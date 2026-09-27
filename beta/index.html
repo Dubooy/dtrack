@@ -1919,6 +1919,11 @@ var I18N_FILAS=[
 ["Escribe el código entero que te ha llegado.","Type the whole code you received.","Écris le code complet que tu as reçu.","Scrivi il codice completo che ti è arrivato."],
 ["Demasiados intentos. Espera un minuto y vuelve a probar.","Too many attempts. Wait a minute and try again.","Trop de tentatives. Attends une minute et réessaie.","Troppi tentativi. Aspetta un minuto e riprova."],
 ["Ese código no vale o ha caducado. Usa el último que te haya llegado o pide otro.","That code isn't valid or has expired. Use the latest one you got or ask for another.","Ce code n'est pas valable ou a expiré. Utilise le dernier reçu ou demandes-en un autre.","Questo codice non è valido o è scaduto. Usa l'ultimo arrivato o chiedine un altro."],
+["Es una cuenta nueva para","It's a new account for","C'est un nouveau compte pour","È un nuovo account per"],
+[". Elige cómo te verán en tu grupo.",". Choose how your group will see you.",". Choisis comment ton groupe te verra.",". Scegli come ti vedrà il tuo gruppo."],
+["¿No es tu correo de siempre? Entrar con otro","Not your usual email? Sign in with another","Ce n'est pas ton e-mail habituel ? Connecte-toi avec un autre","Non è la tua solita email? Entra con un'altra"],
+["No se ha podido leer tu cuenta. Revisa la conexión y pulsa Entrar otra vez.","Couldn't load your account. Check your connection and tap Sign in again.","Impossible de lire ton compte. Vérifie ta connexion et appuie de nouveau sur Entrer.","Impossibile leggere il tuo account. Controlla la connessione e tocca di nuovo Entra."],
+["No se ha podido entrar. Inténtalo otra vez.","Couldn't sign in. Try again.","Connexion impossible. Réessaie.","Accesso non riuscito. Riprova."],
 /* ── tutorial ── */
 ["Tu día en tres anillos","Your day in three rings","Ta journée en trois anneaux","La tua giornata in tre anelli"],
 ["Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta.","Challenges, habits and Vital. When all three close, the day went perfectly. Tap one to see what counts.","Défis, habitudes et Vital. Quand les trois se ferment, la journée est réussie. Touche-en un pour voir ce qui compte.","Sfide, abitudini e Vital. Quando si chiudono tutti e tre, la giornata è andata alla grande. Toccane uno per vedere cosa conta."],
@@ -14494,14 +14499,27 @@ function verificarCodigo(correo, codigo){
   return prueba(0);
 }
 
+/* devuelve el perfil; null si la cuenta de verdad no tiene perfil (hay que crearlo);
+   false si no se ha podido leer (sin red, sesión caducada…): entonces NO se pide
+   otra vez el nombre y la fecha */
 function leerPerfil(){
   if(!ses || ses.demo) return Promise.resolve(perfil);
   return pedirAuth("/rest/v1/perfiles?select=usuario,nacimiento,avatar&id=eq."+ses.uid)
     .then(function(r){
-      if(r.ok && r.datos && r.datos.length){ perfil=r.datos[0]; return perfil; }
-      return null;
+      if(r.ok && r.datos && r.datos.length){ perfil=r.datos[0]; perfilRecuerda(perfil); return perfil; }
+      if(r.ok && r.datos && !r.datos.length) return null;
+      return false;
     })
-    .catch(function(){ return null; });
+    .catch(function(){ return false; });
+}
+/* se recuerda en el móvil el último nombre y fecha, para no volver a escribirlos */
+function perfilRecuerda(p){ try{ if(p && p.usuario) localStorage.setItem("dtrack-perfil-ultimo", JSON.stringify({ usuario:p.usuario, nacimiento:p.nacimiento||"" })); }catch(e){} }
+function perfilRecordado(){ try{ return JSON.parse(localStorage.getItem("dtrack-perfil-ultimo")||"null")||{}; }catch(e){ return {}; } }
+function leerPerfilConReintento(){
+  return leerPerfil().then(function(p){
+    if(p!==false) return p;
+    return new Promise(function(ok){ setTimeout(ok, 1200); }).then(leerPerfil);
+  });
 }
 function crearPerfil(usuario, nacimiento){
   return pedirAuth("/rest/v1/perfiles", { method:"POST", prefer:"return=representation",
@@ -14691,18 +14709,20 @@ function contenidoPaso(){
       '</div>';
   }
   if(puertaPaso==="perfil"){
+    var rec=perfilRecordado();
     return '<h1 class="pu-t display">Ya casi</h1>'+
-      '<p class="pu-sub">Elige cómo te verán en tu grupo. Podrás cambiarlo luego.</p>'+
+      '<p class="pu-sub">Es una cuenta nueva para <b>'+esc(puertaCorreo||(ses&&ses.email)||"")+'</b>. Elige cómo te verán en tu grupo.</p>'+
       '<div class="pu-grupo">'+
         '<label class="pu-fila"><span>Usuario</span>'+
-          '<input id="p-usuario" type="text" autocapitalize="words" autocorrect="off" maxlength="16" placeholder="Carlos"></label>'+
+          '<input id="p-usuario" type="text" autocapitalize="words" autocorrect="off" maxlength="16" placeholder="Carlos" value="'+esc(rec.usuario||"")+'"></label>'+
         '<label class="pu-fila"><span>Nacimiento</span>'+
-          '<input id="p-nac" type="date" max="'+today()+'"></label>'+
+          '<input id="p-nac" type="date" max="'+today()+'" value="'+esc(rec.nacimiento||"")+'"></label>'+
       '</div>'+
       '<p class="pu-nota" style="text-align:left;margin-top:10px">La fecha solo se usa para comprobar la edad. No se le enseña a nadie.</p>'+
       puertaError_()+
       '<button class="pu-boton" data-p="crear"'+(puertaCargando?' disabled':'')+'>'+
-        (puertaCargando?"Creando…":"Crear mi cuenta")+'</button>';
+        (puertaCargando?"Creando…":"Crear mi cuenta")+'</button>'+
+      '<button class="pu-enlace" data-p="otro" style="margin-top:14px">¿No es tu correo de siempre? Entrar con otro</button>';
   }
   if(puertaPaso==="privacidad" && typeof privacidadHTML==="function"){
     return '<h1 class="pu-t display">Privacidad</h1>'+privacidadHTML()+
@@ -14854,9 +14874,10 @@ function pasoVerificar(){
     }
     guardarSesion(r.datos);
     ultimoCorreoSet(puertaCorreo);
-    leerPerfil().then(function(p){
+    leerPerfilConReintento().then(function(p){
       if(p){ cerrarPuerta(); entrarApp(); }
-      else { puertaPaso="perfil"; pintarPuerta(); }
+      else if(p===null){ puertaPaso="perfil"; pintarPuerta(); }
+      else { puertaError="No se ha podido leer tu cuenta. Revisa la conexión y pulsa Entrar otra vez."; pintarPuerta(); }
     });
   }).catch(function(){
     puertaCargando=false; puertaError="Sin conexión. Inténtalo otra vez."; pintarPuerta();
@@ -14885,8 +14906,13 @@ function pasoCrear(){
   puertaError=""; puertaCargando=true; pintarPuerta();
   crearPerfil(us, na).then(function(r){
     puertaCargando=false;
-    if(r.ok){ perfil={usuario:us, nacimiento:na}; cerrarPuerta(); entrarApp(); return; }
-    var cod=(r.datos&&r.datos.code)||"";
+    if(r.ok){ perfil={usuario:us, nacimiento:na}; perfilRecuerda(perfil); cerrarPuerta(); entrarApp(); return; }
+    var cod=(r.datos&&r.datos.code)||"", msg=(r.datos&&(r.datos.message||r.datos.details))||"";
+    if(cod==="23505" && /pkey|\(id\)/.test(msg)){
+      /* esta cuenta ya tenía perfil: se lee y se entra */
+      leerPerfil().then(function(p){ if(p){ cerrarPuerta(); entrarApp(); } else { puertaError="No se ha podido entrar. Inténtalo otra vez."; pintarPuerta(); } });
+      return;
+    }
     if(cod==="23505") puertaError="Ese nombre ya está cogido. Prueba otro.";
     else if((r.datos&&r.datos.message||"").indexOf("14")>=0) puertaPaso="menor";
     else puertaError="No se ha podido crear la cuenta. Inténtalo otra vez.";
@@ -14927,8 +14953,8 @@ function arrancarCuenta(){
   }
   if(!ses){ abrirPuerta("bienvenida"); return; }
   /* con sesión guardada se entra ya, aunque no haya red */
-  leerPerfil().then(function(p){
-    if(p===null && navigator.onLine===false){ tourSiToca(); return; }   /* sin red: adentro con lo local */
+  leerPerfilConReintento().then(function(p){
+    if(p===false){ tourSiToca(); return; }   /* sin red o fallo del servidor: adentro con lo local; no se piden otra vez los datos */
     if(p) { tourSiToca(); sincronizarAlAbrir(); return; }
     if(!ses){ abrirPuerta("bienvenida"); return; }
     puertaCorreo=ses.email||""; abrirPuerta("perfil");
