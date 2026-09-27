@@ -4317,9 +4317,10 @@ function renderGridDay(){
   }
   h+='</div>';
   h+='<p class="text-[11.5px] t3 num mb-3">'+dayRange(d)+'</p><div class="space-y-1.5">';
+  var abiertoHasta=-1;
   for(var i=0;i<sl.length;i++){
     var x=sl[i];
-    if(huecoVacio(d,x)){
+    if(i>abiertoHasta && huecoVacio(d,x)){
       var fin=i; while(fin+1<sl.length && huecoVacio(d,sl[fin+1])) fin++;
       var hk=d+"-"+i;
       if(fin>i && !huecosAbiertos[hk]){
@@ -4329,6 +4330,7 @@ function renderGridDay(){
           '<span class="text-[12px] font-semibold" style="color:var(--accent)">Rellenar</span></button>';
         i=fin; continue;
       }
+      abiertoHasta=fin;
     }
     if(x.r){ h+='<div class="flex items-center gap-2.5 py-1.5"><span class="flex-1 h-px" style="background:var(--hairline-2)"></span>'+
       '<span class="text-[9.5px] tracking-[.12em] t3 font-semibold">RECREO</span>'+
