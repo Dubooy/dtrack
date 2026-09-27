@@ -14468,7 +14468,7 @@ function contenidoPaso(){
       '<div class="pu-fila-enlaces">'+
         '<button class="pu-enlace" data-p="otro">Otro correo</button>'+
         '<span class="t3">·</span>'+
-        '<button class="pu-enlace" data-p="reenviar"'+(puertaReenvio>0?' disabled':'')+'>'+
+        '<button id="p-reenviar" class="pu-enlace" data-p="reenviar"'+(puertaReenvio>0?' disabled':'')+'>'+
           (puertaReenvio>0?("Reenviar en "+puertaReenvio+" s"):"Reenviar el código")+'</button>'+
       '</div>';
   }
@@ -14595,7 +14595,10 @@ function cuentaAtras(){
   puertaCrono=setInterval(function(){
     puertaReenvio--;
     if(puertaReenvio<=0){ clearInterval(puertaCrono); puertaReenvio=0; }
-    if(puertaPaso==="codigo") pintarPuerta();
+    /* solo cambia el botón: repintar la hoja entera borraba el código y cerraba el teclado */
+    var r=document.getElementById("p-reenviar"); if(!r || puertaPaso!=="codigo") return;
+    r.disabled=puertaReenvio>0;
+    r.textContent=puertaReenvio>0?("Reenviar en "+puertaReenvio+" s"):"Reenviar el código";
   }, 1000);
 }
 
