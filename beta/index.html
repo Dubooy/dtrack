@@ -308,12 +308,17 @@ html.dark[class*="acento-"] .view .glass.hero, html.dark[class*="acento-"] .soc-
 .mtab{ position:relative; z-index:1; display:grid; place-items:center; height:54px; width:66px; border-radius:999px;
   color:var(--t3); flex:none; transition:color .4s var(--ease); }
 #mtabs button[data-view="resumen"] svg{ width:28px; height:28px; }
+#mtabs button[data-view="resumen"][aria-current="true"] svg{ width:25px; height:25px; }
 .mtab svg{ width:25px; height:25px; stroke-width:1.8; transition:transform .5s var(--spring); }
-.mtab span{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); }
+/* el nombre solo se ve en la pestaña activa: así se sabe dónde estás sin llenar la barra de texto */
+.mtab span{ position:absolute; left:0; right:0; bottom:7px; font-size:10px; font-weight:650; line-height:1; letter-spacing:.01em;
+  text-align:center; white-space:nowrap; pointer-events:none; opacity:0; transform:translateY(4px);
+  transition:opacity .3s var(--ease), transform .45s var(--spring); }
+.mtab[aria-current="true"] span{ opacity:1; transform:none; }
 .mtab[aria-current="true"]{ color:var(--accent); }
-.mtab[aria-current="true"] svg{ transform:scale(1.12); }
+.mtab[aria-current="true"] svg{ transform:translateY(-6px); }
 .mtab.cerca{ color:var(--accent); }
-.mtab[aria-current="true"]:active svg{ transform:scale(1.12); }
+.mtab[aria-current="true"]:active svg{ transform:translateY(-6px); }
 nav.bottombar{ transition:opacity .25s var(--ease);
   /* iOS recoloca los elementos fijos a trompicones mientras haces scroll: metiéndola
      en su propia capa deja de ir por detrás del dedo */
@@ -889,12 +894,12 @@ html.embebido #acciones-flotantes{ top:94px; }
 <nav class="bottombar lg:hidden fixed inset-x-0 z-40 flex justify-center"
      style="bottom:0;padding:0 12px calc(4px + env(safe-area-inset-bottom));pointer-events:none">
   <div class="barpill" id="mtabs"><span id="mind"></span>
+    <button class="mtab" data-view="resumen" aria-current="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/></svg><span data-label="resumen">Resumen</span></button>
     <button class="mtab" data-view="retos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4a4 4 0 0 1-8 0V3z"/><path d="M16 4.5h3v2a3 3 0 0 1-3 3M8 4.5H5v2a3 3 0 0 0 3 3"/><path d="M12 11v4M9 21h6l-.5-3h-5L9 21z"/></svg><span data-label="retos">Objetivos</span></button>
     <button class="mtab" data-view="vital">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l4.5-6.5L12 13l4-6.5 5 6"/><path d="M3 20.5h18"/></svg><span data-label="vital">Vital</span></button>
-    <button class="mtab" data-view="resumen" aria-current="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/></svg><span data-label="resumen">Resumen</span></button>
     <button class="mtab" data-view="social">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.3 2.9-5.6 6.5-5.6s6.5 2.3 6.5 5.6"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.6M18 14.6c2.1.6 3.5 2.3 3.5 4.6"/></svg><span data-label="social">Social</span></button>
     <button class="mtab" data-view="academico">
@@ -1546,6 +1551,8 @@ var I18N_FILAS=[
 ["Horario semanal","Weekly timetable","Emploi du temps","Orario settimanale"],
 ["Clase","Class","Cours","Lezione"],
 ["Libre","Free","Libre","Libero"],
+["Libre hasta las","Free until","Libre jusqu'à","Libero fino alle"],
+["Rellenar","Fill in","Remplir","Riempi"],
 ["Editar la semana","Edit the week","Modifier la semaine","Modifica la settimana"],
 ["Mi colegio","My school","Mon lycée","La mia scuola"],
 ["Nuevo evento","New event","Nouvel événement","Nuovo evento"],
@@ -2202,6 +2209,8 @@ var I18N_FILAS=[
 ["Todo hecho.", "All done.", "Tout est fait.", "Tutto fatto."],
 ["Solo falta el Parte del día.", "Only the Daily check-in left.", "Il ne reste que le Bilan du jour.", "Manca solo il Resoconto del giorno."],
 ["Todo lo de hoy, hecho.", "Everything for today, done.", "Tout pour aujourd'hui, c'est fait.", "Tutto per oggi, fatto."],
+["Retos hechos.", "Challenges done.", "Défis faits.", "Sfide fatte."],
+["Te queda 1 hábito.", "1 habit left.", "Il te reste 1 habitude.", "Ti resta 1 abitudine."],
 ["Lo demás es extra.", "The rest is a bonus.", "Le reste, c'est du bonus.", "Il resto è un extra."],
 ["Lo que hemos aprendido de ti", "What we've learned about you", "Ce qu'on a appris sur toi", "Cosa abbiamo imparato di te"],
 ["¿Lo pruebas esta semana?", "Try it this week?", "Tu testes cette semaine ?", "Lo provi questa settimana?"],
@@ -2397,6 +2406,7 @@ var I18N_PATRONES=[
 ["Los días que haces ejercicio, tu ánimo sube ([\\d,]+) puntos de media\\.","On days you exercise, your mood rises {1} points on average.","Les jours où tu fais du sport, ton humeur monte de {1} points en moyenne.","Nei giorni in cui fai esercizio, il tuo umore sale di {1} punti in media."],
 ["Hecho · \\+(\\d+) XP hoy","Done · +{1} XP today","Fait · +{1} XP aujourd'hui","Fatto · +{1} XP oggi"],
 ["Ir a (.+)","Go to {t1}","Aller à {t1}","Vai a {t1}"],
+["Te quedan (\\d+) hábitos\\.","{1} habits left.","Il te reste {1} habitudes.","Ti restano {1} abitudini."],
 ["Te quedan (\\d+)\\.","{1} left.","Il en reste {1}.","Ne restano {1}."],
 ["(\\d+) de 8 vasos","{1} of 8 glasses","{1} sur 8 verres","{1} su 8 bicchieri"],
 ["([\\d,]+) h de 7","{1} h of 7","{1} h sur 7","{1} h su 7"],
@@ -4288,6 +4298,9 @@ function sheetDia(d){
 /* horario en móvil: un día cada vez, sin girar el teléfono */
 var schedDay=null;
 function curSchedDay(){ if(schedDay!=null) return schedDay; var i=dayIdx(); return i<0?0:i; }
+/* varios huecos libres seguidos se juntan en una fila; al tocarla se abren */
+var huecosAbiertos={};
+function huecoVacio(d,x){ if(x.r) return false; var c=cellOf(claveCelda(d,x.ci)); return !(c&&(c.sid||c.txt)) && !((d===dayIdx())&&isNow(x)); }
 function renderGridDay(){
   var box=$("#grid-day"); if(!box) return;
   var d=curSchedDay(), sl=slotsFor(d), h="", ND=nDias();
@@ -4306,6 +4319,17 @@ function renderGridDay(){
   h+='<p class="text-[11.5px] t3 num mb-3">'+dayRange(d)+'</p><div class="space-y-1.5">';
   for(var i=0;i<sl.length;i++){
     var x=sl[i];
+    if(huecoVacio(d,x)){
+      var fin=i; while(fin+1<sl.length && huecoVacio(d,sl[fin+1])) fin++;
+      var hk=d+"-"+i;
+      if(fin>i && !huecosAbiertos[hk]){
+        h+='<button class="w-full text-left rounded-[15px] px-3.5 py-3 flex items-center gap-3.5" data-act="hueco-abre" data-k="'+hk+'" style="background:transparent;box-shadow:inset 0 0 0 1px var(--hairline-2)">'+
+          '<span class="num text-[11.5px] t3 w-[46px] shrink-0 leading-tight">'+x.t+'</span>'+
+          '<span class="min-w-0 flex-1 text-[13px] t3">Libre hasta las <span class="num">'+sl[fin].e+'</span></span>'+
+          '<span class="text-[12px] font-semibold" style="color:var(--accent)">Rellenar</span></button>';
+        i=fin; continue;
+      }
+    }
     if(x.r){ h+='<div class="flex items-center gap-2.5 py-1.5"><span class="flex-1 h-px" style="background:var(--hairline-2)"></span>'+
       '<span class="text-[9.5px] tracking-[.12em] t3 font-semibold">RECREO</span>'+
       '<span class="flex-1 h-px" style="background:var(--hairline-2)"></span></div>'; continue; }
@@ -5302,6 +5326,7 @@ document.addEventListener("click",function(ev){
   if(a==="dia"){ sheetDia(el.dataset.d); return; }
   if(a==="dia-h"){ var ph={}; ph[el.dataset.k]=+el.dataset.v; setHabit(el.dataset.day,ph); render(); if(diaAbierto) sheetDia(diaAbierto); return; }
   if(a==="sched-day"){ schedDay=+el.dataset.d; renderGridDay(); return; }
+  if(a==="hueco-abre"){ huecosAbiertos[el.dataset.k]=1; renderGridDay(); return; }
   if(a==="parte"){ parteOpen(); return; }
   if(a==="parte-close"){ parteClose(); return; }
   if(a==="parte-next"){ parteStep=Math.min(4,parteStep+1); renderParte(); $("#parte-body").parentNode.scrollTop=0; return; }
@@ -12785,7 +12810,7 @@ var DISENO_CSS=[
 /* movimiento más corto */
 'html.esencial .glass, html.esencial .btn, html.esencial .soft, html.esencial .seg button, html.esencial .hy-anillo, html.esencial .hy-tarjeta, html.esencial .mtab svg{ transition-duration:.18s!important; }',
 'html.esencial .hy-tarjeta:active, html.esencial .hy-anillo:active{ transform:scale(.985); }',
-'html.esencial .mtab[aria-current="true"] svg{ transform:none; }',
+'html.esencial .mtab[aria-current="true"] svg{ transform:translateY(-6px); }',
 
 /* ── selector de diseño en Ajustes ── */
 '.dz-ops{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }',
@@ -13228,15 +13253,13 @@ function paraHoyHTML(){
     if(t>=r.inicio && t<=r.acaba && !retoHoyHecho()) filas.push('<div class="hy-fila"><button class="tick tick-sm" data-act="soc-reto" aria-label="Marcar">'+ICON_CHECK+'</button>'+
       '<button class="hy-txt" data-act="soc-reto"><span class="strike">'+esc(r.txt)+'</span></button><span class="hy-meta"><span class="hy-grupo-m">grupo</span></span></div>');
   }
-  /* el siguiente hábito */
-  var ck=checksOf(t), ahoraM=new Date().getHours()*60+new Date().getMinutes();
-  var hs=ordenIdeal(idealActivos()).filter(function(it){ return ck.indexOf(it.id)<0; });
-  function mins(x){ if(!x.time) return 9999; var p=x.time.split(":"); return +p[0]*60 + +p[1]; }
-  var sig=hs.filter(function(it){ return mins(it)>=ahoraM-60; })[0] || hs[0];
-  if(sig) filas.push(fila(sig.text, "check", sig.id, ' data-day="'+t+'"', false, sig.time?'<span class="num">'+esc(sig.time)+'</span>':'<span class="hy-hab">hábito</span>'));
+  /* los hábitos ya tienen su tarjeta en Resumen: aquí no se repiten */
+  var ck=checksOf(t), quedan=idealActivos().filter(function(it){ return ck.indexOf(it.id)<0; }).length;
   var total=filas.length; filas=filas.slice(0,max);
   var h=filas.join("");
-  if(!total){
+  if(!total && quedan){
+    h='<div class="hy-fila info"><span class="hy-punto" style="background:var(--accent)"></span><span class="hy-txt"><b>Retos hechos.</b> '+(quedan===1?"Te queda 1 hábito.":"Te quedan "+quedan+" hábitos.")+'</span></div>';
+  } else if(!total){
     var parte=!!(S.parte&&S.parte[t]), hh=new Date().getHours();
     h = (!parte && hh>=18) ? '<div class="hy-fila info"><span class="hy-punto" style="background:var(--violet)"></span><button class="hy-txt" data-act="parte"><b>Todo hecho.</b> Solo falta el Parte del día.</button></div>'
                            : '<div class="hy-fila info"><span class="hy-punto" style="background:var(--good)"></span><span class="hy-txt"><b>Todo lo de hoy, hecho.</b> Lo demás es extra.</span></div>';
