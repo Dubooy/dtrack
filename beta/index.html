@@ -1924,6 +1924,8 @@ var I18N_FILAS=[
 ["¿No es tu correo de siempre? Entrar con otro","Not your usual email? Sign in with another","Ce n'est pas ton e-mail habituel ? Connecte-toi avec un autre","Non è la tua solita email? Entra con un'altra"],
 ["No se ha podido leer tu cuenta. Revisa la conexión y pulsa Entrar otra vez.","Couldn't load your account. Check your connection and tap Sign in again.","Impossible de lire ton compte. Vérifie ta connexion et appuie de nouveau sur Entrer.","Impossibile leggere il tuo account. Controlla la connessione e tocca di nuovo Entra."],
 ["No se ha podido entrar. Inténtalo otra vez.","Couldn't sign in. Try again.","Connexion impossible. Réessaie.","Accesso non riuscito. Riprova."],
+["Enviando código…","Sending code…","Envoi du code…","Invio del codice…"],
+["Ya te hemos mandado un código hace poco: usa el último que te haya llegado. Si no lo tienes, pide otro en un minuto.","We sent you a code a moment ago: use the latest one you received. If you don't have it, ask for another in a minute.","On t'a envoyé un code il y a peu : utilise le dernier reçu. Si tu ne l'as pas, demandes-en un autre dans une minute.","Ti abbiamo appena mandato un codice: usa l'ultimo che ti è arrivato. Se non ce l'hai, chiedine un altro tra un minuto."],
 /* ── tutorial ── */
 ["Tu día en tres anillos","Your day in three rings","Ta journée en trois anneaux","La tua giornata in tre anelli"],
 ["Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta.","Challenges, habits and Vital. When all three close, the day went perfectly. Tap one to see what counts.","Défis, habitudes et Vital. Quand les trois se ferment, la journée est réussie. Touche-en un pour voir ce qui compte.","Sfide, abitudini e Vital. Quando si chiudono tutti e tre, la giornata è andata alla grande. Toccane uno per vedere cosa conta."],
@@ -14840,20 +14842,37 @@ function cuentaAtras(){
   }, 1000);
 }
 
+/* el último código pedido (correo y hora): si Supabase no deja pedir otro tan
+   seguido, se va directo a escribir el que ya llegó */
+var codigoPedido={ correo:"", t:0 };
 function pasoEnviar(reenvio){
+  if(puertaCargando) return;   /* dos toques seguidos no piden dos códigos */
   var i=document.getElementById("p-correo");
   var v=(i && puertaPaso==="correo") ? (i.value||"").trim().toLowerCase() : puertaCorreo;
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ puertaError="Ese correo no tiene buena pinta. Revísalo."; pintarPuerta(); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ puertaError="Ese correo no tiene buena pinta. Revísalo."; if(puertaPaso==="bienvenida") puertaPaso="correo"; pintarPuerta(); return; }
   puertaCorreo=v; puertaError=""; puertaCargando=true; pintarPuerta();
+  /* desde «Entrar como…» no hay hoja todavía: que el botón diga que está enviando */
+  var rb=document.querySelector('[data-p="recordado"]'), rbSub=rb&&rb.querySelector(".pu-boton-sub"), rbAntes=rbSub?rbSub.textContent:"";
+  if(rb){ rb.disabled=true; if(rbSub) rbSub.textContent=tr("Enviando código…"); }
+  function suelta(){ if(rb){ rb.disabled=false; if(rbSub) rbSub.textContent=rbAntes; } }
   pedirCodigo(v).then(function(r){
-    puertaCargando=false;
-    if(r.ok){ puertaPaso="codigo"; cuentaAtras(); pintarPuerta(); return; }
+    puertaCargando=false; suelta();
+    if(r.ok){ codigoPedido={ correo:v, t:Date.now() }; puertaPaso="codigo"; cuentaAtras(); pintarPuerta(); return; }
     var m=(r.datos&&(r.datos.msg||r.datos.error_description||r.datos.message))||"";
-    if(r.estado===429) puertaError="Espera un momento antes de pedir otro código.";
-    else puertaError=m||"No se ha podido mandar el código. Comprueba la conexión.";
+    if(r.estado===429){
+      /* Supabase no deja pedir otro código hasta pasado un rato: el anterior sigue valiendo */
+      puertaPaso="codigo";
+      puertaError="Ya te hemos mandado un código hace poco: usa el último que te haya llegado. Si no lo tienes, pide otro en un minuto.";
+      if(!codigoPedido.t || codigoPedido.correo!==v) cuentaAtras();
+      pintarPuerta(); return;
+    }
+    puertaError=m||"No se ha podido mandar el código. Comprueba la conexión.";
+    if(puertaPaso==="bienvenida") puertaPaso="correo";   /* para que el error se vea */
     pintarPuerta();
   }).catch(function(){
-    puertaCargando=false; puertaError="Sin conexión. Inténtalo otra vez."; pintarPuerta();
+    puertaCargando=false; suelta(); puertaError="Sin conexión. Inténtalo otra vez.";
+    if(puertaPaso==="bienvenida") puertaPaso="correo";
+    pintarPuerta();
   });
 }
 
