@@ -51,7 +51,7 @@ window.DTRACK_TEXTOS = {
   anillo: { alto:"Día redondo. Cierra fuerte.", medio:"Buen ritmo, queda poco.", bajo:"Empieza por algo pequeño." },
 
   parte: {
-    pasos: ["Los retos","El cuerpo","Los números","Las 3 de mañana","Cómo ha ido"],
+    pasos: ["Los retos","El cuerpo","Los números","Para mañana","Cómo ha ido"],
     frases: {
       cero:    "Hoy no ha salido nada. Pasa. Mañana empieza por una sola cosa pequeña.",
       poco:    "Poquita cosa, pero peor era el cero. Que estuviste cerca, ¿eh?",
@@ -122,7 +122,7 @@ window.DTRACK_TEXTOS = {
 
   tutorial: [
     {t:"Tu día en tres anillos", d:"Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
-    {t:"Para hoy",               d:"Lo que te queda por hacer hoy, en una lista. Tócalo para marcarlo; mantén pulsado un hábito para cambiarlo."},
+    {t:"Tus hábitos",            d:"Lo que quieres hacer cada día. Tócalo para marcarlo; mantén pulsado uno para cambiarlo."},
     {t:"Para moverte",           d:"Aquí cambias de sección. En Ajustes puedes volver a ver esta guía cuando quieras."}
   ]
 };
