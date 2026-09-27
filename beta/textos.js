@@ -14,7 +14,7 @@
                cada línea va con una condición fija del programa, así que
                puedes cambiar el texto pero no mover las líneas de sitio.
    · retos     la lista de retos diarios. Añade o quita los que quieras.
-   · tutorial  los 12 pasos. Si borras una línea, ese paso desaparece.
+   · tutorial  los 3 pasos. Si borras una línea, ese paso desaparece.
 
    Reglas: no quites las comas entre líneas ni los corchetes. Las comillas
    van siempre en pareja. Si algo se rompe, la app usa sus textos de serie.
@@ -121,10 +121,8 @@ window.DTRACK_TEXTOS = {
   ],
 
   tutorial: [
-    {t:"Esto es DTrack",        d:"Tu día en tres anillos: retos, hábitos y vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
-    {t:"Tus hábitos",           d:"Lo que quieres hacer cada día. Márcalo al hacerlo y mantén pulsado uno para cambiarlo."},
-    {t:"El Parte del día",      d:"Cada noche, un minuto: repasas el día, cómo te has sentido y eliges las tres cosas de mañana. Es lo más importante de la app."},
-    {t:"Niveles y camino",      d:"Todo lo que haces da XP y la XP te sube de nivel. En tu camino ves qué desbloqueas en cada uno."},
-    {t:"Para moverte",          d:"Aquí cambias de sección. Todo se guarda en este móvil: en Ajustes puedes bajar una copia y volver a ver esta guía."}
+    {t:"Tu día en tres anillos", d:"Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
+    {t:"Para hoy",               d:"Lo que te queda por hacer hoy, en una lista. Tócalo para marcarlo; mantén pulsado un hábito para cambiarlo."},
+    {t:"Para moverte",           d:"Aquí cambias de sección. En Ajustes puedes volver a ver esta guía cuando quieras."}
   ]
 };
