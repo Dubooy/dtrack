@@ -1915,6 +1915,10 @@ var I18N_FILAS=[
 ["Cuando marques ejercicio en Vital, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.","When you log exercise in Vital, you can upload a photo doing sport: gym, football, running, anything. They're all kept here, by month.","Quand tu coches le sport dans Vital, tu peux publier une photo : salle, foot, course, peu importe. Elles sont toutes gardées ici, par mois.","Quando segni l'esercizio in Vital, puoi caricare una foto mentre fai sport: palestra, calcio, corsa, qualsiasi cosa. Qui si salvano tutte, per mesi."],
 ["Tus fotos haciendo deporte","Your sport photos","Tes photos de sport","Le tue foto di sport"],
 ["Quién ha subido más fotos haciendo deporte este mes.","Who posted the most sport photos this month.","Qui a publié le plus de photos de sport ce mois-ci.","Chi ha caricato più foto di sport questo mese."],
+["Código","Code","Code","Codice"],
+["Escribe el código entero que te ha llegado.","Type the whole code you received.","Écris le code complet que tu as reçu.","Scrivi il codice completo che ti è arrivato."],
+["Demasiados intentos. Espera un minuto y vuelve a probar.","Too many attempts. Wait a minute and try again.","Trop de tentatives. Attends une minute et réessaie.","Troppi tentativi. Aspetta un minuto e riprova."],
+["Ese código no vale o ha caducado. Usa el último que te haya llegado o pide otro.","That code isn't valid or has expired. Use the latest one you got or ask for another.","Ce code n'est pas valable ou a expiré. Utilise le dernier reçu ou demandes-en un autre.","Questo codice non è valido o è scaduto. Usa l'ultimo arrivato o chiedine un altro."],
 /* ── tutorial ── */
 ["Tu día en tres anillos","Your day in three rings","Ta journée en trois anneaux","La tua giornata in tre anelli"],
 ["Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta.","Challenges, habits and Vital. When all three close, the day went perfectly. Tap one to see what counts.","Défis, habitudes et Vital. Quand les trois se ferment, la journée est réussie. Touche-en un pour voir ce qui compte.","Sfide, abitudini e Vital. Quando si chiudono tutti e tre, la giornata è andata alla grande. Toccane uno per vedere cosa conta."],
@@ -2559,6 +2563,7 @@ var I18N_FILAS=[
 
 /* [expresión en español, inglés, francés, italiano]  ·  {1} = lo capturado, {t1} = lo capturado traducido */
 var I18N_PATRONES=[
+["No se ha podido entrar: (.+) Pide otro código\.", "Couldn't sign in: {1} Ask for another code.", "Connexion impossible : {1} Demande un autre code.", "Accesso non riuscito: {1} Chiedi un altro codice."],
 ["hasta (\\d+) XP", "up to {1} XP", "jusqu'à {1} XP", "fino a {1} XP"],
 ["Guardada: «(.+)»\\.", "Saved: “{1}”.", "Enregistrée : « {1} ».", "Salvata: «{1}»."],
 ["Foto subida · \\+(\\d+) XP", "Photo uploaded · +{1} XP", "Photo publiée · +{1} XP", "Foto caricata · +{1} XP"],
@@ -6019,7 +6024,8 @@ var CAR_CSS =
   " background:var(--fill); color:var(--t1); border:0; outline:none; font-size:17px!important;"+
   " box-shadow:inset 0 0 0 1px var(--hairline); transition:box-shadow .2s var(--ease), background .2s var(--ease); }"+
 "#puerta .pu-campo:focus{ background:var(--glass-bg-hi); box-shadow:inset 0 0 0 2px var(--accent); }"+
-"#puerta .pu-codigo{ height:68px; text-align:center; font-size:30px!important; font-weight:800; letter-spacing:.5em; padding-left:.5em; }"+
+"#puerta .pu-codigo{ height:68px; text-align:center; font-size:28px!important; font-weight:800; letter-spacing:.28em; padding-left:.28em; }"+
+"#puerta .pu-codigo::placeholder{ letter-spacing:.02em; font-size:20px; font-weight:600; }"+
 "#puerta .pu-fila-enlaces{ display:flex; align-items:center; justify-content:center; gap:10px; margin-top:6px; }"+
 "#puerta .pu-fila-enlaces .pu-enlace{ width:auto; padding-top:10px; font-size:14px; }"+
 "#puerta .pu-fila-enlaces .t3{ padding-top:8px; }"+
@@ -14469,9 +14475,23 @@ function pedirCodigo(correo){
   return pedir("/auth/v1/otp", { method:"POST", anon:true,
     body:{ email:correo, create_user:true } });
 }
+/* Supabase manda el mismo tipo de código para entrar y para registrarse, pero según
+   la cuenta hay que verificarlo como "email", "signup" o "magiclink": se prueban en orden */
 function verificarCodigo(correo, codigo){
-  return pedir("/auth/v1/verify", { method:"POST", anon:true,
-    body:{ email:correo, token:codigo, type:"email" } });
+  var tipos=["email","signup","magiclink"], ultimo=null;
+  function prueba(i){
+    if(i>=tipos.length) return Promise.resolve(ultimo);
+    return pedir("/auth/v1/verify", { method:"POST", anon:true,
+      body:{ email:correo, token:codigo, type:tipos[i] } }).then(function(r){
+        if(r.ok && r.datos && r.datos.access_token) return r;
+        ultimo=r;
+        /* si el fallo no es de código (demasiados intentos, sin red…), no se sigue probando */
+        var ec=(r.datos&&(r.datos.error_code||""))||"";
+        if(r.estado===429 || (ec && ec!=="otp_expired" && ec!=="validation_failed")) return r;
+        return prueba(i+1);
+      });
+  }
+  return prueba(0);
 }
 
 function leerPerfil(){
@@ -14659,7 +14679,7 @@ function contenidoPaso(){
     return '<h1 class="pu-t display">Mira tu correo</h1>'+
       '<p class="pu-sub">Hemos mandado un código a <b>'+esc(puertaCorreo)+'</b>. Si no lo ves, mira en spam.</p>'+
       '<input id="p-codigo" class="pu-campo pu-codigo num" type="text" inputmode="numeric" autocomplete="one-time-code" '+
-        'maxlength="6" placeholder="······">'+
+        'maxlength="10" placeholder="Código">'+
       puertaError_()+
       '<button class="pu-boton" data-p="verificar"'+(puertaCargando?' disabled':'')+'>'+
         (puertaCargando?"Comprobando…":"Entrar")+'</button>'+
@@ -14820,12 +14840,16 @@ function pasoEnviar(reenvio){
 function pasoVerificar(){
   var i=document.getElementById("p-codigo");
   var v=i ? (i.value||"").replace(/\D/g,"") : "";
-  if(v.length!==6){ puertaError="El código son 6 cifras."; pintarPuerta(); return; }
+  /* los códigos de Supabase pueden tener de 6 a 10 cifras */
+  if(v.length<6 || v.length>10){ puertaError="Escribe el código entero que te ha llegado."; pintarPuerta(); return; }
   puertaError=""; puertaCargando=true; pintarPuerta();
   verificarCodigo(puertaCorreo, v).then(function(r){
     puertaCargando=false;
-    if(!r.ok || !r.datos || !r.datos.access_token){
-      puertaError="Ese código no vale o ha caducado. Pide otro.";
+    if(!r || !r.ok || !r.datos || !r.datos.access_token){
+      var ec=(r && r.datos && r.datos.error_code)||"", m=(r && r.datos && (r.datos.msg||r.datos.message))||"";
+      puertaError = r && r.estado===429 ? "Demasiados intentos. Espera un minuto y vuelve a probar."
+        : ec==="otp_expired" ? "Ese código no vale o ha caducado. Usa el último que te haya llegado o pide otro."
+        : ("No se ha podido entrar"+(m?": "+m:".")+" Pide otro código.");
       pintarPuerta(); return;
     }
     guardarSesion(r.datos);
