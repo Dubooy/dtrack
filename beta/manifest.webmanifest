@@ -1,0 +1,67 @@
+{
+  "name": "DTrack Pruebas",
+  "short_name": "DTrack β",
+  "description": "Hábitos, retos, tareas, estudio y el parte del día. Para ti, y si quieres, con tus amigos.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#4f46e5",
+  "theme_color": "#0b0b0f",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Estudiar",
+      "short_name": "Estudiar",
+      "description": "Empieza un pomodoro",
+      "url": "./index.html?abre=estudiar",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Gimnasio",
+      "short_name": "Gym",
+      "description": "Marca que has ido hoy",
+      "url": "./index.html?abre=gym",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Retos de hoy",
+      "short_name": "Retos",
+      "url": "./index.html?abre=retos",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
