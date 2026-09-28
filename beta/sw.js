@@ -1,7 +1,7 @@
 /* DTrack · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v128";
+const CACHE = "dtrack-beta-v139";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js",
   "./icon-192.png", "./icon-512.png", "./icon-maskable.png", "./apple-touch-icon.png"
@@ -18,30 +18,45 @@ self.addEventListener("activate", e => {
   );
 });
 
+const FUENTES = ["fonts.googleapis.com", "fonts.gstatic.com"];
+
 self.addEventListener("fetch", e => {
   const req = e.request;
   if (req.method !== "GET") return;
+  const url = new URL(req.url);
 
   // Lo propio: primero la red, y si no hay, la copia guardada.
-  if (new URL(req.url).origin === location.origin) {
+  // Solo se guardan las respuestas buenas, y sin la parte «?…» de la dirección
+  // (la vuelta del login con Google trae un código de un solo uso).
+  if (url.origin === location.origin) {
     e.respondWith(
       fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(CACHE).then(c => c.put(req, copy));
+        if (res.ok) {
+          const copy = res.clone(), clave = url.search ? url.origin + url.pathname : req;
+          caches.open(CACHE).then(c => c.put(clave, copy)).catch(() => {});
+        }
         return res;
-      }).catch(() => caches.match(req).then(r => r || caches.match("./index.html")))
+      }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match("./index.html")))
     );
     return;
   }
 
-  // Lo de fuera (las tipografías): si ya está guardado, se sirve; si no, se pide y se guarda.
-  e.respondWith(
-    caches.match(req).then(hit => hit || fetch(req).then(res => {
-      const copy = res.clone();
-      caches.open(CACHE).then(c => c.put(req, copy));
-      return res;
-    }).catch(() => hit))
-  );
+  // Las tipografías: si ya están guardadas, se sirven; si no, se piden y se guardan.
+  if (FUENTES.indexOf(url.hostname) >= 0) {
+    e.respondWith(
+      caches.match(req).then(hit => hit || fetch(req).then(res => {
+        if (res.ok || res.type === "opaque") {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+        }
+        return res;
+      }))
+    );
+    return;
+  }
+
+  // Todo lo demás (la cuenta, la nube, los grupos y las fotos) va siempre a la red:
+  // nunca se sirve una copia vieja de tus datos.
 });
 
 /* ═══ avisos diarios ═══

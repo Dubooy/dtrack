@@ -947,7 +947,7 @@ window.addEventListener("error",function(ev){
 });
 (function(){
 "use strict";
-try{ if(window.self!==window.top) document.documentElement.classList.add("embebido"); }catch(e){ document.documentElement.classList.add("embebido"); }
+try{ if(window.self!==window.top && !window.DTRACK_PRUEBAS) document.documentElement.classList.add("embebido"); }catch(e){ document.documentElement.classList.add("embebido"); }
 /* ════ idiomas: inicio ════ */
 /* ════════ idiomas ════════
    El español es el de siempre. En ajustes se puede cambiar a inglés, francés
@@ -1925,6 +1925,30 @@ var I18N_FILAS=[
 ["No se ha podido leer tu cuenta. Revisa la conexión y pulsa Entrar otra vez.","Couldn't load your account. Check your connection and tap Sign in again.","Impossible de lire ton compte. Vérifie ta connexion et appuie de nouveau sur Entrer.","Impossibile leggere il tuo account. Controlla la connessione e tocca di nuovo Entra."],
 ["No se ha podido entrar. Inténtalo otra vez.","Couldn't sign in. Try again.","Connexion impossible. Réessaie.","Accesso non riuscito. Riprova."],
 ["Enviando código…","Sending code…","Envoi du code…","Invio del codice…"],
+["XP hoy","XP today","XP aujourd'hui","XP oggi"],
+["Ver tu progreso","See your progress","Voir ta progression","Vedi i tuoi progressi"],
+["Te mandamos un código al correo. No hay contraseña que recordar.","We'll email you a code. No password to remember.","On t'envoie un code par e-mail. Pas de mot de passe à retenir.","Ti mandiamo un codice per email. Nessuna password da ricordare."],
+["Continuar con Google","Continue with Google","Continuer avec Google","Continua con Google"],
+["o con tu correo","or with your email","ou avec ton e-mail","o con la tua email"],
+["Entrando con Google","Signing in with Google","Connexion avec Google","Accesso con Google"],
+["Termina en la ventana de Google. Al acabar, vuelve aquí y entrarás solo.","Finish in the Google window. When you're done, come back here and you'll be signed in.","Termine dans la fenêtre de Google. Ensuite, reviens ici : tu seras connecté.","Completa nella finestra di Google. Poi torna qui ed entrerai da solo."],
+["Cancelar","Cancel","Annuler","Annulla"],
+["Entrando…","Signing in…","Connexion…","Accesso in corso…"],
+["Un momento: estamos terminando de entrar con tu cuenta de Google.","One moment: we're finishing signing you in with Google.","Un instant : on termine ta connexion avec Google.","Un attimo: stiamo completando l'accesso con Google."],
+["Tu sesión ha caducado. Entra otra vez para seguir guardando en la nube: lo de este móvil no se pierde.","Your session has expired. Sign in again to keep saving to the cloud: nothing on this phone is lost.","Ta session a expiré. Reconnecte-toi pour continuer à sauvegarder dans le cloud : rien n'est perdu sur ce téléphone.","La sessione è scaduta. Accedi di nuovo per continuare a salvare nel cloud: niente di questo telefono va perso."],
+["sesión caducada","session expired","session expirée","sessione scaduta"],
+["Toca otra vez «Cerrar sesión» para salir. Tus datos se quedan guardados.","Tap “Log out” again to leave. Your data stays saved.","Touche encore « Se déconnecter » pour sortir. Tes données restent enregistrées.","Tocca di nuovo «Esci» per uscire. I tuoi dati restano salvati."],
+["Guardando y cerrando la sesión…","Saving and logging out…","Enregistrement et déconnexion…","Salvataggio e uscita…"],
+["Este navegador no deja entrar con Google. Entra con tu correo.","This browser can't sign in with Google. Use your email.","Ce navigateur ne permet pas la connexion avec Google. Utilise ton e-mail.","Questo browser non permette l'accesso con Google. Usa la tua email."],
+["No se ha podido abrir Google. Prueba otra vez o entra con tu correo.","Couldn't open Google. Try again or use your email.","Impossible d'ouvrir Google. Réessaie ou utilise ton e-mail.","Impossibile aprire Google. Riprova o usa la tua email."],
+["No ha llegado la respuesta de Google. Vuelve a intentarlo.","Google didn't respond. Try again.","Google n'a pas répondu. Réessaie.","Google non ha risposto. Riprova."],
+["No se ha podido leer tu cuenta. Revisa la conexión y vuelve a intentarlo.","Couldn't read your account. Check your connection and try again.","Impossible de lire ton compte. Vérifie la connexion et réessaie.","Impossibile leggere il tuo account. Controlla la connessione e riprova."],
+["Has cancelado el inicio con Google.","You cancelled signing in with Google.","Tu as annulé la connexion avec Google.","Hai annullato l'accesso con Google."],
+["Este inicio con Google ha caducado. Vuelve a pulsar «Continuar con Google».","This Google sign-in has expired. Tap “Continue with Google” again.","Cette connexion Google a expiré. Touche à nouveau « Continuer avec Google ».","Questo accesso con Google è scaduto. Tocca di nuovo «Continua con Google»."],
+["No se ha podido entrar con Google. Prueba otra vez o entra con tu correo.","Couldn't sign in with Google. Try again or use your email.","Connexion avec Google impossible. Réessaie ou utilise ton e-mail.","Accesso con Google non riuscito. Riprova o usa la tua email."],
+["Google no ha dejado entrar. Prueba otra vez o entra con tu correo.","Google didn't let you in. Try again or use your email.","Google n'a pas autorisé la connexion. Réessaie ou utilise ton e-mail.","Google non ha permesso l'accesso. Riprova o usa la tua email."],
+["Sin conexión. Inténtalo otra vez.","No connection. Try again.","Pas de connexion. Réessaie.","Nessuna connessione. Riprova."],
+["No se ha podido guardar en este móvil: puede que no quede espacio. Si tienes cuenta, pulsa «Guardar ahora» en Social.","Couldn't save on this phone: it may be out of space. If you have an account, tap “Save now” in Social.","Impossible d'enregistrer sur ce téléphone : il manque peut-être de place. Si tu as un compte, touche « Enregistrer maintenant » dans Social.","Impossibile salvare su questo telefono: forse manca spazio. Se hai un account, tocca «Salva ora» in Social."],
 ["Ya te hemos mandado un código hace poco: usa el último que te haya llegado. Si no lo tienes, pide otro en un minuto.","We sent you a code a moment ago: use the latest one you received. If you don't have it, ask for another in a minute.","On t'a envoyé un code il y a peu : utilise le dernier reçu. Si tu ne l'as pas, demandes-en un autre dans une minute.","Ti abbiamo appena mandato un codice: usa l'ultimo che ti è arrivato. Se non ce l'hai, chiedine un altro tra un minuto."],
 /* ── tutorial ── */
 ["Tu día en tres anillos","Your day in three rings","Ta journée en trois anneaux","La tua giornata in tre anelli"],
@@ -2570,6 +2594,9 @@ var I18N_FILAS=[
 
 /* [expresión en español, inglés, francés, italiano]  ·  {1} = lo capturado, {t1} = lo capturado traducido */
 var I18N_PATRONES=[
+["Faltan (\\d+) XP para el nivel (\\d+)","{1} XP to level {2}","Encore {1} XP pour le niveau {2}","Mancano {1} XP al livello {2}"],
+["Google no ha dejado entrar: (.+) Prueba otra vez o entra con tu correo\\.","Google didn't let you in: {1} Try again or use your email.","Google n'a pas autorisé la connexion : {1} Réessaie ou utilise ton e-mail.","Google non ha permesso l'accesso: {1} Riprova o usa la tua email."],
+["No se ha podido entrar con Google: (.+) Prueba otra vez o entra con tu correo\\.","Couldn't sign in with Google: {1} Try again or use your email.","Connexion avec Google impossible : {1} Réessaie ou utilise ton e-mail.","Accesso con Google non riuscito: {1} Riprova o usa la tua email."],
 ["No se ha podido entrar: (.+) Pide otro código\.", "Couldn't sign in: {1} Ask for another code.", "Connexion impossible : {1} Demande un autre code.", "Accesso non riuscito: {1} Chiedi un altro codice."],
 ["hasta (\\d+) XP", "up to {1} XP", "jusqu'à {1} XP", "fino a {1} XP"],
 ["Guardada: «(.+)»\\.", "Saved: “{1}”.", "Enregistrée : « {1} ».", "Salvata: «{1}»."],
@@ -2581,6 +2608,7 @@ var I18N_PATRONES=[
 ["Se llena con cuatro cosas del cuerpo: hacer ejercicio, beber suficiente agua, dormir 7 horas y estar menos de 2 horas con la pantalla\\. Llevas (\\d+) de 4\\.","It fills with four body things: exercise, drink enough water, sleep 7 hours and spend under 2 hours on screens. You're at {1} of 4.","Il se remplit avec quatre choses du corps : faire du sport, boire assez d'eau, dormir 7 heures et moins de 2 heures d'écran. Tu en es à {1} sur 4.","Si riempie con quattro cose del corpo: esercizio, bere abbastanza, 7 ore di sonno e meno di 2 ore di schermo. Sei a {1} su 4."],
 ["(\\d+) de 7 días activos(.*)","{1} of 7 active days{2}","{1} jours actifs sur 7{2}","{1} giorni attivi su 7{2}"],
 ["Se llena con tus hábitos de cada día: (\\d+) de (\\d+) hechos\\. Se marcan en la lista de abajo\\.","It fills with your daily habits: {1} of {2} done. Tick them in the list below.","Il se remplit avec tes habitudes du jour : {1} sur {2} faites. Coche-les dans la liste en dessous.","Si riempie con le abitudini del giorno: {1} su {2} fatte. Si segnano nella lista sotto."],
+["Se llena con tus hábitos de cada día: (\\d+) de (\\d+) hechos\\. Cada uno da \\+4 XP \\(cuentan hasta 10 al día\\)\\. Se marcan en la lista de abajo\\.","It fills with your daily habits: {1} of {2} done. Each one gives +4 XP (up to 10 a day count). Tick them in the list below.","Il se remplit avec tes habitudes du jour : {1} sur {2} faites. Chacune donne +4 XP (jusqu'à 10 par jour). Coche-les dans la liste en dessous.","Si riempie con le abitudini del giorno: {1} su {2} fatte. Ognuna dà +4 XP (ne contano fino a 10 al giorno). Si segnano nella lista sotto."],
 ["Hacer ejercicio (\\d+) días","Exercise {1} days","Faire du sport {1} jours","Fare esercizio {1} giorni"],
 ["Los días que haces ejercicio, tu ánimo sube ([\\d,]+) puntos de media\\.","On days you exercise, your mood rises {1} points on average.","Les jours où tu fais du sport, ton humeur monte de {1} points en moyenne.","Nei giorni in cui fai esercizio, il tuo umore sale di {1} punti in media."],
 ["Hecho · \\+(\\d+) XP hoy","Done · +{1} XP today","Fait · +{1} XP aujourd'hui","Fatto · +{1} XP oggi"],
@@ -3189,7 +3217,13 @@ function load(){
   }catch(e){ return false; }
 }
 var storageOK=(function(){ try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }catch(e){ return false; } })();
-function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} espejo(); }
+/* si el móvil no deja guardar (sin espacio o en modo privado), se avisa: antes fallaba sin decir nada */
+var saveAvisado=0;
+function save(){
+  try{ localStorage.setItem(KEY,JSON.stringify(S)); }
+  catch(e){ if(storageOK && Date.now()-saveAvisado>60000){ saveAvisado=Date.now(); setTimeout(function(){ if(typeof avisoNube==="function") avisoNube("No se ha podido guardar en este móvil: puede que no quede espacio. Si tienes cuenta, pulsa «Guardar ahora» en Social."); }, 0); } }
+  espejo();
+}
 function avisoGuardado(){
   if(storageOK || document.getElementById("nosave")) return;
   var d=document.createElement("div");
@@ -6045,6 +6079,23 @@ var CAR_CSS =
 "#puerta .pu-fila input::-webkit-date-and-time-value{ text-align:right; }"+
 "#puerta .hoja-x{ border-radius:999px!important; width:32px!important; height:32px!important; top:18px!important; right:18px!important; }"+
 "#puerta .puerta-tarjeta{ border-radius:30px!important; padding:28px 24px 24px!important; }"+
+/* entrar con Google: el botón blanco de Google, con su «G» */
+"#puerta .pu-google{ width:100%; height:52px; margin-top:10px; border-radius:999px; display:flex; align-items:center;"+
+  " justify-content:center; gap:10px; font-size:15.5px; font-weight:600; color:#1f1f1f; background:#fff;"+
+  " box-shadow:inset 0 0 0 1px #747775; transition:transform .35s var(--spring); }"+
+"html.dark #puerta .pu-google{ color:#e3e3e3; background:#131314; box-shadow:inset 0 0 0 1px #8e918f; }"+
+"#puerta .pu-google svg{ width:20px; height:20px; flex:0 0 auto; }"+
+"#puerta .pu-google:active{ transform:scale(.97); }"+
+"#puerta .puerta-tarjeta .pu-google{ margin-top:18px; }"+
+"#puerta .pu-o{ display:flex; align-items:center; gap:12px; margin-top:18px; font-size:12.5px; color:var(--t3); }"+
+"#puerta .pu-o:before, #puerta .pu-o:after{ content:''; flex:1; height:1px; background:var(--hairline-2); }"+
+"#puerta .pu-o + .pu-campo{ margin-top:14px; }"+
+"#puerta .pu-aviso{ margin:0 0 12px; padding:11px 14px; border-radius:14px; font-size:13px; line-height:1.45;"+
+  " text-align:center; color:var(--t1); background:color-mix(in srgb,var(--warn) 16%,var(--bg)); }"+
+"#puerta .pu-espera{ display:flex; justify-content:center; padding:24px 0 10px; }"+
+"#puerta .pu-espera i{ width:34px; height:34px; border-radius:50%; border:3px solid color-mix(in srgb,var(--accent) 20%,transparent);"+
+  " border-top-color:var(--accent); animation:puGira .9s linear infinite; }"+
+"@keyframes puGira{ to{ transform:rotate(360deg); } }"+
 "@media (min-height:900px){ #puerta .car-tel{ max-width:244px; } }"+
 "@media (max-height:700px){ #puerta .car-caja{ padding-top:9%; } #puerta .car-tel{ width:40%; } }";
 
@@ -6682,9 +6733,6 @@ function socYo(){
   var u = perfil&&perfil.usuario ? perfil.usuario : "tú";
   var foto = perfil&&perfil.avatar ? perfil.avatar : "";
   var nombreNv = tituloElegido(st.lvl);
-  var tramo = Math.max(1, st.lvlNeed - st.lvlFloor), dentro = Math.max(0, st.xp - st.lvlFloor);
-  var pct = Math.min(100, Math.round(dentro/tramo*100));
-  var faltan = Math.max(0, st.lvlNeed - st.xp);
   return '<div class="soc-yo" data-act="x-perfil" style="cursor:pointer">'+
     '<button class="soc-yo-foto" data-act="x-perfil" aria-label="Ver tu perfil">'+
       (foto ? '<img src="'+esc(foto)+'" alt="">'
@@ -7134,7 +7182,8 @@ function abrirPerfil(u){
   var capa=document.getElementById("perfil-capa");
   if(!capa){ capa=document.createElement("div"); capa.id="perfil-capa"; document.body.appendChild(capa); }
   var letra=(p.usuario||"?").charAt(0).toUpperCase();
-  var pctNv = p.yo ? Math.min(100, Math.round((p.xp-p.floor)/Math.max(1,p.need-p.floor)*100)) : null;
+  /* floor = XP acumulado al empezar el nivel; need = XP que pide este nivel */
+  var pctNv = p.yo ? Math.max(0, Math.min(100, Math.round((p.xp-p.floor)/Math.max(1,p.need)*100))) : null;
   var foto = p.avatar ? '<img src="'+esc(p.avatar)+'" alt="">' : '<span class="display">'+esc(letra)+'</span>';
   capa.innerHTML=
     '<div class="pf-barra"><button class="pf-atras" data-act="x-perfil-cerrar" aria-label="Volver">'+
@@ -7162,7 +7211,7 @@ function abrirPerfil(u){
       '</div>'+
       (pctNv!==null
         ? '<div class="pf-nivel"><div class="soc-barra"><i style="width:'+pctNv+'%;background:var(--accent)"></i></div>'+
-          '<p class="num">'+(p.nivel>=LVL_NAMES.length?"Nivel máximo":"Faltan "+Math.max(0,p.need-p.xp)+" XP para "+esc(tituloDe(p.nivel+1)))+'</p></div>'
+          '<p class="num">'+(p.nivel>=LVL_NAMES.length?"Nivel máximo":"Faltan "+Math.max(0,p.floor+p.need-p.xp)+" XP para "+esc(tituloDe(p.nivel+1)))+'</p></div>'
         : '')+
       '<div class="pf-cifras">'+
         pfCifra(p.racha,"racha","var(--warn)")+pfCifra(p.mejor,"mejor racha","var(--t1)")+
@@ -11196,7 +11245,7 @@ function anilloDetalle(){
       '<button class="hy-det-ir" data-jump="retos">Ir a '+esc((S.labels&&S.labels.retos)||"Objetivos")+'</button>';
   } else if(anilloAbierto==="habitos"){
     var ck=checksOf(t), it=ordenIdeal(idealActivos());
-    h='<p class="hy-det-t">Se llena con tus hábitos de cada día: '+ck.length+' de '+it.length+' hechos. Se marcan en la lista de abajo.</p>'+
+    h='<p class="hy-det-t">Se llena con tus hábitos de cada día: '+ck.length+' de '+it.length+' hechos. Cada uno da +4 XP (cuentan hasta 10 al día). Se marcan en la lista de abajo.</p>'+
       '<button class="hy-det-ir" data-act="x-ir-habitos">Ir a los hábitos</button>';
   } else {
     h='<p class="hy-det-t">Se llena con cuatro cosas del cuerpo: hacer ejercicio, beber suficiente agua, dormir 7 horas y estar menos de 2 horas con la pantalla. Llevas '+saludHoy(t)+' de 4.</p>'+
@@ -11824,16 +11873,14 @@ function instalarGuia(){
     '</ol><button class="btn btn-primary w-full !py-3.5 mt-5" data-act="close-sheet">Entendido</button>');
 }
 
-/* ════════════ copia en la nube cada rato, si tienes cuenta ════════════ */
-var nubeHuella="";
+/* ════════════ copia en la nube cada rato, si tienes cuenta ════════════
+   Cada minuto, si hay algo nuevo sin subir (nubeSucia, en nube.js). */
 setInterval(function(){
   try{
-    if(typeof ses==="undefined" || !ses || ses.demo || document.hidden) return;
-    var h=JSON.stringify(S).length+"|"+(S.checks?Object.keys(S.checks).length:0)+"|"+verLocal();
-    if(h===nubeHuella) return; nubeHuella=h;
+    if(typeof ses==="undefined" || !ses || ses.demo || document.hidden || !nubeSucia) return;
     subirDatos();
   }catch(e){}
-}, 5*60*1000);
+}, 60*1000);
 
 /* ════════════ acciones y pintado ════════════ */
 function rumboAccion(a, el){
@@ -14178,13 +14225,22 @@ function haceTxt(iso){
   if(h<24) return tr("hace")+" "+h+" h"; var d=Math.round(h/24); if(d===1) return tr("ayer");
   return tr("hace")+" "+d+" "+tr("días");
 }
+/* lo que llega de otros miembros se limpia antes de usarlo: la ficha la escribe cada
+   móvil, así que solo se aceptan números donde van números, textos cortos y fotos
+   que vienen del propio Storage de DTrack */
+function gNum(v, max){ v=Number(v); return (isFinite(v) && v>0) ? Math.min(Math.round(v), max||1e7) : 0; }
+function gTxt(v, n){ return (v==null || typeof v==="object") ? "" : String(v).slice(0, n||140); }
+function gUrl(u){ u=gTxt(u, 500); return u.indexOf(NUBE_URL+"/storage/v1/object/public/")===0 ? u : ""; }
+function gReac(r){ var o={}; if(r && typeof r==="object") Object.keys(r).forEach(function(k){ if(k.length<=8) o[k]=gNum(r[k], 99); }); return o; }
 function gMapea(e){
   var hoy=today(), yoUid=e.yo, porUid={}, yoNom=null;
   var miembros=(e.miembros||[]).map(function(m){
-    var f=m.ficha||{}, dias={}; (m.dias||[]).forEach(function(x){ dias[String(x.d).slice(0,10)]={ p:!!x.p, r:!!x.r }; });
-    var o={ uid:m.uid, usuario:m.usuario||"alguien", avatar:m.avatar||"", unido:String(m.unido||"").slice(0,10), dias:dias,
-            pct:f.pct||0, racha:f.racha||0, gym:f.gym||0, retos:f.retosHoy||0, nivel:f.nivel||1, mejor:f.mejor||f.racha||0, logros:f.logros||0,
-            retosTot:f.retosTot||0, estudioMin:f.estudioMin||0, estudioTop:f.estudioTop||null, desc:f.desc||"", medallas:f.medallas||[], titulo:f.titulo||null };
+    var f=(m.ficha && typeof m.ficha==="object") ? m.ficha : {}, dias={}; (Array.isArray(m.dias)?m.dias:[]).forEach(function(x){ dias[String(x.d).slice(0,10)]={ p:!!x.p, r:!!x.r }; });
+    var o={ uid:gTxt(m.uid,40), usuario:gTxt(m.usuario,16)||"alguien", avatar:gUrl(m.avatar), unido:gTxt(m.unido,10), dias:dias,
+            pct:gNum(f.pct,100), racha:gNum(f.racha,5000), gym:gNum(f.gym,7), retos:gNum(f.retosHoy,4), nivel:Math.max(1, gNum(f.nivel, LVL_NAMES.length)),
+            mejor:gNum(f.mejor||f.racha,5000), logros:gNum(f.logros,99), retosTot:gNum(f.retosTot), estudioMin:gNum(f.estudioMin),
+            estudioTop:gTxt(f.estudioTop,40)||null, desc:gTxt(f.desc,140), titulo:gTxt(f.titulo,40)||null,
+            medallas:(Array.isArray(f.medallas)?f.medallas:[]).slice(0,30).map(function(x){ return gTxt(x,60); }).filter(Boolean) };
     porUid[m.uid]=o; if(m.uid===yoUid) yoNom=o.usuario;
     return o;
   });
@@ -14205,13 +14261,13 @@ function gMapea(e){
     miembros.forEach(function(m){ marcas[m.usuario]=Object.keys(m.dias).filter(function(k){ return k>=ini && k<=fin && m.dias[k].r; }).sort(); });
     /* lo tuyo, lo último que marcaste aquí */
     if(yoNom && S.gRc){ var l=marcas[yoNom]||[]; Object.keys(S.gRc).forEach(function(k){ if(k<ini||k>fin) return; var i2=l.indexOf(k); if(S.gRc[k] && i2<0) l.push(k); if(!S.gRc[k] && i2>=0) l.splice(i2,1); }); marcas[yoNom]=l.sort(); }
-    reto={ txt:R.txt, inicio:ini, acaba:fin, por:R.por||4, objetivo:(R.por||4)*Math.max(1,miembros.length), premio:"+150 XP para cada uno", marcas:marcas };
+    reto={ txt:gTxt(R.txt,90), inicio:ini, acaba:fin, por:R.por||4, objetivo:(R.por||4)*Math.max(1,miembros.length), premio:"+150 XP para cada uno", marcas:marcas };
   } else reto={ txt:"", inicio:"", acaba:"", objetivo:1, premio:"", marcas:{} };
   var muro=(e.eventos||[]).map(function(x){
-    var mias={}; (x.mias||[]).forEach(function(em){ mias[em]=1; });
-    var u=porUid[x.uid]; return { id:String(x.id), usuario:u?u.usuario:"alguien", texto:x.texto, cuando:haceTxt(x.creado), reac:x.reac||{}, mias:mias };
+    var mias={}; (Array.isArray(x.mias)?x.mias:[]).forEach(function(em){ mias[gTxt(em,8)]=1; });
+    var u=porUid[x.uid]; return { id:String(x.id).replace(/\D/g,"").slice(0,18), usuario:u?u.usuario:"alguien", texto:gTxt(x.texto,160), cuando:haceTxt(x.creado), reac:gReac(x.reac), mias:mias };
   });
-  return { real:true, id:e.grupo.id, nombre:e.grupo.nombre, codigo:e.grupo.codigo, desc:e.grupo.descr||"", yo:yoNom||"tú",
+  return { real:true, id:gTxt(e.grupo.id,40), nombre:gTxt(e.grupo.nombre,28)||"Mi grupo", codigo:gTxt(e.grupo.codigo,8), desc:gTxt(e.grupo.descr,140), yo:yoNom||"tú",
            miembros:miembros, racha:{ dias:base, mejor:Math.max(mejor, base), cerrados:cerrados }, reto:reto, muro:muro };
 }
 function retoEnMarcha(){ return !!(GRUPO && GRUPO.reto && GRUPO.reto.txt && today()>=GRUPO.reto.inicio && today()<=GRUPO.reto.acaba); }
@@ -14431,15 +14487,38 @@ function verLocal(){ try{ return Number(localStorage.getItem(SYNCKEY)||0); }catc
 function verLocalSet(n){ try{ localStorage.setItem(SYNCKEY,String(n)); }catch(e){} }
 
 /* ── llamadas ───────────────────────────────────────────── */
+/* hasta sep 2026 el service worker guardaba copias de estas respuestas y podía
+   devolver un perfil o unos datos viejos («Ya casi» cada vez, sincronizar con lo
+   antiguo). Al abrir se borran esas copias antes de la primera llamada. */
+var cacheNubeLimpia=null;
+function limpiaCacheNube(){
+  if(cacheNubeLimpia) return cacheNubeLimpia;
+  var p=Promise.resolve();
+  try{
+    if(window.caches && caches.keys){
+      p=caches.keys().then(function(ks){
+        return Promise.all(ks.map(function(k){
+          return caches.open(k).then(function(c){
+            return c.keys().then(function(rs){
+              return Promise.all(rs.filter(function(q){ return q.url.indexOf(NUBE_URL)===0; }).map(function(q){ return c.delete(q); }));
+            });
+          });
+        }));
+      });
+    }
+  }catch(e){}
+  cacheNubeLimpia=p.catch(function(){});
+  return cacheNubeLimpia;
+}
 function pedir(ruta, opc){
   opc=opc||{};
   var h={ "apikey":NUBE_KEY, "Content-Type":"application/json" };
-  var t=(opc.anon||!ses)?NUBE_KEY:ses.access_token;
-  h["Authorization"]="Bearer "+t;
+  var t=(opc.anon||!ses||!ses.access_token)?NUBE_KEY:ses.access_token;
+  h["Authorization"]="Bearer "+(opc.token||t);
   if(opc.prefer) h["Prefer"]=opc.prefer;
-  var conf={ method:opc.method||"GET", headers:h };
+  var conf={ method:opc.method||"GET", headers:h, cache:"no-store" };
   if(opc.body) conf.body=JSON.stringify(opc.body);
-  return fetch(NUBE_URL+ruta, conf).then(function(r){
+  return limpiaCacheNube().then(function(){ return fetch(NUBE_URL+ruta, conf); }).then(function(r){
     return r.text().then(function(txt){
       var j=null; try{ j=txt?JSON.parse(txt):null; }catch(e){}
       return { ok:r.ok, estado:r.status, datos:j, texto:txt };
@@ -14447,28 +14526,59 @@ function pedir(ruta, opc){
   });
 }
 
-/* reintenta una vez si el testigo ha caducado */
+/* renueva el testigo antes de que caduque y reintenta una vez si aun así da 401 */
 function pedirAuth(ruta, opc){
-  return pedir(ruta,opc).then(function(r){
-    if(r.estado!==401) return r;
-    return refrescar().then(function(bien){
-      return bien ? pedir(ruta,opc) : r;
+  return tokenFresco().then(function(){
+    /* sin sesión no se pregunta como anónimo: devolvería vacío y parecería una cuenta nueva */
+    if(!ses || !ses.access_token) return { ok:false, estado:401, datos:null, texto:"" };
+    return pedir(ruta,opc).then(function(r){
+      if(r.estado!==401) return r;
+      return refrescar().then(function(bien){
+        return (bien && ses) ? pedir(ruta,opc) : r;
+      });
     });
   });
 }
 
+/* una sola renovación a la vez: Supabase solo deja usar cada testigo de renovación
+   una vez, y dos a la vez podían cerrar la sesión */
+var refrescando=null;
 function refrescar(){
-  if(!ses||!ses.refresh_token) return Promise.resolve(false);
-  return pedir("/auth/v1/token?grant_type=refresh_token",
+  if(!ses||!ses.refresh_token||ses.demo) return Promise.resolve(false);
+  if(refrescando) return refrescando;
+  /* otra ventana de la app (la de Google, por ejemplo) puede haberla renovado ya */
+  var guardada=sesLeer();
+  if(guardada && guardada.uid===ses.uid && guardada.refresh_token && guardada.refresh_token!==ses.refresh_token){
+    ses=guardada;
+    if(ses.caduca && ses.caduca-Date.now()>60000) return Promise.resolve(true);
+  }
+  refrescando=pedir("/auth/v1/token?grant_type=refresh_token",
       { method:"POST", anon:true, body:{ refresh_token:ses.refresh_token } })
     .then(function(r){
-      if(!r.ok||!r.datos||!r.datos.access_token){ return false; }
-      guardarSesion(r.datos); return true;
+      if(r.ok && r.datos && r.datos.access_token){ guardarSesion(r.datos); return true; }
+      /* el servidor dice que esa sesión ya no vale (caducada o cerrada en otro sitio) */
+      if(r.estado===400 || r.estado===401 || r.estado===403) sesionCaducada();
+      return false;
     })
-    .catch(function(){ return false; });
+    .catch(function(){ return false; })
+    .then(function(ok){ refrescando=null; return ok; });
+  return refrescando;
+}
+/* la sesión ya no vale: se pide entrar otra vez, sin tocar nada de lo guardado en el móvil */
+function sesionCaducada(){
+  if(!ses || ses.demo) return;
+  if(ses.email) ultimoCorreoSet(ses.email);
+  sesGuardar(null); perfil=null;
+  pintaEstadoNube("caducada");
+  setTimeout(function(){
+    if(puertaEl()) return;
+    puertaAviso="Tu sesión ha caducado. Entra otra vez para seguir guardando en la nube: lo de este móvil no se pierde.";
+    abrirPuerta("bienvenida");
+  }, 300);
 }
 
 function guardarSesion(d){
+  if(!d || !d.access_token) return;
   sesGuardar({
     access_token: d.access_token,
     refresh_token: d.refresh_token,
@@ -14529,23 +14639,54 @@ function crearPerfil(usuario, nacimiento){
 }
 
 /* ── subir y bajar el estado ─────────────────────────────── */
+/* la fila de la nube; null si aún no hay ninguna; false si no se ha podido leer */
 function bajarDatos(){
-  if(!ses || ses.demo) return Promise.resolve(null);
+  if(!ses || ses.demo) return Promise.resolve(false);
   return pedirAuth("/rest/v1/datos?select=estado,version,actualizado&id=eq."+ses.uid)
-    .then(function(r){ return (r.ok&&r.datos&&r.datos.length)?r.datos[0]:null; })
-    .catch(function(){ return null; });
+    .then(function(r){ if(!r.ok || !Array.isArray(r.datos)) return false; return r.datos.length ? r.datos[0] : null; })
+    .catch(function(){ return false; });
 }
+/* nubeSucia: hay cambios en este móvil que aún no se han subido */
+var subiendo=null, nubeSucia=false;
 function subirDatos(){
   if(!ses || ses.demo){ pintaEstadoNube("prueba"); return Promise.resolve(false); }
-  var v=verLocal()+1;
-  return pedirAuth("/rest/v1/datos", { method:"POST", prefer:"resolution=merge-duplicates",
-      body:{ id:ses.uid, estado:S, version:v, actualizado:new Date().toISOString() } })
-    .then(function(r){
-      if(r.ok){ verLocalSet(v); ultimoSync=Date.now(); pintaEstadoNube("guardado"); return true; }
-      pintaEstadoNube("error"); return false;
-    })
-    .catch(function(){ pintaEstadoNube("sinred"); return false; });
+  if(aplicando) return Promise.resolve(false);
+  if(subiendo) return subiendo;
+  var vAntes=verLocal(), v=vAntes+1, ahora=new Date().toISOString();
+  nubeSucia=false;
+  /* solo se sobrescribe si en la nube sigue la versión que este móvil conoce: si otro
+     dispositivo ha guardado entre medias, no se pisa y se pregunta con cuál quedarse */
+  var peticion = vAntes>0
+    ? pedirAuth("/rest/v1/datos?id=eq."+ses.uid+"&version=eq."+vAntes+"&select=version",
+        { method:"PATCH", prefer:"return=representation", body:{ estado:S, version:v, actualizado:ahora } })
+    : pedirAuth("/rest/v1/datos?select=version",
+        { method:"POST", prefer:"return=representation", body:{ id:ses.uid, estado:S, version:v, actualizado:ahora } });
+  subiendo=peticion.then(function(r){
+    if(r.ok && Array.isArray(r.datos) && r.datos.length){ verLocalSet(v); ultimoSync=Date.now(); pintaEstadoNube("guardado"); return true; }
+    nubeSucia=true;
+    if((r.ok && Array.isArray(r.datos)) || r.estado===409){ nubeConflicto(); return false; }
+    pintaEstadoNube(r.estado===401 ? "caducada" : "error"); return false;
+  }).catch(function(){ nubeSucia=true; pintaEstadoNube("sinred"); return false; })
+    .then(function(ok){ subiendo=null; return ok; });
+  return subiendo;
 }
+/* cada vez que se guarda algo en el móvil, queda pendiente de subir */
+var _saveNube=save;
+save=function(){ var r=_saveNube.apply(this, arguments); nubeSucia=true; return r; };
+/* la nube tiene otra versión: se pregunta en cuanto la app esté a la vista */
+var conflictoPend=false;
+var conflictoUltimo=0;
+function nubeConflicto(){
+  if(document.visibilityState==="hidden"){ conflictoPend=true; return; }
+  conflictoPend=false;
+  if(document.getElementById("conflicto")) return;
+  if(Date.now()-conflictoUltimo<20000) return;   /* nunca en bucle */
+  conflictoUltimo=Date.now();
+  sincronizarAlAbrir();
+}
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState==="visible" && conflictoPend) nubeConflicto();
+});
 
 /* cuánto "pesa" un estado, para poder comparar dos versiones */
 function resumenEstado(e){
@@ -14558,12 +14699,17 @@ function resumenEstado(e){
   return { dias:dias, tareas:tareas, hechas:hechas, ultimo:ult };
 }
 
+/* se trae lo de la nube y se recarga. Mientras, nada puede volver a subir ni guardar
+   lo viejo (al recargar se dispara el «al cerrar») */
+var aplicando=false;
 function aplicarEstado(e, version){
   try{
+    aplicando=true; nubeSucia=false;
+    S=e;
     localStorage.setItem(KEY, JSON.stringify(e));
     verLocalSet(version||0);
     location.reload();
-  }catch(err){ avisoNube("No se ha podido guardar lo de la nube en este navegador."); }
+  }catch(err){ aplicando=false; avisoNube("No se ha podido guardar lo de la nube en este navegador."); }
 }
 
 /* ── sincronizar al abrir ────────────────────────────────── */
@@ -14571,21 +14717,26 @@ function sincronizarAlAbrir(){
   if(!ses || ses.demo){ pintaEstadoNube("prueba"); return Promise.resolve(); }
   pintaEstadoNube("mirando");
   return bajarDatos().then(function(nube){
-    if(!nube){ return subirDatos(); }                    /* primera vez: sube lo que haya */
+    if(nube===false){ pintaEstadoNube(navigator.onLine===false ? "sinred" : "error"); return; }
+    if(!nube){ verLocalSet(0); return subirDatos(); }   /* primera vez: sube lo que haya */
     var vLocal=verLocal();
-    if(nube.version===vLocal){ pintaEstadoNube("aldia"); return; }   /* nada nuevo */
+    if(nube.version===vLocal){
+      /* la misma versión: si en este móvil hay algo sin subir (se cerró sin red), se sube */
+      if(JSON.stringify(nube.estado)!==JSON.stringify(S)) return subirDatos();
+      pintaEstadoNube("aldia"); return;
+    }
     var aqui=resumenEstado(S), alla=resumenEstado(nube.estado);
     if(vLocal===0 && aqui && aqui.dias===0 && aqui.tareas===0){
       aplicarEstado(nube.estado, nube.version); return;  /* móvil vacío: baja sin preguntar */
     }
     if(nube.version>vLocal){ preguntarConflicto(nube, aqui, alla); return; }
-    pintaEstadoNube("aldia");
+    /* la nube va por detrás de este móvil: se sube lo de aquí */
+    verLocalSet(nube.version); return subirDatos();
   }).catch(function(){ pintaEstadoNube("sinred"); });
 }
 
 function sincronizarAlCerrar(){
-  if(!ses || ses.demo) return;
-  if(Date.now()-ultimoSync < 4000) return;
+  if(!ses || ses.demo || !nubeSucia) return;
   subirDatos();
 }
 
@@ -14605,7 +14756,7 @@ function avisoNubeViejo(txt){
 }
 
 var ESTADOS={ mirando:"comprobando…", guardado:"guardado en la nube", aldia:"al día", prueba:"modo prueba · sin nube",
-              sinred:"sin conexión", error:"no se ha podido guardar" };
+              sinred:"sin conexión", error:"no se ha podido guardar", caducada:"sesión caducada" };
 function pintaEstadoNube(k){
   var e=document.getElementById("nube-estado");
   if(e) e.textContent=ESTADOS[k]||"";
@@ -14613,6 +14764,7 @@ function pintaEstadoNube(k){
 
 /* ════════ la puerta: correo, código y perfil ════════ */
 var puertaPaso="bienvenida", puertaCorreo="", puertaCargando=false, puertaError="", puertaReenvio=0, puertaCrono=null;
+var puertaAviso="";   /* un aviso arriba de los botones (p. ej. «tu sesión ha caducado») */
 
 function puertaEl(){ return document.getElementById("puerta"); }
 
@@ -14636,10 +14788,16 @@ function abrirPuerta(paso){
     });
   }
   pintarPuerta();
+  /* el botón de Google solo sale si está activado en Supabase */
+  if(!enVisor()){
+    var gAntes=googleActivo();
+    googleMira().then(function(on){ if(on!==gAntes) repintaPie(); });
+  }
 }
 function cerrarPuerta(){
   var d=puertaEl(); if(d&&d.parentNode) d.parentNode.removeChild(d);
-  clearInterval(puertaCrono); carPara();
+  clearInterval(puertaCrono); clearInterval(googleT); carPara();
+  puertaAviso="";
 }
 
 function marcaDTrack(){
@@ -14659,15 +14817,18 @@ function puertaError_(){
 /* la bienvenida se pinta una vez y se queda de fondo; los pasos suben encima
    en una hoja, como una ventanita, sin tocar el carrusel */
 function pieHTML(){
-  var ult=ultimoCorreo();
+  var ult=ultimoCorreo(), g=googleActivo(), porGoogle=!!(ult && g && ultimoMetodo()==="google");
   return '<div class="car-pie">'+
+    (puertaAviso ? '<p class="pu-aviso">'+esc(puertaAviso)+'</p>' : '')+
     (ult
-      ? '<button class="pu-boton" data-p="recordado">'+
+      ? '<button class="pu-boton" data-p="'+(porGoogle?"google":"recordado")+'">'+
           '<span class="pu-boton-sub">Entrar como</span>'+
           '<span class="pu-boton-t">'+esc(ult)+'</span>'+
         '</button>'+
+        (g && !porGoogle ? botonGoogle() : '')+
         '<button class="pu-enlace" data-p="otro-correo">Usar otro correo</button>'
-      : '<button class="pu-boton" data-p="empezar">Entrar o crear cuenta</button>')+
+      : '<button class="pu-boton" data-p="empezar">Entrar o crear cuenta</button>'+
+        (g ? botonGoogle() : ''))+
     /* en la beta (publicar.py pone window.DTRACK_BETA) también se ofrece, para probar sin código */
     (enVisor() || window.DTRACK_BETA
       ? '<button class="pu-enlace" data-p="prueba">Entrar sin cuenta · modo prueba</button>'+
@@ -14676,6 +14837,12 @@ function pieHTML(){
   '</div>';
 }
 
+function repintaPie(){
+  var d=puertaEl(); if(!d || d.dataset.base!=="1") return;
+  var pie=d.querySelector(".car-pie"); if(!pie) return;
+  var t=document.createElement("div"); t.innerHTML=pieHTML();
+  pie.parentNode.replaceChild(t.firstChild, pie);
+}
 function pintarBase(d){
   if(d.dataset.base==="1") return;
   d.className="bienve";
@@ -14687,8 +14854,9 @@ function pintarBase(d){
 function contenidoPaso(){
   if(puertaPaso==="correo"){
     return '<h1 class="pu-t display">Entra en tu cuenta</h1>'+
-      '<p class="pu-sub">Te mandamos un código de 6 cifras al correo. No hay contraseña que recordar.</p>'+
+      '<p class="pu-sub">Te mandamos un código al correo. No hay contraseña que recordar.</p>'+
       '<p class="pu-nota" style="text-align:left;margin-top:6px">Hace falta tener 14 años o más. Al seguir aceptas la <button class="pu-link" data-p="ver-priv">política de privacidad</button>.</p>'+
+      (googleActivo() ? botonGoogle()+'<div class="pu-o"><span>o con tu correo</span></div>' : '')+
       '<input id="p-correo" class="pu-campo" type="email" inputmode="email" autocomplete="email" '+
         'autocapitalize="off" autocorrect="off" placeholder="tucorreo@gmail.com" value="'+esc(puertaCorreo)+'">'+
       puertaError_()+
@@ -14710,13 +14878,25 @@ function contenidoPaso(){
           (puertaReenvio>0?("Reenviar en "+puertaReenvio+" s"):"Reenviar el código")+'</button>'+
       '</div>';
   }
+  if(puertaPaso==="google"){
+    return '<h1 class="pu-t display">Entrando con Google</h1>'+
+      '<p class="pu-sub">Termina en la ventana de Google. Al acabar, vuelve aquí y entrarás solo.</p>'+
+      '<div class="pu-espera" aria-hidden="true"><i></i></div>'+
+      puertaError_()+
+      '<button class="pu-enlace" data-p="cancelar-google" style="margin-top:6px">Cancelar</button>';
+  }
+  if(puertaPaso==="google-vuelta"){
+    return '<h1 class="pu-t display">Entrando…</h1>'+
+      '<p class="pu-sub">Un momento: estamos terminando de entrar con tu cuenta de Google.</p>'+
+      '<div class="pu-espera" aria-hidden="true"><i></i></div>';
+  }
   if(puertaPaso==="perfil"){
     var rec=perfilRecordado();
     return '<h1 class="pu-t display">Ya casi</h1>'+
       '<p class="pu-sub">Es una cuenta nueva para <b>'+esc(puertaCorreo||(ses&&ses.email)||"")+'</b>. Elige cómo te verán en tu grupo.</p>'+
       '<div class="pu-grupo">'+
         '<label class="pu-fila"><span>Usuario</span>'+
-          '<input id="p-usuario" type="text" autocapitalize="words" autocorrect="off" maxlength="16" placeholder="Carlos" value="'+esc(rec.usuario||"")+'"></label>'+
+          '<input id="p-usuario" type="text" autocapitalize="words" autocorrect="off" maxlength="16" placeholder="Carlos" value="'+esc(rec.usuario||nombreGoogle||"")+'"></label>'+
         '<label class="pu-fila"><span>Nacimiento</span>'+
           '<input id="p-nac" type="date" max="'+today()+'" value="'+esc(rec.nacimiento||"")+'"></label>'+
       '</div>'+
@@ -14738,13 +14918,15 @@ function contenidoPaso(){
   return "";
 }
 
-function hojaSeCierra(){ return puertaPaso==="correo" || puertaPaso==="codigo" || puertaPaso==="privacidad"; }
+function hojaSeCierra(){ return puertaPaso==="correo" || puertaPaso==="codigo" || puertaPaso==="privacidad" || puertaPaso==="google"; }
 
 function pintarHoja(d){
   var h=document.getElementById("puerta-hoja");
   if(puertaPaso==="bienvenida"){ quitarHoja(); return; }
+  /* si cambia si se puede cerrar o no (p. ej. de «Entrando…» a un error), se rehace */
+  if(h && h.dataset.cierra!==String(hojaSeCierra())){ if(h.parentNode) h.parentNode.removeChild(h); h=null; }
   if(!h){
-    h=document.createElement("div"); h.id="puerta-hoja";
+    h=document.createElement("div"); h.id="puerta-hoja"; h.dataset.cierra=String(hojaSeCierra());
     h.innerHTML='<div class="puerta-velo"'+(hojaSeCierra()?' data-p="cerrar-hoja"':'')+'></div>'+
       '<div class="puerta-tarjeta glass">'+
         (hojaSeCierra()
@@ -14816,7 +14998,9 @@ function puertaClic(ev){
   if(a==="crear")     return pasoCrear();
   if(a==="reenviar")  return pasoEnviar(true);
   if(a==="prueba"){ entrarDePrueba(); return; }
-  if(a==="cerrar-hoja"){ if(hojaSeCierra()){ puertaError=""; puertaPaso="bienvenida"; pintarPuerta(); } return; }
+  if(a==="google"){ entrarConGoogle(); return; }
+  if(a==="cancelar-google"){ clearInterval(googleT); puertaError=""; puertaPaso="bienvenida"; pintarPuerta(); return; }
+  if(a==="cerrar-hoja"){ if(hojaSeCierra()){ clearInterval(googleT); puertaError=""; puertaPaso="bienvenida"; pintarPuerta(); } return; }
   if(a==="ver-priv"){ var ic=document.getElementById("p-correo"); if(ic) puertaCorreo=(ic.value||"").trim(); puertaError=""; puertaPaso="privacidad"; pintarPuerta(); return; }
   if(a==="empezar"){ puertaError=""; puertaPaso="correo"; pintarPuerta(); return; }
   if(a==="otro-correo"){ puertaError=""; puertaCorreo=""; puertaPaso="correo"; pintarPuerta(); return; }
@@ -14892,7 +15076,7 @@ function pasoVerificar(){
       pintarPuerta(); return;
     }
     guardarSesion(r.datos);
-    ultimoCorreoSet(puertaCorreo);
+    ultimoCorreoSet(puertaCorreo); ultimoMetodoSet("correo");
     leerPerfilConReintento().then(function(p){
       if(p){ cerrarPuerta(); entrarApp(); }
       else if(p===null){ puertaPaso="perfil"; pintarPuerta(); }
@@ -14958,13 +15142,26 @@ function entrarApp(){
   sincronizarAlAbrir();
 }
 
+var salirArmado=0;
 function salirCuenta(){
-  sesGuardar(null); perfil=null;
-  try{ localStorage.removeItem(SYNCKEY); }catch(e){}
-  location.reload();
+  function fin(){
+    sesGuardar(null); perfil=null;
+    try{ localStorage.removeItem(SYNCKEY); localStorage.removeItem("dtrack-grupo-cache"); }catch(e){}
+    location.reload();
+  }
+  if(!ses || ses.demo){ fin(); return; }
+  /* dos toques, para no salir sin querer */
+  if(Date.now()-salirArmado>4000){ salirArmado=Date.now(); avisoNube("Toca otra vez «Cerrar sesión» para salir. Tus datos se quedan guardados."); return; }
+  avisoNube("Guardando y cerrando la sesión…");
+  var tarea=(nubeSucia ? subirDatos() : Promise.resolve(true)).then(function(){
+    /* el testigo de esta sesión deja de valer también en el servidor */
+    return pedir("/auth/v1/logout?scope=local", { method:"POST" }).catch(function(){});
+  });
+  Promise.race([tarea, new Promise(function(ok){ setTimeout(ok, 5000); })]).then(fin, fin);
 }
 
 function arrancarCuenta(){
+  if(volverDeGoogle()) return;   /* se vuelve de Google con un código: se termina de entrar */
   ses=sesLeer();
   if(ses && ses.demo){
     perfil = { usuario:"carlos", nacimiento:"", avatar:"" };
@@ -14978,6 +15175,130 @@ function arrancarCuenta(){
     if(!ses){ abrirPuerta("bienvenida"); return; }
     puertaCorreo=ses.email||""; abrirPuerta("perfil");
   }).catch(function(){});
+}
+
+/* ════════ entrar con Google ════════
+   Lo hace Supabase (Authentication → Sign In / Providers → Google). Si no está
+   activado allí, el botón no sale. Flujo PKCE: el código que vuelve en la dirección
+   solo se puede canjear con una clave que se queda en este móvil. En el iPhone con
+   la app en la pantalla de inicio, salir a otra web abre un Safari aparte (con otro
+   almacén) y la sesión se perdería: por eso allí se usa una ventana de la propia
+   app, que al terminar guarda la sesión y se cierra. */
+var GKEY="dtrack-google", PKCEKEY="dtrack-pkce", METKEY="dtrack-metodo";
+var googleT=null, nombreGoogle="";
+var ICO_GOOGLE='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>';
+function botonGoogle(){ return '<button class="pu-google" data-p="google">'+ICO_GOOGLE+'<span>Continuar con Google</span></button>'; }
+function googleActivo(){ try{ var g=JSON.parse(localStorage.getItem(GKEY)||"null"); return !!(g && g.on); }catch(e){ return false; } }
+function googleMira(){
+  return pedir("/auth/v1/settings", { anon:true }).then(function(r){
+    if(!r.ok || !r.datos || !r.datos.external) return googleActivo();
+    var on=!!r.datos.external.google;
+    try{ localStorage.setItem(GKEY, JSON.stringify({ on:on, t:Date.now() })); }catch(e){}
+    return on;
+  }).catch(function(){ return googleActivo(); });
+}
+function ultimoMetodo(){ try{ return localStorage.getItem(METKEY)||""; }catch(e){ return ""; } }
+function ultimoMetodoSet(m){ try{ localStorage.setItem(METKEY, m); }catch(e){} }
+function b64url(bytes){ var t=""; for(var i=0;i<bytes.length;i++) t+=String.fromCharCode(bytes[i]); return btoa(t).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+/* las pruebas automáticas (carpeta pruebas/) simulan la dirección y la salida a Google */
+function urlActual(){ return window.DTRACK_URL_PRUEBA || location.href; }
+function irA(url){ if(typeof window.DTRACK_IR_PRUEBA==="function"){ window.DTRACK_IR_PRUEBA(url); return; } location.href=url; }
+function iosInstalada(){ return (typeof esIOS==="function" && esIOS()) && (typeof instalada==="function" && instalada()); }
+/* un error en la puerta siempre se ve: si no hay hoja, se abre la del correo */
+function puertaFallo(msg){
+  clearInterval(googleT); puertaCargando=false; puertaError=msg;
+  if(puertaPaso==="bienvenida" || puertaPaso==="google" || puertaPaso==="google-vuelta") puertaPaso="correo";
+  if(!puertaEl()) abrirPuerta(puertaPaso); else pintarPuerta();
+}
+function entrarConGoogle(){
+  if(!window.crypto || !crypto.subtle || !window.TextEncoder || !window.isSecureContext){
+    puertaFallo("Este navegador no deja entrar con Google. Entra con tu correo."); return;
+  }
+  /* la ventana se abre ya, con el toque: si se abre después, el móvil la bloquea */
+  var ventana=null;
+  if(iosInstalada()){ try{ ventana=window.open("about:blank", "_blank"); }catch(e){ ventana=null; } }
+  var bytes=new Uint8Array(32); crypto.getRandomValues(bytes);
+  var clave=b64url(bytes);
+  crypto.subtle.digest("SHA-256", new TextEncoder().encode(clave)).then(function(h){
+    try{ localStorage.setItem(PKCEKEY, JSON.stringify({ v:clave, t:Date.now(), ventana:!!ventana })); }catch(e){}
+    var url=NUBE_URL+"/auth/v1/authorize?provider=google"+
+      "&redirect_to="+encodeURIComponent(location.origin+location.pathname)+
+      "&code_challenge="+b64url(new Uint8Array(h))+"&code_challenge_method=s256";
+    if(ventana){ ventana.location.href=url; googleEspera(); }
+    else irA(url);
+  }).catch(function(){
+    if(ventana){ try{ ventana.close(); }catch(e){} }
+    puertaFallo("No se ha podido abrir Google. Prueba otra vez o entra con tu correo.");
+  });
+}
+/* la app espera a que la ventana de Google deje la sesión guardada */
+function googleEspera(){
+  puertaError=""; puertaPaso="google"; pintarPuerta();
+  clearInterval(googleT); var t0=Date.now();
+  googleT=setInterval(function(){
+    var sg=sesLeer();
+    if(sg && sg.uid && !sg.demo && sg.access_token){
+      clearInterval(googleT); ses=sg;
+      if(sg.email){ ultimoCorreoSet(sg.email); puertaCorreo=sg.email; }
+      ultimoMetodoSet("google"); trasEntrar(); return;
+    }
+    if(Date.now()-t0>10*60000){ clearInterval(googleT); puertaFallo("No ha llegado la respuesta de Google. Vuelve a intentarlo."); }
+  }, 1000);
+}
+function nombreDeGoogle(u){
+  var m=(u && u.user_metadata)||{}, n=String(m.given_name||m.full_name||m.name||"").trim().split(/\s+/)[0]||"";
+  try{ n=n.normalize("NFD").replace(/[̀-ͯ]/g,""); }catch(e){}
+  n=n.replace(/[^A-Za-z0-9._-]/g,"").slice(0,16);
+  return n.length>=3 ? n : "";
+}
+/* después de entrar (con código o con Google): a la app, o a «Ya casi» si la cuenta es nueva */
+function trasEntrar(){
+  puertaAviso="";
+  leerPerfilConReintento().then(function(p){
+    puertaCargando=false;
+    if(p){ cerrarPuerta(); entrarApp(); return; }
+    if(p===null){ puertaCorreo=(ses&&ses.email)||puertaCorreo; puertaError=""; puertaPaso="perfil"; if(!puertaEl()) abrirPuerta("perfil"); else pintarPuerta(); return; }
+    puertaFallo("No se ha podido leer tu cuenta. Revisa la conexión y vuelve a intentarlo.");
+  });
+}
+/* se vuelve de Google: ?code=… (o un error) en la dirección */
+function volverDeGoogle(){
+  var q, hq;
+  try{ var u=new URL(urlActual()); q=new URLSearchParams(u.search); hq=new URLSearchParams((u.hash||"").replace(/^#/,"")); }catch(e){ return false; }
+  var code=q.get("code"), err=q.get("error")||hq.get("error"), desc=q.get("error_description")||hq.get("error_description"), at=hq.get("access_token");
+  if(!code && !err && !at) return false;
+  try{ history.replaceState(null, "", location.pathname); }catch(e){}
+  var g=null; try{ g=JSON.parse(localStorage.getItem(PKCEKEY)||"null"); localStorage.removeItem(PKCEKEY); }catch(e){}
+  var enVentana=!!(g && g.ventana);
+  abrirPuerta("google-vuelta");
+  if(err){ puertaFallo(err==="access_denied" ? "Has cancelado el inicio con Google." : ("Google no ha dejado entrar"+(desc?": "+desc:".")+" Prueba otra vez o entra con tu correo.")); return true; }
+  var canje;
+  if(code){
+    if(!g || !g.v || Date.now()-g.t>30*60000){ puertaFallo("Este inicio con Google ha caducado. Vuelve a pulsar «Continuar con Google»."); return true; }
+    canje=pedir("/auth/v1/token?grant_type=pkce", { method:"POST", anon:true, body:{ auth_code:code, code_verifier:g.v } });
+  } else {
+    /* por si Supabase devuelve la sesión directamente (flujo implícito) */
+    canje=pedir("/auth/v1/user", { token:at }).then(function(r){
+      if(!r.ok || !r.datos || !r.datos.id) return r;
+      return { ok:true, estado:200, datos:{ access_token:at, refresh_token:hq.get("refresh_token"), expires_in:+hq.get("expires_in")||3600, user:r.datos } };
+    });
+  }
+  canje.then(function(r){
+    if(!r || !r.ok || !r.datos || !r.datos.access_token){
+      var m=(r && r.datos && (r.datos.msg||r.datos.error_description||r.datos.message))||"";
+      puertaFallo("No se ha podido entrar con Google"+(m?": "+m:".")+" Prueba otra vez o entra con tu correo."); return;
+    }
+    guardarSesion(r.datos);
+    var u=r.datos.user||{};
+    if(u.email){ ultimoCorreoSet(u.email); puertaCorreo=u.email; }
+    ultimoMetodoSet("google"); nombreGoogle=nombreDeGoogle(u);
+    if(enVentana){
+      /* era la ventanita del iPhone: la app de verdad ya ve la sesión; esta se cierra */
+      setTimeout(function(){ try{ window.close(); }catch(e){} }, 150);
+      setTimeout(trasEntrar, 900);   /* si no se ha podido cerrar, se entra aquí */
+    } else trasEntrar();
+  }).catch(function(){ puertaFallo("Sin conexión. Inténtalo otra vez."); });
+  return true;
 }
 
 /* ════════ elegir versión cuando las dos han cambiado ════════ */
@@ -15942,7 +16263,10 @@ function fgPrepara(archivo, d){
   lector.readAsDataURL(archivo);
 }
 function fgSube(blob, d){
-  var ruta="gym/"+ses.uid+"/"+d+".jpg";
+  /* el nombre lleva una parte al azar: sin ella, quien supiera tu identificador podría
+     adivinar la dirección de tus fotos (el cubo «gym» es público para poder verlas) */
+  var az=new Uint8Array(9); try{ crypto.getRandomValues(az); }catch(e){ for(var k=0;k<9;k++) az[k]=Math.floor(Math.random()*256); }
+  var ruta="gym/"+ses.uid+"/"+d+"-"+Array.prototype.map.call(az, function(n){ return ("0"+n.toString(16)).slice(-2); }).join("")+".jpg";
   tokenFresco().then(function(){
     return fetch(NUBE_URL+"/storage/v1/object/"+ruta, { method:"POST",
       headers:{ "apikey":NUBE_KEY, "Authorization":"Bearer "+ses.access_token, "Content-Type":"image/jpeg", "x-upsert":"true" }, body:blob });
@@ -15974,7 +16298,7 @@ function fgPublica(d, url, real){
 var _fgMapea=gMapea;
 gMapea=function(e){
   var r=_fgMapea.apply(this, arguments);
-  (e.eventos||[]).forEach(function(x, i){ if(x.foto && r.muro[i]) r.muro[i].foto=x.foto; });
+  (e.eventos||[]).forEach(function(x, i){ var u=gUrl(x.foto); if(u && r.muro[i]) r.muro[i].foto=u; });
   return r;
 };
 function fgMiniaturas(){
@@ -16022,7 +16346,7 @@ function fgGaleria(u){
   if(!uid || !(typeof gReal==="function" && gReal())){ dentro.innerHTML='<p class="soc-nota">'+esc(u)+' aún no ha subido fotos.</p>'; return; }
   dentro.innerHTML='<p class="soc-nota">Cargando…</p>';
   gRpc("g_fotos", { p_uid:uid, p_desde:null, p_hasta:null }).then(function(l){
-    dentro.innerHTML=fgRejilla((l||[]).map(function(x){ return { d:String(x.d).slice(0,10), u:x.u }; }));
+    dentro.innerHTML=fgRejilla((Array.isArray(l)?l:[]).map(function(x){ return { d:String(x.d).slice(0,10), u:gUrl(x.u) }; }).filter(function(x){ return x.u; }));
     if(!(l||[]).length) dentro.innerHTML='<p class="soc-nota">'+esc(u)+' aún no ha subido fotos.</p>';
   }).catch(function(){ dentro.innerHTML='<p class="soc-nota">No se han podido cargar las fotos.</p>'; });
 }
@@ -16088,7 +16412,8 @@ function mesGrupo(mes){
   var ds=mesDias(mes);
   box.innerHTML='<div class="soc-sec"><h2 class="display">'+esc(GRUPO.nombre||"Tu grupo")+'</h2></div><p class="soc-nota">Cargando…</p>';
   gRpc("g_fotos", { p_uid:null, p_desde:ds[0], p_hasta:ds[ds.length-1] }).then(function(l){
-    l=l||[]; var por={}, nom={};
+    l=(Array.isArray(l)?l:[]).map(function(x){ return { uid:x.uid, d:String(x.d).slice(0,10), u:gUrl(x.u) }; }).filter(function(x){ return x.u; });
+    var por={}, nom={};
     GRUPO.miembros.forEach(function(m){ nom[m.uid]=m; por[m.uid]=0; });
     l.forEach(function(x){ por[x.uid]=(por[x.uid]||0)+1; });
     var rk=Object.keys(por).filter(function(k){ return nom[k]; }).sort(function(a,b){ return por[b]-por[a]; });
@@ -16373,6 +16698,103 @@ grupoAccion=function(a, el){ if(claridadAccion(a, el)) return true; return _clGA
 var _clTR=grupoTrasRender;
 grupoTrasRender=function(){ var r=_clTR.apply(this, arguments); if(view==="resumen") pintaMananaHoy(); return r; };
 (function(){ var st=document.createElement("style"); st.id="claridad-css"; st.textContent=CLARIDAD_CSS; document.head.appendChild(st); })();
+
+/* ════════════════════════════════════════════════════════════════
+   SOLIDEZ (sep 2026): la revisión de toda la app.
+   · Resumen: una fila con tu nivel, lo que falta para el siguiente y
+     el XP de hoy (antes no se veía el XP en ningún sitio al abrir).
+     Al tocarla se abre Progreso.
+   · «Compartir mi día» solo sale cuando ya has hecho algo hoy.
+   · La barra de abajo cabe en pantallas de 320 px.
+   ════════════════════════════════════════════════════════════════ */
+function hoyNivelHTML(st){
+  var x=dayXP(today(), tasksByDay()), maxNv=st.lvl>=LVL_NAMES.length;
+  var dentro=Math.max(0, st.xp-st.lvlFloor), pct=maxNv ? 1 : Math.min(1, dentro/Math.max(1, st.lvlNeed));
+  return '<button class="hy-xp" id="hy-xp" data-act="x-hoy-nivel" aria-label="'+esc(tr("Ver tu progreso"))+'">'+
+    '<span class="hy-xp-an">'+anilloNivel(st.lvl, 46, pct)+'</span>'+
+    '<span class="hy-xp-txt"><b>'+esc(tituloElegido(st.lvl))+'</b>'+
+      '<small class="num">'+(maxNv ? tr("Nivel máximo") : tr("Faltan "+Math.max(0, st.lvlNeed-dentro)+" XP para el nivel "+(st.lvl+1)))+'</small>'+
+      '<i class="hy-xp-barra"><u style="width:'+(pct*100).toFixed(1)+'%"></u></i></span>'+
+    '<span class="hy-xp-hoy'+(x>0?' si':'')+'"><b class="num">+'+x+'</b><small>'+tr("XP hoy")+'</small></span>'+
+  '</button>';
+}
+var _sdPintaHoy=pintaHoy;
+pintaHoy=function(st){
+  var r=_sdPintaHoy.apply(this, arguments);
+  var box=document.getElementById("hoy"); if(!box) return r;
+  st=st||stats();
+  var dos=box.querySelector(".hy-dos"), vieja=document.getElementById("hy-xp");
+  if(vieja && vieja.parentNode) vieja.parentNode.removeChild(vieja);
+  var t=document.createElement("div"); t.innerHTML=hoyNivelHTML(st);
+  if(dos) box.insertBefore(t.firstChild, dos); else box.appendChild(t.firstChild);
+  box.classList.toggle("sin-nada", dayXP(today(), tasksByDay())<=0);
+  return r;
+};
+function solidezAccion(a, el){
+  if(a==="x-hoy-nivel"){
+    go("retos");
+    if(typeof retosCambiaTab==="function") retosCambiaTab("prog");
+    /* se baja hasta tu nivel, que está debajo de los retos de hoy */
+    setTimeout(function(){ var t=document.getElementById("rt-tabs"); if(!t) return;
+      try{ window.scrollTo({ top:Math.max(0, t.getBoundingClientRect().top+window.scrollY-70), behavior:"smooth" }); }catch(e){} }, 120);
+    return true;
+  }
+  return false;
+}
+
+/* ── XP justo: tope diario para tareas y hábitos ──
+   Antes, apuntar y tachar muchas tareas (o muchos hábitos) daba XP sin fin, y en
+   el grupo se compara el nivel. Desde el 29 sep 2026 cuentan como mucho 5 tareas
+   (30 XP) y 10 hábitos (40 XP) al día. Los días anteriores no cambian: nadie baja
+   de nivel por esto. */
+var XP_TOPE_DESDE="2026-09-29", XP_TAREAS_MAX=5, XP_HABITOS_MAX=10;
+var _sdDayXP=dayXP;
+dayXP=function(d, tmap){
+  var x=_sdDayXP(d, tmap);
+  if(d<XP_TOPE_DESDE) return x;
+  var sobra=Math.max(0, ((tmap&&tmap[d])||0)-XP_TAREAS_MAX)*6 + Math.max(0, checksOf(d).length-XP_HABITOS_MAX)*4;
+  if(!sobra) return x;
+  return Math.max(0, x-Math.round(sobra*(tripleDone(d)?1.5:1)));
+};
+
+/* la celebración dice la verdad: pasado el tope, un ✓ en vez de «+4 XP» */
+var _sdCelebra=celebraTick;
+celebraTick=function(el, xp, color){
+  var hoy=today(), topado=false;
+  if(hoy>=XP_TOPE_DESDE && el && el.dataset){
+    if(el.dataset.act==="check" && xp===4 && checksOf(el.dataset.day||hoy).length>XP_HABITOS_MAX) topado=true;
+    if(el.dataset.act==="toggle" && xp===6 && (tasksByDay()[hoy]||0)>=XP_TAREAS_MAX) topado=true;
+  }
+  var r=_sdCelebra.call(this, el, topado?0:xp, color);
+  if(topado){ var capas=document.querySelectorAll(".tick-capa b"), c=capas[capas.length-1]; if(c) c.textContent="✓"; }
+  return r;
+};
+
+var SOLIDEZ_CSS=[
+'.hy-xp{ width:100%; display:flex; align-items:center; gap:13px; margin-top:18px; padding:12px 14px; border-radius:20px; text-align:left;',
+'  background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline); transition:transform .3s var(--spring); }',
+'.hy-xp:active{ transform:scale(.98); }',
+'.hy-xp-an{ flex:0 0 auto; display:grid; place-items:center; }',
+'.hy-xp-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }',
+'.hy-xp-txt b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:15px; font-weight:800; letter-spacing:-.02em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.hy-xp-txt small{ font-size:12px; color:var(--t3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.hy-xp-barra{ display:block; height:5px; margin-top:5px; border-radius:99px; overflow:hidden; background:color-mix(in srgb,var(--accent) 14%,transparent); }',
+'.hy-xp-barra u{ display:block; height:100%; border-radius:99px; background:var(--accent); transition:width .8s cubic-bezier(.3,.9,.3,1); }',
+'.hy-xp-hoy{ flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; min-width:54px; }',
+'.hy-xp-hoy b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:20px; font-weight:800; letter-spacing:-.03em; color:var(--t3); line-height:1.1; }',
+'.hy-xp-hoy.si b{ color:var(--accent); }',
+'.hy-xp-hoy small{ font-size:11px; color:var(--t3); font-weight:600; }',
+'#hoy.sin-nada #peg-hoy{ display:none!important; }',
+'html.esencial .hy-xp{ border-radius:12px; }',
+/* la barra de abajo en móviles de 320 px: los cinco botones caben sin salirse */
+'@media (max-width:370px){ .mtab{ width:calc((100vw - 44px) / 5)!important; } }',
+/* quien pide menos movimiento en el móvil, lo tiene en toda la app */
+'@media (prefers-reduced-motion:reduce){ *, *::before, *::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }'
+].join("\n");
+
+var _sdGA=grupoAccion;
+grupoAccion=function(a, el){ if(solidezAccion(a, el)) return true; return _sdGA.apply(this, arguments); };
+(function(){ var st=document.createElement("style"); st.id="solidez-css"; st.textContent=SOLIDEZ_CSS; document.head.appendChild(st); })();
 
 
 if(!load()) save();
