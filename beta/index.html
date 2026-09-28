@@ -6098,6 +6098,12 @@ var CAR_CSS =
 "#puerta .pu-espera i{ width:34px; height:34px; border-radius:50%; border:3px solid color-mix(in srgb,var(--accent) 20%,transparent);"+
   " border-top-color:var(--accent); animation:puGira .9s linear infinite; }"+
 "@keyframes puGira{ to{ transform:rotate(360deg); } }"+
+/* el pie, compacto y pegado abajo: que no pise la animación de la bienvenida */
+"#puerta .car-pie{ padding:0 20px calc(10px + env(safe-area-inset-bottom)); }"+
+"#puerta .car-pie .pu-boton{ height:52px; }"+
+"#puerta .car-pie .pu-google{ height:48px; margin-top:8px; }"+
+"#puerta .car-pie .pu-enlace{ padding:9px 0 0; font-size:14px; }"+
+"#puerta .car-pie .pu-aviso{ margin-bottom:8px; padding:9px 12px; font-size:12.5px; }"+
 "@media (min-height:900px){ #puerta .car-tel{ max-width:244px; } }"+
 "@media (max-height:700px){ #puerta .car-caja{ padding-top:9%; } #puerta .car-tel{ width:40%; } }";
 
@@ -14833,7 +14839,7 @@ function pieHTML(){
       : '<button class="pu-boton" data-p="empezar">Entrar o crear cuenta</button>'+
         (g ? botonGoogle() : ''))+
     /* en la beta (publicar.py pone window.DTRACK_BETA) también se ofrece, para probar sin código */
-    (enVisor() || window.DTRACK_BETA
+    (enVisor()
       ? '<button class="pu-enlace" data-p="prueba">Entrar sin cuenta · modo prueba</button>'+
         (enVisor() ? '<p class="pu-nota">Aquí dentro no hay conexión con el servidor, así que la cuenta no funciona. El modo prueba usa datos de mentira.</p>' : '')
       : '')+
