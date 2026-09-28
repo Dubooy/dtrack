@@ -14210,8 +14210,9 @@ function gRpc(fn, args){
     return r.datos;
   });
 }
-var G_ERR={ ya_en_grupo:"Ya estás en un grupo. Sal de él para crear o unirte a otro.", codigo_mal:"Ese código no existe. Revísalo.",
-            lleno:"Ese grupo ya tiene 12 personas.", sin_sesion:"Hace falta entrar con tu cuenta.", sin_servidor:"El servidor de grupos aún no está configurado." };
+var G_ERR={ ya_en_grupo:"Ya estás en ese grupo.", codigo_mal:"Ese código no existe. Revísalo.",
+            lleno:"Ese grupo ya tiene 12 personas.", sin_sesion:"Hace falta entrar con tu cuenta.", sin_servidor:"El servidor de grupos aún no está configurado.",
+            demasiados_grupos:"Como mucho, 8 grupos a la vez.", no_eres_miembro:"Ya no estás en ese grupo." };
 function gError(e){ var m=(e&&e.message)||""; for(var k in G_ERR) if(m.indexOf(k)>=0) return G_ERR[k]; return navigator.onLine===false ? "Sin conexión. Prueba en un rato." : "No se ha podido. Prueba en un rato."; }
 
 /* ── bajar el grupo y traducirlo al GRUPO de siempre ── */
@@ -14230,6 +14231,19 @@ function gCargar(forzar){
 }
 /* al abrir sin red, lo último que se vio */
 function gCache(){ try{ var e=JSON.parse(localStorage.getItem("dtrack-grupo-cache")||"null"); if(e && gReal()) GRUPO=gMapea(e); }catch(err){} }
+
+/* ── varios grupos a la vez: la lista para el selector de arriba de Social ── */
+var MIS_GRUPOS=[], misGruposCargados=0;
+function gMisGrupos(forzar){
+  if(!gReal()) return Promise.resolve(MIS_GRUPOS=[]);
+  if(!forzar && MIS_GRUPOS.length && Date.now()-misGruposCargados<60000) return Promise.resolve(MIS_GRUPOS);
+  return gRpc("g_mis_grupos", {}).then(function(l){
+    MIS_GRUPOS=(Array.isArray(l)?l:[]).map(function(g){
+      return { id:gTxt(g.id,40), nombre:gTxt(g.nombre,28)||"Mi grupo", codigo:gTxt(g.codigo,8), miembros:gNum(g.miembros,50), activo:!!g.activo };
+    });
+    misGruposCargados=Date.now(); return MIS_GRUPOS;
+  }).catch(function(){ return MIS_GRUPOS; });
+}
 function haceTxt(iso){
   var t=Date.parse(iso); if(isNaN(t)) return "";
   var m=Math.max(0, Math.round((Date.now()-t)/60000));
@@ -14347,6 +14361,19 @@ function gCelebra(){
 }
 
 /* ── lo que cambia en la pantalla ── */
+/* el selector de grupo: la pastilla con tus grupos y un «+» para crear o unirte a otro.
+   Con uno solo, no hace falta elegir: sale igual el «+» para tener más de uno. */
+function gSelectorHTML(){
+  if(!gReal() || !MIS_GRUPOS.length) return "";
+  var pills = MIS_GRUPOS.length>1 ? MIS_GRUPOS.map(function(g){
+    return '<button class="'+(g.activo?"on":"")+'" data-act="x-g-cambia" data-id="'+esc(g.id)+'">'+esc(g.nombre)+'</button>';
+  }).join("") : "";
+  return '<div class="g-selector">'+pills+'<button class="mas" data-act="x-g-otro" aria-label="'+esc(tr("Otro grupo"))+'">'+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button></div>';
+}
+var _socGrupoBase=socGrupo;
+socGrupo=function(){ return gSelectorHTML()+_socGrupoBase.apply(this, arguments); };
+
 function socSinGrupo(){
   var real=gReal(), prueba=(typeof esPrueba==="function" && esPrueba());
   return '<div class="soc-sec"><h2 class="display">Tu grupo</h2></div>'+
@@ -14408,13 +14435,19 @@ function gSheetUnirse(){
 function gFallo(e){ var p=document.getElementById("g-err"); var t=gError(e); if(p) p.textContent=t; else avisoNube(t); }
 function gTrasEntrar(txt){
   closeSheet(); gEstado.ultimoSync=""; S.gPub=null;
-  return gCargar(true).then(function(){ gSync(); rSocial(); avisoNube(txt); sonido("semana"); });
+  return gMisGrupos(true).then(function(){ return gCargar(true); }).then(function(){ gSync(); rSocial(); avisoNube(txt); sonido("semana"); });
 }
 function gSalir(){
   if(!gReal()){ avisoNube("En modo prueba no se puede salir del grupo."); return; }
   if(!confirmaSalir()) return;
-  gRpc("g_salir", {}).then(function(){ GRUPO=null; S.gPub=null; save(); try{ localStorage.removeItem("dtrack-grupo-cache"); }catch(e){} cerrarGrupo(); rSocial(); avisoNube("Has salido del grupo."); })
-    .catch(function(e){ avisoNube(gError(e)); });
+  gRpc("g_salir", {}).then(function(){
+    S.gPub=null; save(); try{ localStorage.removeItem("dtrack-grupo-cache"); }catch(e){}
+    return gMisGrupos(true);
+  }).then(function(lista){
+    /* si te quedan más grupos, el servidor ya ha activado otro: se carga ese */
+    if(lista && lista.length) return gCargar(true).then(function(){ cerrarGrupo(); rSocial(); avisoNube("Has salido del grupo."); });
+    GRUPO=null; cerrarGrupo(); rSocial(); avisoNube("Has salido del grupo.");
+  }).catch(function(e){ avisoNube(gError(e)); });
 }
 var salirPulsado=0;
 function confirmaSalir(){ if(Date.now()-salirPulsado<4000) return true; salirPulsado=Date.now(); avisoNube("Pulsa otra vez para salir del grupo."); return false; }
@@ -14449,6 +14482,22 @@ function grupoAccion(a, el){
       '<input id="g-reto-t" class="field mb-4" maxlength="90" placeholder="Ej. 20 minutos de lectura">'+
       '<button class="btn btn-primary w-full !py-3.5" data-act="x-g-reto-ok">Empezar esta semana</button>'); return true; }
   if(a==="x-g-reto-ok"){ var t=(($("#g-reto-t")||{}).value||"").trim(); if(t.length<3) return true; closeSheet(); gPonReto(t); return true; }
+  if(a==="x-g-otro"){
+    openSheet('<div class="flex items-start justify-between mb-4"><h3 class="display text-[20px] font-bold">Otro grupo</h3>'+closeBtn()+'</div>'+
+      '<p class="text-[13px] t2 mb-4 leading-relaxed">Puedes estar hasta en 8 grupos a la vez y cambiar de cuál ves con el selector de arriba.</p>'+
+      '<div style="display:flex;flex-direction:column;gap:10px">'+
+        '<button class="btn btn-primary w-full !py-3.5" data-act="x-g-crear">Crear grupo nuevo</button>'+
+        '<button class="btn btn-quiet w-full !py-3.5" data-act="x-g-unirse">Tengo un código</button>'+
+      '</div>');
+    return true;
+  }
+  if(a==="x-g-cambia"){
+    var idc=el.dataset.id; if(el.classList.contains("on")) return true;
+    el.disabled=true;
+    gRpc("g_activar", { p_grupo:idc }).then(function(){ return gCargar(true); }).then(function(){ return gMisGrupos(true); }).then(function(){ rSocial(); })
+      .catch(function(e){ avisoNube(gError(e)); }).then(function(){ el.disabled=false; });
+    return true;
+  }
   return false;
 }
 function gPonReto(t){
@@ -14458,11 +14507,17 @@ function gPonReto(t){
 }
 
 /* ── cuándo se habla con el servidor ── */
-var gArrancado=false;
+var gArrancado=false, gMisGruposVistos=-1;
 function grupoTrasRender(){
   if(gReal()){
-    if(!gArrancado){ gArrancado=true; gCache(); gCargar(true).then(function(){ gSyncPronto(1500); }); }
-    else { gSyncPronto(); if(view==="social") gCargar(false); }
+    if(!gArrancado){ gArrancado=true; gCache(); gCargar(true).then(function(){ gSyncPronto(1500); }); gMisGrupos(true).then(function(l){ gMisGruposVistos=l.length; if(l.length && view==="social") rSocial(); }); }
+    else {
+      gSyncPronto();
+      if(view==="social"){
+        gCargar(false);
+        gMisGrupos(false).then(function(l){ if(l.length!==gMisGruposVistos){ gMisGruposVistos=l.length; if(view==="social") rSocial(); } });
+      }
+    }
   }
   gVigila();
 }
@@ -14470,6 +14525,15 @@ setInterval(function(){ if(gReal() && view==="social" && document.visibilityStat
 document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible" && gReal()) gCargar(true); });
 
 var GRUPO2_CSS=[
+/* el selector de grupo */
+'.g-selector{ display:flex; align-items:center; gap:7px; overflow-x:auto; padding:2px 2px 4px; margin-bottom:10px; -webkit-overflow-scrolling:touch; }',
+'.g-selector::-webkit-scrollbar{ display:none; }',
+'.g-selector button{ flex:0 0 auto; height:34px; padding:0 14px; border-radius:99px; font-size:13px; font-weight:700; white-space:nowrap;',
+'  background:var(--fill); color:var(--t2); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'.g-selector button.on{ background:var(--accent); color:var(--on-accent); box-shadow:none; }',
+'.g-selector button.mas{ flex:0 0 auto; width:34px; height:34px; padding:0; display:grid; place-items:center; border-radius:99px;',
+'  background:var(--fill); color:var(--accent); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'.g-selector button.mas svg{ width:16px; height:16px; }',
 '.g-elige .g-sug{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }',
 '.g-elige .g-sug button{ text-align:left; padding:12px 14px; border-radius:14px; font-size:14px; font-weight:700; background:rgba(255,255,255,.16); color:inherit; }',
 '.g-elige .g-sug button.otro{ background:transparent; box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); font-weight:600; }',
