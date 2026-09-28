@@ -42,9 +42,9 @@ window.DTRACK_TEXTOS = {
     }
   },
 
-  niveles: ["Noname","Nini","Empanado","Aplatanado","Siesta enjoyer","Recién levantado","Panza",
-            "Mileurista","Currante","Espabiladillo","Apañado","Máquina","Sigma","Tiburón",
-            "Imparable","Leyenda del insti","El puto amo","Padre de los padres","Final boss","Carlos Duboy"],
+  niveles: ["Principiante","Aprendiz","Constante","Disciplinado","Enfocado","Resiliente","Metódico",
+            "Comprometido","Firme","Forjado","Templado","Sólido","Determinado","Ejemplar",
+            "Referente","Incansable","Maestro del hábito","Élite","Imparable","Leyenda"],
 
   saludos: { madrugada:"Aún de madrugada", manana:"Buenos días", tarde:"Buenas tardes", noche:"Buenas noches" },
 

@@ -1379,25 +1379,26 @@ var I18N_FILAS=[
 ["Tu título","Your title","Ton titre","Il tuo titolo"],
 ["Niveles y XP","Levels and XP","Niveaux et XP","Livelli e XP"],
 ["Todo lo que haces da puntos y los puntos dan niveles. Empiezas en Noname. Ahí lo dejo.","Everything you do earns points and points earn levels. You start as Noname. I'll leave it there.","Tout ce que tu fais rapporte des points et les points font monter de niveau. Tu commences en Noname. Je n'en dis pas plus.","Tutto ciò che fai dà punti e i punti danno livelli. Parti da Noname. Non aggiungo altro."],
-["Noname","Noname","Noname","Noname"],
-["Nini","NEET","Glandeur","Nullafacente"],
-["Empanado","Dazed","À l'ouest","Imbambolato"],
-["Aplatanado","Sluggish","Ramolli","Spompato"],
-["Siesta enjoyer","Nap enjoyer","Pro de la sieste","Amante del pisolino"],
-["Recién levantado","Just woke up","Tout juste réveillé","Appena sveglio"],
-["Panza","Couch potato","Patapouf","Pancione"],
-["Mileurista","Minimum wager","Smicard","Precario"],
-["Currante","Grafter","Bosseur","Sgobbone"],
-["Espabiladillo","Sharp one","Petit malin","Sveglio"],
-["Apañado","Handy","Débrouillard","In gamba"],
-["Máquina","Machine","Machine","Macchina"],
-["Sigma","Sigma","Sigma","Sigma"],
-["Tiburón","Shark","Requin","Squalo"],
+["Principiante","Beginner","Débutant","Principiante"],
+["Aprendiz","Apprentice","Apprenti","Apprendista"],
+["Constante","Consistent","Constant","Costante"],
+["Disciplinado","Disciplined","Discipliné","Disciplinato"],
+["Enfocado","Focused","Concentré","Concentrato"],
+["Resiliente","Resilient","Résilient","Resiliente"],
+["Metódico","Methodical","Méthodique","Metodico"],
+["Comprometido","Committed","Engagé","Impegnato"],
+["Firme","Steady","Ferme","Fermo"],
+["Forjado","Forged","Forgé","Forgiato"],
+["Templado","Tempered","Trempé","Temprato"],
+["Sólido","Solid","Solide","Solido"],
+["Determinado","Determined","Déterminé","Determinato"],
+["Ejemplar","Exemplary","Exemplaire","Esemplare"],
+["Referente","Role model","Référence","Punto di riferimento"],
+["Incansable","Tireless","Infatigable","Instancabile"],
+["Maestro del hábito","Habit master","Maître de l'habitude","Maestro dell'abitudine"],
+["Élite","Elite","Élite","Elite"],
 ["Imparable","Unstoppable","Inarrêtable","Inarrestabile"],
-["Leyenda del insti","School legend","Légende du lycée","Leggenda della scuola"],
-["El puto amo","The GOAT","Le patron","Il boss assoluto"],
-["Padre de los padres","Father of fathers","Père des pères","Padre dei padri"],
-["Final boss","Final boss","Boss final","Boss finale"],
+["Leyenda","Legend","Légende","Leggenda"],
 /* logros */
 ["Algo es algo","Better than nothing","C'est déjà ça","Meglio di niente"],
 ["Completa tu primer reto","Complete your first challenge","Réussis ton premier défi","Completa la tua prima sfida"],
@@ -2880,9 +2881,9 @@ var TEXTOS = {
     }
   },
 
-  niveles: ["Noname","Nini","Empanado","Aplatanado","Siesta enjoyer","Recién levantado","Panza",
-            "Mileurista","Currante","Espabiladillo","Apañado","Máquina","Sigma","Tiburón",
-            "Imparable","Leyenda del insti","El puto amo","Padre de los padres","Final boss","Carlos Duboy"],
+  niveles: ["Principiante","Aprendiz","Constante","Disciplinado","Enfocado","Resiliente","Metódico",
+            "Comprometido","Firme","Forjado","Templado","Sólido","Determinado","Ejemplar",
+            "Referente","Incansable","Maestro del hábito","Élite","Imparable","Leyenda"],
 
   saludos: { madrugada:"Aún de madrugada", manana:"Buenos días", tarde:"Buenas tardes", noche:"Buenas noches" },
 
@@ -16846,6 +16847,75 @@ var SOLIDEZ_CSS=[
 var _sdGA=grupoAccion;
 grupoAccion=function(a, el){ if(solidezAccion(a, el)) return true; return _sdGA.apply(this, arguments); };
 (function(){ var st=document.createElement("style"); st.id="solidez-css"; st.textContent=SOLIDEZ_CSS; document.head.appendChild(st); })();
+
+/* ════════════════════════════════════════════════════════════════
+   EASTER EGG «DUBOY» (sep 2026)
+   Si te pones de nombre «Duboy» en tu perfil, los nombres de nivel y las
+   frases más visibles (el saludo, el comentario del aro del día y el
+   resumen del Parte) pasan a un tono muy vacilón y basto, de coña. Si
+   dejas de llamarte así, vuelve todo a la normalidad tal cual estaba.
+   Solo existe en español: es una broma interna, no hace falta traducirla
+   (si el idioma no es español, no se activa).
+   ════════════════════════════════════════════════════════════════ */
+var DUBOY_NIVELES=["Noname","Nini","Empanado","Aplatanado","Siesta enjoyer","Recién levantado","Panza",
+  "Mileurista","Currante","Espabiladillo","Apañado","Máquina","Sigma","Tiburón",
+  "Imparable","Leyenda del insti","El puto amo","Padre de los padres","Final boss","Carlos Duboy"];
+var DUBOY_SALUDOS={ madrugada:"Serás noctámbulo o qué", manana:"Buenas, crack", tarde:"Qué pasa, máquina", noche:"A currar o a la cama, tú decides" };
+var DUBOY_ANILLO={ alto:"Día de escándalo. Esto es una barbaridad.", medio:"Vas que te sales, dale caña.", bajo:"Vaya cutrez de día, espabila." };
+var DUBOY_FRASES={
+  cero:"Hoy cero patatero. Menudo desastre.",
+  poco:"Cuatro cosillas de nada, vaya tela.",
+  normal:"Ni fu ni fa, del montón.",
+  flojo:"Día flojísimo, manda narices.",
+  bien:"Menudo día, máquina como no hay otra.",
+  bestial:"Te has salido del mapa, bestia parda."
+};
+
+var duboyOn=false, duboyGuardado=null;
+function duboyNombre(){
+  if(typeof IDIOMA!=="undefined" && IDIOMA!=="es") return false;   /* la coña es solo en español */
+  var u=(typeof perfil!=="undefined" && perfil && perfil.usuario) || (S.profile && S.profile.name) || "";
+  return String(u).trim().toLowerCase()==="duboy";
+}
+function duboyActiva(){
+  if(duboyOn) return;
+  duboyOn=true;
+  duboyGuardado={ niveles:LVL_NAMES.slice(), saludos:{}, anillo:{}, frases:{} };
+  Object.keys(DUBOY_SALUDOS).forEach(function(k){ duboyGuardado.saludos[k]=TEXTOS.saludos[k]; TEXTOS.saludos[k]=DUBOY_SALUDOS[k]; });
+  Object.keys(DUBOY_ANILLO).forEach(function(k){ duboyGuardado.anillo[k]=TEXTOS.anillo[k]; TEXTOS.anillo[k]=DUBOY_ANILLO[k]; });
+  Object.keys(DUBOY_FRASES).forEach(function(k){ duboyGuardado.frases[k]=TEXTOS.parte.frases[k]; TEXTOS.parte.frases[k]=DUBOY_FRASES[k]; });
+  /* se cambia el contenido del array, no la variable: así todo lo que ya
+     apuntaba a LVL_NAMES (o a TEXTOS.niveles, el mismo array) ve el cambio */
+  LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, DUBOY_NIVELES);
+}
+function duboyDesactiva(){
+  if(!duboyOn) return;
+  duboyOn=false;
+  if(duboyGuardado){
+    Object.keys(duboyGuardado.saludos).forEach(function(k){ TEXTOS.saludos[k]=duboyGuardado.saludos[k]; });
+    Object.keys(duboyGuardado.anillo).forEach(function(k){ TEXTOS.anillo[k]=duboyGuardado.anillo[k]; });
+    Object.keys(duboyGuardado.frases).forEach(function(k){ TEXTOS.parte.frases[k]=duboyGuardado.frases[k]; });
+    LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, duboyGuardado.niveles);
+  }
+  duboyGuardado=null;
+}
+function duboyVigila(){
+  var on=duboyNombre();
+  if(on && !duboyOn){ duboyActiva(); return true; }
+  if(!on && duboyOn){ duboyDesactiva(); return true; }
+  return false;
+}
+/* se comprueba en cada render (barato: dos comparaciones de texto) y, además,
+   nada más cambiar el nombre, para que se note al momento */
+var _duboyGTR=grupoTrasRender;
+grupoTrasRender=function(){ duboyVigila(); return _duboyGTR.apply(this, arguments); };
+var _duboyCambiarUsuario=cambiarUsuario;
+cambiarUsuario=function(v){
+  return _duboyCambiarUsuario.apply(this, arguments).then(function(ok){
+    if(ok && duboyVigila()) render();
+    return ok;
+  });
+};
 
 
 if(!load()) save();
