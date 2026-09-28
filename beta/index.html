@@ -1925,6 +1925,7 @@ var I18N_FILAS=[
 ["No se ha podido leer tu cuenta. Revisa la conexión y pulsa Entrar otra vez.","Couldn't load your account. Check your connection and tap Sign in again.","Impossible de lire ton compte. Vérifie ta connexion et appuie de nouveau sur Entrer.","Impossibile leggere il tuo account. Controlla la connessione e tocca di nuovo Entra."],
 ["No se ha podido entrar. Inténtalo otra vez.","Couldn't sign in. Try again.","Connexion impossible. Réessaie.","Accesso non riuscito. Riprova."],
 ["Enviando código…","Sending code…","Envoi du code…","Invio del codice…"],
+["Meditación total","Total meditation","Méditation totale","Meditazione totale"],
 ["🔑 Tu cuenta","🔑 Your account","🔑 Ton compte","🔑 Il tuo account"],
 ["Puedes entrar con un código que te llega al correo o con tu cuenta de Google. Si entras con Google, DTrack recibe solo tu dirección de correo y tu nombre, para identificarte. No recibe tu contraseña ni nada más de tu cuenta de Google.","You can sign in with a code sent to your email or with your Google account. If you use Google, DTrack only receives your email address and your name, to identify you. It never receives your password or anything else from your Google account.","Tu peux te connecter avec un code reçu par e-mail ou avec ton compte Google. Avec Google, DTrack reçoit seulement ton adresse e-mail et ton nom, pour t'identifier. Il ne reçoit ni ton mot de passe ni rien d'autre de ton compte Google.","Puoi accedere con un codice che ti arriva per email o con il tuo account Google. Con Google, DTrack riceve solo il tuo indirizzo email e il tuo nome, per identificarti. Non riceve la tua password né nient'altro del tuo account Google."],
 ["XP hoy","XP today","XP aujourd'hui","XP oggi"],
@@ -7166,7 +7167,7 @@ function perfilPropio(){
     desc: (S.profile && S.profile.bio) || "",
     nivel: st.lvl, xp: st.xp, floor: st.lvlFloor, need: st.lvlNeed,
     racha: st.streak, mejor: st.best, logros: st.med, gym: st.gym, retos: st.ch,
-    estudioMin: tot.min, estudioTop: tot.top, comodines: c.saldo,
+    estudioMin: tot.min, estudioTop: tot.top, meditaMin: (typeof meditaTotalMin==="function"?meditaTotalMin():0), comodines: c.saldo,
     medallas: MEDALS.filter(function(m){ return m.f(st); }).map(function(m){ return m.n; })
   };
 }
@@ -7178,7 +7179,7 @@ function perfilDe(u){
       if(u===GRUPO.yo) return perfilPropio();
       return { yo:false, usuario:m.usuario, avatar:m.avatar||"", desc:m.desc||"", nivel:m.nivel||1,
                racha:m.racha, mejor:m.mejor||m.racha, logros:m.logros||0, gym:m.gym, retos:m.retosTot||0,
-               estudioMin:m.estudioMin||0, estudioTop:m.estudioTop||null, comodines:null, medallas:m.medallas||[] };
+               estudioMin:m.estudioMin||0, estudioTop:m.estudioTop||null, meditaMin:m.meditaMin||0, comodines:null, medallas:m.medallas||[] };
     }
   }
   return null;
@@ -7222,8 +7223,8 @@ function abrirPerfil(u){
           '<p class="num">'+(p.nivel>=LVL_NAMES.length?"Nivel máximo":"Faltan "+Math.max(0,p.floor+p.need-p.xp)+" XP para "+esc(tituloDe(p.nivel+1)))+'</p></div>'
         : '')+
       '<div class="pf-cifras">'+
-        pfCifra(p.racha,"racha","var(--warn)")+pfCifra(p.mejor,"mejor racha","var(--t1)")+
-        pfCifra(p.logros,"logros","var(--gold)")+pfCifra(Math.round(p.estudioMin/60*10)/10,"h de estudio","var(--accent)")+
+        pfCifra(p.racha,"racha","var(--warn)","racha")+pfCifra(p.mejor,"mejor racha","var(--t1)","racha")+
+        pfCifra(p.logros,"logros","var(--gold)","logro")+pfCifra(Math.round(p.estudioMin/60*10)/10,"h de estudio","var(--accent)","estudiar")+
       '</div>'+
       '<div class="soc-sec"><h2 class="display">Datos</h2></div>'+
       '<div class="soc-lista">'+
@@ -7231,6 +7232,7 @@ function abrirPerfil(u){
         pfFila("Retos cumplidos", p.retos)+
         pfFila("Estudio total", horasTxt(p.estudioMin||0))+
         (p.estudioTop?pfFila("Lo que más estudia", p.estudioTop):"")+
+        (p.meditaMin?pfFila("Meditación total", horasTxt(p.meditaMin)):"")+
         (p.comodines!==null?pfFila("Comodines de racha"+ICON_COMODIN.replace("margin-left:.26em","margin-left:.3em;color:var(--cyan)"), p.comodines+" de "+COMODIN_MAX, true):"")+
       '</div>'+
       (p.medallas.length
@@ -7271,7 +7273,7 @@ function abrirPerfil(u){
     clearTimeout(ta._t); ta._t=setTimeout(save, 500);
   });
 }
-function pfCifra(v,l,c){ return '<div><b class="display num" style="color:'+c+'">'+v+'</b><span>'+l+'</span></div>'; }
+function pfCifra(v,l,c,ic){ return '<div>'+(ic&&typeof ico==="function"?'<i class="pf-cif-ico" style="color:'+c+'">'+ico(ic)+'</i>':'')+'<b class="display num" style="color:'+c+'">'+v+'</b><span>'+l+'</span></div>'; }
 function pfFila(l,v,html){ return '<div class="soc-fila"><div class="soc-cuerpo"><span style="flex:1;font-size:15px">'+(html?l:esc(l))+'</span>'+
   '<span class="num t2" style="font-size:15px;font-weight:600">'+esc(String(v))+'</span></div></div>'; }
 function cerrarPerfil(){
@@ -12529,7 +12531,7 @@ function privacidadHTML(){
       "Solo salen del dispositivo si activas la copia en la nube, y únicamente para guardarlos a tu nombre."
     ])+
     s("👥 Lo que ve tu grupo",[
-      "Si te unes a un grupo, los demás ven tu nombre y tu foto, tu nivel y título, tu racha, tus logros, cuántos retos haces, tu porcentaje de la semana, los días de ejercicio y las horas de estudio (solo el número), tu descripción, si has hecho el Parte del día y el reto del grupo, lo que se publica solo en la actividad y las fotos haciendo deporte que subas (se guardan en el servidor y las ven tus amigos del grupo). Nunca ven tus hábitos concretos, tu diario, tu ánimo ni tu sueño, agua o pantalla."
+      "Si te unes a un grupo, los demás ven tu nombre y tu foto, tu nivel y título, tu racha, tus logros, cuántos retos haces, tu porcentaje de la semana, los días de ejercicio, las horas de estudio y de meditación (solo el número), tu descripción, si has hecho el Parte del día y el reto del grupo, lo que se publica solo en la actividad y las fotos haciendo deporte que subas (se guardan en el servidor y las ven tus amigos del grupo). Nunca ven tus hábitos concretos, tu diario, tu ánimo ni tu sueño, agua o pantalla."
     ])+
     s("🔔 Avisos",[
       "Para mandarte avisos, el servidor guarda la dirección de avisos de tu navegador, las horas que eliges y el texto de los recordatorios de tus hábitos. El resto del aviso lo escribe tu propio móvil."
@@ -14247,7 +14249,7 @@ function gMapea(e){
     var f=(m.ficha && typeof m.ficha==="object") ? m.ficha : {}, dias={}; (Array.isArray(m.dias)?m.dias:[]).forEach(function(x){ dias[String(x.d).slice(0,10)]={ p:!!x.p, r:!!x.r }; });
     var o={ uid:gTxt(m.uid,40), usuario:gTxt(m.usuario,16)||"alguien", avatar:gUrl(m.avatar), unido:gTxt(m.unido,10), dias:dias,
             pct:gNum(f.pct,100), racha:gNum(f.racha,5000), gym:gNum(f.gym,7), retos:gNum(f.retosHoy,4), nivel:Math.max(1, gNum(f.nivel, LVL_NAMES.length)),
-            mejor:gNum(f.mejor||f.racha,5000), logros:gNum(f.logros,99), retosTot:gNum(f.retosTot), estudioMin:gNum(f.estudioMin),
+            mejor:gNum(f.mejor||f.racha,5000), logros:gNum(f.logros,99), retosTot:gNum(f.retosTot), estudioMin:gNum(f.estudioMin), meditaMin:gNum(f.meditaMin),
             estudioTop:gTxt(f.estudioTop,40)||null, desc:gTxt(f.desc,140), titulo:gTxt(f.titulo,40)||null,
             medallas:(Array.isArray(f.medallas)?f.medallas:[]).slice(0,30).map(function(x){ return gTxt(x,60); }).filter(Boolean) };
     porUid[m.uid]=o; if(m.uid===yoUid) yoNom=o.usuario;
@@ -14286,7 +14288,7 @@ function gFicha(){
   var st=stats(), tot=estudioTotales(), hoy=today(), num=0, den=0, gym=0;
   for(var i=0;i<7;i++){ var d=addDays(hoy,-i); var tc=(S.chPick&&S.chPick[d])?S.chPick[d].length:0; num+=chOf(d).length+checksOf(d).length; den+=tc+idealDe(d).length; if(wentGym(d)) gym++; }
   return { nivel:st.lvl, racha:st.streak, mejor:st.best, logros:st.med, retosTot:st.ch, retosHoy:chOf(hoy).length, gym:gym,
-           estudioMin:tot.min, estudioTop:tot.top||null, desc:((S.profile&&S.profile.bio)||"").slice(0,140),
+           estudioMin:tot.min, estudioTop:tot.top||null, meditaMin:(typeof meditaTotalMin==="function"?meditaTotalMin():0), desc:((S.profile&&S.profile.bio)||"").slice(0,140),
            titulo:(typeof tituloElegido==="function")?tituloElegido(st.lvl):null, pct:den?Math.min(100,Math.round(num/den*100)):0,
            medallas:MEDALS.filter(function(m){ return m.f(st); }).map(function(m){ return m.n; }).slice(-12) };
 }
@@ -16751,10 +16753,10 @@ grupoTrasRender=function(){
 /* ── el salto al reaccionar ──
    Reaccionar a algo en la Actividad del grupo repinta toda la pestaña Social
    (rSocial → pintaSocial → innerHTML entero). El botón que acabas de tocar
-   desaparece de en medio de ese repintado y, si tenía el foco (algo normal al
-   tocar un botón en el móvil), Safari busca dónde meter el foco y salta la
-   pantalla hacia arriba de golpe. Se evita quitando el foco antes de repintar
-   y devolviendo el scroll exactamente donde estaba. */
+   desaparece de en medio de ese repintado; si conservaba el foco, el navegador
+   decide él solo dónde recolocarlo y, en el peor caso, mueve la pantalla. Se
+   evita quitando el foco antes de repintar y devolviendo el scroll exactamente
+   donde estaba si aun así se hubiera movido. */
 var _sdRSocial=rSocial;
 rSocial=function(){
   var col=document.getElementById("social-col");
@@ -16764,6 +16766,18 @@ rSocial=function(){
   if(window.scrollY!==y) window.scrollTo(0, y);
   return r;
 };
+/* ── icono de racha y de logros: hacía falta uno nuevo ── */
+try{ if(typeof ICO_B==="object"){
+  ICO_B.racha='<path d="M12 2.4c3.8 4.2 6 7.2 6 10.6a6 6 0 0 1-12 0c0-2.1.9-3.8 2.3-5.3-.1 1.5.4 2.5 1.2 3C9.8 7.5 10.6 5 12 2.4z"/>';
+  ICO_B.logro='<circle cx="12" cy="8.5" r="5"/><path d="M9 12.8 7 21l5-3 5 3-2-8.2"/>';
+} }catch(e){}
+
+/* ── cuánto llevas meditado en total ── */
+function meditaTotalMin(){
+  var t=0; Object.keys(S.habits||{}).forEach(function(d){ t+=(S.habits[d].medita||0); });
+  return t;
+}
+
 function solidezAccion(a, el){
   if(a==="x-hoy-nivel"){
     go("retos");
@@ -16819,6 +16833,9 @@ var SOLIDEZ_CSS=[
 '.hy-xp-hoy.si b{ color:var(--accent); }',
 '.hy-xp-hoy small{ font-size:11px; color:var(--t3); font-weight:600; }',
 '#hoy.sin-nada #peg-hoy{ display:none!important; }',
+/* los iconos delante del número en el perfil (racha, mejor racha, logros, estudio) */
+'.pf-cif-ico{ display:block; margin-bottom:3px; }',
+'.pf-cif-ico .ic{ width:17px; height:17px; }',
 'html.esencial .hy-xp{ border-radius:12px; }',
 /* la barra de abajo en móviles de 320 px: los cinco botones caben sin salirse */
 '@media (max-width:370px){ .mtab{ width:calc((100vw - 44px) / 5)!important; } }',
