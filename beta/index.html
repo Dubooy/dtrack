@@ -16824,6 +16824,7 @@ if("serviceWorker" in navigator){
   window.addEventListener("load",function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); });
 }
 </script>
-<div style="position:fixed;top:env(safe-area-inset-top);left:50%;transform:translateX(-50%);z-index:2147483647;background:#f59e0b;color:#000;font:700 10px/1 sans-serif;letter-spacing:.08em;padding:3px 9px;border-radius:0 0 8px 8px;pointer-events:none">DEMO</div>
+<div id="dtrack-demo" style="position:fixed;top:env(safe-area-inset-top);left:50%;transform:translateX(-50%);z-index:2147483647;background:#f59e0b;color:#000;font:700 10px/1 sans-serif;letter-spacing:.08em;padding:3px 9px;border-radius:0 0 8px 8px;pointer-events:none;transition:top .2s">DEMO</div>
+<script>(function(){try{if([393,402,430,440].indexOf(screen.width)<0) return;var d=document.getElementById("dtrack-demo");d.style.top="calc(env(safe-area-inset-top) - 16px)";d.style.borderRadius="0 0 10px 10px";}catch(e){}})();</script>
 </body>
 </html>
