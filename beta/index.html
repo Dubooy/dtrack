@@ -16747,6 +16747,23 @@ grupoTrasRender=function(){
   sdColocaNivel(arguments[0]);
   return r;
 };
+
+/* ── el salto al reaccionar ──
+   Reaccionar a algo en la Actividad del grupo repinta toda la pestaña Social
+   (rSocial → pintaSocial → innerHTML entero). El botón que acabas de tocar
+   desaparece de en medio de ese repintado y, si tenía el foco (algo normal al
+   tocar un botón en el móvil), Safari busca dónde meter el foco y salta la
+   pantalla hacia arriba de golpe. Se evita quitando el foco antes de repintar
+   y devolviendo el scroll exactamente donde estaba. */
+var _sdRSocial=rSocial;
+rSocial=function(){
+  var col=document.getElementById("social-col");
+  var y=window.scrollY, af=document.activeElement;
+  if(af && col && col.contains(af)){ try{ af.blur(); }catch(e){} }
+  var r=_sdRSocial.apply(this, arguments);
+  if(window.scrollY!==y) window.scrollTo(0, y);
+  return r;
+};
 function solidezAccion(a, el){
   if(a==="x-hoy-nivel"){
     go("retos");
