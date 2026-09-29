@@ -1,7 +1,0 @@
-tres.js es three.js 0.186.1 (licencia MIT) recortado a las piezas que usa
-el maniquí 3D de los estiramientos. Se carga solo al abrir una rutina.
-
-Para regenerarlo:
-  npm i three@0.186.1 esbuild
-  echo "export { WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, SphereGeometry, CapsuleGeometry, CylinderGeometry, BoxGeometry, CircleGeometry, MeshStandardMaterial, ShadowMaterial, HemisphereLight, DirectionalLight, Box3, Vector3, Color, ACESFilmicToneMapping, SRGBColorSpace, PCFSoftShadowMap, MathUtils } from 'three';" > entrada.js
-  npx esbuild entrada.js --bundle --minify --format=esm --legal-comments=inline --outfile=tres.js

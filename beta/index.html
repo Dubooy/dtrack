@@ -18483,7 +18483,7 @@ function pintaCrecer(){
   } else {
     h+='<div class="cr-rutinas">'+ESTIRA_RUTINAS.map(function(r){
       return '<button class="cr-rutina" data-act="x-cr-rutina" data-k="'+r.k+'" style="--c:'+r.c+'">'+
-        '<span class="cr-r-ico"><img data-mq="'+r.pasos[0].f+'" data-ropa="'+r.c+'" alt=""></span><span class="cr-r-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' pasos</small></span>'+
+        '<span class="cr-r-ico"><img data-mq="'+r.pasos[0].f+'" alt=""></span><span class="cr-r-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' pasos</small></span>'+
         '<em class="num">'+estiraMin(r)+' min</em></button>'; }).join("")+'</div>';
   }
   el.innerHTML=h;
@@ -18507,7 +18507,7 @@ function sheetRutina(k){
   openSheet('<div class="flex items-start justify-between mb-2"><div><p class="eyebrow mb-1.5">Estiramientos · '+estiraMin(r)+' min</p><h3 class="display text-[20px] font-bold">'+esc(r.t)+'</h3></div>'+closeBtn()+'</div>'+
     '<p class="text-[12.5px] t3 mb-4 leading-relaxed">'+esc(r.sub)+'. Sin forzar: tiene que tirar, no doler.</p>'+
     '<ol class="cr-pasos" style="--c:'+r.c+'">'+r.pasos.map(function(p,i){
-      return '<li><span class="cr-mini"><img data-mq="'+p.f+'" data-ropa="'+r.c+'" alt=""></span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
+      return '<li><span class="cr-mini"><img data-mq="'+p.f+'" alt=""></span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
         '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver cómo se hace</a></div></li>'; }).join("")+'</ol>'+
     '<button class="btn btn-primary w-full !py-3 mt-4" data-act="x-cr-empieza" data-k="'+r.k+'">Empezar rutina guiada</button>'+
     (ya?'<p class="cr-nota" style="text-align:center">Ya la tienes en tus hábitos. Al terminarla se marca sola.</p>'
@@ -18573,11 +18573,12 @@ var CRECER_CSS=[
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="crecer-css"; st.textContent=CRECER_CSS; document.head.appendChild(st); })();
 
-/* ── el maniquí 3D de los estiramientos ──
-   Un cuerpo articulado hecho con piezas redondeadas (three.js, en tres.js).
-   Cada postura son ángulos en grados; la figura va de la postura de partida
-   (A) a la del estiramiento (B) y vuelve, en bucle. three.js solo se carga
-   al abrir una rutina, así que el resto de la app no pesa más.
+/* ── la persona 3D de los estiramientos ──
+   El cuerpo es cuerpo.glb (un modelo con esqueleto; ver cuerpo.LEEME.txt) y se
+   pinta del color de acento del tema. Cada postura son ángulos en grados sobre
+   un esqueleto guía invisible; el modelo copia los giros de la guía hueso a hueso.
+   La figura va de la postura de partida (A) a la del estiramiento (B) y vuelve,
+   en bucle. three.js y el modelo solo se cargan al abrir una rutina.
    Claves: rx/ry/rz el cuerpo entero · tx/ty/tz el tronco (tx hacia delante, tz hacia su derecha)
    hx/hy/hz la cabeza · aL/aR brazos: [adelante, abrir, girar, codo]
    pL/pR piernas: [adelante, abrir, girar, rodilla] */
@@ -18597,7 +18598,7 @@ var MQ_FIG={
   lateral:{ cam:0, A:mq({}), B:mq({ tz:24, hz:10, aL:[0,172,0,32], aR:[0,32,0,95] }) },
   isquios:{ cam:78, A:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], aL:[35,6,0,20], aR:[35,6,0,20] }),
                    B:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], tx:50, hx:18, aL:[82,4,0,5], aR:[82,4,0,5] }) },
-  cuadriceps:{ cam:84, A:mq({ aL:[55,6,0,10] }), B:mq({ aL:[70,6,0,10], pR:[-8,3,0,150], aR:[-42,10,0,32] }) },
+  cuadriceps:{ cam:84, A:mq({ aR:[55,6,0,10] }), B:mq({ aR:[70,6,0,10], pL:[-8,3,0,150], aL:[-42,10,0,32] }) },
   gemelos:{ cam:86, pared:true, A:mq({ rx:18, pL:[22,3,0,28], pR:[-14,3,0,0], aL:[92,6,0,22], aR:[92,6,0,22], hx:-10 }),
                                B:mq({ rx:27, pL:[30,3,0,42], pR:[-18,3,0,0], aL:[90,6,0,40], aR:[90,6,0,40], hx:-14 }) },
   flexor:{ cam:84, A:mq({ pL:[88,4,0,88], pR:[-22,4,0,100], aL:[18,18,0,70], aR:[18,18,0,70] }),
@@ -18614,19 +18615,22 @@ var MQ_FIG={
                      B:mqCon(MQ_TUMBADO,{ tx:-6, hx:-4, pL:[0,5,0,0], pR:[0,5,0,0], aL:[38,10,0,95], aR:[0,12,0,5] }) }
 };
 
-var MQ_T=null, MQ_CARGA=null;
+var MQ_T=null, MQ_CARGA=null, MQ_GLB=null;
 function maniquiCarga(){
-  if(MQ_T) return Promise.resolve(MQ_T);
-  if(!MQ_CARGA) MQ_CARGA=import("./tres.js").then(function(T){ MQ_T=T; return T; });
+  if(MQ_T && MQ_GLB) return Promise.resolve(MQ_T);
+  if(!MQ_CARGA) MQ_CARGA=Promise.all([
+    import("./tres.js"),
+    fetch("./cuerpo.glb").then(function(r){ if(!r.ok) throw new Error("cuerpo.glb"); return r.arrayBuffer(); })
+  ]).then(function(x){ MQ_T=x[0]; MQ_GLB=x[1]; return MQ_T; }).catch(function(e){ MQ_CARGA=null; throw e; });
   return MQ_CARGA;
 }
-/* el color de una variable CSS, ya resuelto (p. ej. "var(--good)" → "rgb(…)") */
+/* el color de una variable CSS, ya resuelto (p. ej. "var(--accent)" → "rgb(…)") */
 function mqColor(css){
   var e=document.createElement("i"); e.style.color=css; e.style.display="none"; document.body.appendChild(e);
   var c=getComputedStyle(e).color; e.remove(); return c;
 }
 
-/* construye el cuerpo: devuelve la raíz y las articulaciones */
+/* el esqueleto guía: las mismas articulaciones con piezas simples (no se dibuja) */
 function mqCuerpo(T, ropa){
   var piel=new T.MeshStandardMaterial({ color:0xe6d3bf, roughness:.52, metalness:0 });
   var tela=new T.MeshStandardMaterial({ color:new T.Color(ropa), roughness:.7, metalness:0 });
@@ -18671,7 +18675,8 @@ function mqCuerpo(T, ropa){
   return { raiz:raiz, cuerpo:cuerpo, tronco:tronco, cuello:cuello, cabeza:cabeza, brazos:brazos, piernas:piernas, piezas:piezas };
 }
 var MQ_R=Math.PI/180;
-function mqPon(C, P, T, caja){
+/* gira las articulaciones de la guía según la postura P */
+function mqGira(C, P){
   var R=MQ_R;
   C.cuerpo.rotation.set(P.rx*R, P.ry*R, P.rz*R);
   C.tronco.rotation.set(P.tx*R, P.ty*R, P.tz*R);
@@ -18685,38 +18690,100 @@ function mqPon(C, P, T, caja){
     q.c.rotation.set(-p[0]*R, p[2]*R*(l==="L"?-1:1), p[1]*R*q.s);
     q.rod.rotation.set(p[3]*R, 0, 0);
   });
-  /* que apoye en el suelo: se sube o se baja hasta que lo más bajo toque y=0 */
-  C.raiz.position.set(0,0,0); C.raiz.updateMatrixWorld(true);
-  caja.makeEmpty(); C.piezas.forEach(function(m){ caja.expandByObject(m); });
-  C.raiz.position.y=-caja.min.y;
+  C.raiz.updateMatrixWorld(true);
 }
 function mqMezcla(A, B, t){
   var r={}, k;
   for(k in A){ if(Array.isArray(A[k])) r[k]=A[k].map(function(v,i){ return v+(B[k][i]-v)*t; }); else r[k]=A[k]+(B[k]-A[k])*t; }
   return r;
 }
+
+/* qué articulación de la guía mueve cada hueso del modelo (los demás siguen a su padre) */
+var MQ_HUESOS={ cadera:"cuerpo", espalda1:"medio", espalda2:"tronco", cuello:"cuello", cabeza:"cabeza",
+  brazoL:"bL", antebrazoL:"cL", brazoR:"bR", antebrazoR:"cR", musloL:"mL", piernaL:"rL", musloR:"mR", piernaR:"rR" };
+var MQ_POSE_T=mq({ aL:[0,90,0,0], aR:[0,90,0,0], pL:[0,1,0,0], pR:[0,1,0,0] });   /* la pose en T del modelo, en ángulos de la guía */
+var MQ_GUIA=null;
+function mqGuiaQuats(T){
+  var C=MQ_GUIA.C, q={};
+  function w(o){ return o.getWorldQuaternion(new T.Quaternion()); }
+  q.cuerpo=w(C.cuerpo); q.tronco=w(C.tronco); q.medio=q.cuerpo.clone().slerp(q.tronco,.5);
+  q.cuello=w(C.cuello); q.cabeza=w(C.cabeza);
+  q.bL=w(C.brazos.L.h); q.cL=w(C.brazos.L.codo); q.bR=w(C.brazos.R.h); q.cR=w(C.brazos.R.codo);
+  q.mL=w(C.piernas.L.c); q.rL=w(C.piernas.L.rod); q.mR=w(C.piernas.R.c); q.rR=w(C.piernas.R.rod);
+  return q;
+}
+function mqGuia(T){
+  if(MQ_GUIA) return MQ_GUIA;
+  MQ_GUIA={ C:mqCuerpo(T, "#000") };
+  mqGira(MQ_GUIA.C, MQ_POSE_T); MQ_GUIA.enT=mqGuiaQuats(T);
+  var inv={}; for(var k in MQ_GUIA.enT) inv[k]=MQ_GUIA.enT[k].clone().invert();
+  MQ_GUIA.invT=inv;
+  return MQ_GUIA;
+}
+/* el modelo: se lee cuerpo.glb, se pinta y se apuntan los giros de reposo de cada hueso */
+function mqModelo(T, color){
+  return new Promise(function(ok, mal){
+    new T.GLTFLoader().parse(MQ_GLB.slice(0), "./", function(g){
+      var raiz=g.scene, malla=null;
+      raiz.traverse(function(o){ if(o.isSkinnedMesh) malla=o; });
+      var c=new T.Color(color), piel=c.clone().lerp(new T.Color(0xffffff), .18);
+      malla.material=new T.MeshStandardMaterial({ color:piel, roughness:.55, metalness:0 });
+      malla.castShadow=true; malla.frustumCulled=false;
+      /* contorno: una copia por dentro, un pelín más gorda y de un tono más oscuro */
+      var borde=new T.MeshBasicMaterial({ color:c.clone().multiplyScalar(.42), side:T.BackSide });
+      borde.onBeforeCompile=function(sh){ sh.vertexShader=sh.vertexShader.replace("#include <skinning_vertex>", "#include <skinning_vertex>\n  transformed += normalize(objectNormal) * 0.0085;"); };
+      var contorno=new T.SkinnedMesh(malla.geometry, borde); contorno.bind(malla.skeleton, malla.bindMatrix); contorno.frustumCulled=false;
+      malla.parent.add(contorno);
+      raiz.updateMatrixWorld(true);
+      var huesos=malla.skeleton.bones.slice(), reposo={};
+      function hondo(b){ var n=0; while(b.parent && b.parent.isBone){ n++; b=b.parent; } return n; }
+      huesos.sort(function(a,b){ return hondo(a)-hondo(b); });
+      huesos.forEach(function(b){ reposo[b.uuid]={ mundo:b.getWorldQuaternion(new T.Quaternion()), local:b.quaternion.clone() }; });
+      var r0=huesos[0].parent.getWorldQuaternion(new T.Quaternion());
+      ok({ raiz:raiz, malla:malla, huesos:huesos, reposo:reposo, base:r0, caja:new T.Box3(), tmp:new T.Quaternion() });
+    }, mal);
+  });
+}
+/* pone el modelo en la postura P y lo apoya en el suelo */
+function mqPon(M, P, T){
+  var G=mqGuia(T); mqGira(G.C, P);
+  var q=mqGuiaQuats(T), meta={};
+  M.huesos.forEach(function(b){
+    var clave=MQ_HUESOS[b.name], padre=(b.parent && b.parent.isBone) ? meta[b.parent.uuid] : M.base, r=M.reposo[b.uuid], t;
+    if(clave) t=q[clave].clone().multiply(G.invT[clave]).multiply(r.mundo);
+    else t=padre.clone().multiply(r.local);
+    meta[b.uuid]=t;
+    b.quaternion.copy(padre.clone().invert().multiply(t));
+  });
+  M.raiz.position.set(0,0,0); M.raiz.updateMatrixWorld(true);
+  M.malla.computeBoundingBox(); M.caja.copy(M.malla.boundingBox).applyMatrix4(M.malla.matrixWorld);
+  M.raiz.position.y=-M.caja.min.y;
+  M.caja.translate(new T.Vector3(0,M.raiz.position.y,0));
+}
 /* escena, luces, suelo y cámara encuadrada para las dos posturas */
-function mqEscena(T, k, ropa){
-  var F=MQ_FIG[k]||MQ_FIG.cuello, esc=new T.Scene();
-  esc.add(new T.HemisphereLight(0xffffff, 0xb9b3aa, 1.55));
-  var sol=new T.DirectionalLight(0xffffff, 2.1); sol.position.set(1.6,3.2,2.4); sol.castShadow=true;
-  sol.shadow.mapSize.set(1024,1024); sol.shadow.camera.left=-1.6; sol.shadow.camera.right=1.6; sol.shadow.camera.top=1.6; sol.shadow.camera.bottom=-1.6;
-  sol.shadow.radius=6; sol.shadow.bias=-.0006; esc.add(sol); esc.add(sol.target);
-  var suelo=new T.Mesh(new T.CircleGeometry(2.4, 48), new T.ShadowMaterial({ opacity:.2 }));
-  suelo.rotation.x=-Math.PI/2; suelo.receiveShadow=true; esc.add(suelo);
-  var C=mqCuerpo(T, ropa); esc.add(C.raiz);
-  /* encuadre: la caja que ocupan las dos posturas */
-  var caja=new T.Box3(), tot=new T.Box3();
-  mqPon(C, F.A, T, caja); tot.copy(caja).translate(new T.Vector3(0,C.raiz.position.y,0));
-  mqPon(C, F.B, T, caja); tot.union(caja.clone().translate(new T.Vector3(0,C.raiz.position.y,0)));
-  var pared=null;
-  if(F.pared){ C.raiz.updateMatrixWorld(true); var mano=new T.Vector3(); C.brazos.L.codo.children[1].getWorldPosition(mano);
-    pared=new T.Mesh(new T.BoxGeometry(1.4,2.1,.05), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
-    pared.position.set(0,1.05,mano.z+.05); pared.receiveShadow=true; esc.add(pared); tot.expandByPoint(new T.Vector3(0,1.6,mano.z)); }
-  var cen=tot.getCenter(new T.Vector3()), tam=tot.getSize(new T.Vector3());
-  var cam=new T.PerspectiveCamera(30, 1, .05, 30);
-  var radio=Math.max(tam.x, tam.y, tam.z)*.54+.06, dist=radio/Math.sin(15*MQ_R)*1.02;
-  return { esc:esc, cam:cam, C:C, F:F, caja:caja, cen:cen, dist:dist, az:(F.cam||0), el:(F.el!=null?F.el:14) };
+function mqEscena(T, k, color){
+  var F=MQ_FIG[k]||MQ_FIG.cuello;
+  return mqModelo(T, color).then(function(M){
+    var esc=new T.Scene();
+    esc.add(new T.HemisphereLight(0xffffff, 0xb9b3aa, 1.6));
+    var sol=new T.DirectionalLight(0xffffff, 2.2); sol.position.set(1.6,3.2,2.4); sol.castShadow=true;
+    sol.shadow.mapSize.set(1024,1024); sol.shadow.camera.left=-1.6; sol.shadow.camera.right=1.6; sol.shadow.camera.top=1.6; sol.shadow.camera.bottom=-1.6;
+    sol.shadow.radius=6; sol.shadow.bias=-.0006; esc.add(sol); esc.add(sol.target);
+    var suelo=new T.Mesh(new T.CircleGeometry(2.4, 48), new T.ShadowMaterial({ opacity:.2 }));
+    suelo.rotation.x=-Math.PI/2; suelo.receiveShadow=true; esc.add(suelo);
+    esc.add(M.raiz);
+    var tot=new T.Box3();
+    mqPon(M, F.A, T); tot.copy(M.caja);
+    mqPon(M, F.B, T); tot.union(M.caja);
+    if(F.pared){ var mano=null; M.huesos.forEach(function(b){ if(b.name==="manoL") mano=b; });
+      var pm=mano.getWorldPosition(new T.Vector3());
+      var pared=new T.Mesh(new T.BoxGeometry(1.4,2.1,.05), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
+      pared.position.set(0,1.05,pm.z+.1); pared.receiveShadow=true; esc.add(pared); tot.expandByPoint(new T.Vector3(0,1.5,pm.z)); }
+    var cen=tot.getCenter(new T.Vector3()), tam=tot.getSize(new T.Vector3());
+    var cam=new T.PerspectiveCamera(30, 1, .05, 30);
+    var radio=Math.max(tam.x, tam.y, tam.z)*.54+.06, dist=radio/Math.sin(15*MQ_R)*1.02;
+    return { esc:esc, cam:cam, M:M, F:F, cen:cen, dist:dist, az:(F.cam||0), el:(F.el!=null?F.el:14) };
+  });
 }
 function mqCamara(E, az){
   var a=az*MQ_R, e=E.el*MQ_R;
@@ -18731,46 +18798,54 @@ function mqRenderer(T, lienzo){
 }
 
 /* miniaturas: un solo renderer fuera de pantalla hace una foto de la postura B */
-var MQ_FOTOS={}, MQ_FOTO_R=null;
-function maniquiFoto(k, ropa){
-  var clave=k+"|"+ropa;
+var MQ_FOTOS={}, MQ_FOTO_R=null, MQ_COLA=Promise.resolve();
+function maniquiFoto(k){
+  var color=mqColor("var(--accent)"), clave=k+"|"+color;
   if(MQ_FOTOS[clave]) return Promise.resolve(MQ_FOTOS[clave]);
-  return maniquiCarga().then(function(T){
+  /* de una en una, que el renderer es compartido */
+  var p=MQ_COLA.then(function(){ return maniquiCarga(); }).then(function(T){
+    if(MQ_FOTOS[clave]) return MQ_FOTOS[clave];
     if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); MQ_FOTO_R.setPixelRatio(1); MQ_FOTO_R.setSize(220,220,false); }
-    var E=mqEscena(T, k, mqColor(ropa));
-    mqPon(E.C, E.F.B, T, E.caja); mqCamara(E, E.az);
-    MQ_FOTO_R.render(E.esc, E.cam);
-    return (MQ_FOTOS[clave]=MQ_FOTO_R.domElement.toDataURL("image/png"));
+    return mqEscena(T, k, color).then(function(E){
+      mqPon(E.M, E.F.B, T); mqCamara(E, E.az);
+      MQ_FOTO_R.render(E.esc, E.cam);
+      return (MQ_FOTOS[clave]=MQ_FOTO_R.domElement.toDataURL("image/png"));
+    });
   });
+  MQ_COLA=p.catch(function(){});
+  return p;
 }
-/* rellena los <img data-mq="postura" data-ropa="var(--x)"> que haya dentro de un elemento */
+/* rellena los <img data-mq="postura"> que haya dentro de un elemento */
 function maniquiFotos(dentro){
   if(!dentro) return;
   Array.prototype.forEach.call(dentro.querySelectorAll("img[data-mq]:not([src])"), function(im){
-    maniquiFoto(im.dataset.mq, im.dataset.ropa||"var(--accent)").then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
+    maniquiFoto(im.dataset.mq).then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
   });
 }
 /* la escena animada del modo guiado */
-function maniquiVivo(lienzo, k, ropa, quieto){
+function maniquiVivo(lienzo, k, quieto){
   var vivo={ para:function(){ vivo.fin=true; } };
   maniquiCarga().then(function(T){
     if(vivo.fin) return;
-    var r=mqRenderer(T, lienzo), E=mqEscena(T, k, mqColor(ropa)), t0=performance.now();
-    E.dist*=1.12;   /* la cámara se balancea un poco: algo de margen para que no se salga */
-    function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(2, window.devicePixelRatio||1)); r.setSize(w,h,false); E.cam.aspect=w/h; E.cam.updateProjectionMatrix(); }
-    tam();
-    function suave(x){ return x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2; }
-    function cuadro(ahora){
-      if(vivo.fin){ r.dispose(); try{ r.forceContextLoss(); }catch(e){} return; }
-      var s=((ahora-t0)/4200)%1, t;
-      if(quieto) t=1; else if(s<.32) t=suave(s/.32); else if(s<.68) t=1; else t=1-suave((s-.68)/.32);
-      mqPon(E.C, mqMezcla(E.F.A, E.F.B, t), T, E.caja);
-      mqCamara(E, E.az + (quieto?0:Math.sin((ahora-t0)/2600)*14));
-      if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
-      r.render(E.esc, E.cam);
+    return mqEscena(T, k, mqColor("var(--accent)")).then(function(E){
+      if(vivo.fin) return;
+      var r=mqRenderer(T, lienzo), t0=performance.now();
+      E.dist*=1.12;   /* la cámara se balancea un poco: algo de margen para que no se salga */
+      function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(2, window.devicePixelRatio||1)); r.setSize(w,h,false); E.cam.aspect=w/h; E.cam.updateProjectionMatrix(); }
+      tam();
+      function suave(x){ return x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2; }
+      function cuadro(ahora){
+        if(vivo.fin){ r.dispose(); try{ r.forceContextLoss(); }catch(e){} return; }
+        var s=((ahora-t0)/4200)%1, t;
+        if(quieto) t=1; else if(s<.32) t=suave(s/.32); else if(s<.68) t=1; else t=1-suave((s-.68)/.32);
+        mqPon(E.M, mqMezcla(E.F.A, E.F.B, t), T);
+        mqCamara(E, E.az + (quieto?0:Math.sin((ahora-t0)/2600)*14));
+        if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
+        r.render(E.esc, E.cam);
+        requestAnimationFrame(cuadro);
+      }
       requestAnimationFrame(cuadro);
-    }
-    requestAnimationFrame(cuadro);
+    });
   }).catch(function(){ var p=lienzo.parentNode; if(p) p.classList.add("sin-3d"); });
   return vivo;
 }
@@ -18823,7 +18898,7 @@ function guiaPinta(){
     '</div>'+
     '<p class="gu-sig">'+(sig?'Después: <b>'+esc(sig.t)+'</b>':'Es el último')+'</p>';
   if(GUIA.vivo) GUIA.vivo.para();
-  GUIA.vivo=maniquiVivo(c.querySelector(".gu-3d"), p.f, r.c, quieto);
+  GUIA.vivo=maniquiVivo(c.querySelector(".gu-3d"), p.f, quieto);
 }
 function guiaPausa(){
   if(!GUIA) return;
@@ -18868,10 +18943,10 @@ function guiaAccion(a){
 document.addEventListener("keydown", function(e){ if(GUIA && e.key==="Escape") guiaCierra(); });
 
 var CRECER2_CSS=[
-'.cr-r-ico{ background:color-mix(in srgb,var(--c) 14%,var(--glass-bg-hi))!important; }',
+'.cr-r-ico{ background:color-mix(in srgb,var(--accent) 12%,var(--glass-bg-hi))!important; }',
 '.cr-r-ico img, .cr-mini img{ width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity .35s var(--ease); } .cr-r-ico img.ve, .cr-mini img.ve{ opacity:1; }',
 /* miniatura de la figura en la lista de pasos */
-'.cr-pasos li .cr-mini{ flex:0 0 auto; width:68px; height:68px; border-radius:14px; padding:2px; background:color-mix(in srgb,var(--c) 11%,transparent); }',
+'.cr-pasos li .cr-mini{ flex:0 0 auto; width:68px; height:68px; border-radius:14px; padding:2px; background:color-mix(in srgb,var(--accent) 10%,transparent); }',
 /* pantalla del modo guiado */
 '#guia{ position:fixed; inset:0; z-index:70; display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 18px);',
 '  background:var(--bg); background-image:radial-gradient(90% 55% at 50% 22%, color-mix(in srgb,var(--c) 16%,transparent), transparent 70%); color:var(--t1); overflow-y:auto; }',
@@ -18883,7 +18958,7 @@ var CRECER2_CSS=[
 '.gu-fila button{ display:grid; place-items:center; width:36px; height:36px; border-radius:99px; background:var(--fill); color:var(--t1); }',
 '.gu-fila button svg{ width:16px; height:16px; }',
 '.gu-escena{ position:relative; flex:1 1 auto; min-height:220px; max-height:46vh; margin:14px auto 6px; aspect-ratio:1; border-radius:28px; padding:6%;',
-'  background:radial-gradient(80% 70% at 50% 35%, color-mix(in srgb,var(--c) 9%,var(--glass-bg-hi)), color-mix(in srgb,var(--c) 16%,var(--glass-bg-hi))); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 18%,transparent); overflow:hidden; }',
+'  background:radial-gradient(80% 70% at 50% 35%, color-mix(in srgb,var(--accent) 7%,var(--glass-bg-hi)), color-mix(in srgb,var(--accent) 14%,var(--glass-bg-hi))); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 16%,transparent); overflow:hidden; }',
 '.gu-3d{ position:absolute; inset:0; width:100%; height:100%; display:block; } .gu-escena.sin-3d .gu-3d{ display:none; }',
 '.gu-lado{ position:absolute; left:50%; top:14px; transform:translate(-50%,-6px); opacity:0; font-size:12.5px; font-weight:800; padding:6px 12px; border-radius:99px; color:#fff; background:var(--c); transition:opacity .3s var(--ease), transform .3s var(--spring); }',
 '.gu-lado.ve{ opacity:1; transform:translate(-50%,0); }',

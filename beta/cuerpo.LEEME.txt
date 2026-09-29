@@ -1,0 +1,15 @@
+cuerpo.glb · la persona 3D de los estiramientos guiados
+
+- Modelo: «human body base cartoon», de Fab
+  https://www.fab.com/listings/317d6bce-ec6f-4694-95f9-be4c2ad692ca
+  Antes de publicar, confirmar en la ficha que su licencia permite usarlo dentro de una app.
+- Se le quitó la textura y el contorno de Blender; el color y el contorno los pone la app
+  según el color de acento del tema.
+- El esqueleto (19 huesos) y los pesos se generan con herramientas/cuerpo-rig.py.
+
+tres.js es three.js 0.186.1 (licencia MIT) recortado a lo que usa esta parte,
+con el lector de glTF. Se genera con herramientas/tres-entrada.js:
+  npm i three@0.186.1 esbuild
+  npx esbuild herramientas/tres-entrada.js --bundle --minify --format=esm --legal-comments=inline --outfile=beta/tres.js
+
+Los dos archivos solo se descargan al abrir una rutina de estiramientos.
