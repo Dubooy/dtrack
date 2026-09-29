@@ -17571,6 +17571,314 @@ var CHAT_CSS=[
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="chat-css"; st.textContent=CHAT_CSS; document.head.appendChild(st); })();
 
+/* ════════════════════════════════════════════════════════════════
+   MEDITACIÓN CON LOS OJOS CERRADOS (sep 2026)
+   · El cuenco suena en cada cambio de fase (inspira → mantén → espira
+     → pausa → inspira), para seguir el ritmo sin mirar. Antes solo
+     sonaba al inspirar, una vez de cada dos.
+   · Al inspirar suena aire que entra (soplo que sube); al mantener,
+     nada; al espirar, aire que sale (soplo que baja y se apaga).
+     Ruido filtrado generado en el móvil, como las olas: sin archivos.
+   ════════════════════════════════════════════════════════════════ */
+var MED_RUIDO=null, MED_ALIENTO=null;
+function medRuido(ctx){
+  if(MED_RUIDO && MED_RUIDO.sampleRate===ctx.sampleRate) return MED_RUIDO;
+  var n=ctx.sampleRate*2, b=ctx.createBuffer(1, n, ctx.sampleRate), d=b.getChannelData(0);
+  for(var i=0;i<n;i++) d[i]=Math.random()*2-1;
+  MED_RUIDO=b; return b;
+}
+function medAliento(k, seg){
+  var ctx=medAudio(); if(!ctx) return;
+  medAlientoPara(.15);
+  seg=Math.max(1, seg);
+  try{
+    var t=ctx.currentTime+0.03, fin=t+seg, src=ctx.createBufferSource(); src.buffer=medRuido(ctx); src.loop=true;
+    var bp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter(), g=ctx.createGain();
+    bp.type="bandpass"; lp.type="lowpass"; g.gain.setValueAtTime(0.0001, t);
+    if(k==="in"){
+      /* por la nariz: fino, va subiendo y se corta suave al llenar */
+      bp.Q.value=.9; bp.frequency.setValueAtTime(800, t); bp.frequency.linearRampToValueAtTime(1800, fin);
+      lp.frequency.value=3400;
+      g.gain.linearRampToValueAtTime(.09, t+Math.min(1, seg*.35));
+      g.gain.linearRampToValueAtTime(.14, fin-Math.min(.5, seg*.15));
+      g.gain.linearRampToValueAtTime(0.0001, fin);
+    } else {
+      /* soltar el aire: más grave y abierto, empieza fuerte y se apaga */
+      bp.Q.value=.6; bp.frequency.setValueAtTime(1000, t); bp.frequency.exponentialRampToValueAtTime(380, fin);
+      lp.frequency.value=2200;
+      g.gain.linearRampToValueAtTime(.16, t+Math.min(.4, seg*.12));
+      g.gain.exponentialRampToValueAtTime(.03, fin-Math.min(.4, seg*.1));
+      g.gain.linearRampToValueAtTime(0.0001, fin);
+    }
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(ctx.destination);
+    src.start(t); src.stop(fin+0.05);
+    MED_ALIENTO={ src:src, g:g };
+  }catch(e){ MED_ALIENTO=null; }
+}
+function medAlientoPara(s){
+  if(!MED_ALIENTO || !MED_CTX) return;
+  var a=MED_ALIENTO; MED_ALIENTO=null; s=s||.3;
+  try{ var t=MED_CTX.currentTime; a.g.gain.cancelScheduledValues(t); a.g.gain.setValueAtTime(a.g.gain.value, t); a.g.gain.linearRampToValueAtTime(0.0001, t+s); a.src.stop(t+s+0.05); }catch(e){}
+}
+/* cada fase nueva: cuenco y, si toca, el aire */
+var _medAvanzaCF=medAvanza;
+medAvanza=function(){
+  var antes=medA && medA.fase, r=_medAvanzaCF.apply(this, arguments);
+  if(!medA || medA.fin || medA.pausadoEn || medA.tipo.guia!=="resp" || medA.fase===antes || !medA.fase) return r;
+  var f=medFaseDe(medTranscurrido());
+  if(f.k==="prep") return r;
+  if(medHayCuenco()) medCuenco(293.7, .02, Math.min(4.5, Math.max(2.5, f.dur+.5)));
+  if(medSuena() && (f.k==="in" || f.k==="ex")) medAliento(f.k, f.rest); else medAlientoPara(.3);
+  return r;
+};
+/* el cuenco de antes (solo al inspirar, una de cada dos) ya no hace falta: lo tapa el de cada fase */
+var _medCuencoCF=medCuenco;
+medCuenco=function(f, vol, dur){
+  if(medA && !medA.fin && medA.tipo.guia==="resp" && f===293.7 && vol===.016) return;
+  return _medCuencoCF.apply(this, arguments);
+};
+/* al parar el sonido, pausar o terminar, el aire también se calla */
+var _medOlasParaCF=medOlasPara;
+medOlasPara=function(){ medAlientoPara(.4); return _medOlasParaCF.apply(this, arguments); };
+var _medPausaCF=medPausa;
+medPausa=function(){ if(medA && !medA.pausadoEn) medAlientoPara(.4); return _medPausaCF.apply(this, arguments); };
+
+/* ════════════════════════════════════════════════════════════════
+   BARRA DE HÁBITOS SUAVE (sep 2026)
+   Antes la barra salía de golpe: al marcar el primero aparecía ya llena
+   (pasaba de oculta a visible sin nada que animar), y en los demás
+   esperaba al repintado (0,4 s) y la curva hacía casi todo el recorrido
+   de una vez. Ahora avanza en el mismo toque, con una curva pareja, y
+   la primera vez se despliega en vez de aparecer.
+   ════════════════════════════════════════════════════════════════ */
+habitosBarra=function(){
+  var bar=document.getElementById("ideal-bar"); if(!bar) return;
+  var p=bar.parentNode; if(!p) return;
+  var pleg=checksOf(today()).length===0;
+  p.classList.remove("rb-oculta");
+  if(!p.classList.contains("hb-caja")){
+    p.classList.add("hb-caja"); p.classList.toggle("hb-plegada", pleg);
+    setTimeout(function(){ p.classList.add("hb-lista"); }, 60);
+    return;
+  }
+  if(pleg!==p.classList.contains("hb-plegada")) p.classList.toggle("hb-plegada", pleg);
+};
+/* al tocar un hábito, la barra se mueve ya (el repintado llega luego con el mismo valor) */
+document.addEventListener("click", function(ev){
+  var el=ev.target.closest && ev.target.closest('[data-act="check"]'); if(!el) return;
+  setTimeout(function(){
+    var bar=document.getElementById("ideal-bar"); if(!bar || view!=="resumen") return;
+    var t=(typeof curDay==="function") ? curDay() : today(), items=ordenIdeal(idealActivos()), ck=checksOf(t);
+    bar.style.width=(items.length ? Math.min(100, ck.length/items.length*100) : 0)+"%";
+    habitosBarra();
+  }, 0);
+});
+
+/* ════════════════════════════════════════════════════════════════
+   RECORTE DE LA FOTO DE PERFIL (sep 2026)
+   Al elegir foto se abre una pantalla con la foto dentro de un
+   cuadrado con cuadrícula: se mueve con el dedo y se hace zoom
+   pellizcando (o con la barra de abajo). El círculo enseña cómo se
+   verá. Se guarda cuadrada, a 512 px, y se sube como antes.
+   ════════════════════════════════════════════════════════════════ */
+var RC=null, RC_SALIDA=512;
+subirFoto=function(archivo){
+  if(!ses) return;
+  if(archivo.size > 25*1024*1024){ avisoNube("Esa foto pesa demasiado."); return; }
+  var lector=new FileReader();
+  lector.onerror=function(){ avisoNube("No he podido leer esa foto."); };
+  lector.onload=function(){
+    var im=new Image();
+    im.onerror=function(){ avisoNube("Ese archivo no es una imagen."); };
+    im.onload=function(){ rcAbre(im); };
+    im.src=lector.result;
+  };
+  lector.readAsDataURL(archivo);
+};
+function rcAbre(im){
+  var capa=document.getElementById("rc-capa");
+  if(!capa){ capa=document.createElement("div"); capa.id="rc-capa"; document.body.appendChild(capa); }
+  capa.innerHTML=
+    '<div class="rc-arriba"><button data-act="x-rc-cancela">Cancelar</button><b>Mueve y ajusta</b><button class="rc-ok" data-act="x-rc-ok">Usar</button></div>'+
+    '<div class="rc-zona"><div class="rc-marco" id="rc-marco">'+
+      '<img id="rc-img" alt="" draggable="false">'+
+      '<div class="rc-circulo"></div>'+
+      '<div class="rc-rejilla"><i></i><i></i><i></i><i></i></div>'+
+    '</div></div>'+
+    '<div class="rc-abajo">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M8.5 11h5M16 16l4 4"/></svg>'+
+      '<input type="range" id="rc-zoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M8.5 11h5M11 8.5v5M16 16l4 4"/></svg>'+
+    '</div>'+
+    '<p class="rc-pista">Arrastra para moverla · pellizca para acercar</p>';
+  var img=capa.querySelector("#rc-img"); img.src=im.src;
+  RC={ im:im, w:im.naturalWidth||im.width, h:im.naturalHeight||im.height, F:0, b:1, z:1, x:0, y:0, dedos:{}, gesto:null };
+  rcMide(true);
+  var marco=capa.querySelector("#rc-marco");
+  marco.addEventListener("pointerdown", rcBaja);
+  marco.addEventListener("pointermove", rcMueve);
+  ["pointerup","pointercancel","pointerleave"].forEach(function(t){ marco.addEventListener(t, rcSube); });
+  marco.addEventListener("wheel", function(ev){ ev.preventDefault(); var r=marco.getBoundingClientRect(); rcZoom(RC.z*Math.exp(-ev.deltaY*0.0015), ev.clientX-r.left, ev.clientY-r.top); }, { passive:false });
+  capa.querySelector("#rc-zoom").addEventListener("input", function(ev){ rcZoom(+ev.target.value, RC.F/2, RC.F/2); });
+  window.addEventListener("resize", rcMideYa);
+  /* en el iPhone, pellizcar no debe ampliar la página entera */
+  ["gesturestart","gesturechange"].forEach(function(t){ capa.addEventListener(t, function(ev){ ev.preventDefault(); }); });
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ capa.classList.add("ve"); }); });
+}
+function rcMideYa(){ rcMide(false); }
+/* el cuadrado ocupa lo que quepa; la foto empieza cubriéndolo, centrada */
+function rcMide(inicio){
+  var marco=document.getElementById("rc-marco"); if(!RC || !marco) return;
+  var zona=marco.parentNode, F=Math.floor(Math.min(zona.clientWidth-32, zona.clientHeight-24, 420));
+  F=Math.max(160, F);
+  var viejo=RC.F, cx=viejo ? (RC.F/2-RC.x)/(RC.b*RC.z) : RC.w/2, cy=viejo ? (RC.F/2-RC.y)/(RC.b*RC.z) : RC.h/2;
+  RC.F=F; RC.b=F/Math.min(RC.w, RC.h);
+  marco.style.width=F+"px"; marco.style.height=F+"px";
+  var img=document.getElementById("rc-img");
+  img.style.width=(RC.w*RC.b)+"px"; img.style.height=(RC.h*RC.b)+"px";
+  if(inicio) RC.z=1;
+  RC.x=F/2-cx*RC.b*RC.z; RC.y=F/2-cy*RC.b*RC.z;
+  rcPinta();
+}
+function rcLimita(){
+  var s=RC.b*RC.z, W=RC.w*s, H=RC.h*s;
+  RC.x=Math.min(0, Math.max(RC.F-W, RC.x));
+  RC.y=Math.min(0, Math.max(RC.F-H, RC.y));
+}
+function rcPinta(){
+  rcLimita();
+  var img=document.getElementById("rc-img"); if(img) img.style.transform="translate("+RC.x.toFixed(2)+"px,"+RC.y.toFixed(2)+"px) scale("+RC.z.toFixed(4)+")";
+  var r=document.getElementById("rc-zoom"); if(r && Math.abs(+r.value-RC.z)>.005) r.value=RC.z;
+}
+/* zoom alrededor de un punto del cuadrado: lo que está bajo el dedo se queda bajo el dedo */
+function rcZoom(z, px, py){
+  if(!RC) return;
+  z=Math.min(4, Math.max(1, z));
+  var u=(px-RC.x)/RC.z, v=(py-RC.y)/RC.z;
+  RC.z=z; RC.x=px-u*z; RC.y=py-v*z;
+  rcPinta();
+}
+function rcPunto(ev){ var r=document.getElementById("rc-marco").getBoundingClientRect(); return { x:ev.clientX-r.left, y:ev.clientY-r.top }; }
+function rcGesto(){
+  var ids=Object.keys(RC.dedos);
+  if(ids.length>=2){
+    var a=RC.dedos[ids[0]], b=RC.dedos[ids[1]];
+    RC.gesto={ n:2, d:Math.max(1, Math.hypot(a.x-b.x, a.y-b.y)), mx:(a.x+b.x)/2, my:(a.y+b.y)/2, z:RC.z, x:RC.x, y:RC.y };
+  } else if(ids.length===1){
+    var p=RC.dedos[ids[0]]; RC.gesto={ n:1, px:p.x, py:p.y, x:RC.x, y:RC.y };
+  } else RC.gesto=null;
+}
+function rcBaja(ev){
+  if(!RC) return; ev.preventDefault();
+  try{ ev.currentTarget.setPointerCapture(ev.pointerId); }catch(e){}
+  RC.dedos[ev.pointerId]=rcPunto(ev); rcGesto();
+  document.getElementById("rc-marco").classList.add("toca");
+}
+function rcMueve(ev){
+  if(!RC || !RC.dedos[ev.pointerId]) return; ev.preventDefault();
+  RC.dedos[ev.pointerId]=rcPunto(ev);
+  var g=RC.gesto, ids=Object.keys(RC.dedos); if(!g) return;
+  if(g.n===2 && ids.length>=2){
+    var a=RC.dedos[ids[0]], b=RC.dedos[ids[1]], d=Math.max(1, Math.hypot(a.x-b.x, a.y-b.y)), mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    var z=Math.min(4, Math.max(1, g.z*d/g.d)), u=(g.mx-g.x)/g.z, v=(g.my-g.y)/g.z;
+    RC.z=z; RC.x=mx-u*z; RC.y=my-v*z;
+  } else if(g.n===1){
+    var p=RC.dedos[ids[0]]; RC.x=g.x+(p.x-g.px); RC.y=g.y+(p.y-g.py);
+  }
+  rcPinta();
+}
+function rcSube(ev){
+  if(!RC || !RC.dedos[ev.pointerId]) return;
+  delete RC.dedos[ev.pointerId]; rcLimita(); rcGesto();
+  if(!Object.keys(RC.dedos).length){ var m=document.getElementById("rc-marco"); if(m) m.classList.remove("toca"); }
+}
+function rcCierra(){
+  window.removeEventListener("resize", rcMideYa);
+  var capa=document.getElementById("rc-capa"); RC=null; if(!capa) return;
+  capa.classList.remove("ve");
+  setTimeout(function(){ if(capa.parentNode && !capa.classList.contains("ve")) capa.parentNode.removeChild(capa); }, 350);
+}
+/* lo que se ve en el cuadrado, a 512 px */
+function rcRecorta(){
+  if(!RC) return null;
+  var s=RC.b*RC.z, c=document.createElement("canvas"); c.width=RC_SALIDA; c.height=RC_SALIDA;
+  var x=c.getContext("2d"); if(!x) return null;
+  x.imageSmoothingEnabled=true; x.imageSmoothingQuality="high";
+  x.drawImage(RC.im, -RC.x/s, -RC.y/s, RC.F/s, RC.F/s, 0, 0, RC_SALIDA, RC_SALIDA);
+  return c;
+}
+function rcUsar(){
+  var c=rcRecorta(); if(!c){ avisoNube("No he podido preparar la foto."); return; }
+  var bt=document.querySelector("#rc-capa .rc-ok"); if(bt){ bt.disabled=true; bt.textContent="Subiendo…"; }
+  c.toBlob(function(b){
+    if(!b){ avisoNube("No he podido preparar la foto."); if(bt){ bt.disabled=false; bt.textContent="Usar"; } return; }
+    rcSubeAvatar(b, c.toDataURL("image/jpeg", .8));
+  }, "image/jpeg", 0.88);
+}
+function rcSubeAvatar(blob, previa){
+  tokenFresco().then(function(){
+    return fetch(NUBE_URL+"/storage/v1/object/avatares/"+ses.uid+"/foto.jpg", {
+      method:"POST",
+      headers:{ "apikey":NUBE_KEY, "Authorization":"Bearer "+ses.access_token, "Content-Type":"image/jpeg", "x-upsert":"true" },
+      body:blob
+    });
+  }).then(function(r){
+    if(!r || !r.ok) throw 0;
+    var url=NUBE_URL+"/storage/v1/object/public/avatares/"+ses.uid+"/foto.jpg?v="+Date.now();
+    return pedirAuth("/rest/v1/perfiles?id=eq."+ses.uid, { method:"PATCH", body:{ avatar:url } }).then(function(r2){
+      if(!r2.ok) throw 0;
+      if(!perfil) perfil={};
+      perfil.avatar=url;
+      rcCierra();
+      /* el perfil abierto también cambia al momento */
+      $$("#perfil-capa .pf-foto").forEach(function(f){ f.innerHTML='<img src="'+esc(previa||url)+'" alt="">'; });
+      if(view==="social") rSocial();
+      avisoNube("Foto puesta.");
+    });
+  }).catch(function(){
+    avisoNube("No se ha podido subir la foto.");
+    var bt=document.querySelector("#rc-capa .rc-ok"); if(bt){ bt.disabled=false; bt.textContent="Usar"; }
+  });
+}
+function recorteAccion(a){
+  if(a==="x-rc-cancela"){ rcCierra(); return true; }
+  if(a==="x-rc-ok"){ rcUsar(); return true; }
+  return false;
+}
+var _rcGA=grupoAccion;
+grupoAccion=function(a, el){ if(recorteAccion(a, el)) return true; return _rcGA.apply(this, arguments); };
+
+var MEJORAS_CSS=[
+/* barra de hábitos */
+'#ideal-bar{ transition:width 1s cubic-bezier(.4,0,.2,1)!important; }',
+'.hb-caja.hb-lista{ transition:height .5s cubic-bezier(.4,0,.2,1), margin-bottom .5s cubic-bezier(.4,0,.2,1), opacity .4s ease; }',
+'.hb-caja.hb-plegada{ height:0!important; margin-bottom:0!important; opacity:0; }',
+/* recorte de la foto */
+'#rc-capa{ position:fixed; inset:0; z-index:150; background:#0c0c0e; color:#fff; display:flex; flex-direction:column;',
+'  opacity:0; transition:opacity .3s ease; }',
+'#rc-capa.ve{ opacity:1; }',
+'.rc-arriba{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:calc(env(safe-area-inset-top) + 10px) 16px 10px; }',
+'.rc-arriba b{ font-size:16px; font-weight:700; }',
+'.rc-arriba button{ min-width:72px; font-size:15px; font-weight:600; color:rgba(255,255,255,.8); text-align:left; padding:8px 0; }',
+'.rc-arriba .rc-ok{ text-align:center; padding:8px 16px; border-radius:99px; background:var(--accent); color:var(--on-accent); }',
+'.rc-arriba .rc-ok:disabled{ opacity:.6; }',
+'.rc-zona{ flex:1; min-height:0; display:grid; place-items:center; }',
+'.rc-marco{ position:relative; overflow:hidden; touch-action:none; cursor:grab; background:#000; border-radius:4px; }',
+'.rc-marco.toca{ cursor:grabbing; }',
+'#rc-img{ position:absolute; left:0; top:0; max-width:none; transform-origin:0 0; will-change:transform; user-select:none; -webkit-user-select:none; pointer-events:none; }',
+'.rc-circulo{ position:absolute; inset:0; border-radius:50%; box-shadow:0 0 0 999px rgba(0,0,0,.5); pointer-events:none; outline:1px solid rgba(255,255,255,.55); outline-offset:-1px; }',
+'.rc-rejilla{ position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 0 1px rgba(255,255,255,.6); opacity:.55; transition:opacity .2s ease; }',
+'.rc-marco.toca .rc-rejilla{ opacity:1; }',
+'.rc-rejilla i{ position:absolute; background:rgba(255,255,255,.45); }',
+'.rc-rejilla i:nth-child(1){ left:33.333%; top:0; bottom:0; width:1px; } .rc-rejilla i:nth-child(2){ left:66.666%; top:0; bottom:0; width:1px; }',
+'.rc-rejilla i:nth-child(3){ top:33.333%; left:0; right:0; height:1px; } .rc-rejilla i:nth-child(4){ top:66.666%; left:0; right:0; height:1px; }',
+'.rc-abajo{ display:flex; align-items:center; gap:12px; max-width:420px; width:100%; margin:0 auto; padding:14px 24px 6px; color:rgba(255,255,255,.7); }',
+'.rc-abajo svg{ width:20px; height:20px; flex:0 0 auto; }',
+'#rc-zoom{ flex:1; accent-color:var(--accent); }',
+'.rc-pista{ text-align:center; font-size:12.5px; color:rgba(255,255,255,.5); padding:4px 16px calc(env(safe-area-inset-bottom) + 16px); }'
+].join("\n");
+(function(){ var st=document.createElement("style"); st.id="mejoras-css"; st.textContent=MEJORAS_CSS; document.head.appendChild(st); })();
+
 
 if(!load()) save();
 if(S.cats.length) newCat=S.cats[0].id;
