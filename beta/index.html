@@ -17077,7 +17077,7 @@ function chCargar(antes){
     chPintaTodo();
   }).catch(function(e){
     if(!antes) G.cargado=Date.now();
-    if(e && e.message==="sin_servidor") CH.sinServidor=true; else G.error=true;
+    if(e && e.message==="sin_servidor") CH.sinServidor=true; else { G.error=true; G.errorTxt=(e && e.message) || ""; }
     chPintaTodo();
   }).then(function(){ if(!antes) G.cargando=null; });
   if(!antes) G.cargando=p;
@@ -17108,7 +17108,7 @@ function chSube(G, m){
     chPintaTodo();
   }).catch(function(e){
     var t=(e && e.message) || "";
-    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : t==="foto" ? "no se ha podido subir la foto" : "";
+    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : t==="foto" ? "no se ha podido subir la foto" : (window.DTRACK_BETA ? t.slice(0,160) : "");
     if(t==="sin_servidor") CH.sinServidor=true;
     chPintaTodo();
     if(t==="sin_servidor") avisoNube("El chat aún no está activado en el servidor.");
@@ -17391,7 +17391,7 @@ function chPintaLista(abajo, forzar){
   if(!items.length){
     h+='<p class="ch-vacio">'+(CH.sinServidor ? "El chat aún no está activado en el servidor. Vuelve a probar en un rato."
       : !G.cargado ? "Cargando…"
-      : G.error ? "No se han podido cargar los mensajes. Prueba en un rato."
+      : G.error ? "No se han podido cargar los mensajes. Prueba en un rato."+(window.DTRACK_BETA && G.errorTxt ? " ("+esc(G.errorTxt.slice(0,160))+")" : "")
       : "Aquí empieza el chat de «"+esc(GRUPO.nombre)+"». Lo que escribas solo lo ve el grupo.")+'</p>';
   }
   items.forEach(function(it){
