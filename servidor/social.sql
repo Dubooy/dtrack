@@ -26,21 +26,35 @@
 -- de quien pregunta (security invoker).
 -- ════════════════════════════════════════════════════════════════
 
--- ── los grupos en los que estás, sacados de g_mis_grupos() sea cual sea su forma ──
+-- ── los grupos en los que estás ──
+-- Con g_mis_grupos() (varios grupos), todos los de esa lista, sea cual sea su forma.
+-- Si no existe (servidor de un solo grupo), el grupo que devuelve g_estado().
 create or replace function public.gc_mis_ids()
 returns setof text
 language plpgsql stable security invoker
 set search_path = public
 as $$
-declare j jsonb;
+declare j jsonb; e jsonb;
 begin
   if auth.uid() is null then return; end if;
-  select jsonb_agg(to_jsonb(x)) into j from public.g_mis_grupos() x;
+  begin
+    execute 'select jsonb_agg(to_jsonb(x)) from public.g_mis_grupos() x' into j;
+    if j is not null and jsonb_typeof(j->0) = 'array' then j := j->0; end if;
+  exception when undefined_function then
+    j := null;
+    begin
+      execute 'select to_jsonb(x) from public.g_estado(''2999-01-01'') x' into e;
+      if e is not null and jsonb_typeof(e) = 'array' then e := e->0; end if;
+      if e is not null and jsonb_typeof(e) = 'object' and jsonb_typeof(e->'grupo') = 'object' and (e->'grupo') ? 'id' then
+        j := jsonb_build_array(jsonb_build_object('id', e->'grupo'->>'id'));
+      end if;
+    exception when others then j := null;
+    end;
+  end;
   if j is null then return; end if;
-  if jsonb_typeof(j->0) = 'array' then j := j->0; end if;
   return query
-    select e->>'id' from jsonb_array_elements(j) e
-    where jsonb_typeof(e) = 'object' and e ? 'id';
+    select x->>'id' from jsonb_array_elements(j) x
+    where jsonb_typeof(x) = 'object' and x ? 'id';
 end $$;
 
 -- ════════════════ CHAT ════════════════

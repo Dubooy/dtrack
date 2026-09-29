@@ -14204,7 +14204,7 @@ var gEstado={ cargado:0, cargando:false, error:null, sinServidor:false, ultimoSy
 function gReal(){ return !!(typeof ses!=="undefined" && ses && !ses.demo && ses.uid && ses.access_token); }
 function gRpc(fn, args){
   return pedirAuth("/rest/v1/rpc/"+fn, { method:"POST", body:args||{} }).then(function(r){
-    if(r.estado===404 || (r.datos && r.datos.code==="PGRST202")){ gEstado.sinServidor=true; throw new Error("sin_servidor"); }
+    if(r.estado===404 || (r.datos && r.datos.code==="PGRST202")){ gEstado.sinServidor=true; gEstado.detalle=fn+": "+((r.datos && (r.datos.hint||r.datos.message))||("error "+r.estado)); throw new Error("sin_servidor"); }
     if(!r.ok){ var m=(r.datos && (r.datos.message||r.datos.hint)) || ("error "+r.estado); throw new Error(m); }
     gEstado.sinServidor=false;
     return r.datos;
@@ -17099,7 +17099,11 @@ function chSube(G, m){
   m.estado="enviando";
   var antes=(m.blob && !m.foto) ? chSubeFoto(m.blob).then(function(url){ m.foto=url; }) : Promise.resolve();
   antes.then(function(){
-    return gRpc("gc_enviar", { p_grupo:G.id, p_texto:m.texto, p_foto:m.foto||null, p_padre:m.padre||null, p_evento:m.evento||null });
+    return gRpc("gc_enviar", { p_grupo:G.id, p_texto:m.texto, p_foto:m.foto||null, p_padre:m.padre||null, p_evento:m.evento||null }).catch(function(e){
+      /* si en el servidor solo está la versión primera (solo texto), un texto normal va igual */
+      if(e && e.message==="sin_servidor" && !m.foto && !m.padre && !m.evento) return gRpc("gc_enviar", { p_grupo:G.id, p_texto:m.texto });
+      throw e;
+    });
   }).then(function(x){
     var n=chMapea(x); if(!n.id) throw new Error("sin_id");
     var i=G.msgs.indexOf(m), ya=G.msgs.some(function(o){ return o.id===n.id; });
@@ -17108,7 +17112,7 @@ function chSube(G, m){
     chPintaTodo();
   }).catch(function(e){
     var t=(e && e.message) || "";
-    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : t==="foto" ? "no se ha podido subir la foto" : (window.DTRACK_BETA ? t.slice(0,160) : "");
+    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase"+(window.DTRACK_BETA && gEstado.detalle ? " · "+gEstado.detalle.slice(0,200) : "") : t==="foto" ? "no se ha podido subir la foto" : (window.DTRACK_BETA ? t.slice(0,160) : "");
     if(t==="sin_servidor") CH.sinServidor=true;
     chPintaTodo();
     if(t==="sin_servidor") avisoNube("El chat aún no está activado en el servidor.");
