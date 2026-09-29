@@ -18574,8 +18574,8 @@ var CRECER_CSS=[
 (function(){ var st=document.createElement("style"); st.id="crecer-css"; st.textContent=CRECER_CSS; document.head.appendChild(st); })();
 
 /* ── la persona 3D de los estiramientos ──
-   El cuerpo es cuerpo.glb (un modelo con esqueleto; ver cuerpo.LEEME.txt) y se
-   pinta del color de acento del tema. Cada postura son ángulos en grados sobre
+   El cuerpo es cuerpo.glb (un modelo con esqueleto; ver cuerpo.LEEME.txt), con
+   su piel y su contorno originales. Cada postura son ángulos en grados sobre
    un esqueleto guía invisible; el modelo copia los giros de la guía hueso a hueso.
    La figura va de la postura de partida (A) a la del estiramiento (B) y vuelve,
    en bucle. three.js y el modelo solo se cargan al abrir una rutina.
@@ -18726,12 +18726,12 @@ function mqModelo(T, color){
     new T.GLTFLoader().parse(MQ_GLB.slice(0), "./", function(g){
       var raiz=g.scene, malla=null;
       raiz.traverse(function(o){ if(o.isSkinnedMesh) malla=o; });
-      var c=new T.Color(color), piel=c.clone().lerp(new T.Color(0xffffff), .18);
-      malla.material=new T.MeshStandardMaterial({ color:piel, roughness:.55, metalness:0 });
+      /* la piel original del modelo (su textura) */
+      malla.material=new T.MeshStandardMaterial({ map:malla.material.map, roughness:.55, metalness:0 });
       malla.castShadow=true; malla.frustumCulled=false;
-      /* contorno: una copia por dentro, un pelín más gorda y de un tono más oscuro */
-      var borde=new T.MeshBasicMaterial({ color:c.clone().multiplyScalar(.42), side:T.BackSide });
-      borde.onBeforeCompile=function(sh){ sh.vertexShader=sh.vertexShader.replace("#include <skinning_vertex>", "#include <skinning_vertex>\n  transformed += normalize(objectNormal) * 0.0085;"); };
+      /* contorno fino y oscuro, como el del modelo original: una copia vuelta del revés, 5 mm más gorda */
+      var borde=new T.MeshBasicMaterial({ color:0x0a0203, side:T.BackSide });
+      borde.onBeforeCompile=function(sh){ sh.vertexShader=sh.vertexShader.replace("#include <skinning_vertex>", "#include <skinning_vertex>\n  transformed += normalize(objectNormal) * 0.005;"); };
       var contorno=new T.SkinnedMesh(malla.geometry, borde); contorno.bind(malla.skeleton, malla.bindMatrix); contorno.frustumCulled=false;
       malla.parent.add(contorno);
       raiz.updateMatrixWorld(true);

@@ -1,12 +1,18 @@
 # Pone un esqueleto al modelo «human body base cartoon» de Fab y lo exporta a beta/cuerpo.glb.
 # Uso: pip install bpy==4.5.14 ; python3 cuerpo-rig.py  (con body_base.blend del zip de Fab al lado)
 # Los pesos de la piel los calcula Blender solo (pesos automáticos).
+# La piel se reduce antes a 1024 px:  Image.open('Char_base_Base_color.png').convert('RGB').resize((1024,1024)).save('piel.jpg', quality=85)
 import bpy
 bpy.ops.wm.open_mainfile(filepath="body_base.blend")
 o=bpy.data.objects["Body_OL"]
 for m in list(o.modifiers): o.modifiers.remove(m)
 # un solo material simple (el color lo pone la app)
-mat=bpy.data.materials.new("cuerpo"); o.data.materials.clear(); o.data.materials.append(mat)
+# la piel original del modelo (la textura, reducida a 1024 px en JPEG)
+mat=bpy.data.materials["Char_base"]
+img=bpy.data.images.load(bpy.path.abspath("//piel.jpg")); img.name="piel"
+for n in mat.node_tree.nodes:
+    if n.type=="TEX_IMAGE": n.image=img
+o.data.materials.clear(); o.data.materials.append(mat)
 for p in o.data.polygons: p.material_index=0
 o.name="cuerpo"
 arm_data=bpy.data.armatures.new("esqueleto"); arm=bpy.data.objects.new("esqueleto", arm_data)
@@ -39,6 +45,7 @@ print("vgroups", len(o.vertex_groups), [g.name for g in o.vertex_groups])
 # vértices sin peso
 sin=[v.index for v in o.data.vertices if not any(g.weight>0.01 for g in v.groups)]
 print("sin peso", len(sin))
-for im in list(bpy.data.images): bpy.data.images.remove(im)
-bpy.ops.export_scene.gltf(filepath="cuerpo.glb", export_format='GLB', export_skins=True, export_animations=False, export_materials='PLACEHOLDER', export_normals=True, export_texcoords=False, export_yup=True)
+for im in list(bpy.data.images):
+    if im.name!="piel": bpy.data.images.remove(im)
+bpy.ops.export_scene.gltf(filepath="cuerpo.glb", export_format='GLB', export_skins=True, export_animations=False, export_materials='EXPORT', export_image_format='JPEG', export_normals=True, export_texcoords=True, export_yup=True)
 bpy.ops.wm.save_as_mainfile(filepath="cuerpo_rig.blend")
