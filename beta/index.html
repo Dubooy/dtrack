@@ -18721,17 +18721,46 @@ function mqGuia(T){
   return MQ_GUIA;
 }
 /* el modelo: se lee cuerpo.glb, se pinta y se apuntan los giros de reposo de cada hueso */
+/* las normales que usa Blender para el contorno: la de cada punto del cuerpo, media de las caras
+   que lo tocan (pesadas por su ángulo) y la misma en los vértices repetidos por las costuras de la textura */
+function mqNormalesBorde(T, geo){
+  if(geo.attributes.borde) return;
+  var p=geo.attributes.position, n=p.count, ix=geo.index ? geo.index.array : null, grupo=new Int32Array(n), mapa={}, g=0, i, k;
+  for(i=0;i<n;i++){ k=Math.round(p.getX(i)*1e5)+","+Math.round(p.getY(i)*1e5)+","+Math.round(p.getZ(i)*1e5);
+    if(mapa[k]===undefined) mapa[k]=g++; grupo[i]=mapa[k]; }
+  var suma=new Float32Array(g*3), a=new T.Vector3(), b=new T.Vector3(), c=new T.Vector3(), u=new T.Vector3(), v=new T.Vector3(), f=new T.Vector3();
+  var tris=ix ? ix.length : n;
+  for(i=0;i<tris;i+=3){
+    var t=[ix?ix[i]:i, ix?ix[i+1]:i+1, ix?ix[i+2]:i+2];
+    a.fromBufferAttribute(p,t[0]); b.fromBufferAttribute(p,t[1]); c.fromBufferAttribute(p,t[2]);
+    f.subVectors(c,b).cross(u.subVectors(a,b)).normalize();
+    [[a,b,c],[b,c,a],[c,a,b]].forEach(function(q, j){
+      var ang=u.subVectors(q[1],q[0]).angleTo(v.subVectors(q[2],q[0])), o=grupo[t[j]]*3;
+      if(!isFinite(ang)) return;
+      suma[o]+=f.x*ang; suma[o+1]+=f.y*ang; suma[o+2]+=f.z*ang;
+    });
+  }
+  var out=new Float32Array(n*3);
+  for(i=0;i<n;i++){ var o=grupo[i]*3; f.set(suma[o],suma[o+1],suma[o+2]).normalize(); out[i*3]=f.x; out[i*3+1]=f.y; out[i*3+2]=f.z; }
+  geo.setAttribute("borde", new T.BufferAttribute(out, 3));
+}
 function mqModelo(T, color){
   return new Promise(function(ok, mal){
     new T.GLTFLoader().parse(MQ_GLB.slice(0), "./", function(g){
       var raiz=g.scene, malla=null;
       raiz.traverse(function(o){ if(o.isSkinnedMesh) malla=o; });
-      /* la piel original del modelo (su textura) */
-      malla.material=new T.MeshStandardMaterial({ map:malla.material.map, roughness:.55, metalness:0 });
+      /* la piel original del modelo: su textura tal cual, con el mismo material que en Blender (rugosidad 0,5) */
+      var piel=malla.material.map; piel.anisotropy=8;
+      malla.material=new T.MeshStandardMaterial({ map:piel, roughness:.5, metalness:0 });
       malla.castShadow=true; malla.frustumCulled=false;
-      /* contorno fino y oscuro, como el del modelo original: una copia vuelta del revés, 5 mm más gorda */
-      var borde=new T.MeshBasicMaterial({ color:0x0a0203, side:T.BackSide });
-      borde.onBeforeCompile=function(sh){ sh.vertexShader=sh.vertexShader.replace("#include <skinning_vertex>", "#include <skinning_vertex>\n  transformed += normalize(objectNormal) * 0.005;"); };
+      /* el contorno, como en el modelo original (un Solidify de Blender): una copia vuelta del revés,
+         5 mm hacia fuera por la normal de cada vértice, del mismo color casi negro que su material OL */
+      mqNormalesBorde(T, malla.geometry);
+      var borde=new T.MeshBasicMaterial({ side:T.BackSide }); borde.color.setRGB(.003543, .00054, .0009);
+      borde.onBeforeCompile=function(sh){
+        sh.vertexShader="attribute vec3 borde;\n"+sh.vertexShader.replace("#include <skinning_vertex>",
+          "#include <skinning_vertex>\n  transformed += normalize((skinMatrix * vec4(borde, 0.0)).xyz) * 0.005;");
+      };
       var contorno=new T.SkinnedMesh(malla.geometry, borde); contorno.bind(malla.skeleton, malla.bindMatrix); contorno.frustumCulled=false;
       malla.parent.add(contorno);
       raiz.updateMatrixWorld(true);
@@ -18765,8 +18794,9 @@ function mqEscena(T, k, color){
   var F=MQ_FIG[k]||MQ_FIG.cuello;
   return mqModelo(T, color).then(function(M){
     var esc=new T.Scene();
-    esc.add(new T.HemisphereLight(0xffffff, 0xb9b3aa, 1.6));
-    var sol=new T.DirectionalLight(0xffffff, 2.2); sol.position.set(1.6,3.2,2.4); sol.castShadow=true;
+    /* luz blanca uniforme y un sol suave: el color de la piel se ve como el de su textura */
+    esc.add(new T.HemisphereLight(0xffffff, 0xffffff, Math.PI));
+    var sol=new T.DirectionalLight(0xffffff, 1); sol.position.set(1.54,2.25,2.2); sol.castShadow=true;
     sol.shadow.mapSize.set(1024,1024); sol.shadow.camera.left=-1.6; sol.shadow.camera.right=1.6; sol.shadow.camera.top=1.6; sol.shadow.camera.bottom=-1.6;
     sol.shadow.radius=6; sol.shadow.bias=-.0006; esc.add(sol); esc.add(sol.target);
     var suelo=new T.Mesh(new T.CircleGeometry(2.4, 48), new T.ShadowMaterial({ opacity:.2 }));
@@ -18793,7 +18823,7 @@ function mqCamara(E, az){
 function mqRenderer(T, lienzo){
   var r=new T.WebGLRenderer({ canvas:lienzo, antialias:true, alpha:true, preserveDrawingBuffer:!!lienzo.dataset.foto });
   r.shadowMap.enabled=true; r.shadowMap.type=T.PCFSoftShadowMap;
-  r.toneMapping=T.ACESFilmicToneMapping; r.outputColorSpace=T.SRGBColorSpace; r.setClearColor(0x000000, 0);
+  r.toneMapping=T.NoToneMapping; r.outputColorSpace=T.SRGBColorSpace; r.setClearColor(0x000000, 0);
   return r;
 }
 

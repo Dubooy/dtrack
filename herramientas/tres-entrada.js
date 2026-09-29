@@ -1,2 +1,2 @@
-export { WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, SkinnedMesh, SphereGeometry, CapsuleGeometry, BoxGeometry, CircleGeometry, MeshStandardMaterial, MeshBasicMaterial, ShadowMaterial, HemisphereLight, DirectionalLight, Box3, Vector3, Quaternion, Color, ACESFilmicToneMapping, SRGBColorSpace, PCFSoftShadowMap, BackSide } from 'three';
+export { WebGLRenderer, Scene, PerspectiveCamera, Group, Mesh, SkinnedMesh, BufferAttribute, SphereGeometry, CapsuleGeometry, BoxGeometry, CircleGeometry, MeshStandardMaterial, MeshBasicMaterial, ShadowMaterial, HemisphereLight, DirectionalLight, Box3, Vector3, Quaternion, Color, NoToneMapping, SRGBColorSpace, PCFSoftShadowMap, BackSide } from 'three';
 export { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';

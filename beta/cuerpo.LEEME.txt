@@ -3,7 +3,7 @@ cuerpo.glb · la persona 3D de los estiramientos guiados
 - Modelo: «human body base cartoon», de Fab
   https://www.fab.com/listings/317d6bce-ec6f-4694-95f9-be4c2ad692ca
   Antes de publicar, confirmar en la ficha que su licencia permite usarlo dentro de una app.
-- Conserva su piel original (la textura, reducida a 1024 px en JPEG). El contorno oscuro
+- Conserva su piel original (la textura a 2048 px en JPEG de alta calidad). El contorno oscuro
   de 5 mm del modelo original lo dibuja la app, porque el de Blender no se exporta.
 - El esqueleto (19 huesos) y los pesos se generan con herramientas/cuerpo-rig.py.
 

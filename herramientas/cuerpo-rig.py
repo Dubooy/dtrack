@@ -1,13 +1,13 @@
 # Pone un esqueleto al modelo «human body base cartoon» de Fab y lo exporta a beta/cuerpo.glb.
 # Uso: pip install bpy==4.5.14 ; python3 cuerpo-rig.py  (con body_base.blend del zip de Fab al lado)
 # Los pesos de la piel los calcula Blender solo (pesos automáticos).
-# La piel se reduce antes a 1024 px:  Image.open('Char_base_Base_color.png').convert('RGB').resize((1024,1024)).save('piel.jpg', quality=85)
+# La piel es la textura original a 2048 px en JPEG de alta calidad:  Image.open('Char_base_Base_color.png').convert('RGB').save('piel.jpg', quality=95, subsampling=0)
 import bpy
 bpy.ops.wm.open_mainfile(filepath="body_base.blend")
 o=bpy.data.objects["Body_OL"]
 for m in list(o.modifiers): o.modifiers.remove(m)
 # un solo material simple (el color lo pone la app)
-# la piel original del modelo (la textura, reducida a 1024 px en JPEG)
+# la piel original del modelo (la textura a 2048 px en JPEG de alta calidad)
 mat=bpy.data.materials["Char_base"]
 img=bpy.data.images.load(bpy.path.abspath("//piel.jpg")); img.name="piel"
 for n in mat.node_tree.nodes:
@@ -47,5 +47,5 @@ sin=[v.index for v in o.data.vertices if not any(g.weight>0.01 for g in v.groups
 print("sin peso", len(sin))
 for im in list(bpy.data.images):
     if im.name!="piel": bpy.data.images.remove(im)
-bpy.ops.export_scene.gltf(filepath="cuerpo.glb", export_format='GLB', export_skins=True, export_animations=False, export_materials='EXPORT', export_image_format='JPEG', export_normals=True, export_texcoords=True, export_yup=True)
+bpy.ops.export_scene.gltf(filepath="cuerpo.glb", export_format='GLB', export_skins=True, export_animations=False, export_materials='EXPORT', export_image_format='JPEG', export_jpeg_quality=95, export_normals=True, export_texcoords=True, export_yup=True)
 bpy.ops.wm.save_as_mainfile(filepath="cuerpo_rig.blend")
