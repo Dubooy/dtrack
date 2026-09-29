@@ -14213,7 +14213,7 @@ function gRpc(fn, args){
 var G_ERR={ ya_en_grupo:"Ya estás en ese grupo.", codigo_mal:"Ese código no existe. Revísalo.",
             lleno:"Ese grupo ya tiene 12 personas.", sin_sesion:"Hace falta entrar con tu cuenta.", sin_servidor:"El servidor de grupos aún no está configurado.",
             demasiados_grupos:"Como mucho, 8 grupos a la vez.", no_eres_miembro:"Ya no estás en ese grupo." };
-function gError(e){ var m=(e&&e.message)||""; for(var k in G_ERR) if(m.indexOf(k)>=0) return G_ERR[k]; return navigator.onLine===false ? "Sin conexión. Prueba en un rato." : "No se ha podido. Prueba en un rato."; }
+function gError(e){ var m=(e&&e.message)||""; for(var k in G_ERR) if(m.indexOf(k)>=0) return G_ERR[k]; return navigator.onLine===false ? "Sin conexión. Prueba en un rato." : "No se ha podido. Prueba en un rato."+(window.DTRACK_BETA && m ? " ("+m.slice(0,160)+")" : ""); }
 
 /* ── bajar el grupo y traducirlo al GRUPO de siempre ── */
 function gCargar(forzar){
