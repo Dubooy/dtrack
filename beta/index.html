@@ -9141,6 +9141,7 @@ function novedadesTrasRender(st){
   if(typeof disenoTrasRender==="function") disenoTrasRender(st);
   if(typeof bucleTrasRender==="function") bucleTrasRender(st);
   if(typeof grupoTrasRender==="function") grupoTrasRender(st);
+  if(typeof crecerTrasRender==="function") crecerTrasRender(st);
   pintaRetoSemana(); pintaSemanas(); pintaAvisoSemana(); vigilaRetoSemana(); pintaInsignia(); avisoPomodoro(); vigilaTriple();
   if(document.getElementById("imp-box")) copiaMejora();
 }
@@ -11900,6 +11901,7 @@ function rumboAccion(a, el){
   if(typeof disenoAccion==="function" && disenoAccion(a, el)) return true;
   if(typeof bucleAccion==="function" && bucleAccion(a, el)) return true;
   if(typeof grupoAccion==="function" && grupoAccion(a, el)) return true;
+  if(typeof crecerAccion==="function" && crecerAccion(a, el)) return true;
   if(a==="x-anillo"){ anilloToca(el.dataset.k); return true; }
   if(a==="x-ir-habitos"){ var ci=document.getElementById("card-ideal"); if(ci) ci.scrollIntoView({behavior:"smooth", block:"start"}); return true; }
   if(a==="x-pomo-ya"){ pomodoroYa(); return true; }
@@ -18371,6 +18373,398 @@ var MEJORAS_CSS=[
 '.rc-pista{ text-align:center; font-size:12.5px; color:rgba(255,255,255,.5); padding:4px 16px calc(env(safe-area-inset-bottom) + 16px); }'
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="mejoras-css"; st.textContent=MEJORAS_CSS; document.head.appendChild(st); })();
+
+
+/* ════════════ para crecer: libros por tema y estiramientos guiados ════════════
+   Una tarjeta en Objetivos con dos pestañas. Los libros se agrupan por tema,
+   cada uno con su color; los estiramientos van en rutinas cortas y cada paso
+   tiene un enlace a vídeos para ver cómo se hace. Desde las dos se crea un
+   hábito con un botón. */
+ICO_B.libro=ICO_B.estudiar;
+ICO_B.estira='<circle cx="12" cy="4.5" r="2"/><path d="M4 9.5l8 1.5 8-1.5"/><path d="M12 11v4.5l-4 5M12 15.5l4 5"/>';
+ICO_B.video='<rect x="3" y="5.5" width="18" height="13" rx="3.5"/><path d="M10.5 9.5v5l4.2-2.5z"/>';
+
+var LIB_TEMAS=[
+  { k:"economia", t:"Economía", c:"var(--good)", libros:[
+    { t:"Economía en una lección", a:"Henry Hazlitt", p:"Cómo pensar en las consecuencias de una decisión más allá de lo que se ve a primera vista." },
+    { t:"El economista camuflado", a:"Tim Harford", p:"La economía de lo cotidiano: por qué un café cuesta lo que cuesta." },
+    { t:"Freakonomics", a:"Steven D. Levitt y Stephen J. Dubner", p:"Preguntas raras respondidas con datos. Engancha desde la primera página." },
+    { t:"La psicología del dinero", a:"Morgan Housel", p:"Ahorrar e invertir tiene más de comportamiento que de matemáticas." },
+    { t:"El hombre más rico de Babilonia", a:"George S. Clason", p:"Las reglas básicas del dinero contadas como fábulas. Muy corto." }
+  ]},
+  { k:"negocio", t:"Negocio", c:"var(--warn)", libros:[
+    { t:"De cero a uno", a:"Peter Thiel", p:"Cómo crear algo nuevo en vez de copiar lo que ya existe." },
+    { t:"El método Lean Startup", a:"Eric Ries", p:"Probar una idea pequeña y barata antes de apostarlo todo." },
+    { t:"Nunca te pares", a:"Phil Knight", p:"La historia de cómo empezó Nike, contada por su fundador." },
+    { t:"Cómo ganar amigos e influir sobre las personas", a:"Dale Carnegie", p:"Un clásico sobre tratar con la gente. Sirve para todo, no solo para vender." }
+  ]},
+  { k:"politica", t:"Política", c:"var(--alert)", libros:[
+    { t:"Rebelión en la granja", a:"George Orwell", p:"Una fábula corta sobre cómo el poder cambia a quien lo tiene." },
+    { t:"1984", a:"George Orwell", p:"Vigilancia, propaganda y control. Para entender muchas noticias de hoy." },
+    { t:"El príncipe", a:"Nicolás Maquiavelo", p:"El manual original del poder, escrito hace 500 años." },
+    { t:"Por qué fracasan los países", a:"Daron Acemoglu y James A. Robinson", p:"Por qué unos países son ricos y otros pobres: las instituciones importan." }
+  ]},
+  { k:"mente", t:"Mente", c:"var(--violet)", libros:[
+    { t:"Hábitos atómicos", a:"James Clear", p:"Cambios pequeños que se suman. Encaja con lo que ya haces en DTrack." },
+    { t:"Mindset", a:"Carol S. Dweck", p:"La diferencia entre creer que tu talento es fijo o que se entrena." },
+    { t:"El hombre en busca de sentido", a:"Viktor Frankl", p:"Lo que aprendió un psiquiatra en un campo de concentración." },
+    { t:"Meditaciones", a:"Marco Aurelio", p:"Las notas de un emperador romano para mantener la calma." },
+    { t:"Pensar rápido, pensar despacio", a:"Daniel Kahneman", p:"Cómo decide tu cerebro y cuándo te engaña. Más largo, pero vale la pena." }
+  ]},
+  { k:"historia", t:"Historia y ciencia", c:"var(--cyan)", libros:[
+    { t:"Sapiens. De animales a dioses", a:"Yuval Noah Harari", p:"La historia de la humanidad de un tirón." },
+    { t:"Factfulness", a:"Hans Rosling", p:"El mundo va mejor de lo que crees, y los datos lo demuestran." },
+    { t:"Breve historia del tiempo", a:"Stephen Hawking", p:"El universo, los agujeros negros y el big bang, sin fórmulas." },
+    { t:"Armas, gérmenes y acero", a:"Jared Diamond", p:"Por qué la historia fue como fue en cada continente." }
+  ]}
+];
+
+/* rutinas de estiramientos: s = segundos de cada paso, v = búsqueda de vídeo */
+var ESTIRA_RUTINAS=[
+  { k:"estudio", t:"Cuello y espalda", sub:"Para después de estudiar", c:"var(--accent)", pasos:[
+    { t:"Cuello hacia un lado", s:60, d:"Deja caer la oreja hacia el hombro sin subirlo. 30 segundos por lado.", v:"estiramiento cuello lateral" , f:"cuello" },
+    { t:"Barbilla al pecho", s:30, d:"Entrelaza las manos detrás de la cabeza y deja que su peso baje la barbilla.", v:"estiramiento barbilla al pecho cuello" , f:"barbilla" },
+    { t:"Brazo cruzado", s:60, d:"Cruza un brazo por delante del pecho y sujétalo con el otro. 30 segundos por lado.", v:"estiramiento hombro brazo cruzado" , f:"cruzado" },
+    { t:"Tríceps", s:60, d:"Lleva una mano a la espalda por detrás de la cabeza y tira suave del codo. 30 segundos por lado.", v:"estiramiento triceps detras de la cabeza" , f:"triceps" },
+    { t:"Espalda redonda", s:30, d:"Junta las manos delante, empuja hacia fuera y redondea la espalda alta.", v:"estiramiento espalda alta manos al frente" , f:"redonda" },
+    { t:"Inclinación lateral", s:60, d:"De pie, un brazo por encima de la cabeza e inclínate hacia el otro lado. 30 segundos por lado.", v:"estiramiento lateral de pie" , f:"lateral" }
+  ]},
+  { k:"piernas", t:"Piernas", sub:"Después de entrenar o de andar", c:"var(--good)", pasos:[
+    { t:"Isquiotibiales sentado", s:60, d:"Una pierna estirada, la otra doblada. Inclínate desde la cadera hacia el pie. 30 segundos por pierna.", v:"estiramiento isquiotibiales sentado" , f:"isquios" },
+    { t:"Cuádriceps de pie", s:60, d:"Coge el pie por detrás y lleva el talón al glúteo con las rodillas juntas. 30 segundos por pierna.", v:"estiramiento cuadriceps de pie" , f:"cuadriceps" },
+    { t:"Gemelos contra la pared", s:60, d:"Manos en la pared, una pierna atrás con el talón en el suelo. 30 segundos por pierna.", v:"estiramiento gemelos pared" , f:"gemelos" },
+    { t:"Flexor de cadera", s:60, d:"Rodilla atrás en el suelo, la otra delante a 90 grados. Lleva la cadera hacia delante. 30 segundos por lado.", v:"estiramiento flexor de cadera arrodillado" , f:"flexor" },
+    { t:"Mariposa", s:45, d:"Sentado, junta las plantas de los pies y deja caer las rodillas hacia fuera.", v:"estiramiento mariposa aductores" , f:"mariposa" },
+    { t:"Glúteo tumbado", s:60, d:"Boca arriba, cruza un tobillo sobre la rodilla contraria y acerca las piernas al pecho. 30 segundos por lado.", v:"estiramiento gluteo tumbado figura 4" , f:"gluteo" }
+  ]},
+  { k:"dormir", t:"Antes de dormir", sub:"Suave, para relajarte", c:"var(--violet)", pasos:[
+    { t:"Postura del niño", s:60, d:"Siéntate sobre los talones y lleva los brazos hacia delante con la frente en el suelo.", v:"postura del niño estiramiento" , f:"nino" },
+    { t:"Gato y vaca", s:45, d:"A cuatro patas, alterna redondear la espalda y arquearla, despacio y respirando.", v:"estiramiento gato vaca" , f:"gato" },
+    { t:"Rodillas al pecho", s:45, d:"Boca arriba, abraza las rodillas por debajo y acércalas al pecho.", v:"estiramiento rodillas al pecho tumbado" , f:"rodillas" },
+    { t:"Torsión tumbado", s:60, d:"Boca arriba, deja caer las rodillas hacia un lado y mira al contrario. 30 segundos por lado.", v:"torsion lumbar tumbado estiramiento" , f:"torsion" },
+    { t:"Respirar", s:60, d:"Tumbado, una mano en la tripa. Coge aire en 4 segundos y suéltalo en 6.", v:"respiracion diafragmatica tumbado" , f:"respirar" }
+  ]}
+];
+var crecerTab="libros";
+
+function estiraMin(r){ return Math.round(r.pasos.reduce(function(s,p){ return s+p.s; },0)/60); }
+function estiraHabito(r){ return "Estiramientos: "+r.t.toLowerCase()+" ("+estiraMin(r)+" min)"; }
+function libroHabito(b){ return "Leer 10 páginas de «"+b.t+"»"; }
+function estiraVideo(q){ return "https://www.youtube.com/results?search_query="+encodeURIComponent(q); }
+function habitoTiene(tx){ var k=tx.toLowerCase(); return idealTodos().some(function(x){ return String(x.text||"").toLowerCase()===k; }); }
+function habitoAnade(tx, tag){
+  if(habitoTiene(tx)){ avisoNube("Ya está en tus hábitos."); return false; }
+  S.ideal.push({ id:uid(), time:"", text:tx, tag:tag, desde:today() });
+  save(); sonido("pop"); avisoNube("Añadido a tus hábitos: "+tx);
+  return true;
+}
+function libroTema(k){ for(var i=0;i<LIB_TEMAS.length;i++) if(LIB_TEMAS[i].k===k) return LIB_TEMAS[i]; return LIB_TEMAS[0]; }
+function estiraRutina(k){ for(var i=0;i<ESTIRA_RUTINAS.length;i++) if(ESTIRA_RUTINAS[i].k===k) return ESTIRA_RUTINAS[i]; return ESTIRA_RUTINAS[0]; }
+/* el lomo de un libro: un bloque de color con las iniciales del título */
+function libroLomo(b, c){
+  var ini=b.t.replace(/[«»¿?¡!.,]/g,"").split(/\s+/).filter(function(w){ return w.length>2 || /^\d/.test(w); }).slice(0,2).map(function(w){ return w.charAt(0).toUpperCase(); }).join("");
+  return '<span class="cr-lomo" style="--c:'+c+'"><b>'+esc(ini||b.t.charAt(0))+'</b></span>';
+}
+
+function pintaCrecer(){
+  var obj=document.getElementById("rt-obj"); if(!obj) return;
+  var el=document.getElementById("rt-crecer");
+  if(!el){ el=document.createElement("div"); el.id="rt-crecer"; el.className="glass rounded-[24px] pad"; }
+  var ex=document.getElementById("rt-exp");
+  if(ex && ex.parentNode===obj){ if(ex.nextSibling!==el) obj.insertBefore(el, ex.nextSibling); } else if(el.parentNode!==obj) obj.appendChild(el);
+  var h='<div class="cr-cab"><div><h2 class="display">Para crecer</h2><p>Libros para pensar mejor y estiramientos para el cuerpo. Conviértelos en hábito con un toque.</p></div></div>'+
+    '<div class="cr-tabs"><button data-act="x-cr-tab" data-t="libros" class="'+(crecerTab==="libros"?"on":"")+'">'+ico("libro")+'Libros</button>'+
+    '<button data-act="x-cr-tab" data-t="estira" class="'+(crecerTab==="estira"?"on":"")+'">'+ico("estira")+'Estiramientos</button></div>';
+  if(crecerTab==="libros"){
+    h+='<div class="cr-temas">'+LIB_TEMAS.map(function(T){
+      return '<button class="cr-tema" data-act="x-cr-libros" data-k="'+T.k+'" style="--c:'+T.c+'">'+
+        '<span class="cr-pila">'+T.libros.slice(0,3).map(function(b){ return libroLomo(b, T.c); }).join("")+'</span>'+
+        '<b>'+esc(T.t)+'</b><small>'+T.libros.length+' libros</small></button>'; }).join("")+'</div>';
+  } else {
+    h+='<div class="cr-rutinas">'+ESTIRA_RUTINAS.map(function(r){
+      return '<button class="cr-rutina" data-act="x-cr-rutina" data-k="'+r.k+'" style="--c:'+r.c+'">'+
+        '<span class="cr-r-ico">'+figuraSVG(r.pasos[0].f, true)+'</span><span class="cr-r-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' pasos</small></span>'+
+        '<em class="num">'+estiraMin(r)+' min</em></button>'; }).join("")+'</div>';
+  }
+  el.innerHTML=h;
+}
+
+function sheetLibros(k){
+  var T=libroTema(k);
+  openSheet('<div class="flex items-start justify-between mb-2"><div><p class="eyebrow mb-1.5">Libros para crecer</p><h3 class="display text-[20px] font-bold">'+esc(T.t)+'</h3></div>'+closeBtn()+'</div>'+
+    '<div class="cr-chips">'+LIB_TEMAS.map(function(x){ return '<button data-act="x-cr-libros" data-k="'+x.k+'" class="'+(x.k===T.k?"on":"")+'" style="--c:'+x.c+'">'+esc(x.t)+'</button>'; }).join("")+'</div>'+
+    '<div class="cr-libros">'+T.libros.map(function(b,i){
+      var ya=habitoTiene(libroHabito(b));
+      return '<div class="cr-libro">'+libroLomo(b, T.c)+
+        '<div class="cr-l-t"><b>'+esc(b.t)+'</b><small>'+esc(b.a)+'</small><p>'+esc(b.p)+'</p></div>'+
+        (ya?'<span class="cr-ya">'+ICON_CHECK+'</span>':'<button class="cr-empieza" data-act="x-cr-leer" data-k="'+T.k+'" data-i="'+i+'">Lo empiezo</button>')+'</div>'; }).join("")+'</div>'+
+    '<p class="cr-nota">«Lo empiezo» añade el hábito de leer 10 páginas al día de ese libro.</p>');
+}
+
+function sheetRutina(k){
+  var r=estiraRutina(k), ya=habitoTiene(estiraHabito(r));
+  openSheet('<div class="flex items-start justify-between mb-2"><div><p class="eyebrow mb-1.5">Estiramientos · '+estiraMin(r)+' min</p><h3 class="display text-[20px] font-bold">'+esc(r.t)+'</h3></div>'+closeBtn()+'</div>'+
+    '<p class="text-[12.5px] t3 mb-4 leading-relaxed">'+esc(r.sub)+'. Sin forzar: tiene que tirar, no doler.</p>'+
+    '<ol class="cr-pasos" style="--c:'+r.c+'">'+r.pasos.map(function(p,i){
+      return '<li><span class="cr-mini">'+figuraSVG(p.f, true)+'</span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
+        '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver cómo se hace</a></div></li>'; }).join("")+'</ol>'+
+    '<button class="btn btn-primary w-full !py-3 mt-4" data-act="x-cr-empieza" data-k="'+r.k+'">Empezar rutina guiada</button>'+
+    (ya?'<p class="cr-nota" style="text-align:center">Ya la tienes en tus hábitos. Al terminarla se marca sola.</p>'
+       :'<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-cr-estira" data-k="'+r.k+'">Añadir a mis hábitos</button>'));
+}
+
+function crecerAccion(a, el){
+  if(guiaAccion(a)) return true;
+  if(a==="x-cr-empieza"){ guiaEmpieza(el.dataset.k); return true; }
+  if(a==="x-cr-tab"){ crecerTab=el.dataset.t; sonido("tick"); pintaCrecer(); return true; }
+  if(a==="x-cr-libros"){ sheetLibros(el.dataset.k); return true; }
+  if(a==="x-cr-rutina"){ sheetRutina(el.dataset.k); return true; }
+  if(a==="x-cr-leer"){ var T=libroTema(el.dataset.k), b=T.libros[+el.dataset.i]; if(b && habitoAnade(libroHabito(b), "personal")){ sheetLibros(T.k); render(); } return true; }
+  if(a==="x-cr-estira"){ var r=estiraRutina(el.dataset.k); if(habitoAnade(estiraHabito(r), "vital")){ sheetRutina(r.k); render(); } return true; }
+  return false;
+}
+function crecerTrasRender(){ if(view==="retos") pintaCrecer(); }
+
+var CRECER_CSS=[
+'.cr-cab h2{ font-size:17px; font-weight:800; letter-spacing:-.02em; } .cr-cab p{ font-size:12.5px; color:var(--t3); margin-top:2px; line-height:1.4; }',
+'.cr-tabs{ display:flex; gap:6px; margin:14px 0 14px; padding:4px; border-radius:14px; background:var(--fill); }',
+'.cr-tabs button{ flex:1; display:flex; align-items:center; justify-content:center; gap:7px; padding:9px 8px; border-radius:11px; font-size:13px; font-weight:700; color:var(--t2); transition:background .2s var(--ease), color .2s var(--ease); }',
+'.cr-tabs button .ic{ width:16px; height:16px; }',
+'.cr-tabs button.on{ background:var(--glass-bg-hi); color:var(--t1); box-shadow:0 1px 3px rgba(0,0,0,.08), inset 0 0 0 1px var(--hairline-2); }',
+'.cr-temas{ display:grid; grid-template-columns:repeat(auto-fill,minmax(128px,1fr)); gap:8px; }',
+'.cr-tema{ display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:12px; border-radius:16px; text-align:left;',
+'  background:color-mix(in srgb,var(--c) 10%,transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 22%,transparent); transition:transform .2s var(--spring); }',
+'.cr-tema:active{ transform:scale(.97); }',
+'.cr-tema b{ font-size:13.5px; font-weight:700; margin-top:8px; } .cr-tema small{ font-size:11.5px; color:var(--t3); }',
+'.cr-pila{ display:flex; gap:3px; align-items:flex-end; height:44px; }',
+'.cr-lomo{ display:grid; place-items:center; flex:0 0 auto; width:30px; height:44px; border-radius:4px 7px 7px 4px; color:#fff;',
+'  background:linear-gradient(90deg, color-mix(in srgb,var(--c) 70%,#000) 0 4px, var(--c) 4px); box-shadow:0 2px 6px color-mix(in srgb,var(--c) 30%,transparent); }',
+'.cr-pila .cr-lomo:nth-child(2){ height:38px; opacity:.85; } .cr-pila .cr-lomo:nth-child(3){ height:41px; opacity:.7; }',
+'.cr-lomo b{ font-size:10.5px; font-weight:800; letter-spacing:.02em; }',
+'.cr-rutinas{ display:flex; flex-direction:column; gap:8px; }',
+'.cr-rutina{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; text-align:left;',
+'  background:color-mix(in srgb,var(--c) 9%,transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 20%,transparent); }',
+'.cr-r-ico{ display:grid; place-items:center; width:40px; height:40px; border-radius:12px; flex:0 0 auto; color:#fff; background:var(--c); }',
+'.cr-r-ico{ padding:3px; overflow:hidden; } .cr-pasos li .cr-mini{ overflow:hidden; }',
+'.cr-r-t{ flex:1; min-width:0; } .cr-r-t b{ display:block; font-size:14px; font-weight:700; } .cr-r-t small{ display:block; font-size:12px; color:var(--t3); margin-top:1px; }',
+'.cr-rutina em{ font-style:normal; font-size:12px; font-weight:700; color:var(--c); padding:5px 10px; border-radius:99px; background:color-mix(in srgb,var(--c) 14%,transparent); }',
+'.cr-chips{ display:flex; gap:6px; overflow-x:auto; margin:6px -2px 14px; padding:2px; scrollbar-width:none; }',
+'.cr-chips button{ flex:0 0 auto; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:99px; background:var(--fill); color:var(--t2); }',
+'.cr-chips button.on{ background:var(--c); color:#fff; }',
+'.cr-libros{ display:flex; flex-direction:column; }',
+'.cr-libro{ display:flex; align-items:flex-start; gap:12px; padding:12px 0; box-shadow:inset 0 -1px 0 var(--hairline-2); }',
+'.cr-libro .cr-lomo{ width:38px; height:54px; } .cr-libro .cr-lomo b{ font-size:12px; }',
+'.cr-l-t{ flex:1; min-width:0; } .cr-l-t b{ display:block; font-size:14px; font-weight:700; line-height:1.3; } .cr-l-t small{ display:block; font-size:12px; color:var(--t3); margin-top:1px; }',
+'.cr-l-t p{ font-size:12.5px; color:var(--t2); margin-top:5px; line-height:1.4; }',
+'.cr-empieza{ flex:0 0 auto; font-size:12px; font-weight:700; color:var(--accent); padding:6px 11px; border-radius:99px; background:var(--accent-soft); margin-top:2px; }',
+'.cr-ya{ flex:0 0 auto; display:grid; place-items:center; width:28px; height:28px; border-radius:99px; color:#fff; background:var(--good); margin-top:2px; }',
+'.cr-ya svg{ width:14px; height:14px; }',
+'.cr-nota{ font-size:12px; color:var(--t3); margin-top:12px; line-height:1.4; }',
+'.cr-pasos{ display:flex; flex-direction:column; gap:4px; }',
+'.cr-pasos li{ display:flex; gap:12px; padding:10px 0; box-shadow:inset 0 -1px 0 var(--hairline-2); }',
+'.cr-n{ display:inline-grid; place-items:center; width:20px; height:20px; margin-right:7px; vertical-align:1px; border-radius:99px; font-size:11px; font-weight:800; color:#fff; background:var(--c); }',
+'.cr-p-t{ flex:1; min-width:0; } .cr-p-t b{ font-size:14px; font-weight:700; } .cr-p-t b span{ font-weight:600; color:var(--t3); font-size:12.5px; }',
+'.cr-p-t b .cr-n{ color:#fff; font-size:11px; font-weight:800; }',
+'.cr-p-t p{ font-size:12.5px; color:var(--t2); margin-top:3px; line-height:1.4; }',
+'.cr-video{ display:inline-flex; align-items:center; gap:6px; margin-top:7px; font-size:12.5px; font-weight:700; color:var(--accent); }',
+'.cr-video .ic{ width:16px; height:16px; }'
+].join("\n");
+(function(){ var st=document.createElement("style"); st.id="crecer-css"; st.textContent=CRECER_CSS; document.head.appendChild(st); })();
+
+/* ── la figura: una persona dibujada con trazos gruesos que va de la postura
+   de partida (A) a la del estiramiento (B) y vuelve, en bucle.
+   Puntos: h cabeza, n cuello, b mitad de la espalda, p cadera,
+   le/lh codo y mano cercanos, re/rh los lejanos, lk/lf rodilla y pie cercanos, rk/rf los lejanos. */
+var DE_PIE={ h:[50,15], n:[50,26], p:[50,54], le:[43,40], lh:[41,53], re:[57,40], rh:[59,53], lk:[46,72], lf:[45,90], rk:[54,72], rf:[55,90] };
+var DE_LADO={ h:[50,15], n:[50,26], p:[50,54], le:[49,40], lh:[50,53], re:[51,40], rh:[52,53], lk:[51,72], lf:[50,90], rk:[49,72], rf:[48,90] };
+function pose(base, cambios){ var o={}, k; for(k in base) o[k]=base[k]; for(k in cambios) o[k]=cambios[k]; return o; }
+var TUMBADO={ h:[16,80], n:[26,84], b:[39,85], p:[52,84], le:[34,86], lh:[44,86], re:[34,86], rh:[44,86], lk:[70,85], lf:[86,86], rk:[70,85], rf:[86,86] };
+var CUATRO={ h:[78,58], n:[68,62], b:[53,62], p:[38,64], le:[69,76], lh:[70,90], re:[67,76], rh:[68,90], lk:[38,90], lf:[22,90], rk:[36,90], rf:[20,90] };
+var FIGURAS={
+  cuello:{ A:DE_PIE, B:pose(DE_PIE,{ h:[42,18], re:[60,16], rh:[46,11] }) },
+  barbilla:{ A:pose(DE_LADO,{ le:[60,19], lh:[47,12], re:[58,19], rh:[46,12] }), B:pose(DE_LADO,{ h:[56,24], le:[62,27], lh:[53,19], re:[60,27], rh:[52,19] }) },
+  cruzado:{ A:DE_PIE, B:pose(DE_PIE,{ re:[44,33], rh:[31,31], le:[40,44], lh:[45,34] }) },
+  triceps:{ A:DE_PIE, B:pose(DE_PIE,{ re:[57,6], rh:[48,22], le:[39,17], lh:[54,8] }) },
+  redonda:{ A:DE_LADO, B:pose(DE_LADO,{ h:[59,19], n:[54,27], b:[55,40], le:[66,31], lh:[79,31], re:[64,32], rh:[77,32] }) },
+  lateral:{ A:DE_PIE, B:pose(DE_PIE,{ h:[37,20], n:[43,28], b:[47,41], re:[48,9], rh:[31,9], le:[37,43], lh:[45,51] }) },
+  isquios:{ A:{ h:[35,46], n:[35,57], b:[35,71], p:[35,86], le:[42,70], lh:[48,80], re:[40,70], rh:[46,80], lk:[56,87], lf:[78,86], rk:[47,76], rf:[43,88] },
+            B:{ h:[64,62], n:[56,68], b:[45,77], p:[35,86], le:[66,77], lh:[76,82], re:[64,78], rh:[74,83], lk:[56,87], lf:[78,86], rk:[47,76], rf:[43,88] } },
+  cuadriceps:{ A:pose(DE_LADO,{ le:[57,38], lh:[64,44] }), B:pose(DE_LADO,{ le:[57,36], lh:[66,36], re:[46,44], rh:[41,57], rk:[51,72], rf:[41,57] }) },
+  gemelos:{ A:{ h:[70,21], n:[64,30], p:[50,55], le:[74,36], lh:[86,32], re:[73,37], rh:[85,33], lk:[62,72], lf:[64,90], rk:[42,72], rf:[32,90] },
+            B:{ h:[75,25], n:[68,33], p:[54,57], le:[76,40], lh:[86,34], re:[75,41], rh:[85,35], lk:[66,73], lf:[64,90], rk:[44,74], rf:[32,90] }, suelo:'<path d="M88 12V92" class="fg-pared"/>' },
+  flexor:{ A:{ h:[47,33], n:[46,43], p:[44,68], le:[40,56], lh:[47,66], re:[42,56], rh:[49,66], lk:[66,70], lf:[67,90], rk:[34,90], rf:[18,90] },
+           B:{ h:[53,37], n:[52,47], p:[51,72], le:[46,60], lh:[53,70], re:[48,60], rh:[55,70], lk:[68,70], lf:[67,90], rk:[34,90], rf:[18,90] } },
+  mariposa:{ A:{ h:[50,42], n:[50,53], p:[50,80], le:[40,68], lh:[47,86], re:[60,68], rh:[53,86], lk:[33,74], lf:[48,88], rk:[67,74], rf:[52,88] },
+             B:{ h:[50,46], n:[50,56], p:[50,80], le:[38,70], lh:[47,87], re:[62,70], rh:[53,87], lk:[27,84], lf:[48,88], rk:[73,84], rf:[52,88] } },
+  gluteo:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85] }), B:pose(TUMBADO,{ lk:[55,62], lf:[66,70], rk:[67,66], rf:[55,63], le:[42,74], lh:[55,64], re:[40,75], rh:[54,66] }) },
+  nino:{ A:{ h:[40,45], n:[38,56], p:[34,82], le:[40,68], lh:[44,80], re:[38,68], rh:[42,80], lk:[56,90], lf:[28,90], rk:[54,90], rf:[26,90] },
+         B:{ h:[68,84], n:[58,80], b:[44,74], p:[34,82], le:[74,87], lh:[88,89], re:[72,87], rh:[86,89], lk:[56,90], lf:[28,90], rk:[54,90], rf:[26,90] } },
+  gato:{ A:pose(CUATRO,{ b:[53,52], h:[77,66] }), B:pose(CUATRO,{ b:[53,70], h:[80,52] }) },
+  rodillas:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85] }), B:pose(TUMBADO,{ lk:[48,63], lf:[60,70], rk:[50,64], rf:[62,71], le:[40,72], lh:[50,68], re:[38,73], rh:[49,69] }) },
+  torsion:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85], re:[22,74], rh:[18,62] }), B:pose(TUMBADO,{ h:[14,78], lk:[68,80], lf:[62,88], rk:[70,82], rf:[64,89], re:[22,74], rh:[18,62] }) },
+  respirar:{ A:pose(TUMBADO,{ le:[36,80], lh:[45,81] }), B:pose(TUMBADO,{ b:[39,81], le:[36,77], lh:[45,77] }) }
+};
+function fgMedio(P){ return P.b || [(P.n[0]+P.p[0])/2, (P.n[1]+P.p[1])/2]; }
+function fgD(P, parte){
+  function q(x){ return x[0]+" "+x[1]; }
+  if(parte==="torso") return "M"+q(P.n)+" L"+q(fgMedio(P))+" L"+q(P.p);
+  if(parte==="brazoL") return "M"+q(P.n)+" L"+q(P.le)+" L"+q(P.lh);
+  if(parte==="brazoR") return "M"+q(P.n)+" L"+q(P.re)+" L"+q(P.rh);
+  if(parte==="piernaL") return "M"+q(P.p)+" L"+q(P.lk)+" L"+q(P.lf);
+  return "M"+q(P.p)+" L"+q(P.rk)+" L"+q(P.rf);
+}
+/* encuadre: un cuadrado que abarca las dos posturas, para que la figura llene el dibujo */
+function fgCaja(F){
+  var x0=99, x1=0, y0=99, y1=92;
+  [F.A, F.B].forEach(function(P){ ["h","n","p","le","lh","re","rh","lk","lf","rk","rf"].forEach(function(k){ var q=P[k];
+    x0=Math.min(x0,q[0]); x1=Math.max(x1,q[0]); y0=Math.min(y0,q[1]); y1=Math.max(y1,q[1]); }); });
+  if(F.suelo) x1=Math.max(x1,88);
+  var lado=Math.max(x1-x0, y1-y0)+22, cx=(x0+x1)/2, cy=(y0+y1)/2;
+  return (cx-lado/2).toFixed(1)+" "+(cy-lado/2).toFixed(1)+" "+lado.toFixed(1)+" "+lado.toFixed(1);
+}
+/* quieto: dibuja solo la postura del estiramiento (para miniaturas y si el sistema pide menos movimiento) */
+function figuraSVG(k, quieto){
+  var F=FIGURAS[k]; if(!F) return "";
+  var dur="3.6s", kt='keyTimes="0;.3;.7;1" calcMode="spline" keySplines=".45 0 .55 1;0 0 1 1;.45 0 .55 1"';
+  function anima(attr, a, b){ return quieto ? "" : '<animate attributeName="'+attr+'" dur="'+dur+'" repeatCount="indefinite" values="'+a+";"+b+";"+b+";"+a+'" '+kt+'/>'; }
+  var P=quieto?F.B:F.A;
+  function trazo(parte, cls){ return '<path class="'+cls+'" d="'+fgD(P,parte)+'">'+anima("d", fgD(F.A,parte), fgD(F.B,parte))+'</path>'; }
+  return '<svg class="fg" viewBox="'+fgCaja(F)+'" aria-hidden="true">'+
+    '<ellipse cx="50" cy="93" rx="46" ry="2.4" class="fg-sombra"/>'+(F.suelo||"")+
+    trazo("brazoR","fg-lejos fg-brazo")+trazo("piernaR","fg-lejos fg-pierna")+
+    trazo("torso","fg-torso")+trazo("piernaL","fg-pierna")+trazo("brazoL","fg-brazo")+
+    '<circle class="fg-cabeza" r="6.4" cx="'+P.h[0]+'" cy="'+P.h[1]+'">'+anima("cx",F.A.h[0],F.B.h[0])+anima("cy",F.A.h[1],F.B.h[1])+'</circle>'+
+  '</svg>';
+}
+
+/* ── modo guiado: un estiramiento por pantalla, con cuenta atrás, y pasa solo al siguiente ── */
+var GUIA=null;
+function guiaPasoDoble(p){ return /por (lado|pierna)/.test(p.d); }
+function guiaEmpieza(k){
+  closeSheet();
+  GUIA={ r:estiraRutina(k), i:0, fin:0, resta:0, pausa:false, tm:0, cambio:false };
+  var c=document.getElementById("guia");
+  if(!c){ c=document.createElement("div"); c.id="guia"; document.body.appendChild(c); }
+  c.hidden=false; document.documentElement.classList.add("guia-abierta");
+  guiaPaso(0);
+  GUIA.tm=setInterval(guiaTic, 200);
+}
+function guiaPaso(i){
+  var r=GUIA.r; if(i<0) i=0;
+  if(i>=r.pasos.length){ guiaFin(); return; }
+  GUIA.i=i; GUIA.resta=r.pasos[i].s*1000; GUIA.fin=Date.now()+GUIA.resta; GUIA.cambio=false;
+  guiaPinta(); sonido("tick");
+}
+function guiaTic(){
+  if(!GUIA || GUIA.pausa || GUIA.hecho) return;
+  var p=GUIA.r.pasos[GUIA.i], total=p.s*1000, resta=Math.max(0, GUIA.fin-Date.now());
+  GUIA.resta=resta;
+  if(guiaPasoDoble(p) && !GUIA.cambio && resta<=total/2){ GUIA.cambio=true; sonido("pop"); var cl=document.querySelector("#guia .gu-lado"); if(cl) cl.classList.add("ve"); }
+  var s=document.querySelector("#guia .gu-seg"); if(s) s.textContent=Math.ceil(resta/1000);
+  var arco=document.querySelector("#guia .gu-arco"); if(arco) arco.style.strokeDashoffset=(GUIA_C*(1-resta/total)).toFixed(1);
+  if(resta<=0) guiaPaso(GUIA.i+1);
+}
+var GUIA_C=2*Math.PI*44;
+function guiaPinta(){
+  var c=document.getElementById("guia"); if(!c||!GUIA) return;
+  var r=GUIA.r, p=r.pasos[GUIA.i], sig=r.pasos[GUIA.i+1], total=p.s*1000;
+  var quieto=typeof medQuieto==="function" && medQuieto();
+  c.style.setProperty("--c", r.c);
+  c.innerHTML='<div class="gu-top"><div class="gu-barras">'+r.pasos.map(function(x,j){ return '<i class="'+(j<GUIA.i?"hecha":j===GUIA.i?"ahora":"")+'"></i>'; }).join("")+'</div>'+
+      '<div class="gu-fila"><span>'+esc(r.t)+' · '+(GUIA.i+1)+' de '+r.pasos.length+'</span><button data-act="x-gu-cierra" aria-label="Cerrar">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'+
+    '<div class="gu-escena">'+figuraSVG(p.f, quieto)+(guiaPasoDoble(p)?'<span class="gu-lado'+(GUIA.cambio?" ve":"")+'">Cambia de lado</span>':'')+'</div>'+
+    '<div class="gu-info"><h2 class="display">'+esc(p.t)+'</h2><p>'+esc(p.d)+'</p>'+
+      '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
+    '<div class="gu-mandos">'+
+      '<button class="gu-b" data-act="x-gu-atras" aria-label="Anterior"'+(GUIA.i?'':' disabled')+'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>'+
+      '<button class="gu-reloj" data-act="x-gu-pausa" aria-label="'+(GUIA.pausa?"Seguir":"Pausa")+'"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" class="gu-pista"/>'+
+        '<circle cx="50" cy="50" r="44" class="gu-arco" stroke-dasharray="'+GUIA_C.toFixed(1)+'" stroke-dashoffset="'+(GUIA_C*(1-GUIA.resta/total)).toFixed(1)+'"/></svg>'+
+        '<b class="gu-seg num">'+Math.ceil(GUIA.resta/1000)+'</b><small>'+(GUIA.pausa?"En pausa":"segundos")+'</small></button>'+
+      '<button class="gu-b" data-act="x-gu-sigue" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>'+
+    '</div>'+
+    '<p class="gu-sig">'+(sig?'Después: <b>'+esc(sig.t)+'</b>':'Es el último')+'</p>';
+}
+function guiaPausa(){
+  if(!GUIA) return;
+  if(GUIA.pausa){ GUIA.pausa=false; GUIA.fin=Date.now()+GUIA.resta; } else { GUIA.pausa=true; GUIA.resta=Math.max(0, GUIA.fin-Date.now()); }
+  guiaPinta();
+}
+/* al terminar: si la rutina está entre tus hábitos, se marca la de hoy */
+function guiaFin(){
+  var r=GUIA.r, tx=estiraHabito(r).toLowerCase(), hab=null;
+  idealTodos().forEach(function(x){ if(String(x.text||"").toLowerCase()===tx) hab=x; });
+  var marcado=false;
+  if(hab){ var t=today(); if(!S.checks[t]) S.checks[t]=[]; if(S.checks[t].indexOf(hab.id)<0){ S.checks[t].push(hab.id); save(); marcado=true; } }
+  GUIA.hecho=true; sonido("pop");
+  var c=document.getElementById("guia"); if(!c) return;
+  c.innerHTML='<div class="gu-top"><div class="gu-fila"><span>'+esc(r.t)+'</span><button data-act="x-gu-cierra" aria-label="Cerrar">'+
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'+
+    '<div class="gu-final"><span class="gu-ok">'+ICON_CHECK+'</span><h2 class="display">Rutina hecha</h2>'+
+      '<p>'+estiraMin(r)+' minutos, '+r.pasos.length+' estiramientos.'+(marcado?' La he marcado en tus hábitos de hoy.':hab?' Ya estaba marcada hoy.':'')+'</p>'+
+      (hab?'':'<button class="btn btn-primary w-full !py-3 mt-5" data-act="x-gu-habito">Añadirla a mis hábitos</button>')+
+      '<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-gu-cierra">Cerrar</button></div>';
+}
+function guiaCierra(){
+  if(GUIA && GUIA.tm) clearInterval(GUIA.tm);
+  GUIA=null;
+  var c=document.getElementById("guia"); if(c){ c.hidden=true; c.innerHTML=""; }
+  document.documentElement.classList.remove("guia-abierta");
+  render();
+}
+function guiaAccion(a){
+  if(a==="x-gu-cierra"){ guiaCierra(); return true; }
+  if(!GUIA) return false;
+  if(a==="x-gu-pausa"){ guiaPausa(); return true; }
+  if(a==="x-gu-sigue"){ GUIA.pausa=false; guiaPaso(GUIA.i+1); return true; }
+  if(a==="x-gu-atras"){ GUIA.pausa=false; guiaPaso(GUIA.i-1); return true; }
+  if(a==="x-gu-habito"){ var r=GUIA.r; if(habitoAnade(estiraHabito(r), "vital")){ var hb=null; idealTodos().forEach(function(x){ if(x.text===estiraHabito(r)) hb=x; });
+      if(hb){ var t=today(); if(!S.checks[t]) S.checks[t]=[]; if(S.checks[t].indexOf(hb.id)<0) S.checks[t].push(hb.id); save(); }
+      var bt=document.querySelector('#guia [data-act="x-gu-habito"]'); if(bt) bt.remove(); } return true; }
+  return false;
+}
+document.addEventListener("keydown", function(e){ if(GUIA && e.key==="Escape") guiaCierra(); });
+
+var CRECER2_CSS=[
+'.fg{ width:100%; height:100%; overflow:visible; }',
+'.fg path{ fill:none; stroke-linecap:round; stroke-linejoin:round; }',
+'.fg-torso{ stroke:var(--fg-c); stroke-width:13; }',
+'.fg-brazo{ stroke:var(--fg-c); stroke-width:6.5; } .fg-pierna{ stroke:var(--fg-c); stroke-width:8.5; }',
+'.fg-lejos{ stroke:color-mix(in srgb,var(--fg-c) 45%,var(--fg-fondo)); }',
+'.fg-cabeza{ fill:var(--fg-c); }',
+'.fg-sombra{ fill:color-mix(in srgb,var(--fg-c) 14%,transparent); }',
+'.fg-pared{ stroke:color-mix(in srgb,var(--fg-c) 30%,transparent)!important; stroke-width:2.5; stroke-dasharray:3 4; }',
+'.cr-rutina .cr-r-ico{ --fg-c:#fff; --fg-fondo:var(--c); }',
+/* miniatura de la figura en la lista de pasos */
+'.cr-pasos li .cr-mini{ flex:0 0 auto; width:62px; height:62px; border-radius:14px; padding:5px; background:color-mix(in srgb,var(--c) 11%,transparent); --fg-c:var(--c); --fg-fondo:var(--bg); }',
+/* pantalla del modo guiado */
+'#guia{ position:fixed; inset:0; z-index:70; display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 18px);',
+'  background:var(--bg); background-image:radial-gradient(90% 55% at 50% 22%, color-mix(in srgb,var(--c) 16%,transparent), transparent 70%); color:var(--t1); overflow-y:auto; }',
+'html.guia-abierta, html.guia-abierta body{ overflow:hidden; }',
+'#guia > *{ width:100%; max-width:460px; margin-left:auto; margin-right:auto; }',
+'.gu-barras{ display:flex; gap:4px; } .gu-barras i{ flex:1; height:4px; border-radius:99px; background:var(--fill-hi); }',
+'.gu-barras i.hecha{ background:var(--c); } .gu-barras i.ahora{ background:color-mix(in srgb,var(--c) 55%,var(--fill-hi)); }',
+'.gu-fila{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; font-size:13px; font-weight:700; color:var(--t2); }',
+'.gu-fila button{ display:grid; place-items:center; width:36px; height:36px; border-radius:99px; background:var(--fill); color:var(--t1); }',
+'.gu-fila button svg{ width:16px; height:16px; }',
+'.gu-escena{ position:relative; flex:1 1 auto; min-height:220px; max-height:46vh; margin:14px auto 6px; aspect-ratio:1; border-radius:28px; padding:6%;',
+'  background:color-mix(in srgb,var(--c) 10%,var(--glass-bg-hi)); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 18%,transparent); --fg-c:var(--c); --fg-fondo:var(--bg); }',
+'.gu-lado{ position:absolute; left:50%; top:14px; transform:translate(-50%,-6px); opacity:0; font-size:12.5px; font-weight:800; padding:6px 12px; border-radius:99px; color:#fff; background:var(--c); transition:opacity .3s var(--ease), transform .3s var(--spring); }',
+'.gu-lado.ve{ opacity:1; transform:translate(-50%,0); }',
+'.gu-info{ text-align:center; margin-top:8px; } .gu-info h2{ font-size:24px; font-weight:800; letter-spacing:-.02em; }',
+'.gu-info p{ font-size:14px; color:var(--t2); line-height:1.45; margin:6px auto 0; max-width:36ch; }',
+'.gu-info .cr-video{ margin-top:10px; }',
+'.gu-mandos{ display:flex; align-items:center; justify-content:center; gap:26px; margin-top:18px; }',
+'.gu-b{ display:grid; place-items:center; width:52px; height:52px; border-radius:99px; background:var(--fill); color:var(--t1); } .gu-b svg{ width:22px; height:22px; } .gu-b:disabled{ opacity:.35; }',
+'.gu-reloj{ position:relative; width:118px; height:118px; display:flex; flex-direction:column; align-items:center; justify-content:center; }',
+'.gu-reloj svg{ position:absolute; inset:0; width:100%; height:100%; transform:rotate(-90deg); }',
+'.gu-pista{ fill:none; stroke:var(--fill-hi); stroke-width:7; } .gu-arco{ fill:none; stroke:var(--c); stroke-width:7; stroke-linecap:round; transition:stroke-dashoffset .25s linear; }',
+'.gu-reloj b{ position:relative; font-size:38px; font-weight:800; line-height:1; } .gu-reloj small{ position:relative; font-size:11px; font-weight:600; color:var(--t3); margin-top:3px; }',
+'.gu-sig{ text-align:center; font-size:13px; color:var(--t3); margin-top:16px; } .gu-sig b{ color:var(--t1); font-weight:700; }',
+'.gu-final{ margin:auto; text-align:center; padding:20px 0; } .gu-final h2{ font-size:28px; font-weight:800; margin-top:16px; } .gu-final p{ font-size:14px; color:var(--t2); margin-top:6px; line-height:1.45; }',
+'.gu-ok{ display:inline-grid; place-items:center; width:72px; height:72px; border-radius:99px; color:#fff; background:var(--c); } .gu-ok svg{ width:32px; height:32px; }'
+].join("\n");
+(function(){ var st=document.createElement("style"); st.id="crecer2-css"; st.textContent=CRECER2_CSS; document.head.appendChild(st); })();
 
 
 if(!load()) save();
