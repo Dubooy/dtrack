@@ -19,6 +19,10 @@
 --   Tus datos (ficha, días, fotos) son los mismos en todos tus grupos.
 -- ════════════════════════════════════════════════════════════════
 
+-- la regla de antes: «cada persona en un solo grupo» (índice único sobre uid)
+alter table public.g_miembros drop constraint if exists g_miembros_uno;
+drop index if exists public.g_miembros_uno;
+
 create table if not exists public.g_activo (
   uid    uuid primary key,
   grupo  uuid not null references public.g_grupos(id) on delete cascade,
