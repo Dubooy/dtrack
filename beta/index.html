@@ -15681,7 +15681,7 @@ function medAudio(){
 /* un cuenco tibetano: parciales no armónicos que se apagan despacio, con un leve batido */
 function medCuenco(f, vol, dur){
   var ctx=medAudio(); if(!ctx) return;
-  var t=ctx.currentTime+0.03, sal=ctx.createGain(); sal.gain.value=1; sal.connect(ctx.destination);
+  var t=ctx.currentTime+0.03, sal=ctx.createGain(); sal.gain.value=1; sal.connect(medSalida(ctx));
   [[1,1,1],[2.71,.42,.7],[5.13,.16,.45],[8.4,.05,.3]].forEach(function(p){
     [0,1.6].forEach(function(det){
       try{
@@ -15707,7 +15707,7 @@ function medOlasEmpieza(){
     var src=ctx.createBufferSource(); src.buffer=buf; src.loop=true;
     var fil=ctx.createBiquadFilter(); fil.type="lowpass"; fil.frequency.value=420; fil.Q.value=0.5;
     var g=ctx.createGain(); g.gain.value=0.0001;
-    src.connect(fil); fil.connect(g); g.connect(ctx.destination); src.start();
+    src.connect(fil); fil.connect(g); g.connect(medSalida(ctx)); src.start();
     g.gain.linearRampToValueAtTime(0.03, ctx.currentTime+3);
     MED_OLAS={ src:src, fil:fil, g:g };
   }catch(e){ MED_OLAS=null; }
@@ -16983,28 +16983,38 @@ cambiarUsuario=function(v){
 
 /* ════════════════════════════════════════════════════════════════
    CHAT DEL GRUPO (sep 2026)
-   · Cada grupo tiene su chat. En Social, «Actividad» pasa a ser una
-     tarjeta con lo último del chat; al tocarla se abre a pantalla
-     completa. Los logros que se publican solos siguen saliendo, dentro
-     del chat, como líneas pequeñas en gris.
+   · Cada grupo tiene su chat, dentro de Social (donde estaba
+     «Actividad»): un recuadro con scroll y la caja para escribir debajo.
+     Los logros que se publican solos salen dentro, como líneas en gris.
+   · Se pueden mandar fotos (botón de la cámara). Debajo de cada foto,
+     también de las del gym que salen solas, hay comentarios que se
+     despliegan.
    · Lo nuevo llega al momento: se escucha el tiempo real de Supabase
-     (a mano, sin librería, como el resto de la nube) y, si no llega,
-     se vuelve a preguntar cada pocos segundos con el chat abierto.
+     (a mano, sin librería, como el resto de la nube) y, si no llega, se
+     vuelve a preguntar cada pocos segundos mientras ves Social.
    · Reacciones: las mismas de Actividad (emojisDisponibles), una de
      cada por persona; tocar la burbuja las muestra, tocar otra vez quita.
    · Cambiar de grupo: el nombre del grupo lleva una flecha ⌄ que abre
      la lista de tus grupos con los mensajes sin leer de cada uno. Si
      hay algo sin leer, sale un punto en la pestaña Social.
-   · Servidor: tabla g_chat y funciones gc_* (servidor/chat.sql).
+   · El recuadro es siempre el mismo trozo de página: cuando Social se
+     repinta se vuelve a colocar tal cual (con lo escrito y el scroll),
+     y mientras escribes no se repinta, para no cerrar el teclado.
+   · Servidor: tabla g_chat y funciones gc_* (servidor/social.sql).
    Solo con cuenta y un grupo de verdad; sin eso, Social sigue igual.
    ════════════════════════════════════════════════════════════════ */
-var CH={ por:{}, abierto:false, grupoAbierto:"", abiertoReac:null, borrar:null, borrador:"", firma:"", mantenArriba:false, sinServidor:false };
+var CH={ por:{}, caja:null, cajaGrupo:"", abiertoReac:null, borrar:null, firma:"", mantenArriba:false, sinServidor:false,
+         coms:{}, comBorr:{}, repintar:false, listaPend:false };
 var CH_RES={}, chResT=0, CH_N=60;
 G_ERR.muy_rapido="Vas muy rápido. Espera un momento.";
 G_ERR.vacio="El mensaje está vacío.";
+G_ERR.foto_mal="Esa foto no se puede mandar.";
+G_ERR.no_existe="Ese mensaje ya no está.";
 
 function chYo(){ return (ses && ses.uid) || ""; }
 function chActivo(){ return !!(GRUPO && GRUPO.real && GRUPO.id && gReal()); }
+function chVisible(){ return !!(chActivo() && view==="social" && CH.caja && CH.caja.isConnected && document.visibilityState!=="hidden"); }
+function chEscribiendo(){ var a=document.activeElement; return !!(a && CH.caja && CH.caja.contains(a) && (a.tagName==="TEXTAREA" || a.tagName==="INPUT")); }
 /* lo de cada grupo por separado: cambiar de grupo no mezcla mensajes */
 function chG(g){
   g=g||(GRUPO && GRUPO.id)||"";
@@ -17016,6 +17026,8 @@ function chQuien(uid){
   if(GRUPO) for(var i=0;i<GRUPO.miembros.length;i++) if(GRUPO.miembros[i].uid===uid) return GRUPO.miembros[i];
   return null;
 }
+/* mensaje del chat (no comentario) */
+function chPrincipal(m){ return !m.padre && !m.evento; }
 function chMapea(x){
   x=x||{};
   var reac={}, mias={}, yo=chYo();
@@ -17024,7 +17036,8 @@ function chMapea(x){
     if(e.length>8 || !l.length) return;
     reac[e]=Math.min(l.length, 99); if(l.indexOf(yo)>=0) mias[e]=1;
   });
-  return { id:gNum(x.id, 9e15), uid:gTxt(x.uid,40), texto:gTxt(x.texto,1000), ts:Date.parse(x.creado)||Date.now(), reac:reac, mias:mias };
+  return { id:gNum(x.id, 9e15), uid:gTxt(x.uid,40), texto:gTxt(x.texto,1000), foto:gUrl(x.foto), padre:gNum(x.padre, 9e15), evento:gNum(x.evento, 9e15),
+           ts:Date.parse(x.creado)||Date.now(), reac:reac, mias:mias };
 }
 /* la actividad automática trae la hora exacta, para ordenarla con los mensajes */
 var _chMapea=gMapea;
@@ -17041,20 +17054,24 @@ function chCargar(antes){
   if(G.cargando && !antes) return G.cargando;
   var p=gRpc("gc_leer", { p_grupo:G.id, p_antes:antes||null, p_n:CH_N }).then(function(l){
     l=(Array.isArray(l)?l:[]).map(chMapea).filter(function(m){ return m.id; });
+    var princ=l.filter(chPrincipal);
     CH.sinServidor=false; G.error=false;
     if(antes){
       var ya={}; G.msgs.forEach(function(m){ if(m.id) ya[m.id]=1; });
       G.msgs=l.filter(function(m){ return !ya[m.id]; }).concat(G.msgs);
-      G.hayMas=l.length>=CH_N; CH.mantenArriba=true;
+      G.hayMas=princ.length>=CH_N; CH.mantenArriba=true;
     } else {
-      var min=l.length ? l[0].id : Infinity;
-      var viejos=G.msgs.filter(function(m){ return m.id && m.id<min; });
+      /* lo anterior a lo recibido (cargado con «ver anteriores») se queda, con sus comentarios */
+      var min=princ.length ? princ[0].id : Infinity, viejos={};
+      var quedan=G.msgs.filter(function(m){ if(m.id && chPrincipal(m) && m.id<min){ viejos[m.id]=1; return true; } return false; });
+      var comsViejos=G.msgs.filter(function(m){ return m.id && m.padre && viejos[m.padre]; });
       /* lo que se está enviando se queda, salvo que ya haya llegado por aquí */
       var pend=G.msgs.filter(function(m){
-        return !m.id && !(m.estado==="enviando" && l.some(function(n){ return n.uid===m.uid && n.texto===m.texto; }));
+        return !m.id && !(m.estado==="enviando" && l.some(function(n){
+          return n.uid===m.uid && n.texto===m.texto && !!n.foto===!!(m.foto||m.local) && n.padre===m.padre && n.evento===m.evento; }));
       });
-      if(!G.leido){ G.hayMas=l.length>=CH_N; G.leido=true; }
-      G.msgs=viejos.concat(l, pend);
+      if(!G.leido){ G.hayMas=princ.length>=CH_N; G.leido=true; }
+      G.msgs=quedan.concat(comsViejos, l, pend);
       G.cargado=Date.now();
     }
     chPintaTodo();
@@ -17066,17 +17083,24 @@ function chCargar(antes){
   if(!antes) G.cargando=p;
   return p;
 }
-function chEnviar(txt){
+/* mandar: texto, foto (blob + vista previa) o comentario (padre/evento) */
+function chEnviar(txt, extra){
+  extra=extra||{};
   txt=String(txt||"").replace(/^\s+|\s+$/g, "").slice(0, 1000);
-  if(!txt || !chActivo()) return;
-  var G=chG(), m={ id:0, tmp:"t"+Date.now()+Math.random().toString(36).slice(2,6), uid:chYo(), texto:txt, ts:Date.now(), reac:{}, mias:{}, estado:"enviando" };
+  if((!txt && !extra.blob) || !chActivo()) return null;
+  var G=chG(), m={ id:0, tmp:"t"+Date.now()+Math.random().toString(36).slice(2,6), uid:chYo(), texto:txt, foto:"", local:extra.local||"", blob:extra.blob||null,
+                   padre:extra.padre||0, evento:extra.evento||0, ts:Date.now(), reac:{}, mias:{}, estado:"enviando" };
   G.msgs.push(m);
-  chPintaLista(true);
+  chPintaLista(chPrincipal(m), true);
   chSube(G, m);
+  return m;
 }
 function chSube(G, m){
   m.estado="enviando";
-  gRpc("gc_enviar", { p_grupo:G.id, p_texto:m.texto }).then(function(x){
+  var antes=(m.blob && !m.foto) ? chSubeFoto(m.blob).then(function(url){ m.foto=url; }) : Promise.resolve();
+  antes.then(function(){
+    return gRpc("gc_enviar", { p_grupo:G.id, p_texto:m.texto, p_foto:m.foto||null, p_padre:m.padre||null, p_evento:m.evento||null });
+  }).then(function(x){
     var n=chMapea(x); if(!n.id) throw new Error("sin_id");
     var i=G.msgs.indexOf(m), ya=G.msgs.some(function(o){ return o.id===n.id; });
     if(i>=0){ if(ya) G.msgs.splice(i,1); else G.msgs[i]=n; }
@@ -17084,14 +17108,56 @@ function chSube(G, m){
     chPintaTodo();
   }).catch(function(e){
     var t=(e && e.message) || "";
-    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : "";
+    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : t==="foto" ? "no se ha podido subir la foto" : "";
     if(t==="sin_servidor") CH.sinServidor=true;
     chPintaTodo();
     if(t==="sin_servidor") avisoNube("El chat aún no está activado en el servidor.");
-    else if(t.indexOf("muy_rapido")>=0 || t.indexOf("no_eres_miembro")>=0) avisoNube(gError(e));
+    else if(G_ERR[t] || t.indexOf("muy_rapido")>=0 || t.indexOf("no_eres_miembro")>=0) avisoNube(gError(e));
     /* en la beta, cualquier otro error se enseña tal cual para poder arreglarlo */
-    else if(window.DTRACK_BETA && t && navigator.onLine!==false) avisoNube("No se ha enviado: "+t.slice(0,120));
+    else if(window.DTRACK_BETA && t && t!=="foto" && navigator.onLine!==false) avisoNube("No se ha enviado: "+t.slice(0,120));
   });
+}
+/* la foto va al mismo cubo público que las del gym, en tu carpeta y con un nombre al azar */
+function chSubeFoto(blob){
+  var az=new Uint8Array(9); try{ crypto.getRandomValues(az); }catch(e){ for(var k=0;k<9;k++) az[k]=Math.floor(Math.random()*256); }
+  var ruta="gym/"+ses.uid+"/chat-"+Date.now().toString(36)+"-"+Array.prototype.map.call(az, function(n){ return ("0"+n.toString(16)).slice(-2); }).join("")+".jpg";
+  return tokenFresco().then(function(){
+    return fetch(NUBE_URL+"/storage/v1/object/"+ruta, { method:"POST",
+      headers:{ "apikey":NUBE_KEY, "Authorization":"Bearer "+ses.access_token, "Content-Type":"image/jpeg", "x-upsert":"true" }, body:blob });
+  }).then(function(r){
+    if(!r || !r.ok) throw new Error("foto");
+    return NUBE_URL+"/storage/v1/object/public/"+ruta;
+  }, function(){ throw new Error("foto"); });
+}
+function chFotoElige(){
+  var i=document.createElement("input"); i.type="file"; i.accept="image/*"; i.style.cssText="position:fixed;left:-9999px";
+  document.body.appendChild(i);
+  i.addEventListener("change", function(){ var f=i.files && i.files[0]; if(i.parentNode) i.parentNode.removeChild(i); if(f) chFotoPrepara(f); });
+  i.click();
+}
+/* se reduce en el móvil (1280 px) y se manda con lo que hubiera escrito como pie */
+function chFotoPrepara(archivo){
+  if(archivo.size > 25*1024*1024){ avisoNube("Esa foto pesa demasiado."); return; }
+  var lector=new FileReader();
+  lector.onerror=function(){ avisoNube("No he podido leer esa foto."); };
+  lector.onload=function(){
+    var im=new Image();
+    im.onerror=function(){ avisoNube("Ese archivo no es una imagen."); };
+    im.onload=function(){
+      var L=1280, k=Math.min(1, L/Math.max(im.width, im.height)), w=Math.round(im.width*k), h=Math.round(im.height*k);
+      var c=document.createElement("canvas"); c.width=w; c.height=h; var x=c.getContext("2d"); if(!x) return;
+      x.drawImage(im, 0, 0, w, h);
+      var previa=c.toDataURL("image/jpeg", .6);
+      c.toBlob(function(b){
+        if(!b){ avisoNube("No he podido preparar la foto."); return; }
+        var ta=document.getElementById("ch-texto"), pie=ta ? ta.value : "";
+        if(ta){ ta.value=""; chAlto(ta); }
+        chEnviar(pie, { blob:b, local:previa });
+      }, "image/jpeg", .82);
+    };
+    im.src=lector.result;
+  };
+  lector.readAsDataURL(archivo);
 }
 function chBusca(key){
   var id=+String(key).slice(2), G=chG();
@@ -17114,7 +17180,7 @@ function chBorra(key){
   if(CH.borrar!==key){ CH.borrar=key; chPintaLista(); return; }
   var m=chBusca(key), G=chG(); CH.borrar=null; CH.abiertoReac=null;
   if(!m) return;
-  var i=G.msgs.indexOf(m); if(i>=0) G.msgs.splice(i,1);
+  G.msgs=G.msgs.filter(function(o){ return o!==m && o.padre!==m.id; });
   sonido("borrar"); chPintaTodo();
   gRpc("gc_borrar", { p_id:m.id }).catch(function(err){ avisoNube(gError(err)); chCargar(); });
 }
@@ -17130,7 +17196,8 @@ function chResumen(forzar){
     CH_RES=o;
     /* si llega algo nuevo en el grupo que ves, se trae */
     if(chActivo() && o[GRUPO.id] && o[GRUPO.id].ultimo>chUltimo(chG())) chCargar();
-    if(JSON.stringify(o)!==antes && view==="social" && !CH.abierto) rSocial(); else chPunto();
+    if(JSON.stringify(o)!==antes && view==="social") rSocial();
+    chPunto();
     return o;
   }).catch(function(e){ if(e && e.message==="sin_servidor") CH.sinServidor=true; return CH_RES; });
 }
@@ -17140,8 +17207,9 @@ function chSinLeer(g){
   if(G && G.cargado){ var n=0; G.msgs.forEach(function(m){ if(m.id && m.id>(V[g]||0) && m.uid!==yo) n++; }); return n; }
   return (CH_RES[g] && CH_RES[g].sin) || 0;
 }
+/* viendo Social, lo del grupo que tienes delante cuenta como leído */
 function chMarcaVisto(){
-  if(!CH.abierto || !chActivo() || document.visibilityState==="hidden") return;
+  if(!chVisible()) return;
   var g=GRUPO.id, max=chUltimo(chG()), V=chVistos();
   if(max>(V[g]||0)){ V[g]=max; save(); }
   if(CH_RES[g]) CH_RES[g].sin=0;
@@ -17151,7 +17219,7 @@ function chPunto(){
   var hay=false;
   if(chActivo()){
     var ids=MIS_GRUPOS.length ? MIS_GRUPOS.map(function(g){ return g.id; }) : [GRUPO.id];
-    ids.forEach(function(g){ if(chSinLeer(g)>0 && !(CH.abierto && g===GRUPO.id)) hay=true; });
+    ids.forEach(function(g){ if(chSinLeer(g)>0 && !(chVisible() && g===GRUPO.id)) hay=true; });
   }
   $$('#mtabs button[data-view="social"], #rail button[data-view="social"]').forEach(function(b){ b.classList.toggle("ch-punto", hay); });
 }
@@ -17159,7 +17227,7 @@ function chPunto(){
 /* ── tiempo real: el aviso de Supabase de que algo ha cambiado en g_chat ──
    Solo hace de timbre: al sonar, se vuelven a pedir los últimos mensajes. */
 var chWs=null, chWsTopic="", chWsOk=false, chWsRef=0, chWsJoin="", chWsHb=null, chWsReint=0, chWsTok="", chAvisoT=null;
-function chRtQuiere(){ return chActivo() && document.visibilityState!=="hidden" && (CH.abierto || view==="social"); }
+function chRtQuiere(){ return chActivo() && document.visibilityState!=="hidden" && view==="social"; }
 function chRtRevisa(){
   if(!chRtQuiere()){ chRtCierra(); return; }
   var topic="realtime:dtrack-chat-"+GRUPO.id;
@@ -17211,17 +17279,16 @@ function chRtCierra(){
   var ws=chWs; chWs=null; chWsTopic=""; chWsOk=false;
   try{ ws.close(); }catch(e){}
 }
-/* por si el tiempo real no llega: con el chat abierto se pregunta cada 4 s (cada 30 s si llega) */
+/* por si el tiempo real no llega: viendo Social se pregunta cada 4 s (cada 30 s si llega) */
 setInterval(function(){
-  if(!chActivo() || document.visibilityState==="hidden") return;
-  var G=chG(), hace=Date.now()-(G.cargado||0);
-  if(CH.abierto){ if(hace>(chWsOk?30000:4000)) chCargar(); }
-  else if(view==="social" && hace>(chWsOk?90000:25000)) chCargar();
+  if(!chActivo() || document.visibilityState==="hidden" || view!=="social") return;
+  var G=chG();
+  if(Date.now()-(G.cargado||0)>(chWsOk?30000:4000)) chCargar();
 }, 2000);
 document.addEventListener("visibilitychange", function(){
   if(document.visibilityState==="hidden"){ chRtCierra(); return; }
   if(!chActivo()) return;
-  chRtRevisa(); if(CH.abierto || view==="social") chCargar(); chResumen(true);
+  chRtRevisa(); if(view==="social") chCargar(); chResumen(true);
 });
 
 /* ── pintar ── */
@@ -17231,13 +17298,18 @@ function chDiaTxt(d){
   if(d===hoy) return tr("Hoy"); if(d===addDays(hoy,-1)) return tr("Ayer");
   return cap(fmt(d, d.slice(0,4)===hoy.slice(0,4) ? { weekday:"long", day:"numeric", month:"long" } : { day:"numeric", month:"long", year:"numeric" }));
 }
+function chNombre(uid){ if(uid===chYo()) return tr("Tú"); var q=chQuien(uid); return q ? q.usuario : "alguien"; }
 /* mensajes y actividad automática, por orden de hora */
 function chItems(){
-  var G=chG(), l=G.msgs.map(function(m){ return { k:"m", ts:m.ts, m:m }; });
-  var desde=(G.hayMas && G.msgs.length) ? G.msgs[0].ts : 0;
+  var G=chG(), princ=G.msgs.filter(chPrincipal), l=princ.map(function(m){ return { k:"m", ts:m.ts, m:m }; });
+  var desde=(G.hayMas && princ.length) ? princ[0].ts : 0;
   ((GRUPO && GRUPO.muro) || []).forEach(function(e){ if(e.ts && e.ts>=desde) l.push({ k:"e", ts:e.ts, e:e }); });
   l.sort(function(a,b){ return a.ts-b.ts; });
   return l;
+}
+function chComentarios(key){
+  var id=+String(key).slice(2), ev=key.indexOf("e:")===0;
+  return chG().msgs.filter(function(m){ return ev ? m.evento===id : (m.padre===id && id>0); });
 }
 function chReacHTML(reac, mias, key){
   var ks=Object.keys(reac||{}); if(!ks.length) return "";
@@ -17253,19 +17325,39 @@ function chEligeHTML(key, mias, mio){
   (mio ? '<button class="ch-borra'+(CH.borrar===key?" seguro":"")+'" data-act="x-chat-borra" data-id="'+esc(key)+'">'+(CH.borrar===key?"¿Borrar?":"Borrar")+'</button>' : '')+
   '</div>';
 }
+/* los comentarios de una foto, plegados; al abrirlos, la caja para comentar */
+function chComHTML(key){
+  var l=chComentarios(key), ab=!!CH.coms[key];
+  var h='<div class="ch-com'+(ab?" abierto":"")+'"><button class="ch-com-t" data-act="x-chat-com" data-id="'+esc(key)+'">'+
+    (l.length ? l.length+" "+(l.length===1?"comentario":"comentarios") : "Comentar")+
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>';
+  if(ab){
+    h+='<div class="ch-com-lista">'+l.map(function(c){
+      return '<p class="ch-com-c'+(c.estado?" "+c.estado:"")+'"><b>'+esc(chNombre(c.uid))+'</b> '+esc(c.texto)+
+        (c.estado==="fallo" ? ' <button class="ch-fallo" data-act="x-chat-reintenta" data-tmp="'+esc(c.tmp)+'">Reintentar</button>' : '')+'</p>';
+    }).join("")+
+    '<div class="ch-com-esc"><input class="ch-com-in" data-id="'+esc(key)+'" maxlength="500" placeholder="Añade un comentario…" enterkeyhint="send" autocomplete="off" value="'+esc(CH.comBorr[key]||"")+'">'+
+      '<button class="ch-com-env" data-act="x-chat-com-envia" data-id="'+esc(key)+'">Enviar</button></div></div>';
+  }
+  return h+'</div>';
+}
 function chMensajeHTML(m, sigue, mio){
-  var key=m.id ? "m:"+m.id : "", q=mio ? null : chQuien(m.uid), nom=q ? q.usuario : "alguien";
+  var key=m.id ? "m:"+m.id : "", nom=chNombre(m.uid), q=mio ? null : chQuien(m.uid), foto=m.foto||m.local;
   var cara="";
   if(!mio) cara = sigue ? '<span class="ch-hueco"></span>'
     : '<span class="ch-cara"'+(q?' data-act="x-perfil" data-u="'+esc(nom)+'"':'')+'>'+caraDe(q||{ usuario:nom }, 28)+'</span>';
+  var hora='<span class="ch-hora num">'+(m.estado==="enviando"?"···":chHora(m.ts))+'</span>';
   return '<div class="ch-m'+(mio?" yo":"")+(sigue?" sigue":"")+'">'+cara+
     '<div class="ch-col">'+
       (!mio && !sigue ? '<p class="ch-quien">'+esc(nom)+'</p>' : '')+
-      '<button class="ch-burbuja'+(m.estado?" "+m.estado:"")+'"'+(key?' data-act="x-chat-toca" data-id="'+key+'"':'')+'>'+
-        '<span class="ch-txt">'+esc(m.texto)+'</span><span class="ch-hora num">'+(m.estado==="enviando"?"···":chHora(m.ts))+'</span></button>'+
+      '<div class="ch-burbuja'+(foto?" con-foto":"")+(m.estado?" "+m.estado:"")+'"'+(key?' data-act="x-chat-toca" data-id="'+key+'"':'')+'>'+
+        (foto ? '<button class="ch-foto-m"'+(m.foto?' data-act="x-fg-ver" data-u="'+esc(m.foto)+'" data-t="'+esc(nom+" · "+chHora(m.ts))+'"':'')+'><img src="'+esc(foto)+'" alt="" loading="lazy"></button>' : '')+
+        (m.texto ? '<span class="ch-txt">'+esc(m.texto)+'</span>'+hora : (foto ? '<span class="ch-pie">'+hora+'</span>' : hora))+
+      '</div>'+
       chReacHTML(m.reac, m.mias, key)+
       (key && CH.abiertoReac===key ? chEligeHTML(key, m.mias, mio) : '')+
       (m.estado==="fallo" ? '<button class="ch-fallo" data-act="x-chat-reintenta" data-tmp="'+esc(m.tmp)+'">No se ha enviado'+(m.motivo?" ("+esc(m.motivo)+")":"")+' · Reintentar</button>' : '')+
+      (key && m.foto ? chComHTML(key) : '')+
     '</div></div>';
 }
 function chEventoHTML(e){
@@ -17275,19 +17367,24 @@ function chEventoHTML(e){
     (e.foto ? '<button class="ch-foto" data-act="x-fg-ver" data-u="'+esc(e.foto)+'" data-t="'+esc(e.usuario+" · "+e.cuando)+'"><img src="'+esc(e.foto)+'" alt="" loading="lazy"></button>' : '')+
     chReacHTML(e.reac, e.mias, key)+
     (CH.abiertoReac===key ? chEligeHTML(key, e.mias, false) : '')+
+    (e.foto && /^\d+$/.test(String(e.id)) ? chComHTML(key) : '')+
   '</div>';
 }
 function chFirma(items){
   return items.map(function(it){
     return it.k==="m" ? (it.m.id||it.m.tmp)+(it.m.estado||"")+JSON.stringify(it.m.reac)+JSON.stringify(it.m.mias)
-                      : "e"+it.e.id+JSON.stringify(it.e.reac||{})+JSON.stringify(it.e.mias||{});
-  }).join("|")+"#"+CH.abiertoReac+"#"+CH.borrar+"#"+chG().hayMas+"#"+chG().cargado+"#"+CH.sinServidor+"#"+(GRUPO?GRUPO.miembros.length:0);
+                      : "e"+it.e.id+JSON.stringify(it.e.reac||{})+JSON.stringify(it.e.mias||{})+(it.e.foto?1:0);
+  }).join("|")+"#"+chG().msgs.filter(function(m){ return !chPrincipal(m); }).map(function(m){ return (m.id||m.tmp)+(m.estado||""); }).join(",")+
+    "#"+JSON.stringify(CH.coms)+"#"+CH.abiertoReac+"#"+CH.borrar+"#"+chG().hayMas+"#"+chG().cargado+"#"+CH.sinServidor+"#"+(GRUPO?GRUPO.miembros.length:0);
 }
-function chPintaLista(abajo){
-  var lista=document.getElementById("ch-lista"), sc=document.getElementById("ch-scroll"); if(!lista || !sc) return;
+/* abajo: bajar al final; forzar: aunque estés comentando (después se devuelve el foco) */
+function chPintaLista(abajo, forzar){
+  var lista=document.getElementById("ch-lista"), sc=document.getElementById("ch-scroll"); if(!lista || !sc || !chActivo()) return;
+  var ae=document.activeElement, comentando=ae && ae.classList && ae.classList.contains("ch-com-in") && lista.contains(ae);
+  if(comentando && !forzar){ CH.listaPend=true; return; }
   var items=chItems(), firma=chFirma(items);
   if(firma===CH.firma && !abajo) return;
-  CH.firma=firma;
+  CH.firma=firma; CH.listaPend=false;
   var G=chG(), yo=chYo(), h="", dia="", prev=null;
   var cerca=abajo || (sc.scrollHeight-sc.scrollTop-sc.clientHeight<140);
   if(G.hayMas) h+='<button class="ch-antes" data-act="x-chat-antes">Ver mensajes anteriores</button>';
@@ -17301,7 +17398,7 @@ function chPintaLista(abajo){
     var d=iso(it.ts);
     if(d!==dia){ dia=d; prev=null; h+='<p class="ch-dia">'+esc(chDiaTxt(d))+'</p>'; }
     if(it.k==="e"){ h+=chEventoHTML(it.e); prev=null; return; }
-    var m=it.m, sigue=!!(prev && prev.uid===m.uid && m.ts-prev.ts<5*60000);
+    var m=it.m, sigue=!!(prev && prev.uid===m.uid && m.ts-prev.ts<5*60000 && !prev.foto && !m.foto);
     h+=chMensajeHTML(m, sigue, m.uid===yo);
     prev=m;
   });
@@ -17310,89 +17407,84 @@ function chPintaLista(abajo){
   if(CH.mantenArriba){ CH.mantenArriba=false; sc.scrollTop=arriba+(sc.scrollHeight-alto); }
   else if(cerca) sc.scrollTop=sc.scrollHeight;
   else sc.scrollTop=arriba;
+  /* si estabas comentando, el foco vuelve a tu caja */
+  if(comentando){ var inp=lista.querySelector('.ch-com-in[data-id="'+ae.dataset.id+'"]'); if(inp){ try{ inp.focus({ preventScroll:true }); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){ inp.focus(); } } }
   chMarcaVisto();
 }
-/* la tarjeta de Social: lo último del chat y un «Escribe al grupo…» que lo abre */
-function chTarjetaHTML(){
-  var G=chG(), sin=chSinLeer(G.id), items=chItems().slice(-3), yo=chYo();
-  var filas=items.map(function(it){
-    if(it.k==="e") return '<span class="ch-t-fila ev"><span class="ch-t-txt"><b>'+esc(it.e.usuario)+'</b> '+esc(it.e.texto)+'</span></span>';
-    var m=it.m, q=chQuien(m.uid), nom=(m.uid===yo) ? tr("Tú") : (q ? q.usuario : "alguien");
-    return '<span class="ch-t-fila">'+caraDe(q||{ usuario:nom }, 26)+'<span class="ch-t-txt"><b>'+esc(nom)+'</b> '+esc(m.texto)+'</span></span>';
-  }).join("");
-  if(!filas) filas='<span class="ch-t-vacio">'+(CH.sinServidor ? "El chat aún no está activado en el servidor." : !G.cargado ? "Cargando…" : "Aún no hay mensajes. Saluda al grupo.")+'</span>';
-  return '<div id="ch-tarj"><div class="soc-sec"><h2 class="display">Chat</h2>'+
-      (sin ? '<span class="ch-nuevos num">'+(sin>=99?"99+":sin)+' '+(sin===1?"nuevo":"nuevos")+'</span>' : '')+'</div>'+
-    '<button class="ch-tarjeta" data-act="x-chat">'+filas+'<span class="ch-t-escribe">Escribe al grupo…</span></button></div>';
-}
-function chPintaTarjeta(){
-  var t=document.getElementById("ch-tarj");
-  if(t && view==="social" && chActivo()) t.outerHTML=chTarjetaHTML();
-}
-function chPintaTodo(){ if(CH.abierto) chPintaLista(); chPintaTarjeta(); chPunto(); }
+function chPintaTodo(){ if(chVisible()) chPintaLista(); chPunto(); }
 
-/* en Social, «Actividad» se convierte en la tarjeta del chat */
-var _chSocMuro=socMuro;
-socMuro=function(){ return chActivo() ? chTarjetaHTML() : _chSocMuro.apply(this, arguments); };
-
-/* ── abrir y cerrar el chat ── */
-function chAbrir(){
-  if(!chActivo()) return;
-  var capa=document.getElementById("chat-capa");
-  if(!capa){ capa=document.createElement("div"); capa.id="chat-capa"; document.body.appendChild(capa); }
-  var n=GRUPO.miembros.length;
-  CH.abierto=true; CH.grupoAbierto=GRUPO.id; CH.abiertoReac=null; CH.borrar=null; CH.firma="";
-  capa.innerHTML=
-    '<div class="pf-barra ch-barra"><button class="pf-atras" data-act="x-chat-cierra" aria-label="Volver">'+
-      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>'+
-      '<button class="ch-titulo" data-act="x-grupo"><b>'+esc(GRUPO.nombre)+'</b><small>'+(n===1?"1 persona":n+" personas")+'</small></button></div>'+
-    '<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>'+
-    '<div class="ch-escribe"><div class="ch-escribe-in">'+
+/* ── el recuadro del chat: se crea una vez y se recoloca en cada repintado de Social ── */
+var ICO_CAMARA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
+function chCaja(){
+  if(CH.caja) return CH.caja;
+  var c=document.createElement("div"); c.className="ch-caja"; c.id="ch-caja";
+  c.innerHTML='<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>'+
+    '<div class="ch-escribe">'+
+      '<button class="ch-foto-bt" data-act="x-chat-foto" aria-label="Mandar una foto">'+ICO_CAMARA+'</button>'+
       '<textarea id="ch-texto" rows="1" maxlength="1000" placeholder="Escribe al grupo…" enterkeyhint="send" autocomplete="off"></textarea>'+
       '<button class="ch-enviar" data-act="x-chat-enviar" aria-label="Enviar">'+
         '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>'+
-    '</div></div>';
-  var ta=capa.querySelector("#ch-texto"), bt=capa.querySelector(".ch-enviar"), sc=capa.querySelector("#ch-scroll");
-  ta.value=CH.borrador||""; chAlto(ta);
-  ta.addEventListener("input", function(){ CH.borrador=ta.value; chAlto(ta); });
-  /* escribiendo = teclado abierto: fuera el margen de la barra de inicio (en el iPhone
-     instalado la ventana entera encoge con el teclado y no se puede saber midiendo) */
-  ta.addEventListener("focus", function(){ CH.escribe=true; chViewport(); });
-  ta.addEventListener("blur", function(){ CH.escribe=false; chViewport(); });
+    '</div>';
+  var ta=c.querySelector("#ch-texto"), sc=c.querySelector("#ch-scroll");
+  ta.addEventListener("input", function(){ chAlto(ta); });
   ta.addEventListener("keydown", function(ev){ if(ev.key==="Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); chEnviaCaja(); } });
   /* que al tocar «enviar» no se cierre el teclado */
-  ["pointerdown","mousedown"].forEach(function(t){ bt.addEventListener(t, function(ev){ ev.preventDefault(); }); });
+  c.addEventListener("pointerdown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
+  c.addEventListener("mousedown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
+  /* comentarios: lo escrito se guarda y Enter lo manda */
+  c.addEventListener("input", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in")) CH.comBorr[t.dataset.id]=t.value; });
+  c.addEventListener("keydown", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in") && ev.key==="Enter" && !ev.isComposing){ ev.preventDefault(); chComEnvia(t.dataset.id); } });
+  /* al soltar la caja, lo que se dejó para luego */
+  c.addEventListener("focusout", function(){
+    setTimeout(function(){
+      if(chEscribiendo()) return;
+      if(CH.listaPend) chPintaLista();
+      if(CH.repintar){ CH.repintar=false; if(view==="social") rSocial(); }
+    }, 60);
+  });
   /* tocar fuera de una burbuja cierra las reacciones */
   sc.addEventListener("click", function(ev){ if(!ev.target.closest("[data-act]") && CH.abiertoReac){ CH.abiertoReac=null; CH.borrar=null; chPintaLista(); } });
-  chPintaLista(true);
-  chViewport();
-  if(window.visualViewport){ visualViewport.addEventListener("resize", chViewport); visualViewport.addEventListener("scroll", chViewport); }
-  requestAnimationFrame(function(){ requestAnimationFrame(function(){ capa.classList.add("ve"); }); });
-  chCargar(); chRtRevisa(); chPunto();
+  CH.caja=c; return c;
 }
-function chCerrar(){
-  var capa=document.getElementById("chat-capa"); if(!capa) return;
-  var ta=capa.querySelector("#ch-texto"); if(ta){ CH.borrador=ta.value; ta.blur(); }
-  CH.abierto=false; CH.abiertoReac=null; CH.borrar=null; CH.firma=""; CH.escribe=false;
-  if(window.visualViewport){ visualViewport.removeEventListener("resize", chViewport); visualViewport.removeEventListener("scroll", chViewport); }
-  capa.classList.remove("ve");
-  setTimeout(function(){ if(capa.parentNode && !capa.classList.contains("ve")) capa.parentNode.removeChild(capa); }, 420);
-  chPintaTarjeta(); chPunto(); chRtRevisa();
-}
-function chAlto(ta){ ta.style.height="auto"; ta.style.height=Math.min(132, ta.scrollHeight)+"px"; }
+function chAlto(ta){ ta.style.height="auto"; ta.style.height=Math.min(120, ta.scrollHeight)+"px"; }
 function chEnviaCaja(){
   var ta=document.getElementById("ch-texto"); if(!ta) return;
   var v=ta.value; if(!v.trim()) return;
-  ta.value=""; CH.borrador=""; chAlto(ta); ta.focus();
+  ta.value=""; chAlto(ta); ta.focus();
   chEnviar(v);
 }
-/* con el teclado del iPhone abierto, el chat ocupa solo lo que queda visible */
-function chViewport(){
-  var capa=document.getElementById("chat-capa"), vv=window.visualViewport; if(!capa || !vv) return;
-  var sc=document.getElementById("ch-scroll"), cerca=sc && (sc.scrollHeight-sc.scrollTop-sc.clientHeight<140);
-  capa.style.height=vv.height+"px"; capa.style.top=vv.offsetTop+"px";
-  capa.classList.toggle("teclado", !!CH.escribe || window.innerHeight-vv.height>120);
-  if(cerca && sc) sc.scrollTop=sc.scrollHeight;
+function chComEnvia(key){
+  var inp=CH.caja && CH.caja.querySelector('.ch-com-in[data-id="'+key+'"]'), v=inp ? inp.value : (CH.comBorr[key]||"");
+  if(!v.trim()) return;
+  CH.comBorr[key]="";
+  if(inp) inp.value="";
+  var id=+String(key).slice(2);
+  chEnviar(v, key.indexOf("e:")===0 ? { evento:id } : { padre:id });
+}
+/* en Social, «Actividad» deja sitio al chat */
+var _chSocMuro=socMuro;
+socMuro=function(){
+  if(!chActivo()) return _chSocMuro.apply(this, arguments);
+  return '<div class="soc-sec"><h2 class="display">Chat</h2></div><div id="ch-sitio"></div>';
+};
+var _chRSocial=rSocial;
+rSocial=function(){
+  /* escribiendo no se repinta: se perdería el teclado. Se hace al soltar la caja. */
+  if(chEscribiendo()){ CH.repintar=true; return; }
+  var sc=CH.caja && CH.caja.isConnected ? CH.caja.querySelector(".ch-scroll") : null;
+  var pos=sc ? { y:sc.scrollTop, abajo:sc.scrollHeight-sc.scrollTop-sc.clientHeight<60 } : null;
+  var r=_chRSocial.apply(this, arguments);
+  chColoca(pos);
+  return r;
+};
+function chColoca(pos){
+  var sitio=document.getElementById("ch-sitio"); if(!sitio || !chActivo()) return;
+  var caja=chCaja(), sc=caja.querySelector(".ch-scroll");
+  sitio.parentNode.replaceChild(caja, sitio);
+  if(CH.cajaGrupo!==GRUPO.id){ CH.cajaGrupo=GRUPO.id; CH.firma=""; CH.abiertoReac=null; CH.borrar=null; chPintaLista(true); }
+  else { CH.firma=""; chPintaLista(); if(pos) sc.scrollTop=pos.abajo ? sc.scrollHeight : pos.y; else sc.scrollTop=sc.scrollHeight; }
+  chMarcaVisto();
+  chPunto();
 }
 
 /* ── cambiar de grupo: nombre con flecha ⌄ y la lista de tus grupos ── */
@@ -17452,24 +17544,25 @@ function chCambiaA(id){
 }
 
 function chatAccion(a, el){
-  if(a==="x-chat"){ chAbrir(); return true; }
-  if(a==="x-chat-cierra"){ chCerrar(); return true; }
   if(a==="x-chat-enviar"){ chEnviaCaja(); return true; }
+  if(a==="x-chat-foto"){ chFotoElige(); return true; }
   if(a==="x-chat-toca"){ var k=el.dataset.id; CH.abiertoReac=(CH.abiertoReac===k)?null:k; CH.borrar=null; sonido("tick"); chPintaLista();
     var e=document.querySelector("#ch-lista .ch-elige"); if(e && e.scrollIntoView) try{ e.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){}
     return true; }
   if(a==="x-chat-reac"){ chReacciona(el.dataset.id, el.dataset.e); return true; }
   if(a==="x-chat-borra"){ chBorra(el.dataset.id); return true; }
-  if(a==="x-chat-antes"){ var G=chG(); if(G.msgs[0] && G.msgs[0].id){ el.disabled=true; el.textContent="Cargando…"; chCargar(G.msgs[0].id); } return true; }
-  if(a==="x-chat-reintenta"){ var G2=chG(); G2.msgs.forEach(function(m){ if(m.tmp===el.dataset.tmp && m.estado==="fallo"){ chSube(G2, m); } }); chPintaLista(); return true; }
+  if(a==="x-chat-antes"){ var G=chG(), pr=G.msgs.filter(function(m){ return m.id && chPrincipal(m); }); if(pr[0]){ el.disabled=true; el.textContent="Cargando…"; chCargar(pr[0].id); } return true; }
+  if(a==="x-chat-reintenta"){ var G2=chG(); G2.msgs.forEach(function(m){ if(m.tmp===el.dataset.tmp && m.estado==="fallo"){ chSube(G2, m); } }); chPintaLista(false, true); return true; }
+  if(a==="x-chat-com"){ var ck=el.dataset.id; if(CH.coms[ck]) delete CH.coms[ck]; else CH.coms[ck]=1; sonido("tick"); chPintaLista(false, true);
+    if(CH.coms[ck]){ var inp=document.querySelector('#ch-lista .ch-com-in[data-id="'+ck+'"]'); if(inp && inp.scrollIntoView) try{ inp.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){} }
+    return true; }
+  if(a==="x-chat-com-envia"){ chComEnvia(el.dataset.id); return true; }
   if(a==="x-g-lista"){ chLista(); return true; }
   if(a==="x-g-elige"){ chCambiaA(el.dataset.id); return true; }
   return false;
 }
 function chTrasRender(){
-  if(!chActivo()){ if(CH.abierto) chCerrar(); chRtCierra(); chPunto(); return; }
-  /* si mientras tanto has cambiado de grupo (o has salido), el chat abierto era de otro */
-  if(CH.abierto && CH.grupoAbierto!==GRUPO.id) chCerrar();
+  if(!chActivo()){ chRtCierra(); chPunto(); return; }
   chRtRevisa();
   if(view==="social"){ var G=chG(); if(!G.cargado && !G.cargando) chCargar(); }
   chResumen(false);
@@ -17479,21 +17572,11 @@ var _chGA=grupoAccion;
 grupoAccion=function(a, el){ if(chatAccion(a, el)) return true; return _chGA.apply(this, arguments); };
 var _chGTR=grupoTrasRender;
 grupoTrasRender=function(){ var r=_chGTR.apply(this, arguments); chTrasRender(); return r; };
+/* el grupo suele llegar del servidor después del primer pintado: al llegar, lo mismo */
+var _chGCargar=gCargar;
+gCargar=function(){ return _chGCargar.apply(this, arguments).then(function(r){ try{ chTrasRender(); }catch(e){} return r; }); };
 
 var CHAT_CSS=[
-/* la tarjeta en Social */
-'.ch-nuevos{ font-size:12.5px; font-weight:700; color:var(--accent); }',
-'.ch-tarjeta{ display:block; width:100%; margin-top:10px; padding:8px 14px 14px; border-radius:18px; text-align:left;',
-'  background:var(--glass-bg); box-shadow:inset 0 0 0 1px var(--hairline-2); transition:transform .3s var(--spring); }',
-'.ch-tarjeta:active{ transform:scale(.985); }',
-'.ch-t-fila{ display:flex; align-items:center; gap:10px; padding:7px 0; min-width:0; }',
-'.ch-t-fila.ev{ padding-left:36px; }',
-'.ch-t-txt{ flex:1; min-width:0; font-size:14px; line-height:1.35; color:var(--t2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
-'.ch-t-txt b{ color:var(--t1); font-weight:600; }',
-'.ch-t-fila.ev .ch-t-txt{ font-size:12.5px; color:var(--t3); }',
-'.ch-t-fila.ev .ch-t-txt b{ color:var(--t2); }',
-'.ch-t-vacio{ display:block; padding:8px 0 4px; font-size:13.5px; color:var(--t3); }',
-'.ch-t-escribe{ display:block; margin-top:8px; padding:10px 14px; border-radius:999px; font-size:14px; color:var(--t3); background:var(--fill); }',
 /* nombre del grupo con flecha y la lista de grupos */
 '.gs-nombre{ display:inline-flex; align-items:center; gap:4px; max-width:100%; font-size:16px; font-weight:700; letter-spacing:-.01em; color:var(--t1); text-align:left; }',
 '.gs-nombre span{ min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
@@ -17513,31 +17596,32 @@ var CHAT_CSS=[
 /* punto en la pestaña Social si hay mensajes sin leer */
 '#mtabs button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:8px; left:calc(50% + 9px); width:8px; height:8px; border-radius:99px; background:var(--accent); box-shadow:0 0 0 2px var(--bg); }',
 '#rail button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:50%; right:12px; margin-top:-4px; width:8px; height:8px; border-radius:99px; background:var(--accent); }',
-/* el chat a pantalla completa */
-'#chat-capa{ position:fixed; left:0; right:0; top:0; height:100%; z-index:63; background:var(--bg); display:flex; flex-direction:column;',
-'  transform:translateX(100%); transition:transform .42s cubic-bezier(.32,.72,0,1); }',
-'#chat-capa.ve{ transform:none; }',
-'body:has(#chat-capa.ve) #sheet{ z-index:72!important; }',
-'.ch-barra{ box-shadow:0 1px 0 var(--hairline); flex:0 0 auto; }',
-'.ch-titulo{ flex:1; min-width:0; display:flex; flex-direction:column; align-items:flex-start; text-align:left; padding:2px 4px; }',
-'.ch-titulo b{ max-width:100%; font-size:16px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
-'.ch-titulo small{ font-size:12px; color:var(--t3); }',
+/* el recuadro del chat */
+'.ch-caja{ margin-top:10px; height:min(64vh, 500px); display:flex; flex-direction:column; border-radius:20px; overflow:hidden;',
+'  background:var(--glass-bg); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
 '.ch-scroll{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }',
-'.ch-lista{ max-width:640px; margin:0 auto; padding:6px 12px 14px; }',
+'.ch-lista{ padding:4px 12px 12px; }',
 '.ch-antes{ display:block; margin:10px auto 4px; padding:7px 14px; border-radius:99px; font-size:13px; font-weight:600; color:var(--accent); background:var(--fill); }',
 '.ch-vacio{ margin:40px auto 0; max-width:30ch; text-align:center; font-size:13.5px; line-height:1.5; color:var(--t3); }',
-'.ch-dia{ margin:18px 0 6px; text-align:center; font-size:11.5px; font-weight:700; color:var(--t3); }',
+'.ch-dia{ margin:16px 0 6px; text-align:center; font-size:11.5px; font-weight:700; color:var(--t3); }',
 '.ch-m{ display:flex; align-items:flex-start; gap:8px; margin-top:10px; }',
 '.ch-m.sigue{ margin-top:3px; }',
 '.ch-m.yo{ justify-content:flex-end; }',
 '.ch-cara, .ch-hueco{ width:28px; flex:0 0 auto; }',
 '.ch-cara{ margin-top:18px; cursor:pointer; }',
-'.ch-col{ min-width:0; max-width:78%; display:flex; flex-direction:column; align-items:flex-start; }',
+'.ch-col{ min-width:0; max-width:80%; display:flex; flex-direction:column; align-items:flex-start; }',
 '.ch-m.yo .ch-col{ align-items:flex-end; }',
 '.ch-quien{ margin:0 0 3px 12px; font-size:12px; font-weight:600; color:var(--t3); }',
-'.ch-burbuja{ display:block; max-width:100%; padding:7px 12px 7px; border-radius:18px; text-align:left; font-size:15px; line-height:1.38;',
-'  white-space:pre-wrap; overflow-wrap:anywhere; background:var(--fill); color:var(--t1); -webkit-user-select:text; user-select:text; }',
+'.ch-burbuja{ display:block; max-width:100%; padding:7px 12px 7px; border-radius:18px; text-align:left; font-size:15px; line-height:1.38; cursor:pointer;',
+'  white-space:pre-wrap; overflow-wrap:anywhere; background:var(--fill); color:var(--t1); }',
 '.ch-m.yo .ch-burbuja{ background:var(--accent); color:var(--on-accent); }',
+'.ch-burbuja.con-foto{ padding:4px; }',
+'.ch-burbuja.con-foto .ch-txt{ display:inline; padding:0 8px; }',
+'.ch-burbuja.con-foto .ch-txt:first-of-type{ padding-left:8px; }',
+'.ch-burbuja.con-foto .ch-hora{ margin-right:6px; }',
+'.ch-pie{ display:block; text-align:right; padding:2px 4px 0; }',
+'.ch-foto-m{ display:block; width:min(240px, 62vw); max-height:320px; border-radius:14px; overflow:hidden; background:var(--fill-hi); margin-bottom:4px; }',
+'.ch-foto-m img{ display:block; width:100%; max-height:320px; object-fit:cover; }',
 '.ch-burbuja.enviando{ opacity:.6; }',
 '.ch-burbuja.fallo{ opacity:.5; }',
 '.ch-hora{ display:inline-block; margin-left:8px; font-size:10.5px; opacity:.55; vertical-align:-1px; white-space:nowrap; }',
@@ -17547,27 +17631,42 @@ var CHAT_CSS=[
 '.ch-reac button.mia{ background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent); }',
 '.ch-reac button:active, .ch-elige button:active{ transform:scale(.9); }',
 '.ch-reac .num{ font-size:11.5px; font-weight:700; }',
-'.ch-elige{ display:flex; flex-wrap:wrap; align-items:center; gap:2px; margin-top:6px; padding:3px; border-radius:22px; background:var(--glass-bg); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
+'.ch-elige{ display:flex; flex-wrap:wrap; align-items:center; gap:2px; margin-top:6px; padding:3px; border-radius:22px; background:var(--bg); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
 '.ch-elige button{ width:36px; height:36px; border-radius:99px; font-size:19px; display:grid; place-items:center; transition:transform .25s var(--spring); }',
 '.ch-elige button.mia{ background:var(--accent-soft); }',
 '.ch-elige .ch-borra{ width:auto; padding:0 12px; font-size:13px; font-weight:600; color:var(--t3); }',
 '.ch-elige .ch-borra.seguro{ color:var(--alert); }',
 '.ch-fallo{ margin-top:4px; font-size:12px; font-weight:600; color:var(--alert); }',
-'.ch-ev{ display:flex; flex-direction:column; align-items:center; margin:14px auto 4px; max-width:88%; text-align:center; }',
+/* comentarios de una foto */
+'.ch-com{ margin-top:4px; width:min(240px, 62vw); }',
+'.ch-ev .ch-com{ margin-left:auto; margin-right:auto; }',
+'.ch-com-t{ display:inline-flex; align-items:center; gap:3px; padding:4px 2px; font-size:12.5px; font-weight:600; color:var(--t3); }',
+'.ch-com-t svg{ width:14px; height:14px; transition:transform .25s var(--ease); }',
+'.ch-com.abierto .ch-com-t svg{ transform:rotate(180deg); }',
+'.ch-com-lista{ padding:2px 0 4px; text-align:left; }',
+'.ch-com-c{ font-size:13.5px; line-height:1.4; padding:3px 0; color:var(--t2); overflow-wrap:anywhere; }',
+'.ch-com-c b{ color:var(--t1); font-weight:600; }',
+'.ch-com-c.enviando{ opacity:.6; }',
+'.ch-com-esc{ display:flex; gap:6px; margin-top:4px; }',
+'.ch-com-in{ flex:1; min-width:0; height:34px; padding:0 12px; border-radius:99px; border:0; outline:none; font:inherit; font-size:16px; background:var(--fill); color:var(--t1); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'.ch-com-env{ flex:0 0 auto; padding:0 10px; font-size:13px; font-weight:700; color:var(--accent); }',
+/* actividad automática dentro del chat */
+'.ch-ev{ display:flex; flex-direction:column; align-items:center; margin:14px auto 4px; max-width:90%; text-align:center; }',
 '.ch-ev-t{ font-size:12.5px; line-height:1.45; color:var(--t3); }',
 '.ch-ev-t b{ font-weight:600; color:var(--t2); }',
 '.ch-foto{ display:block; width:150px; aspect-ratio:4/5; margin-top:6px; border-radius:14px; overflow:hidden; background:var(--fill); }',
 '.ch-foto img{ width:100%; height:100%; object-fit:cover; display:block; }',
 '.ch-ev .ch-reac, .ch-ev .ch-elige{ justify-content:center; }',
-'.ch-escribe{ flex:0 0 auto; padding:8px 12px calc(8px + env(safe-area-inset-bottom)); background:var(--bg); box-shadow:0 -1px 0 var(--hairline); }',
-'#chat-capa.teclado .ch-escribe{ padding-bottom:8px; }',
-'.ch-escribe-in{ display:flex; align-items:flex-end; gap:8px; max-width:640px; margin:0 auto; }',
-'#ch-texto{ flex:1; min-width:0; min-height:40px; max-height:132px; resize:none; padding:9px 14px; border-radius:20px; border:0; outline:none;',
+/* la caja para escribir */
+'.ch-escribe{ flex:0 0 auto; display:flex; align-items:flex-end; gap:6px; padding:8px 8px 8px 6px; box-shadow:0 -1px 0 var(--hairline); background:var(--glass-bg); }',
+'#ch-texto{ flex:1; min-width:0; min-height:38px; max-height:120px; resize:none; padding:8px 14px; border-radius:19px; border:0; outline:none;',
 '  font:inherit; font-size:16px; line-height:1.35; background:var(--fill); color:var(--t1); box-shadow:inset 0 0 0 1px var(--hairline); }',
 '#ch-texto:focus{ box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--accent) 55%,transparent); }',
-'.ch-enviar{ width:40px; height:40px; flex:0 0 auto; border-radius:99px; display:grid; place-items:center; background:var(--accent); color:var(--on-accent); transition:transform .25s var(--spring); }',
+'.ch-foto-bt{ width:38px; height:38px; flex:0 0 auto; border-radius:99px; display:grid; place-items:center; color:var(--t3); }',
+'.ch-foto-bt svg{ width:22px; height:22px; }',
+'.ch-enviar{ width:38px; height:38px; flex:0 0 auto; border-radius:99px; display:grid; place-items:center; background:var(--accent); color:var(--on-accent); transition:transform .25s var(--spring); }',
 '.ch-enviar:active{ transform:scale(.9); }',
-'.ch-enviar svg{ width:20px; height:20px; }'
+'.ch-enviar svg{ width:19px; height:19px; }'
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="chat-css"; st.textContent=CHAT_CSS; document.head.appendChild(st); })();
 
@@ -17597,20 +17696,20 @@ function medAliento(k, seg){
     bp.type="bandpass"; lp.type="lowpass"; g.gain.setValueAtTime(0.0001, t);
     if(k==="in"){
       /* por la nariz: fino, va subiendo y se corta suave al llenar */
-      bp.Q.value=.9; bp.frequency.setValueAtTime(800, t); bp.frequency.linearRampToValueAtTime(1800, fin);
-      lp.frequency.value=3400;
-      g.gain.linearRampToValueAtTime(.09, t+Math.min(1, seg*.35));
-      g.gain.linearRampToValueAtTime(.14, fin-Math.min(.5, seg*.15));
+      bp.Q.value=.8; bp.frequency.setValueAtTime(650, t); bp.frequency.linearRampToValueAtTime(1300, fin);
+      lp.frequency.value=2000;
+      g.gain.linearRampToValueAtTime(.028, t+Math.min(1.2, seg*.4));
+      g.gain.linearRampToValueAtTime(.045, fin-Math.min(.6, seg*.18));
       g.gain.linearRampToValueAtTime(0.0001, fin);
     } else {
       /* soltar el aire: más grave y abierto, empieza fuerte y se apaga */
-      bp.Q.value=.6; bp.frequency.setValueAtTime(1000, t); bp.frequency.exponentialRampToValueAtTime(380, fin);
-      lp.frequency.value=2200;
-      g.gain.linearRampToValueAtTime(.16, t+Math.min(.4, seg*.12));
-      g.gain.exponentialRampToValueAtTime(.03, fin-Math.min(.4, seg*.1));
+      bp.Q.value=.6; bp.frequency.setValueAtTime(800, t); bp.frequency.exponentialRampToValueAtTime(320, fin);
+      lp.frequency.value=1500;
+      g.gain.linearRampToValueAtTime(.05, t+Math.min(.6, seg*.15));
+      g.gain.exponentialRampToValueAtTime(.008, fin-Math.min(.4, seg*.1));
       g.gain.linearRampToValueAtTime(0.0001, fin);
     }
-    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(ctx.destination);
+    src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(medSalida(ctx));
     src.start(t); src.stop(fin+0.05);
     MED_ALIENTO={ src:src, g:g };
   }catch(e){ MED_ALIENTO=null; }
@@ -17627,7 +17726,7 @@ medAvanza=function(){
   if(!medA || medA.fin || medA.pausadoEn || medA.tipo.guia!=="resp" || medA.fase===antes || !medA.fase) return r;
   var f=medFaseDe(medTranscurrido());
   if(f.k==="prep") return r;
-  if(medHayCuenco()) medCuenco(293.7, .02, Math.min(4.5, Math.max(2.5, f.dur+.5)));
+  if(medSuena()) medCuenco(293.7, .075, Math.min(5, Math.max(2.5, f.dur+.8)));
   if(medSuena() && (f.k==="in" || f.k==="ex")) medAliento(f.k, f.rest); else medAlientoPara(.3);
   return r;
 };
@@ -17642,6 +17741,218 @@ var _medOlasParaCF=medOlasPara;
 medOlasPara=function(){ medAlientoPara(.4); return _medOlasParaCF.apply(this, arguments); };
 var _medPausaCF=medPausa;
 medPausa=function(){ if(medA && !medA.pausadoEn) medAlientoPara(.4); return _medPausaCF.apply(this, arguments); };
+
+/* ════════════════════════════════════════════════════════════════
+   SONIDOS DE FONDO Y LIMITADOR (sep 2026)
+   · Todo el sonido de la meditación pasa por un limitador suave: así el
+     aire, el cuenco y el fondo no saturan los altavoces del móvil.
+   · El cuenco y el aire suenan siempre que haya sonido (el editor ya
+     solo pregunta «con sonido / sin sonido»); lo que se elige aparte es
+     el fondo: olas suaves (siguen tu respiración, las de siempre),
+     lluvia, mar rompiendo, río, hoguera, música relajante o nada.
+     Se elige en la tarjeta de Meditación (con un trocito de prueba) y
+     se puede cambiar durante la sesión con el botón de arriba.
+   · Todo se genera en el móvil, sin archivos: ruido filtrado con
+     envolventes (agua, fuego) y notas suaves de una escala pentatónica
+     sobre un fondo tenue (música).
+   ════════════════════════════════════════════════════════════════ */
+var MED_SAL=null;
+function medSalida(ctx){
+  if(MED_SAL && MED_SAL.context===ctx) return MED_SAL;
+  var g=ctx.createGain(); g.gain.value=.9;
+  try{
+    var c=ctx.createDynamicsCompressor();
+    c.threshold.value=-20; c.knee.value=14; c.ratio.value=8; c.attack.value=.008; c.release.value=.35;
+    g.connect(c); c.connect(ctx.destination);
+  }catch(e){ g.connect(ctx.destination); }
+  MED_SAL=g; return g;
+}
+var MED_FONDOS=[["olas","Olas suaves"],["lluvia","Lluvia"],["mar","Mar"],["rio","Río"],["hoguera","Hoguera"],["musica","Música"],["nada","Sin fondo"]];
+var MED_FONDO_VOL={ lluvia:.11, mar:.14, rio:.1, hoguera:.13, musica:.5 };
+function medFondoTipo(){ var f=medPref().fondo; return MED_FONDOS.some(function(x){ return x[0]===f; }) ? f : "olas"; }
+function medFondoNombre(k){ for(var i=0;i<MED_FONDOS.length;i++) if(MED_FONDOS[i][0]===k) return MED_FONDOS[i][1]; return ""; }
+/* ahora solo «con sonido» o «sin sonido»: lo de antes (olas, cuenco) cuenta como con sonido */
+medModoSonido=function(v){ return (v===false || v==="nada") ? "nada" : "ambos"; };
+MED_SONIDOS.length=0; MED_SONIDOS.push(["ambos","Con sonido"], ["nada","Sin sonido"]);
+medHayOlas=function(){ return medSuena() && medFondoTipo()==="olas"; };
+medHayCuenco=function(){ return medSuena(); };
+
+/* ── los bucles, generados una vez ── */
+var MED_BUF={};
+function medRosa(n){
+  var d=new Float32Array(n), b0=0,b1=0,b2=0,b3=0,b4=0,b5=0,b6=0;
+  for(var i=0;i<n;i++){ var w=Math.random()*2-1;
+    b0=.99886*b0+w*.0555179; b1=.99332*b1+w*.0750759; b2=.969*b2+w*.153852; b3=.8665*b3+w*.3104856; b4=.55*b4+w*.5329522; b5=-.7616*b5-w*.016898;
+    d[i]=(b0+b1+b2+b3+b4+b5+b6+w*.5362)*.11; b6=w*.115926; }
+  return d;
+}
+function medMarron(n){ var d=new Float32Array(n), l=0; for(var i=0;i<n;i++){ l=(l+.02*(Math.random()*2-1))/1.02; d[i]=l*3.5; } return d; }
+/* el final se funde con el principio y todo se deja al mismo volumen medio */
+function medCierraBucle(d, sr){
+  var n=d.length, f=Math.min(n>>2, Math.floor(sr*.6));
+  for(var k=0;k<f;k++){ var a=k/f; d[k]=d[k]*a+d[n-f+k]*(1-a); }
+  var out=d.subarray(0, n-f), s=0; for(var i=0;i<out.length;i+=4) s+=out[i]*out[i];
+  var rms=Math.sqrt(s/(out.length/4))||1, k2=.25/rms; for(var j=0;j<out.length;j++) out[j]=Math.max(-1, Math.min(1, out[j]*k2));
+  return out;
+}
+function medBufFondo(ctx, k){
+  if(MED_BUF[k] && MED_BUF[k].sampleRate===ctx.sampleRate) return MED_BUF[k];
+  var sr=ctx.sampleRate, seg={ lluvia:9, mar:25, rio:9, hoguera:10 }[k]||8, n=Math.floor(sr*seg), d;
+  if(k==="lluvia"){
+    d=medRosa(n);
+    /* gotas: golpecitos cortos repartidos al azar */
+    for(var g=0; g<seg*28; g++){ var p=Math.floor(Math.random()*(n-sr*.02)), a=.15+Math.random()*.5, L=Math.floor(sr*(.002+Math.random()*.01));
+      for(var i=0;i<L;i++) d[p+i]+=(Math.random()*2-1)*a*Math.exp(-i/(L*.3)); }
+  } else if(k==="mar"){
+    /* tres olas de distinto largo: suben, rompen (con espuma) y se retiran */
+    var br=medMarron(n), bl=new Float32Array(n); for(var q=0;q<n;q++) bl[q]=Math.random()*2-1;
+    d=new Float32Array(n); var cortes=[0, 7.6, 16.2, seg], ini;
+    for(var o=0;o<3;o++){ ini=Math.floor(cortes[o]*sr); var fin=Math.floor(cortes[o+1]*sr), L2=fin-ini, sube=sr*(2+Math.random()*.8);
+      for(var x=0;x<L2;x++){
+        var env=x<sube ? .15+.85*Math.pow(x/sube, 2) : .15+.85*Math.exp(-(x-sube)/(sr*1.9));
+        var esp=x<sube ? 0 : Math.exp(-(x-sube)/(sr*.9))*Math.min(1, (x-sube)/(sr*.15));
+        d[ini+x]=br[ini+x]*env+bl[ini+x]*esp*.22;
+      } }
+  } else if(k==="rio"){
+    /* agua corriendo: ruido rosa que se agita deprisa, sin ritmo */
+    d=medRosa(n); var m=0, obj=0;
+    for(var r=0;r<n;r++){ if(r%Math.floor(sr/9)===0) obj=(Math.random()*2-1)*.35; m+=(obj-m)*.002; d[r]*=1+m; }
+  } else {
+    /* hoguera: un rumor grave y chasquidos sueltos, a veces en racha */
+    d=medMarron(n); for(var h2=0;h2<n;h2++) d[h2]*=.35;
+    var t=0; while(t<n-sr*.05){
+      t+=Math.floor(sr*(Math.random()<.2 ? .02+Math.random()*.05 : .08+Math.random()*.35));
+      var amp=.25+Math.random()*(Math.random()<.1 ? 1.6 : .7), L3=Math.floor(sr*(.001+Math.random()*.004));
+      for(var c2=0;c2<L3 && t+c2<n;c2++) d[t+c2]+=(Math.random()*2-1)*amp*Math.exp(-c2/(L3*.25));
+    }
+  }
+  d=medCierraBucle(d, sr);
+  var b=ctx.createBuffer(1, d.length, sr); b.getChannelData(0).set(d);
+  MED_BUF[k]=b; return b;
+}
+/* crea el fondo k (sin las olas suaves, que van aparte) y lo devuelve para poder pararlo */
+function medFondoCrea(k, vol){
+  var ctx=medAudio(); if(!ctx || !MED_FONDO_VOL[k]) return null;
+  var t=ctx.currentTime, sal=ctx.createGain(), F={ k:k, sal:sal, nodos:[], t:null, vol:MED_FONDO_VOL[k]*(vol==null?1:vol) };
+  sal.gain.setValueAtTime(0.0001, t); sal.gain.linearRampToValueAtTime(F.vol, t+2.5); sal.connect(medSalida(ctx));
+  try{
+    if(k==="musica") medMusica(ctx, F);
+    else {
+      var src=ctx.createBufferSource(); src.buffer=medBufFondo(ctx, k); src.loop=true;
+      var hp=ctx.createBiquadFilter(), lp=ctx.createBiquadFilter(); hp.type="highpass"; lp.type="lowpass";
+      var fil={ lluvia:[350, 6500], mar:[40, 1700], rio:[250, 3200], hoguera:[60, 6000] }[k];
+      hp.frequency.value=fil[0]; lp.frequency.value=fil[1];
+      src.connect(hp); hp.connect(lp); lp.connect(sal);
+      src.start(t, Math.random()*src.buffer.duration); F.nodos.push(src);
+    }
+  }catch(e){ return null; }
+  return F;
+}
+/* música: un fondo tenue (la y mi) y notas sueltas de la pentatónica de la menor */
+function medMusica(ctx, F){
+  var t=ctx.currentTime, pad=ctx.createGain(), lp=ctx.createBiquadFilter();
+  lp.type="lowpass"; lp.frequency.value=700; pad.gain.value=.05; pad.connect(lp); lp.connect(F.sal);
+  [[110,"sine",1],[164.81,"sine",.7],[220,"triangle",.35],[110.4,"sine",.6]].forEach(function(v){
+    var o=ctx.createOscillator(), g=ctx.createGain(); o.type=v[1]; o.frequency.value=v[0]; g.gain.value=v[2];
+    o.connect(g); g.connect(pad); o.start(t); F.nodos.push(o);
+  });
+  var lfo=ctx.createOscillator(), lg=ctx.createGain(); lfo.frequency.value=.07; lg.gain.value=.02; lfo.connect(lg); lg.connect(pad.gain); lfo.start(t); F.nodos.push(lfo);
+  var escala=[220,261.63,293.66,329.63,392,440,523.25,587.33], ult=-1;
+  function nota(){
+    if(F.parado) return;
+    var c=MED_CTX; if(!c) return;
+    var i; do{ i=Math.floor(Math.random()*escala.length); } while(i===ult); ult=i;
+    var t0=c.currentTime+.05, f=escala[i], g=c.createGain(), fl=c.createBiquadFilter();
+    fl.type="lowpass"; fl.frequency.value=1800; g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(.09, t0+1.1); g.gain.exponentialRampToValueAtTime(0.0001, t0+7);
+    g.connect(fl); fl.connect(F.sal);
+    [["sine",1,0],["triangle",.25,1.5],["sine",.12,2.002]].forEach(function(v){
+      var o=c.createOscillator(), og=c.createGain(); o.type=v[0]; o.frequency.value=v[2] ? f*v[2] : f; og.gain.value=v[1];
+      o.connect(og); og.connect(g); o.start(t0); o.stop(t0+7.2);
+    });
+  }
+  nota(); F.t=setInterval(function(){ if(Math.random()<.75) nota(); }, 2800);
+}
+function medFondoQuita(F, s){
+  if(!F) return; F.parado=true; clearInterval(F.t); s=s||1.5;
+  try{ var t=MED_CTX.currentTime; F.sal.gain.cancelScheduledValues(t); F.sal.gain.setValueAtTime(F.sal.gain.value, t); F.sal.gain.linearRampToValueAtTime(0.0001, t+s);
+    F.nodos.forEach(function(n){ try{ n.stop(t+s+.1); }catch(e){} }); }catch(e){}
+}
+var MED_FONDO=null, MED_PRUEBA=null, medPruebaT=null;
+function medFondoPara(s){ var F=MED_FONDO; MED_FONDO=null; medFondoQuita(F, s); }
+/* en la sesión: arranca el fondo elegido (las olas suaves, con su código de siempre) */
+function medFondoEmpieza(){
+  medFondoPara(1.2);
+  if(!medA || medA.fin || !medSuena()) return;
+  var k=medFondoTipo();
+  if(k==="olas"){ medOlasEmpieza(); return; }
+  if(MED_OLAS) _medOlasParaCF();
+  MED_FONDO=medFondoCrea(k, medA.pausadoEn ? .3 : 1);
+}
+function medFondoNivel(x){
+  if(!MED_FONDO || !MED_CTX) return;
+  try{ var t=MED_CTX.currentTime, g=MED_FONDO.sal.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(Math.max(.0001, MED_FONDO.vol*x), t+1.2); }catch(e){}
+}
+/* un trocito para probarlo desde la tarjeta */
+function medFondoPrueba(k){
+  medFondoQuita(MED_PRUEBA, .4); MED_PRUEBA=null; clearTimeout(medPruebaT);
+  if(medA) return;
+  if(k==="olas"){ medCuenco(293.7, .06, 3); return; }
+  MED_PRUEBA=medFondoCrea(k, .9);
+  medPruebaT=setTimeout(function(){ medFondoQuita(MED_PRUEBA, 1.5); MED_PRUEBA=null; }, 4000);
+}
+var _medEmpiezaFD=medEmpieza;
+medEmpieza=function(){ medFondoQuita(MED_PRUEBA, .3); MED_PRUEBA=null; var r=_medEmpiezaFD.apply(this, arguments); medFondoEmpieza(); return r; };
+var _medOlasParaFD=medOlasPara;
+medOlasPara=function(){ medFondoPara(1.8); return _medOlasParaFD.apply(this, arguments); };
+var _medPausaFD=medPausa;
+medPausa=function(){ var pausando=!!(medA && !medA.pausadoEn), r=_medPausaFD.apply(this, arguments); medFondoNivel(pausando ? .3 : 1); return r; };
+/* el botón del fondo, arriba en la sesión */
+var _medPintaCapaFD=medPintaCapa;
+medPintaCapa=function(){
+  var r=_medPintaCapaFD.apply(this, arguments);
+  var ar=document.querySelector("#med-capa .med-arriba");
+  if(medA && ar && !ar.querySelector(".med-fondo-bt")){
+    var s=ar.querySelector('[data-act="x-med-son"]');
+    if(s) s.insertAdjacentHTML("beforebegin", '<button class="med-fondo-bt" data-act="x-med-fondo" aria-label="Sonido de fondo">'+esc(medFondoNombre(medFondoTipo()))+'</button>');
+  }
+  return r;
+};
+/* en la tarjeta: la fila para elegir el fondo */
+var _medPintaTarjetaFD=medPintaTarjeta;
+medPintaTarjeta=function(){
+  var r=_medPintaTarjetaFD.apply(this, arguments);
+  var c=document.getElementById("med-card"), go=c && c.querySelector(".med-go");
+  if(go && !c.querySelector(".med-fondos")){
+    var k=medFondoTipo();
+    go.insertAdjacentHTML("beforebegin", '<p class="eyebrow mt-4 mb-2">Sonido de fondo</p><div class="med-fondos">'+
+      MED_FONDOS.map(function(f){ return '<button class="'+(f[0]===k?"on":"")+'" data-act="x-med-fondo-elige" data-k="'+f[0]+'">'+esc(f[1])+'</button>'; }).join("")+'</div>');
+  }
+  return r;
+};
+function fondoAccion(a, el){
+  if(a==="x-med-fondo-elige"){
+    medPref().fondo=el.dataset.k; save();
+    $$("#med-card .med-fondos button").forEach(function(b){ b.classList.toggle("on", b===el); });
+    medFondoPrueba(el.dataset.k); return true;
+  }
+  if(a==="x-med-fondo" && medA){
+    var i=0; for(var j=0;j<MED_FONDOS.length;j++) if(MED_FONDOS[j][0]===medFondoTipo()) i=j;
+    var k=MED_FONDOS[(i+1)%MED_FONDOS.length][0]; medPref().fondo=k; save();
+    el.textContent=medFondoNombre(k);
+    /* las olas suaves siguen la respiración: esas sí necesitan saber la fase */
+    if(medSuena()){ if(k!=="olas" && MED_OLAS) _medOlasParaCF(); medFondoEmpieza(); if(k==="olas") medA.fase=""; }
+    return true;
+  }
+  if(a==="x-med-son" && medA){
+    medA.son=!medA.son; el.classList.toggle("on", medA.son);
+    if(!medA.son) medOlasPara(); else { medFondoEmpieza(); medA.fase=""; }
+    return true;
+  }
+  return false;
+}
+var _fdGA=grupoAccion;
+grupoAccion=function(a, el){ if(fondoAccion(a, el)) return true; return _fdGA.apply(this, arguments); };
 
 /* ════════════════════════════════════════════════════════════════
    BARRA DE HÁBITOS SUAVE (sep 2026)
@@ -17848,7 +18159,185 @@ function recorteAccion(a){
 var _rcGA=grupoAccion;
 grupoAccion=function(a, el){ if(recorteAccion(a, el)) return true; return _rcGA.apply(this, arguments); };
 
+/* ════════════════════════════════════════════════════════════════
+   FOTOS DEL PERFIL: DESCRIPCIÓN, LIKES Y REACCIONES (sep 2026)
+   En la galería del perfil, cada foto enseña sus likes (❤️). Al tocarla
+   se abre en grande con el corazón, las reacciones de siempre y su
+   descripción, que solo escribe su dueño (se guarda al dejar de
+   escribir). Lo ven quienes comparten algún grupo con el dueño.
+   Servidor: g_foto_descr, g_foto_reac y funciones gf_* (servidor/social.sql).
+   ════════════════════════════════════════════════════════════════ */
+var FP={}, FPV=null, FP_LIKE="❤️";
+var ICO_CORAZON='<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.4C1.6 7.6 3.9 4.5 7.2 4.5c2 0 3.6 1.1 4.8 2.8 1.2-1.7 2.8-2.8 4.8-2.8 3.3 0 5.6 3.1 4.4 6.6-1.7 4.8-9.2 9.4-9.2 9.4z"/></svg>';
+function fpDatos(dueno){ if(!FP[dueno]) FP[dueno]={ descr:{}, reac:{}, cargado:0 }; return FP[dueno]; }
+function fpCarga(dueno){
+  return gRpc("gf_datos", { p_dueno:dueno }).then(function(d){
+    var D=fpDatos(dueno); d=d||{};
+    D.descr={}; Object.keys(d.descr||{}).forEach(function(k){ D.descr[k.slice(0,10)]=gTxt(d.descr[k], 300); });
+    D.reac={}; Object.keys(d.reac||{}).forEach(function(k){ D.reac[k.slice(0,10)]=fpReacLimpia(d.reac[k]); });
+    D.cargado=Date.now(); fpMarcas(dueno); fpPintaVisor(); return D;
+  }).catch(function(){ return fpDatos(dueno); });
+}
+function fpReacLimpia(r){ var o={}; if(r && typeof r==="object") Object.keys(r).slice(0,12).forEach(function(e){ if(e.length<=8 && Array.isArray(r[e]) && r[e].length) o[e]=r[e].map(function(x){ return gTxt(x,40); }); }); return o; }
+/* cuadrícula por meses, como la de siempre, con los likes de cada foto */
+function fpRejilla(lista, dueno){
+  var porMes={}, meses=[];
+  lista.forEach(function(f){ var m=f.d.slice(0,7); if(!porMes[m]){ porMes[m]=[]; meses.push(m); } porMes[m].push(f); });
+  meses.sort().reverse();
+  return meses.map(function(m){
+    var fs=porMes[m].sort(function(a,b){ return a.d<b.d?1:-1; });
+    return '<div class="fg-mes"><p><b>'+esc(cap(fmt(m+"-01",{month:"long", year:"numeric"})))+'</b><span class="num">'+fs.length+'</span></p>'+
+      '<div class="fg-rejilla">'+fs.map(function(f){
+        return '<button class="fp-b" data-act="x-fp-ver" data-dueno="'+esc(dueno)+'" data-d="'+esc(f.d)+'" data-u="'+esc(f.u)+'"><img src="'+esc(f.u)+'" alt="" loading="lazy"><span class="fp-marca" data-d="'+esc(f.d)+'"></span></button>'; }).join("")+
+      '</div></div>';
+  }).join("");
+}
+function fpMarcas(dueno){
+  var D=fpDatos(dueno);
+  $$('#fg-galeria .fp-b[data-dueno="'+dueno+'"] .fp-marca').forEach(function(s){
+    var r=D.reac[s.dataset.d]||{}, n=(r[FP_LIKE]||[]).length;
+    s.innerHTML=n ? ICO_CORAZON+'<b class="num">'+n+'</b>' : ''; s.classList.toggle("ve", n>0);
+  });
+}
+var _fpGaleria=fgGaleria;
+fgGaleria=function(u){
+  if(!(typeof gReal==="function" && gReal())) return _fpGaleria.apply(this, arguments);
+  var capa=document.getElementById("perfil-capa"); if(!capa) return;
+  var sc=capa.querySelector(".pf-scroll"); if(!sc || sc.querySelector("#fg-galeria")) return;
+  var yo=(!u || (GRUPO && u===GRUPO.yo) || (perfil && u===perfil.usuario));
+  var box=document.createElement("div"); box.id="fg-galeria";
+  box.innerHTML='<div class="soc-sec"><h2 class="display">Fotos haciendo deporte</h2></div><div id="fg-gal-in"></div>';
+  var ref=sc.querySelector(".soc-sec")||sc.lastElementChild; sc.insertBefore(box, ref);
+  var dentro=box.querySelector("#fg-gal-in");
+  if(yo){
+    var F=fgFotos(), l=Object.keys(F).filter(function(d){ return gUrl(F[d].u); }).map(function(d){ return { d:d, u:F[d].u }; });
+    if(!l.length){ dentro.innerHTML='<p class="soc-nota">Cuando marques ejercicio en Vital, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.</p>'; return; }
+    dentro.innerHTML=fpRejilla(l, ses.uid)+'<p class="soc-nota">Toca una foto para ponerle descripción y ver sus likes.</p>';
+    fpMarcas(ses.uid); fpCarga(ses.uid); return;
+  }
+  var uid=fgUidDe(u);
+  if(!uid){ dentro.innerHTML='<p class="soc-nota">'+esc(u)+' aún no ha subido fotos.</p>'; return; }
+  dentro.innerHTML='<p class="soc-nota">Cargando…</p>';
+  gRpc("g_fotos", { p_uid:uid, p_desde:null, p_hasta:null }).then(function(l){
+    l=(Array.isArray(l)?l:[]).map(function(x){ return { d:String(x.d).slice(0,10), u:gUrl(x.u) }; }).filter(function(x){ return x.u; });
+    dentro.innerHTML=l.length ? fpRejilla(l, uid) : '<p class="soc-nota">'+esc(u)+' aún no ha subido fotos.</p>';
+    if(l.length){ fpMarcas(uid); fpCarga(uid); }
+  }).catch(function(){ dentro.innerHTML='<p class="soc-nota">No se han podido cargar las fotos.</p>'; });
+};
+/* ── la foto en grande ── */
+function fpNombreDe(dueno){
+  if(dueno===chYo()) return (perfil && perfil.usuario) || "tú";
+  var q=chQuien(dueno); return q ? q.usuario : "";
+}
+function fpAbre(dueno, d, u){
+  FPV={ dueno:dueno, d:d, u:u, elige:false };
+  var v=document.getElementById("fp-capa");
+  if(!v){ v=document.createElement("div"); v.id="fp-capa"; document.body.appendChild(v); }
+  v.innerHTML='<div class="fp-arriba"><span class="fp-quien"><b>'+esc(fpNombreDe(dueno))+'</b><small>'+esc(cap(fmt(d,{weekday:"long", day:"numeric", month:"long"})))+'</small></span>'+
+      '<button class="fp-x" data-act="x-fp-cierra" aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>'+
+    '<div class="fp-img"><img src="'+esc(u)+'" alt=""></div>'+
+    '<div class="fp-abajo"><div id="fp-acc"></div><div id="fp-desc"></div></div>';
+  fpPintaVisor(true);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ v.classList.add("ve"); }); });
+  if(!fpDatos(dueno).cargado) fpCarga(dueno);
+}
+function fpPintaVisor(todo){
+  if(!FPV) return;
+  var acc=document.getElementById("fp-acc"), dsc=document.getElementById("fp-desc"); if(!acc) return;
+  var D=fpDatos(FPV.dueno), r=D.reac[FPV.d]||{}, yo=chYo(), mio=FPV.dueno===yo;
+  var likes=r[FP_LIKE]||[], megusta=likes.indexOf(yo)>=0;
+  var otras=Object.keys(r).filter(function(e){ return e!==FP_LIKE; });
+  acc.innerHTML='<div class="fp-acciones">'+
+      '<button class="fp-like'+(megusta?" on":"")+'" data-act="x-fp-reac" data-e="'+FP_LIKE+'" aria-label="Me gusta">'+ICO_CORAZON+'<b class="num">'+(likes.length||"")+'</b></button>'+
+      otras.map(function(e){ var l=r[e]; return '<button class="fp-r'+(l.indexOf(yo)>=0?" on":"")+'" data-act="x-fp-reac" data-e="'+esc(e)+'">'+esc(e)+(l.length>1?'<b class="num">'+l.length+'</b>':'')+'</button>'; }).join("")+
+      '<button class="fp-mas" data-act="x-fp-elige" aria-label="Reaccionar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="12" r="8"/><path d="M8 14.5c.8 1 1.8 1.5 3 1.5s2.2-.5 3-1.5M8.5 10h.01M13.5 10h.01"/><path d="M19 3v4M17 5h4"/></svg></button>'+
+    '</div>'+
+    (FPV.elige ? '<div class="fp-elige">'+emojisDisponibles().map(function(e){ return '<button class="'+((r[e]||[]).indexOf(yo)>=0?"on":"")+'" data-act="x-fp-reac" data-e="'+esc(e)+'">'+esc(e)+'</button>'; }).join("")+'</div>' : '')+
+    (likes.length ? '<p class="fp-quienes">'+esc(fpQuienes(likes))+'</p>' : '');
+  /* la descripción: el dueño la escribe; los demás la leen */
+  if(todo || !mio){
+    var t=D.descr[FPV.d]||"";
+    if(mio){
+      if(!document.getElementById("fp-descr") || todo){
+        dsc.innerHTML='<textarea id="fp-descr" maxlength="300" rows="2" placeholder="Añade una descripción…">'+esc(t)+'</textarea>';
+        var ta=document.getElementById("fp-descr");
+        ta.addEventListener("input", function(){ ta.style.height="auto"; ta.style.height=Math.min(140, ta.scrollHeight)+"px"; });
+        ta.addEventListener("blur", function(){ fpGuardaDescr(ta.value); });
+      }
+    } else dsc.innerHTML=t ? '<p class="fp-texto">'+esc(t)+'</p>' : '';
+  } else {
+    var ta2=document.getElementById("fp-descr");
+    if(ta2 && document.activeElement!==ta2){ var t2=D.descr[FPV.d]||""; if(ta2.value!==t2) ta2.value=t2; }
+  }
+}
+function fpQuienes(l){
+  var n=l.map(function(u){ return u===chYo() ? "tú" : (chQuien(u) ? chQuien(u).usuario : null); }).filter(Boolean);
+  var otros=l.length-n.length;
+  if(!n.length) return l.length+" "+(l.length===1?"me gusta":"me gusta");
+  return "Le gusta a "+n.slice(0,3).join(", ")+(n.length>3 || otros>0 ? " y "+(n.length-Math.min(3,n.length)+otros)+" más" : "");
+}
+function fpGuardaDescr(v){
+  if(!FPV || FPV.dueno!==chYo()) return;
+  var D=fpDatos(FPV.dueno), d=FPV.d; v=String(v||"").replace(/^\s+|\s+$/g, "").slice(0,300);
+  if((D.descr[d]||"")===v) return;
+  var antes=D.descr[d]; if(v) D.descr[d]=v; else delete D.descr[d];
+  gRpc("gf_descr", { p_dia:d, p_texto:v }).then(function(){ avisoNube(v ? "Descripción guardada." : "Descripción quitada."); })
+    .catch(function(e){ if(antes) D.descr[d]=antes; else delete D.descr[d]; avisoNube(e && e.message==="sin_servidor" ? "Falta activar las fotos en el servidor." : gError(e)); });
+}
+function fpReacciona(e){
+  if(!FPV) return;
+  var F=FPV, D=fpDatos(F.dueno), r=D.reac[F.d]=D.reac[F.d]||{}, yo=chYo(), l=r[e]=r[e]||[], i=l.indexOf(yo);
+  if(i>=0){ l.splice(i,1); if(!l.length) delete r[e]; sonido("des"); } else { l.push(yo); sonido("pop"); }
+  F.elige=false; fpPintaVisor(); fpMarcas(F.dueno);
+  gRpc("gf_reaccion", { p_dueno:F.dueno, p_dia:F.d, p_emoji:e }).then(function(n){ D.reac[F.d]=fpReacLimpia(n); fpPintaVisor(); fpMarcas(F.dueno); })
+    .catch(function(err){ avisoNube(err && err.message==="sin_servidor" ? "Falta activar las fotos en el servidor." : gError(err)); fpCarga(F.dueno); });
+}
+function fpCierra(){
+  var ta=document.getElementById("fp-descr"); if(ta) fpGuardaDescr(ta.value);
+  var v=document.getElementById("fp-capa"); FPV=null; if(!v) return;
+  v.classList.remove("ve"); setTimeout(function(){ if(v.parentNode && !v.classList.contains("ve")) v.parentNode.removeChild(v); }, 300);
+}
+function fotosPerfilAccion(a, el){
+  if(a==="x-fp-ver"){ fpAbre(el.dataset.dueno, el.dataset.d, el.dataset.u); return true; }
+  if(a==="x-fp-cierra"){ fpCierra(); return true; }
+  if(a==="x-fp-reac"){ fpReacciona(el.dataset.e); return true; }
+  if(a==="x-fp-elige"){ if(FPV){ FPV.elige=!FPV.elige; sonido("tick"); fpPintaVisor(); } return true; }
+  return false;
+}
+var _fpGA=grupoAccion;
+grupoAccion=function(a, el){ if(fotosPerfilAccion(a, el)) return true; return _fpGA.apply(this, arguments); };
+
 var MEJORAS_CSS=[
+/* fotos del perfil */
+'.fp-b{ position:relative; }',
+'.fp-marca{ position:absolute; left:6px; bottom:6px; display:none; align-items:center; gap:3px; padding:2px 7px 2px 5px; border-radius:99px; font-size:11.5px; color:#fff; background:rgba(0,0,0,.45); }',
+'.fp-marca.ve{ display:inline-flex; } .fp-marca svg{ width:13px; height:13px; fill:currentColor; }',
+'#fp-capa{ position:fixed; inset:0; z-index:140; background:#0c0c0e; color:#fff; display:flex; flex-direction:column; opacity:0; transition:opacity .25s ease; }',
+'#fp-capa.ve{ opacity:1; }',
+'.fp-arriba{ display:flex; align-items:center; gap:10px; padding:calc(env(safe-area-inset-top) + 10px) 12px 8px 18px; }',
+'.fp-quien{ flex:1; min-width:0; display:flex; flex-direction:column; } .fp-quien b{ font-size:15px; } .fp-quien small{ font-size:12px; color:rgba(255,255,255,.55); }',
+'.fp-x{ width:40px; height:40px; border-radius:99px; display:grid; place-items:center; background:rgba(255,255,255,.1); } .fp-x svg{ width:20px; height:20px; }',
+'.fp-img{ flex:1; min-height:0; display:grid; place-items:center; padding:0 8px; } .fp-img img{ max-width:100%; max-height:100%; object-fit:contain; border-radius:10px; }',
+'.fp-abajo{ padding:12px 16px calc(env(safe-area-inset-bottom) + 14px); max-width:640px; width:100%; margin:0 auto; }',
+'.fp-acciones{ display:flex; align-items:center; flex-wrap:wrap; gap:6px; }',
+'.fp-acciones button{ height:36px; padding:0 12px; border-radius:99px; display:inline-flex; align-items:center; gap:5px; font-size:15px; background:rgba(255,255,255,.1); transition:transform .25s var(--spring); }',
+'.fp-acciones button:active, .fp-elige button:active{ transform:scale(.9); }',
+'.fp-acciones .num{ font-size:13px; font-weight:700; }',
+'.fp-like svg{ width:20px; height:20px; fill:none; } .fp-like.on{ color:#ff4d6d; } .fp-like.on svg{ fill:currentColor; }',
+'.fp-r.on{ background:rgba(255,255,255,.22); box-shadow:inset 0 0 0 1px rgba(255,255,255,.35); }',
+'.fp-mas{ width:36px; padding:0!important; justify-content:center; color:rgba(255,255,255,.7); } .fp-mas svg{ width:19px; height:19px; }',
+'.fp-elige{ display:flex; flex-wrap:wrap; gap:2px; margin-top:8px; padding:3px; border-radius:22px; background:rgba(255,255,255,.08); width:max-content; max-width:100%; }',
+'.fp-elige button{ width:38px; height:38px; border-radius:99px; font-size:20px; display:grid; place-items:center; } .fp-elige button.on{ background:rgba(255,255,255,.18); }',
+'.fp-quienes{ margin-top:8px; font-size:12.5px; color:rgba(255,255,255,.6); }',
+'.fp-texto{ margin-top:10px; font-size:14.5px; line-height:1.45; white-space:pre-wrap; overflow-wrap:anywhere; }',
+'#fp-descr{ width:100%; margin-top:10px; padding:10px 12px; border-radius:14px; border:0; outline:none; resize:none; font:inherit; font-size:16px; line-height:1.4;',
+'  background:rgba(255,255,255,.08); color:#fff; box-shadow:inset 0 0 0 1px rgba(255,255,255,.12); }',
+'#fp-descr::placeholder{ color:rgba(255,255,255,.45); }',
+/* sonidos de fondo de la meditación */
+'#med-card .med-fondos{ display:flex; flex-wrap:wrap; gap:6px; }',
+'#med-card .med-fondos button{ padding:8px 12px; border-radius:99px; font-size:13px; font-weight:600; background:var(--fill); color:var(--t2); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'#med-card .med-fondos button.on{ background:var(--accent-soft); color:var(--accent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent); }',
+'#med-capa .med-arriba .med-fondo-bt{ width:auto!important; padding:0 14px; font-size:12.5px; font-weight:700; color:var(--t2)!important; }',
 /* barra de hábitos */
 '#ideal-bar{ transition:width 1s cubic-bezier(.4,0,.2,1)!important; }',
 '.hb-caja.hb-lista{ transition:height .5s cubic-bezier(.4,0,.2,1), margin-bottom .5s cubic-bezier(.4,0,.2,1), opacity .4s ease; }',

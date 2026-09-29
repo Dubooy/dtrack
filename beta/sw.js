@@ -1,7 +1,7 @@
 /* DTrack · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v159";
+const CACHE = "dtrack-beta-v160";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js",
   "./icon-192.png", "./icon-512.png", "./icon-maskable.png", "./apple-touch-icon.png"
