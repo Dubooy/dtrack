@@ -18483,10 +18483,11 @@ function pintaCrecer(){
   } else {
     h+='<div class="cr-rutinas">'+ESTIRA_RUTINAS.map(function(r){
       return '<button class="cr-rutina" data-act="x-cr-rutina" data-k="'+r.k+'" style="--c:'+r.c+'">'+
-        '<span class="cr-r-ico">'+figuraSVG(r.pasos[0].f, true)+'</span><span class="cr-r-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' pasos</small></span>'+
+        '<span class="cr-r-ico"><img data-mq="'+r.pasos[0].f+'" data-ropa="'+r.c+'" alt=""></span><span class="cr-r-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' pasos</small></span>'+
         '<em class="num">'+estiraMin(r)+' min</em></button>'; }).join("")+'</div>';
   }
   el.innerHTML=h;
+  if(crecerTab==="estira") maniquiFotos(el);
 }
 
 function sheetLibros(k){
@@ -18506,11 +18507,12 @@ function sheetRutina(k){
   openSheet('<div class="flex items-start justify-between mb-2"><div><p class="eyebrow mb-1.5">Estiramientos · '+estiraMin(r)+' min</p><h3 class="display text-[20px] font-bold">'+esc(r.t)+'</h3></div>'+closeBtn()+'</div>'+
     '<p class="text-[12.5px] t3 mb-4 leading-relaxed">'+esc(r.sub)+'. Sin forzar: tiene que tirar, no doler.</p>'+
     '<ol class="cr-pasos" style="--c:'+r.c+'">'+r.pasos.map(function(p,i){
-      return '<li><span class="cr-mini">'+figuraSVG(p.f, true)+'</span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
+      return '<li><span class="cr-mini"><img data-mq="'+p.f+'" data-ropa="'+r.c+'" alt=""></span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
         '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver cómo se hace</a></div></li>'; }).join("")+'</ol>'+
     '<button class="btn btn-primary w-full !py-3 mt-4" data-act="x-cr-empieza" data-k="'+r.k+'">Empezar rutina guiada</button>'+
     (ya?'<p class="cr-nota" style="text-align:center">Ya la tienes en tus hábitos. Al terminarla se marca sola.</p>'
        :'<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-cr-estira" data-k="'+r.k+'">Añadir a mis hábitos</button>'));
+  maniquiFotos(document.getElementById("sheet-body"));
 }
 
 function crecerAccion(a, el){
@@ -18544,7 +18546,7 @@ var CRECER_CSS=[
 '.cr-rutinas{ display:flex; flex-direction:column; gap:8px; }',
 '.cr-rutina{ display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; text-align:left;',
 '  background:color-mix(in srgb,var(--c) 9%,transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 20%,transparent); }',
-'.cr-r-ico{ display:grid; place-items:center; width:40px; height:40px; border-radius:12px; flex:0 0 auto; color:#fff; background:var(--c); }',
+'.cr-r-ico{ display:grid; place-items:center; width:54px; height:54px; border-radius:14px; border-radius:12px; flex:0 0 auto; color:#fff; background:var(--c); }',
 '.cr-r-ico{ padding:3px; overflow:hidden; } .cr-pasos li .cr-mini{ overflow:hidden; }',
 '.cr-r-t{ flex:1; min-width:0; } .cr-r-t b{ display:block; font-size:14px; font-weight:700; } .cr-r-t small{ display:block; font-size:12px; color:var(--t3); margin-top:1px; }',
 '.cr-rutina em{ font-style:normal; font-size:12px; font-weight:700; color:var(--c); padding:5px 10px; border-radius:99px; background:color-mix(in srgb,var(--c) 14%,transparent); }',
@@ -18571,70 +18573,206 @@ var CRECER_CSS=[
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="crecer-css"; st.textContent=CRECER_CSS; document.head.appendChild(st); })();
 
-/* ── la figura: una persona dibujada con trazos gruesos que va de la postura
-   de partida (A) a la del estiramiento (B) y vuelve, en bucle.
-   Puntos: h cabeza, n cuello, b mitad de la espalda, p cadera,
-   le/lh codo y mano cercanos, re/rh los lejanos, lk/lf rodilla y pie cercanos, rk/rf los lejanos. */
-var DE_PIE={ h:[50,15], n:[50,26], p:[50,54], le:[43,40], lh:[41,53], re:[57,40], rh:[59,53], lk:[46,72], lf:[45,90], rk:[54,72], rf:[55,90] };
-var DE_LADO={ h:[50,15], n:[50,26], p:[50,54], le:[49,40], lh:[50,53], re:[51,40], rh:[52,53], lk:[51,72], lf:[50,90], rk:[49,72], rf:[48,90] };
-function pose(base, cambios){ var o={}, k; for(k in base) o[k]=base[k]; for(k in cambios) o[k]=cambios[k]; return o; }
-var TUMBADO={ h:[16,80], n:[26,84], b:[39,85], p:[52,84], le:[34,86], lh:[44,86], re:[34,86], rh:[44,86], lk:[70,85], lf:[86,86], rk:[70,85], rf:[86,86] };
-var CUATRO={ h:[78,58], n:[68,62], b:[53,62], p:[38,64], le:[69,76], lh:[70,90], re:[67,76], rh:[68,90], lk:[38,90], lf:[22,90], rk:[36,90], rf:[20,90] };
-var FIGURAS={
-  cuello:{ A:DE_PIE, B:pose(DE_PIE,{ h:[42,18], re:[60,16], rh:[46,11] }) },
-  barbilla:{ A:pose(DE_LADO,{ le:[60,19], lh:[47,12], re:[58,19], rh:[46,12] }), B:pose(DE_LADO,{ h:[56,24], le:[62,27], lh:[53,19], re:[60,27], rh:[52,19] }) },
-  cruzado:{ A:DE_PIE, B:pose(DE_PIE,{ re:[44,33], rh:[31,31], le:[40,44], lh:[45,34] }) },
-  triceps:{ A:DE_PIE, B:pose(DE_PIE,{ re:[57,6], rh:[48,22], le:[39,17], lh:[54,8] }) },
-  redonda:{ A:DE_LADO, B:pose(DE_LADO,{ h:[59,19], n:[54,27], b:[55,40], le:[66,31], lh:[79,31], re:[64,32], rh:[77,32] }) },
-  lateral:{ A:DE_PIE, B:pose(DE_PIE,{ h:[37,20], n:[43,28], b:[47,41], re:[48,9], rh:[31,9], le:[37,43], lh:[45,51] }) },
-  isquios:{ A:{ h:[35,46], n:[35,57], b:[35,71], p:[35,86], le:[42,70], lh:[48,80], re:[40,70], rh:[46,80], lk:[56,87], lf:[78,86], rk:[47,76], rf:[43,88] },
-            B:{ h:[64,62], n:[56,68], b:[45,77], p:[35,86], le:[66,77], lh:[76,82], re:[64,78], rh:[74,83], lk:[56,87], lf:[78,86], rk:[47,76], rf:[43,88] } },
-  cuadriceps:{ A:pose(DE_LADO,{ le:[57,38], lh:[64,44] }), B:pose(DE_LADO,{ le:[57,36], lh:[66,36], re:[46,44], rh:[41,57], rk:[51,72], rf:[41,57] }) },
-  gemelos:{ A:{ h:[70,21], n:[64,30], p:[50,55], le:[74,36], lh:[86,32], re:[73,37], rh:[85,33], lk:[62,72], lf:[64,90], rk:[42,72], rf:[32,90] },
-            B:{ h:[75,25], n:[68,33], p:[54,57], le:[76,40], lh:[86,34], re:[75,41], rh:[85,35], lk:[66,73], lf:[64,90], rk:[44,74], rf:[32,90] }, suelo:'<path d="M88 12V92" class="fg-pared"/>' },
-  flexor:{ A:{ h:[47,33], n:[46,43], p:[44,68], le:[40,56], lh:[47,66], re:[42,56], rh:[49,66], lk:[66,70], lf:[67,90], rk:[34,90], rf:[18,90] },
-           B:{ h:[53,37], n:[52,47], p:[51,72], le:[46,60], lh:[53,70], re:[48,60], rh:[55,70], lk:[68,70], lf:[67,90], rk:[34,90], rf:[18,90] } },
-  mariposa:{ A:{ h:[50,42], n:[50,53], p:[50,80], le:[40,68], lh:[47,86], re:[60,68], rh:[53,86], lk:[33,74], lf:[48,88], rk:[67,74], rf:[52,88] },
-             B:{ h:[50,46], n:[50,56], p:[50,80], le:[38,70], lh:[47,87], re:[62,70], rh:[53,87], lk:[27,84], lf:[48,88], rk:[73,84], rf:[52,88] } },
-  gluteo:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85] }), B:pose(TUMBADO,{ lk:[55,62], lf:[66,70], rk:[67,66], rf:[55,63], le:[42,74], lh:[55,64], re:[40,75], rh:[54,66] }) },
-  nino:{ A:{ h:[40,45], n:[38,56], p:[34,82], le:[40,68], lh:[44,80], re:[38,68], rh:[42,80], lk:[56,90], lf:[28,90], rk:[54,90], rf:[26,90] },
-         B:{ h:[68,84], n:[58,80], b:[44,74], p:[34,82], le:[74,87], lh:[88,89], re:[72,87], rh:[86,89], lk:[56,90], lf:[28,90], rk:[54,90], rf:[26,90] } },
-  gato:{ A:pose(CUATRO,{ b:[53,52], h:[77,66] }), B:pose(CUATRO,{ b:[53,70], h:[80,52] }) },
-  rodillas:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85] }), B:pose(TUMBADO,{ lk:[48,63], lf:[60,70], rk:[50,64], rf:[62,71], le:[40,72], lh:[50,68], re:[38,73], rh:[49,69] }) },
-  torsion:{ A:pose(TUMBADO,{ lk:[62,68], lf:[72,84], rk:[64,70], rf:[74,85], re:[22,74], rh:[18,62] }), B:pose(TUMBADO,{ h:[14,78], lk:[68,80], lf:[62,88], rk:[70,82], rf:[64,89], re:[22,74], rh:[18,62] }) },
-  respirar:{ A:pose(TUMBADO,{ le:[36,80], lh:[45,81] }), B:pose(TUMBADO,{ b:[39,81], le:[36,77], lh:[45,77] }) }
+/* ── el maniquí 3D de los estiramientos ──
+   Un cuerpo articulado hecho con piezas redondeadas (three.js, en tres.js).
+   Cada postura son ángulos en grados; la figura va de la postura de partida
+   (A) a la del estiramiento (B) y vuelve, en bucle. three.js solo se carga
+   al abrir una rutina, así que el resto de la app no pesa más.
+   Claves: rx/ry/rz el cuerpo entero · tx/ty/tz el tronco (tx hacia delante, tz hacia su derecha)
+   hx/hy/hz la cabeza · aL/aR brazos: [adelante, abrir, girar, codo]
+   pL/pR piernas: [adelante, abrir, girar, rodilla] */
+var MQ_NEUTRO={ rx:0, ry:0, rz:0, tx:0, ty:0, tz:0, hx:0, hy:0, hz:0, aL:[0,8,0,6], aR:[0,8,0,6], pL:[0,3,0,0], pR:[0,3,0,0] };
+function mq(o){ var r={}, k; for(k in MQ_NEUTRO) r[k]=MQ_NEUTRO[k]; for(k in o) r[k]=o[k]; return r; }
+var MQ_SENTADO={ pL:[90,6,0,0], pR:[90,6,0,0] };
+function mqCon(base, o){ var r={}, k; for(k in base) r[k]=base[k]; for(k in o) r[k]=o[k]; return mq(r); }
+var MQ_TUMBADO={ rx:-90, pL:[62,6,0,105], pR:[62,6,0,105], aL:[0,14,0,5], aR:[0,14,0,5] };
+var MQ_CUATRO={ rx:90, tx:-12, hx:-10, aL:[78,4,0,0], aR:[78,4,0,0], pL:[90,4,0,90], pR:[90,4,0,90] };
+/* cam: desde dónde se mira (grados alrededor de la figura; 0 de frente, 90 de lado) */
+var MQ_FIG={
+  cuello:{ cam:18, A:mq({}), B:mq({ hz:32, aR:[150,25,0,118] }) },
+  barbilla:{ cam:58, A:mq({ aL:[150,38,0,125], aR:[150,38,0,125] }), B:mq({ hx:42, aL:[135,34,0,128], aR:[135,34,0,128] }) },
+  cruzado:{ cam:22, A:mq({}), B:mq({ aR:[90,0,72,0], aL:[55,0,-35,85] }) },
+  triceps:{ cam:62, A:mq({}), B:mq({ hx:8, aR:[172,4,0,145], aL:[150,10,-20,100] }) },
+  redonda:{ cam:82, A:mq({}), B:mq({ tx:22, hx:28, aL:[90,4,0,8], aR:[90,4,0,8] }) },
+  lateral:{ cam:0, A:mq({}), B:mq({ tz:24, hz:10, aL:[0,172,0,32], aR:[0,32,0,95] }) },
+  isquios:{ cam:78, A:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], aL:[35,6,0,20], aR:[35,6,0,20] }),
+                   B:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], tx:50, hx:18, aL:[82,4,0,5], aR:[82,4,0,5] }) },
+  cuadriceps:{ cam:84, A:mq({ aL:[55,6,0,10] }), B:mq({ aL:[70,6,0,10], pR:[-8,3,0,150], aR:[-42,10,0,32] }) },
+  gemelos:{ cam:86, pared:true, A:mq({ rx:18, pL:[22,3,0,28], pR:[-14,3,0,0], aL:[92,6,0,22], aR:[92,6,0,22], hx:-10 }),
+                               B:mq({ rx:27, pL:[30,3,0,42], pR:[-18,3,0,0], aL:[90,6,0,40], aR:[90,6,0,40], hx:-14 }) },
+  flexor:{ cam:84, A:mq({ pL:[88,4,0,88], pR:[-22,4,0,100], aL:[18,18,0,70], aR:[18,18,0,70] }),
+                   B:mq({ pL:[70,4,0,98], pR:[-42,4,0,108], aL:[18,18,0,70], aR:[18,18,0,70], tx:-6 }) },
+  mariposa:{ cam:8, A:mqCon(MQ_SENTADO,{ pL:[82,48,0,135], pR:[82,48,0,135], tx:8, aL:[48,8,0,35], aR:[48,8,0,35] }),
+                    B:mqCon(MQ_SENTADO,{ pL:[80,68,0,140], pR:[80,68,0,140], tx:22, hx:8, aL:[60,8,0,25], aR:[60,8,0,25] }) },
+  gluteo:{ cam:74, A:mqCon(MQ_TUMBADO,{}), B:mqCon(MQ_TUMBADO,{ pL:[100,4,0,95], pR:[95,30,40,95], aL:[70,10,0,40], aR:[70,10,0,40] }) },
+  nino:{ cam:84, A:mq({ pL:[60,4,0,150], pR:[60,4,0,150], aL:[10,6,0,10], aR:[10,6,0,10] }),
+                 B:mq({ pL:[60,4,0,150], pR:[60,4,0,150], tx:112, hx:20, aL:[175,10,0,0], aR:[175,10,0,0] }) },
+  gato:{ cam:84, A:mqCon(MQ_CUATRO,{ tx:4, hx:32 }), B:mqCon(MQ_CUATRO,{ tx:-26, hx:-38 }) },
+  rodillas:{ cam:76, A:mqCon(MQ_TUMBADO,{}), B:mqCon(MQ_TUMBADO,{ pL:[128,6,0,128], pR:[128,6,0,128], aL:[62,10,0,55], aR:[62,10,0,55] }) },
+  torsion:{ cam:6, el:34, A:mqCon(MQ_TUMBADO,{ aL:[0,82,0,0], aR:[0,82,0,0] }), B:mqCon(MQ_TUMBADO,{ hy:28, aL:[0,82,0,0], aR:[0,82,0,0], pL:[62,-40,0,105], pR:[62,55,0,105] }) },
+  respirar:{ cam:70, A:mqCon(MQ_TUMBADO,{ pL:[0,5,0,0], pR:[0,5,0,0], aL:[35,10,0,95], aR:[0,12,0,5] }),
+                     B:mqCon(MQ_TUMBADO,{ tx:-6, hx:-4, pL:[0,5,0,0], pR:[0,5,0,0], aL:[38,10,0,95], aR:[0,12,0,5] }) }
 };
-function fgMedio(P){ return P.b || [(P.n[0]+P.p[0])/2, (P.n[1]+P.p[1])/2]; }
-function fgD(P, parte){
-  function q(x){ return x[0]+" "+x[1]; }
-  if(parte==="torso") return "M"+q(P.n)+" L"+q(fgMedio(P))+" L"+q(P.p);
-  if(parte==="brazoL") return "M"+q(P.n)+" L"+q(P.le)+" L"+q(P.lh);
-  if(parte==="brazoR") return "M"+q(P.n)+" L"+q(P.re)+" L"+q(P.rh);
-  if(parte==="piernaL") return "M"+q(P.p)+" L"+q(P.lk)+" L"+q(P.lf);
-  return "M"+q(P.p)+" L"+q(P.rk)+" L"+q(P.rf);
+
+var MQ_T=null, MQ_CARGA=null;
+function maniquiCarga(){
+  if(MQ_T) return Promise.resolve(MQ_T);
+  if(!MQ_CARGA) MQ_CARGA=import("./tres.js").then(function(T){ MQ_T=T; return T; });
+  return MQ_CARGA;
 }
-/* encuadre: un cuadrado que abarca las dos posturas, para que la figura llene el dibujo */
-function fgCaja(F){
-  var x0=99, x1=0, y0=99, y1=92;
-  [F.A, F.B].forEach(function(P){ ["h","n","p","le","lh","re","rh","lk","lf","rk","rf"].forEach(function(k){ var q=P[k];
-    x0=Math.min(x0,q[0]); x1=Math.max(x1,q[0]); y0=Math.min(y0,q[1]); y1=Math.max(y1,q[1]); }); });
-  if(F.suelo) x1=Math.max(x1,88);
-  var lado=Math.max(x1-x0, y1-y0)+22, cx=(x0+x1)/2, cy=(y0+y1)/2;
-  return (cx-lado/2).toFixed(1)+" "+(cy-lado/2).toFixed(1)+" "+lado.toFixed(1)+" "+lado.toFixed(1);
+/* el color de una variable CSS, ya resuelto (p. ej. "var(--good)" → "rgb(…)") */
+function mqColor(css){
+  var e=document.createElement("i"); e.style.color=css; e.style.display="none"; document.body.appendChild(e);
+  var c=getComputedStyle(e).color; e.remove(); return c;
 }
-/* quieto: dibuja solo la postura del estiramiento (para miniaturas y si el sistema pide menos movimiento) */
-function figuraSVG(k, quieto){
-  var F=FIGURAS[k]; if(!F) return "";
-  var dur="3.6s", kt='keyTimes="0;.3;.7;1" calcMode="spline" keySplines=".45 0 .55 1;0 0 1 1;.45 0 .55 1"';
-  function anima(attr, a, b){ return quieto ? "" : '<animate attributeName="'+attr+'" dur="'+dur+'" repeatCount="indefinite" values="'+a+";"+b+";"+b+";"+a+'" '+kt+'/>'; }
-  var P=quieto?F.B:F.A;
-  function trazo(parte, cls){ return '<path class="'+cls+'" d="'+fgD(P,parte)+'">'+anima("d", fgD(F.A,parte), fgD(F.B,parte))+'</path>'; }
-  return '<svg class="fg" viewBox="'+fgCaja(F)+'" aria-hidden="true">'+
-    '<ellipse cx="50" cy="93" rx="46" ry="2.4" class="fg-sombra"/>'+(F.suelo||"")+
-    trazo("brazoR","fg-lejos fg-brazo")+trazo("piernaR","fg-lejos fg-pierna")+
-    trazo("torso","fg-torso")+trazo("piernaL","fg-pierna")+trazo("brazoL","fg-brazo")+
-    '<circle class="fg-cabeza" r="6.4" cx="'+P.h[0]+'" cy="'+P.h[1]+'">'+anima("cx",F.A.h[0],F.B.h[0])+anima("cy",F.A.h[1],F.B.h[1])+'</circle>'+
-  '</svg>';
+
+/* construye el cuerpo: devuelve la raíz y las articulaciones */
+function mqCuerpo(T, ropa){
+  var piel=new T.MeshStandardMaterial({ color:0xe6d3bf, roughness:.52, metalness:0 });
+  var tela=new T.MeshStandardMaterial({ color:new T.Color(ropa), roughness:.7, metalness:0 });
+  var zapa=new T.MeshStandardMaterial({ color:0x2b2d33, roughness:.6, metalness:0 });
+  var piezas=[];
+  function pieza(geo, mat, x,y,z, sx,sy,sz, padre){
+    var m=new T.Mesh(geo, mat); m.position.set(x,y,z); if(sx) m.scale.set(sx,sy,sz);
+    m.castShadow=true; m.receiveShadow=true; padre.add(m); piezas.push(m); return m;
+  }
+  function g(padre, x,y,z){ var o=new T.Group(); o.position.set(x,y,z); o.rotation.order="YXZ"; padre.add(o); return o; }
+  var esf=new T.SphereGeometry(1, 28, 20);
+  function cap(r,l){ return new T.CapsuleGeometry(r, l, 8, 18); }
+  var raiz=new T.Group(), cuerpo=g(raiz,0,0,0);
+  /* cadera y pantalón corto */
+  pieza(esf, tela, 0,0,0, .165,.11,.115, cuerpo);
+  var tronco=g(cuerpo, 0,.04,0);
+  pieza(cap(.112,.1), tela, 0,.13,0, 0,0,0, tronco);
+  pieza(esf, tela, 0,.33,0, .185,.19,.12, tronco);
+  var cuello=g(tronco, 0,.5,0);
+  pieza(cap(.045,.05), piel, 0,.03,0, 0,0,0, cuello);
+  var cabeza=g(cuello, 0,.09,0);
+  pieza(esf, piel, 0,.085,.005, .1,.118,.108, cabeza);
+  pieza(esf, piel, 0,.08,.105, .018,.024,.02, cabeza);   /* la nariz, para saber hacia dónde mira */
+  var brazos={}, piernas={};
+  [["L",1],["R",-1]].forEach(function(l){
+    var h=g(tronco, l[1]*.205,.43,0);
+    pieza(esf, tela, 0,0,0, .066,.066,.066, h);
+    pieza(cap(.05,.19), piel, 0,-.14,0, 0,0,0, h);
+    var codo=g(h, 0,-.285,0);
+    pieza(cap(.042,.17), piel, 0,-.125,0, 0,0,0, codo);
+    pieza(esf, piel, 0,-.27,.005, .042,.065,.026, codo);
+    brazos[l[0]]={ h:h, codo:codo, s:l[1] };
+    var c=g(cuerpo, l[1]*.092,-.055,0);
+    pieza(cap(.075,.22), tela, 0,-.08,0, 0,0,0, c).scale.set(1,.5,1);
+    pieza(cap(.07,.28), piel, 0,-.22,0, 0,0,0, c);
+    var rod=g(c, 0,-.43,0);
+    pieza(cap(.052,.3), piel, 0,-.2,0, 0,0,0, rod);
+    var pie=g(rod, 0,-.41,0);
+    var zp=pieza(cap(.045,.13), zapa, 0,-.015,.05, 0,0,0, pie); zp.rotation.x=Math.PI/2;
+    piernas[l[0]]={ c:c, rod:rod, s:l[1] };
+  });
+  return { raiz:raiz, cuerpo:cuerpo, tronco:tronco, cuello:cuello, cabeza:cabeza, brazos:brazos, piernas:piernas, piezas:piezas };
+}
+var MQ_R=Math.PI/180;
+function mqPon(C, P, T, caja){
+  var R=MQ_R;
+  C.cuerpo.rotation.set(P.rx*R, P.ry*R, P.rz*R);
+  C.tronco.rotation.set(P.tx*R, P.ty*R, P.tz*R);
+  C.cuello.rotation.set(P.hx*R*.35, P.hy*R*.4, P.hz*R*.4);
+  C.cabeza.rotation.set(P.hx*R*.65, P.hy*R*.6, P.hz*R*.6);
+  ["L","R"].forEach(function(l){
+    var a=P["a"+l], b=C.brazos[l];
+    b.h.rotation.set(-a[0]*R, a[2]*R*(l==="L"?-1:1), a[1]*R*b.s);
+    b.codo.rotation.set(-a[3]*R, 0, 0);
+    var p=P["p"+l], q=C.piernas[l];
+    q.c.rotation.set(-p[0]*R, p[2]*R*(l==="L"?-1:1), p[1]*R*q.s);
+    q.rod.rotation.set(p[3]*R, 0, 0);
+  });
+  /* que apoye en el suelo: se sube o se baja hasta que lo más bajo toque y=0 */
+  C.raiz.position.set(0,0,0); C.raiz.updateMatrixWorld(true);
+  caja.makeEmpty(); C.piezas.forEach(function(m){ caja.expandByObject(m); });
+  C.raiz.position.y=-caja.min.y;
+}
+function mqMezcla(A, B, t){
+  var r={}, k;
+  for(k in A){ if(Array.isArray(A[k])) r[k]=A[k].map(function(v,i){ return v+(B[k][i]-v)*t; }); else r[k]=A[k]+(B[k]-A[k])*t; }
+  return r;
+}
+/* escena, luces, suelo y cámara encuadrada para las dos posturas */
+function mqEscena(T, k, ropa){
+  var F=MQ_FIG[k]||MQ_FIG.cuello, esc=new T.Scene();
+  esc.add(new T.HemisphereLight(0xffffff, 0xb9b3aa, 1.55));
+  var sol=new T.DirectionalLight(0xffffff, 2.1); sol.position.set(1.6,3.2,2.4); sol.castShadow=true;
+  sol.shadow.mapSize.set(1024,1024); sol.shadow.camera.left=-1.6; sol.shadow.camera.right=1.6; sol.shadow.camera.top=1.6; sol.shadow.camera.bottom=-1.6;
+  sol.shadow.radius=6; sol.shadow.bias=-.0006; esc.add(sol); esc.add(sol.target);
+  var suelo=new T.Mesh(new T.CircleGeometry(2.4, 48), new T.ShadowMaterial({ opacity:.2 }));
+  suelo.rotation.x=-Math.PI/2; suelo.receiveShadow=true; esc.add(suelo);
+  var C=mqCuerpo(T, ropa); esc.add(C.raiz);
+  /* encuadre: la caja que ocupan las dos posturas */
+  var caja=new T.Box3(), tot=new T.Box3();
+  mqPon(C, F.A, T, caja); tot.copy(caja).translate(new T.Vector3(0,C.raiz.position.y,0));
+  mqPon(C, F.B, T, caja); tot.union(caja.clone().translate(new T.Vector3(0,C.raiz.position.y,0)));
+  var pared=null;
+  if(F.pared){ C.raiz.updateMatrixWorld(true); var mano=new T.Vector3(); C.brazos.L.codo.children[1].getWorldPosition(mano);
+    pared=new T.Mesh(new T.BoxGeometry(1.4,2.1,.05), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
+    pared.position.set(0,1.05,mano.z+.05); pared.receiveShadow=true; esc.add(pared); tot.expandByPoint(new T.Vector3(0,1.6,mano.z)); }
+  var cen=tot.getCenter(new T.Vector3()), tam=tot.getSize(new T.Vector3());
+  var cam=new T.PerspectiveCamera(30, 1, .05, 30);
+  var radio=Math.max(tam.x, tam.y, tam.z)*.54+.06, dist=radio/Math.sin(15*MQ_R)*1.02;
+  return { esc:esc, cam:cam, C:C, F:F, caja:caja, cen:cen, dist:dist, az:(F.cam||0), el:(F.el!=null?F.el:14) };
+}
+function mqCamara(E, az){
+  var a=az*MQ_R, e=E.el*MQ_R;
+  E.cam.position.set(E.cen.x+Math.sin(a)*Math.cos(e)*E.dist, E.cen.y+Math.sin(e)*E.dist, E.cen.z+Math.cos(a)*Math.cos(e)*E.dist);
+  E.cam.lookAt(E.cen);
+}
+function mqRenderer(T, lienzo){
+  var r=new T.WebGLRenderer({ canvas:lienzo, antialias:true, alpha:true, preserveDrawingBuffer:!!lienzo.dataset.foto });
+  r.shadowMap.enabled=true; r.shadowMap.type=T.PCFSoftShadowMap;
+  r.toneMapping=T.ACESFilmicToneMapping; r.outputColorSpace=T.SRGBColorSpace; r.setClearColor(0x000000, 0);
+  return r;
+}
+
+/* miniaturas: un solo renderer fuera de pantalla hace una foto de la postura B */
+var MQ_FOTOS={}, MQ_FOTO_R=null;
+function maniquiFoto(k, ropa){
+  var clave=k+"|"+ropa;
+  if(MQ_FOTOS[clave]) return Promise.resolve(MQ_FOTOS[clave]);
+  return maniquiCarga().then(function(T){
+    if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); MQ_FOTO_R.setPixelRatio(1); MQ_FOTO_R.setSize(220,220,false); }
+    var E=mqEscena(T, k, mqColor(ropa));
+    mqPon(E.C, E.F.B, T, E.caja); mqCamara(E, E.az);
+    MQ_FOTO_R.render(E.esc, E.cam);
+    return (MQ_FOTOS[clave]=MQ_FOTO_R.domElement.toDataURL("image/png"));
+  });
+}
+/* rellena los <img data-mq="postura" data-ropa="var(--x)"> que haya dentro de un elemento */
+function maniquiFotos(dentro){
+  if(!dentro) return;
+  Array.prototype.forEach.call(dentro.querySelectorAll("img[data-mq]:not([src])"), function(im){
+    maniquiFoto(im.dataset.mq, im.dataset.ropa||"var(--accent)").then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
+  });
+}
+/* la escena animada del modo guiado */
+function maniquiVivo(lienzo, k, ropa, quieto){
+  var vivo={ para:function(){ vivo.fin=true; } };
+  maniquiCarga().then(function(T){
+    if(vivo.fin) return;
+    var r=mqRenderer(T, lienzo), E=mqEscena(T, k, mqColor(ropa)), t0=performance.now();
+    E.dist*=1.12;   /* la cámara se balancea un poco: algo de margen para que no se salga */
+    function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(2, window.devicePixelRatio||1)); r.setSize(w,h,false); E.cam.aspect=w/h; E.cam.updateProjectionMatrix(); }
+    tam();
+    function suave(x){ return x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2; }
+    function cuadro(ahora){
+      if(vivo.fin){ r.dispose(); try{ r.forceContextLoss(); }catch(e){} return; }
+      var s=((ahora-t0)/4200)%1, t;
+      if(quieto) t=1; else if(s<.32) t=suave(s/.32); else if(s<.68) t=1; else t=1-suave((s-.68)/.32);
+      mqPon(E.C, mqMezcla(E.F.A, E.F.B, t), T, E.caja);
+      mqCamara(E, E.az + (quieto?0:Math.sin((ahora-t0)/2600)*14));
+      if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
+      r.render(E.esc, E.cam);
+      requestAnimationFrame(cuadro);
+    }
+    requestAnimationFrame(cuadro);
+  }).catch(function(){ var p=lienzo.parentNode; if(p) p.classList.add("sin-3d"); });
+  return vivo;
 }
 
 /* ── modo guiado: un estiramiento por pantalla, con cuenta atrás, y pasa solo al siguiente ── */
@@ -18673,7 +18811,7 @@ function guiaPinta(){
   c.innerHTML='<div class="gu-top"><div class="gu-barras">'+r.pasos.map(function(x,j){ return '<i class="'+(j<GUIA.i?"hecha":j===GUIA.i?"ahora":"")+'"></i>'; }).join("")+'</div>'+
       '<div class="gu-fila"><span>'+esc(r.t)+' · '+(GUIA.i+1)+' de '+r.pasos.length+'</span><button data-act="x-gu-cierra" aria-label="Cerrar">'+
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'+
-    '<div class="gu-escena">'+figuraSVG(p.f, quieto)+(guiaPasoDoble(p)?'<span class="gu-lado'+(GUIA.cambio?" ve":"")+'">Cambia de lado</span>':'')+'</div>'+
+    '<div class="gu-escena"><canvas class="gu-3d"></canvas>'+(guiaPasoDoble(p)?'<span class="gu-lado'+(GUIA.cambio?" ve":"")+'">Cambia de lado</span>':'')+'</div>'+
     '<div class="gu-info"><h2 class="display">'+esc(p.t)+'</h2><p>'+esc(p.d)+'</p>'+
       '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
     '<div class="gu-mandos">'+
@@ -18684,11 +18822,14 @@ function guiaPinta(){
       '<button class="gu-b" data-act="x-gu-sigue" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>'+
     '</div>'+
     '<p class="gu-sig">'+(sig?'Después: <b>'+esc(sig.t)+'</b>':'Es el último')+'</p>';
+  if(GUIA.vivo) GUIA.vivo.para();
+  GUIA.vivo=maniquiVivo(c.querySelector(".gu-3d"), p.f, r.c, quieto);
 }
 function guiaPausa(){
   if(!GUIA) return;
   if(GUIA.pausa){ GUIA.pausa=false; GUIA.fin=Date.now()+GUIA.resta; } else { GUIA.pausa=true; GUIA.resta=Math.max(0, GUIA.fin-Date.now()); }
-  guiaPinta();
+  var b=document.querySelector("#guia .gu-reloj");
+  if(b){ b.setAttribute("aria-label", GUIA.pausa?"Seguir":"Pausa"); b.querySelector("small").textContent=GUIA.pausa?"En pausa":"segundos"; }
 }
 /* al terminar: si la rutina está entre tus hábitos, se marca la de hoy */
 function guiaFin(){
@@ -18696,7 +18837,7 @@ function guiaFin(){
   idealTodos().forEach(function(x){ if(String(x.text||"").toLowerCase()===tx) hab=x; });
   var marcado=false;
   if(hab){ var t=today(); if(!S.checks[t]) S.checks[t]=[]; if(S.checks[t].indexOf(hab.id)<0){ S.checks[t].push(hab.id); save(); marcado=true; } }
-  GUIA.hecho=true; sonido("pop");
+  GUIA.hecho=true; sonido("pop"); if(GUIA.vivo){ GUIA.vivo.para(); GUIA.vivo=null; }
   var c=document.getElementById("guia"); if(!c) return;
   c.innerHTML='<div class="gu-top"><div class="gu-fila"><span>'+esc(r.t)+'</span><button data-act="x-gu-cierra" aria-label="Cerrar">'+
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'+
@@ -18707,6 +18848,7 @@ function guiaFin(){
 }
 function guiaCierra(){
   if(GUIA && GUIA.tm) clearInterval(GUIA.tm);
+  if(GUIA && GUIA.vivo) GUIA.vivo.para();
   GUIA=null;
   var c=document.getElementById("guia"); if(c){ c.hidden=true; c.innerHTML=""; }
   document.documentElement.classList.remove("guia-abierta");
@@ -18726,17 +18868,10 @@ function guiaAccion(a){
 document.addEventListener("keydown", function(e){ if(GUIA && e.key==="Escape") guiaCierra(); });
 
 var CRECER2_CSS=[
-'.fg{ width:100%; height:100%; overflow:visible; }',
-'.fg path{ fill:none; stroke-linecap:round; stroke-linejoin:round; }',
-'.fg-torso{ stroke:var(--fg-c); stroke-width:13; }',
-'.fg-brazo{ stroke:var(--fg-c); stroke-width:6.5; } .fg-pierna{ stroke:var(--fg-c); stroke-width:8.5; }',
-'.fg-lejos{ stroke:color-mix(in srgb,var(--fg-c) 45%,var(--fg-fondo)); }',
-'.fg-cabeza{ fill:var(--fg-c); }',
-'.fg-sombra{ fill:color-mix(in srgb,var(--fg-c) 14%,transparent); }',
-'.fg-pared{ stroke:color-mix(in srgb,var(--fg-c) 30%,transparent)!important; stroke-width:2.5; stroke-dasharray:3 4; }',
-'.cr-rutina .cr-r-ico{ --fg-c:#fff; --fg-fondo:var(--c); }',
+'.cr-r-ico{ background:color-mix(in srgb,var(--c) 14%,var(--glass-bg-hi))!important; }',
+'.cr-r-ico img, .cr-mini img{ width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity .35s var(--ease); } .cr-r-ico img.ve, .cr-mini img.ve{ opacity:1; }',
 /* miniatura de la figura en la lista de pasos */
-'.cr-pasos li .cr-mini{ flex:0 0 auto; width:62px; height:62px; border-radius:14px; padding:5px; background:color-mix(in srgb,var(--c) 11%,transparent); --fg-c:var(--c); --fg-fondo:var(--bg); }',
+'.cr-pasos li .cr-mini{ flex:0 0 auto; width:68px; height:68px; border-radius:14px; padding:2px; background:color-mix(in srgb,var(--c) 11%,transparent); }',
 /* pantalla del modo guiado */
 '#guia{ position:fixed; inset:0; z-index:70; display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 18px);',
 '  background:var(--bg); background-image:radial-gradient(90% 55% at 50% 22%, color-mix(in srgb,var(--c) 16%,transparent), transparent 70%); color:var(--t1); overflow-y:auto; }',
@@ -18748,7 +18883,8 @@ var CRECER2_CSS=[
 '.gu-fila button{ display:grid; place-items:center; width:36px; height:36px; border-radius:99px; background:var(--fill); color:var(--t1); }',
 '.gu-fila button svg{ width:16px; height:16px; }',
 '.gu-escena{ position:relative; flex:1 1 auto; min-height:220px; max-height:46vh; margin:14px auto 6px; aspect-ratio:1; border-radius:28px; padding:6%;',
-'  background:color-mix(in srgb,var(--c) 10%,var(--glass-bg-hi)); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 18%,transparent); --fg-c:var(--c); --fg-fondo:var(--bg); }',
+'  background:radial-gradient(80% 70% at 50% 35%, color-mix(in srgb,var(--c) 9%,var(--glass-bg-hi)), color-mix(in srgb,var(--c) 16%,var(--glass-bg-hi))); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--c) 18%,transparent); overflow:hidden; }',
+'.gu-3d{ position:absolute; inset:0; width:100%; height:100%; display:block; } .gu-escena.sin-3d .gu-3d{ display:none; }',
 '.gu-lado{ position:absolute; left:50%; top:14px; transform:translate(-50%,-6px); opacity:0; font-size:12.5px; font-weight:800; padding:6px 12px; border-radius:99px; color:#fff; background:var(--c); transition:opacity .3s var(--ease), transform .3s var(--spring); }',
 '.gu-lado.ve{ opacity:1; transform:translate(-50%,0); }',
 '.gu-info{ text-align:center; margin-top:8px; } .gu-info h2{ font-size:24px; font-weight:800; letter-spacing:-.02em; }',
