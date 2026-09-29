@@ -17083,10 +17083,14 @@ function chSube(G, m){
     else if(!ya) G.msgs.push(n);
     chPintaTodo();
   }).catch(function(e){
-    m.estado="fallo"; chPintaTodo();
-    var t=e && e.message;
+    var t=(e && e.message) || "";
+    m.estado="fallo"; m.motivo=t==="sin_servidor" ? "falta activar el chat en Supabase" : "";
+    if(t==="sin_servidor") CH.sinServidor=true;
+    chPintaTodo();
     if(t==="sin_servidor") avisoNube("El chat aún no está activado en el servidor.");
-    else if(t && (t.indexOf("muy_rapido")>=0 || t.indexOf("no_eres_miembro")>=0)) avisoNube(gError(e));
+    else if(t.indexOf("muy_rapido")>=0 || t.indexOf("no_eres_miembro")>=0) avisoNube(gError(e));
+    /* en la beta, cualquier otro error se enseña tal cual para poder arreglarlo */
+    else if(window.DTRACK_BETA && t && navigator.onLine!==false) avisoNube("No se ha enviado: "+t.slice(0,120));
   });
 }
 function chBusca(key){
@@ -17261,7 +17265,7 @@ function chMensajeHTML(m, sigue, mio){
         '<span class="ch-txt">'+esc(m.texto)+'</span><span class="ch-hora num">'+(m.estado==="enviando"?"···":chHora(m.ts))+'</span></button>'+
       chReacHTML(m.reac, m.mias, key)+
       (key && CH.abiertoReac===key ? chEligeHTML(key, m.mias, mio) : '')+
-      (m.estado==="fallo" ? '<button class="ch-fallo" data-act="x-chat-reintenta" data-tmp="'+esc(m.tmp)+'">No se ha enviado · Reintentar</button>' : '')+
+      (m.estado==="fallo" ? '<button class="ch-fallo" data-act="x-chat-reintenta" data-tmp="'+esc(m.tmp)+'">No se ha enviado'+(m.motivo?" ("+esc(m.motivo)+")":"")+' · Reintentar</button>' : '')+
     '</div></div>';
 }
 function chEventoHTML(e){
@@ -17351,6 +17355,10 @@ function chAbrir(){
   var ta=capa.querySelector("#ch-texto"), bt=capa.querySelector(".ch-enviar"), sc=capa.querySelector("#ch-scroll");
   ta.value=CH.borrador||""; chAlto(ta);
   ta.addEventListener("input", function(){ CH.borrador=ta.value; chAlto(ta); });
+  /* escribiendo = teclado abierto: fuera el margen de la barra de inicio (en el iPhone
+     instalado la ventana entera encoge con el teclado y no se puede saber midiendo) */
+  ta.addEventListener("focus", function(){ CH.escribe=true; chViewport(); });
+  ta.addEventListener("blur", function(){ CH.escribe=false; chViewport(); });
   ta.addEventListener("keydown", function(ev){ if(ev.key==="Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); chEnviaCaja(); } });
   /* que al tocar «enviar» no se cierre el teclado */
   ["pointerdown","mousedown"].forEach(function(t){ bt.addEventListener(t, function(ev){ ev.preventDefault(); }); });
@@ -17365,7 +17373,7 @@ function chAbrir(){
 function chCerrar(){
   var capa=document.getElementById("chat-capa"); if(!capa) return;
   var ta=capa.querySelector("#ch-texto"); if(ta){ CH.borrador=ta.value; ta.blur(); }
-  CH.abierto=false; CH.abiertoReac=null; CH.borrar=null; CH.firma="";
+  CH.abierto=false; CH.abiertoReac=null; CH.borrar=null; CH.firma=""; CH.escribe=false;
   if(window.visualViewport){ visualViewport.removeEventListener("resize", chViewport); visualViewport.removeEventListener("scroll", chViewport); }
   capa.classList.remove("ve");
   setTimeout(function(){ if(capa.parentNode && !capa.classList.contains("ve")) capa.parentNode.removeChild(capa); }, 420);
@@ -17383,7 +17391,7 @@ function chViewport(){
   var capa=document.getElementById("chat-capa"), vv=window.visualViewport; if(!capa || !vv) return;
   var sc=document.getElementById("ch-scroll"), cerca=sc && (sc.scrollHeight-sc.scrollTop-sc.clientHeight<140);
   capa.style.height=vv.height+"px"; capa.style.top=vv.offsetTop+"px";
-  capa.classList.toggle("teclado", window.innerHeight-vv.height>120);
+  capa.classList.toggle("teclado", !!CH.escribe || window.innerHeight-vv.height>120);
   if(cerca && sc) sc.scrollTop=sc.scrollHeight;
 }
 
