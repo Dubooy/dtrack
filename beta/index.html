@@ -18613,7 +18613,7 @@ function mqCon(base, o){ var r={}, k; for(k in base) r[k]=base[k]; for(k in o) r
 /* bases: de pie es la neutra; tumbado boca arriba y boca abajo, a cuatro patas, de rodillas y en zancada con una rodilla en el suelo */
 var MQ_SUPINO={ rx:-90, aL:[0,14,0,5], aR:[0,14,0,5], fL:-30, fR:-30 };
 var MQ_PRONO={ rx:90, fL:-60, fR:-60, aL:[0,14,0,5], aR:[0,14,0,5] };
-var MQ_CUATRO={ rx:90, tx:-6, hx:-14, aL:[84,4,0,0], aR:[84,4,0,0], pL:[90,5,0,90], pR:[90,5,0,90], fL:-80, fR:-80, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } } };
+var MQ_CUATRO={ rx:90, tx:-6, hx:-14, aL:[84,8,0,0], aR:[84,8,0,0], pL:[90,5,0,90], pR:[90,5,0,90], fL:-80, fR:-80, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } } };
 var MQ_RODILLAS={ pL:[0,5,0,90], pR:[0,5,0,90], fL:-80, fR:-80 };
 var MQ_CABALLERO={ pR:[100,5,0,95], pL:[-10,5,0,70], fL:-80, fR:0 };
 var MQ_NUCA={ L:{ h:"cabeza", o:[.045,.05,-.125], m:[-1,.2,0], n:[0,0,1] }, R:{ h:"cabeza", o:[-.045,.05,-.125], m:[1,.2,0], n:[0,0,1] } };
@@ -18637,7 +18637,7 @@ var MQ_FIG={
   tspine:{ cam:-60, el:25, lados:1, A:mqCon(MQ_CUATRO,{ ty:40, hy:15, aR:[30,95,0,130,60], dR:20, ik:{ L:{ s:1, fijo:1 }, R:MQ_NUCA.R } }), B:mqCon(MQ_CUATRO,{ ty:-50, hy:-40, aR:[30,95,0,130,60], dR:20, ik:{ L:{ s:1, fijo:1 }, R:MQ_NUCA.R } }) },
   torsion:{ cam:150, el:55, A:mqCon(MQ_SUPINO,{ aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,4,0,90] }), B:mqCon(MQ_SUPINO,{ rr:80, ty:-80, hy:-40, aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,-25,0,90] }) },
   /* 3. cadera */
-  paloma:{ cam:60, el:18, A:mqCon(MQ_CUATRO,{}), B:mq({ rx:20, tx:-30, pR:[100,20,0,100,90], pL:[-60,5,0,0], fL:-80, aL:[30,8,0,0], aR:[30,8,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }) },
+  paloma:{ cam:60, el:18, ancla:"manoL+manoR", A:mqCon(MQ_CUATRO,{ ikp:{ R:{ rod:[0,1], tob:[0,-1] }, L:{ rod:[0,-1], tob:[0,-1] } } }), B:mq({ rx:55, tx:-50, hx:-10, alto:.15, aL:[12,12,4,0], aR:[22,19,35,0], pL:[-32,5,0,5], pR:[115,35,15,85,90], fL:-110, fR:6, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } }, ikp:{ R:{ rod:[-1.6,1], tob:[1,-.45] }, L:{ rod:[0,-1], tob:[0,-1] } } }) },
   gluteo:{ cam:74, A:mqCon(MQ_SUPINO,{ pL:[62,6,0,105], pR:[62,6,0,105] }), B:mqCon(MQ_SUPINO,{ pL:[100,4,0,95], pR:[95,30,40,95], aL:[70,10,0,40], aR:[70,10,0,40],
                      ik:{ L:{ h:"piernaL", o:[.07,.1,-.06] }, R:{ h:"piernaL", o:[-.07,.1,-.06] } } }) },
   mariposa:{ cam:20, el:18, A:mq({ rx:-10, tx:15, pL:[100,60,0,130,55], pR:[100,60,0,130,55], aL:[55,8,0,25], aR:[55,8,0,25], ik:MQ_PIES }), B:mq({ rx:-10, tx:45, hx:10, pL:[100,66,0,130,55], pR:[100,66,0,130,55], aL:[65,8,0,20], aR:[65,8,0,20], ik:MQ_PIES }) },
@@ -18743,22 +18743,41 @@ function mqGira(C, P){
   C.raiz.updateMatrixWorld(true);
 }
 /* fases: { clave:[de, a] } para que una parte se mueva solo en ese tramo de t (p. ej. la mano se apoya
-   antes de que el cuello se incline); "ik" es el de los contactos de las manos */
-function mqMezcla(A, B, t, fases){
-  var r={}, k;
+   antes de que el cuello se incline); "ik" es el de los contactos de las manos. C: una postura intermedia
+   (en tc, 0.5 si no se dice) por la que pasa cada parte al ir de A a B */
+function mqMezcla(A, B, t, fases, C, tc, arco){
+  var r={}, k; tc=tc||.5;
   function en(k){ var f=fases && fases[k]; return f ? Math.max(0, Math.min(1, (t-f[0])/(f[1]-f[0]))) : t; }
-  for(k in A){ if(k==="ik") continue; var u=en(k); if(Array.isArray(A[k])) r[k]=A[k].map(function(v,i){ return v+(B[k][i]-v)*u; }); else r[k]=A[k]+(B[k]-A[k])*u; }
+  function tramo(u){ return !C ? [A, B, u] : u<tc ? [A, C, u/tc] : [C, B, (u-tc)/(1-tc)]; }
+  for(k in A){ if(k==="ik") continue; var s=tramo(en(k)), X=s[0][k], Y=s[1][k], u=s[2];
+    if(Array.isArray(X)) r[k]=X.map(function(v,i){ return v+(Y[i]-v)*u; }); else r[k]=X+(Y-X)*u;
+    /* arco: { clave:[de, a, cuánto] } suma un arco (seno) en ese tramo, p. ej. para levantar una pierna al moverla */
+    var ar=arco && arco[k]; if(ar && t>ar[0] && t<ar[1]){ var sn=Math.sin(Math.PI*(t-ar[0])/(ar[1]-ar[0]));
+      if(Array.isArray(r[k])) r[k]=r[k].map(function(v,i){ return v+(ar[2][i]||0)*sn; }); else r[k]+=ar[2]*sn; } }
+  r.tramo=C && t>=tc ? 1 : 0;
   /* los contactos de una mano: el de B si lo tiene (si no, el de A), con su peso mezclado; si los dos
      son al mismo hueso, el desplazamiento y la dirección de la mano también se mezclan */
-  var a=A.ik||{}, b=B.ik||{}, ti=en("ik"); r.ik={};
+  var si=tramo(en("ik")), a=si[0].ik||{}, b=si[1].ik||{}, ti=si[2]; r.ik={};
   function mv(x, y){ if(!x || !y) return y||x; return x.map(function(v,i){ return v+(y[i]-v)*ti; }); }
   ["L","R"].forEach(function(l){ var c=b[l]||a[l]; if(!c) return;
     var mismo=a[l] && b[l] && a[l].h===b[l].h && !!a[l].s===!!b[l].s && !!a[l].pared===!!b[l].pared;
     r.ik[l]={ h:c.h, f:c.f, o:mismo ? mv(a[l].o||[0,0,0], b[l].o||[0,0,0]) : c.o, m:mismo ? mv(a[l].m, b[l].m) : c.m, n:mismo ? mv(a[l].n, b[l].n) : c.n,
-      s:c.s, pared:c.pared, fijo:mismo ? (a[l].fijo && b[l].fijo) : c.fijo,
+      s:c.s, pared:c.pared, codo:c.codo, fijo:mismo ? (a[l].fijo && b[l].fijo) : c.fijo,
       w:(a[l]?(a[l].w==null?1:a[l].w):0)*(1-ti)+(b[l]?(b[l].w==null?1:b[l].w):0)*ti }; });
+  /* las piernas, igual: con los dos del mismo tipo se mezclan las direcciones */
+  var sp=tramo(en("ikp")), pa=sp[0].ikp||{}, pb=sp[1].ikp||{}, tp=sp[2];
+  if(sp[0].ikp || sp[1].ikp){ r.ikp={};
+    ["L","R"].forEach(function(l){ var x=pa[l], y=pb[l], c=y||x; if(!c) return;
+      var wx=x?(x.w==null?1:x.w):0, wy=y?(y.w==null?1:y.w):0, o={}; for(var q in c) o[q]=c[q];
+      if(x && y && x.rod && y.rod){ o.rod=[x.rod[0]+(y.rod[0]-x.rod[0])*tp, x.rod[1]+(y.rod[1]-x.rod[1])*tp]; o.rk=(x.rk||.03)+((y.rk||.03)-(x.rk||.03))*tp;
+        if(x.tob && y.tob) o.tob=x.tob.map(function(v,i){ return v+((y.tob[i]||0)-v)*tp; }); }
+      if(x && y && x.h && y.h && x.h===y.h && x.o && y.o) o.o=x.o.map(function(v,i){ return v+(y.o[i]-v)*tp; });
+      o.fijo=x && y ? (x.fijo && y.fijo) : c.fijo;
+      o.w=wx*(1-tp)+wy*tp; r.ikp[l]=o; }); }
   return r;
 }
+/* la postura de la figura F en el instante t (0 = A, 1 = B) */
+function mqFigT(F, t){ return mqMezcla(F.A, F.B, t, F.fases, F.C, F.tc, F.arco); }
 
 /* qué articulación de la guía mueve cada hueso del modelo (los demás siguen a su padre) */
 var MQ_HUESOS={ cadera:"cuerpo", espalda1:"medio", espalda2:"tronco", cuello:"cuello", cabeza:"cabeza",
@@ -18992,8 +19011,11 @@ function mqClavicula(T, C, l){
 }
 var MQ_CLAV=40;
 /* lleva la muñeca de un brazo a un punto (IK de dos huesos), sin cambiar hacia dónde dobla el codo */
-function mqIK(T, M, l, dest, w){
-  var A=M.hueso["brazo"+l], B=M.hueso["antebrazo"+l], C=M.hueso["mano"+l]; if(!A||!B||!C||w<=0) return;
+function mqIK(T, M, l, dest, w){ mqIK2(T, M.hueso["brazo"+l], M.hueso["antebrazo"+l], M.hueso["mano"+l], dest, w); }
+/* dos huesos (brazo y antebrazo, o muslo y pierna) para que el extremo C llegue a dest, doblando el
+   codo o la rodilla hacia donde ya se doblaba */
+function mqIK2(T, A, B, C, dest, w){
+  if(!A||!B||!C||w<=0) return;
   function pos(o){ return o.getWorldPosition(new T.Vector3()); }
   function gira(o, de, a){
     var q=new T.Quaternion().setFromUnitVectors(de.normalize(), a.normalize());
@@ -19027,6 +19049,73 @@ function mqIK(T, M, l, dest, w){
       var ang=Math.atan2(eje.dot(pa.clone().cross(pb)), pa.dot(pb))*Math.min(1,w);
       var rq=new T.Quaternion().setFromAxisAngle(eje, ang), pq=C.parent.getWorldQuaternion(new T.Quaternion()).invert();
       C.quaternion.copy(pq.multiply(rq).multiply(cq)); C.updateMatrixWorld(true); } }
+}
+/* las piernas (ikp: { L:{…}, R:{…} }): fijo, el pie se queda donde y como lo dejó la postura A (y el
+   cuerpo baja lo que haga falta para llegar, como con el peso); h/o, el tobillo va a un punto de otro
+   hueso (como las manos); rod y tob, la rodilla en el suelo en esa dirección desde la cadera ([x, z]) y
+   la espinilla tumbada en el suelo en esa otra desde la rodilla */
+function mqPierna(T, M, l, c, w){
+  var A=M.hueso["muslo"+l], B=M.hueso["pierna"+l], C=M.hueso["pie"+l]; if(!A||!B||!C||w<=0) return;
+  function pos(o){ return o.getWorldPosition(new T.Vector3()); }
+  function gira(o, de, a){
+    var q=new T.Quaternion().setFromUnitVectors(de.normalize(), a.normalize());
+    if(w<1) q=new T.Quaternion().slerp(q, w);
+    var wq=o.getWorldQuaternion(new T.Quaternion()), pq=o.parent.getWorldQuaternion(new T.Quaternion()).invert();
+    o.quaternion.copy(pq.multiply(q).multiply(wq)); o.updateMatrixWorld(true);
+  }
+  if(c.rod){
+    /* se apoya y, si la pierna se hunde en el suelo o se queda en el aire, se corrige la altura de la rodilla */
+    var q0={ A:A.quaternion.clone(), B:B.quaternion.clone(), C:C.quaternion.clone() }, rk=c.rk||.03;
+    for(var it=0; it<3; it++){
+      if(it){ A.quaternion.copy(q0.A); B.quaternion.copy(q0.B); C.quaternion.copy(q0.C); A.updateMatrixWorld(true); }
+      mqRodilla(T, A, B, C, c, rk, w, gira);
+      var hu=mqHunde(T, M, l); if(Math.abs(hu)<.003) break; rk+=hu; }
+    return;
+  }
+  var dest=c.fijo ? (M.fijoP && M.fijoP[l] ? M.fijoP[l].p.clone() : null) : (c.h ? mqContacto(T, M, c) : null);
+  if(!dest) return;
+  mqIK2(T, A, B, C, dest, w);
+  /* el pie apoyado no gira */
+  if(c.fijo){ var cq=C.getWorldQuaternion(new T.Quaternion()).slerp(M.fijoP[l].q, Math.min(1,w)), pq2=C.parent.getWorldQuaternion(new T.Quaternion()).invert();
+    C.quaternion.copy(pq2.multiply(cq)); C.updateMatrixWorld(true); }
+}
+/* la rodilla en el suelo a la altura rk, en la dirección c.rod desde la cadera, y la espinilla tumbada hacia c.tob */
+function mqRodilla(T, A, B, C, c, rk, w, gira){
+  function pos(o){ return o.getWorldPosition(new T.Vector3()); }
+  var h=pos(A), k=pos(B), L1=h.distanceTo(k), dy=Math.min(L1-.001, Math.max(0, h.y-rk)), dh=Math.sqrt(L1*L1-dy*dy);
+  var d=new T.Vector3(c.rod[0], 0, c.rod[1]).normalize(), kt=new T.Vector3(h.x+d.x*dh, h.y-dy, h.z+d.z*dh);
+  gira(A, k.clone().sub(h), kt.sub(h));
+  if(!c.tob) return;
+  /* la espinilla: se gira el muslo sobre sí mismo hasta que la rodilla se dobla hacia allí, y se dobla */
+  h=pos(A); k=pos(B); var u=k.clone().sub(h).normalize(), s0=pos(C).sub(k), s1=new T.Vector3(c.tob[0], c.tob[2]!=null?c.tob[2]:0, c.tob[1]).normalize();
+  var e0=s0.clone().sub(u.clone().multiplyScalar(s0.dot(u))), e1=s1.clone().sub(u.clone().multiplyScalar(s1.dot(u)));
+  if(e0.lengthSq()>1e-8 && e1.lengthSq()>1e-8){ e0.normalize(); e1.normalize();
+    var ang=Math.atan2(u.dot(e0.clone().cross(e1)), e0.dot(e1))*Math.min(1,w), wq=A.getWorldQuaternion(new T.Quaternion()), pq=A.parent.getWorldQuaternion(new T.Quaternion()).invert();
+    A.quaternion.copy(pq.multiply(new T.Quaternion().setFromAxisAngle(u, ang)).multiply(wq)); A.updateMatrixWorld(true); }
+  k=pos(B); gira(B, pos(C).sub(k), s1);
+  /* el pie, de canto en el suelo: la punta en horizontal */
+  var cq=C.getWorldQuaternion(new T.Quaternion()), p0=new T.Vector3(0,1,0).applyQuaternion(cq), p1=p0.clone(); p1.y=0;
+  if(p1.lengthSq()>1e-6){ var rq=new T.Quaternion().setFromUnitVectors(p0, p1.normalize()); if(w<1) rq=new T.Quaternion().slerp(rq, w);
+    var pq3=C.parent.getWorldQuaternion(new T.Quaternion()).invert(); C.quaternion.copy(pq3.multiply(rq.multiply(cq))); C.updateMatrixWorld(true); }
+}
+/* cuánto se hunde en el suelo la pierna l (negativo: cuánto le falta para tocarlo) */
+function mqHunde(T, M, l){
+  var g=M.malla.geometry, v=new T.Vector3(), mw=M.malla.matrixWorld, min=Infinity, i;
+  if(!M.piernaV){ var si=g.attributes.skinIndex, sw=g.attributes.skinWeight, nb=M.malla.skeleton.bones, n=g.attributes.position.count; M.piernaV={ L:[], R:[] };
+    for(i=0;i<n;i++){ var mejor=0, cual=0; for(var j=0;j<4;j++){ var w=sw.getComponent(i,j); if(w>mejor){ mejor=w; cual=si.getComponent(i,j); } }
+      var r=/^(muslo|pierna|pie)([LR])$/.exec(nb[cual].name); if(r && mejor>.5) M.piernaV[r[2]].push(i); } }
+  M.raiz.updateMatrixWorld(true);
+  M.piernaV[l].forEach(function(k){ M.malla.getVertexPosition(k, v); v.applyMatrix4(mw); if(v.y<min) min=v.y; });
+  return isFinite(min) ? -min : 0;
+}
+/* con los pies fijos, el cuerpo baja hasta que las piernas llegan (como hace el peso) */
+function mqBajaHastaPies(T, M, P){
+  var baja=0;
+  ["L","R"].forEach(function(l){ var c=P.ikp[l]; if(!c || !c.fijo || !M.fijoP || !M.fijoP[l]) return;
+    var h=M.hueso["muslo"+l].getWorldPosition(new T.Vector3()), k=M.hueso["pierna"+l].getWorldPosition(new T.Vector3()), a=M.hueso["pie"+l].getWorldPosition(new T.Vector3());
+    var L=h.distanceTo(k)+k.distanceTo(a)-.004, D=h.clone().sub(M.fijoP[l].p), hz=D.x*D.x+D.z*D.z;
+    if(hz<L*L){ var d=D.y-Math.sqrt(L*L-hz); if(d>baja) baja=d; } });
+  if(baja>0){ M.raiz.position.y-=baja; M.raiz.updateMatrixWorld(true); }
 }
 /* el punto de contacto: un hueso del modelo más un desplazamiento en metros, medido en la pose de
    reposo (x a su izquierda, y arriba, z hacia delante) y que gira con ese hueso, o con el hueso f
@@ -19073,10 +19162,39 @@ function mqPon(M, P, T){
   /* con las manos apoyadas, el cuerpo se apoya sin contar los brazos, y luego las manos bajan hasta el suelo */
   var suelo=apoyos.some(function(x){ return x[1].s; });
   mqSuelo(T, M, suelo);
+  /* alto: a qué altura queda la cadera (lo que baja la pelvis al estirar); las piernas se apoyan después */
+  if(P.alto!=null){ var dh=P.alto-M.hueso.cadera.getWorldPosition(new T.Vector3()).y; M.raiz.position.y+=dh; M.raiz.updateMatrixWorld(true); M.caja.translate(new T.Vector3(0,dh,0)); }
+  /* ancla: lo que se queda quieto en el suelo (los pies, las rodillas…) no resbala: el cuerpo entero
+     se desplaza para que siga donde lo dejó la postura A */
+  var an=M.anclas && M.anclas[P.tramo||0];
+  if(an && an.en){ var ac=mqAncla(T, M, an.h), dx=an.en.x-ac.x, dz=an.en.z-ac.z;
+    M.raiz.position.x+=dx; M.raiz.position.z+=dz; M.raiz.updateMatrixWorld(true); M.caja.translate(new T.Vector3(dx,0,dz)); }
+  if(P.ikp){ mqBajaHastaPies(T, M, P);
+    ["L","R"].forEach(function(l){ var c=P.ikp[l]; if(c) mqPierna(T, M, l, c, c.w==null?1:c.w); });
+    if(!apoyos.length) mqSuelo(T, M, false); }
   if(apoyos.length){
-    apoyos.forEach(function(x){ var d=mqApoyo(T, M, x[0], x[1]); if(d) mqIK(T, M, x[0], d, x[1].w==null?1:x[1].w); });
+    apoyos.forEach(function(x){ var d=mqApoyo(T, M, x[0], x[1]), w=x[1].w==null?1:x[1].w; if(!d) return; mqIK(T, M, x[0], d, w);
+      /* la palma justo en la superficie: lo que la mano se hunda o se quede corta se corrige y se vuelve a apoyar */
+      if(w>=1 && d.sup){ var hu=mqManoEntra(T, M, x[0], d.sup); if(Math.abs(hu)>.002){ d[d.sup.e]-=hu*d.sup.s; mqIK(T, M, x[0], d, w); } } });
     mqSuelo(T, M, false);
   }
+}
+/* cuánto entra la mano l en la superficie sup (e: eje, v: dónde está, s: hacia dónde queda el cuerpo
+   con signo −: −1 en el suelo); negativo si se queda corta */
+function mqManoEntra(T, M, l, sup){
+  var g=M.malla.geometry, v=new T.Vector3(), mw=M.malla.matrixWorld, max=-Infinity, i;
+  if(!M.manoV){ var si=g.attributes.skinIndex, sw=g.attributes.skinWeight, nb=M.malla.skeleton.bones, n=g.attributes.position.count; M.manoV={ L:[], R:[] };
+    for(i=0;i<n;i++){ var mejor=0, cual=0; for(var j=0;j<4;j++){ var w=sw.getComponent(i,j); if(w>mejor){ mejor=w; cual=si.getComponent(i,j); } }
+      var r=/^(mano|dedo[12])([LR])$/.exec(nb[cual].name); if(r && mejor>.5) M.manoV[r[2]].push(i); } }
+  M.raiz.updateMatrixWorld(true);
+  M.manoV[l].forEach(function(k){ M.malla.getVertexPosition(k, v); v.applyMatrix4(mw); var d=(v[sup.e]-sup.v)*sup.s; if(d>max) max=d; });
+  return isFinite(max) ? max : 0;
+}
+/* el punto medio de los huesos del ancla ("pieL+pieR"), donde está ahora */
+function mqAncla(T, M, a){
+  var p=new T.Vector3(), n=0;
+  a.split("+").forEach(function(h){ var o=M.hueso[h]; if(o){ p.add(o.getWorldPosition(new T.Vector3())); n++; } });
+  return n ? p.multiplyScalar(1/n) : p;
 }
 /* apoya el cuerpo en el suelo: su punto más bajo (sin los brazos, si sinBrazos) a la altura 0.
    Si una mano queda por debajo, sube todo lo que haga falta. */
@@ -19100,12 +19218,13 @@ function mqSuelo(T, M, sinBrazos){
 function mqApoyo(T, M, l, c){
   var mu=M.hueso["mano"+l]; if(!mu || (c.pared && !M.pared)) return null;
   var p=mu.getWorldPosition(new T.Vector3()), dir=new T.Vector3(0,1,0).applyQuaternion(mu.getWorldQuaternion(new T.Quaternion())), palma;
-  if(c.fijo && M.fijo && M.fijo[l]){ p.x=M.fijo[l].x; p.z=M.fijo[l].z; }
+  /* fijo: la mano no se mueve de donde la dejó la postura A (en el suelo, o en la pared) */
+  if(c.fijo && M.fijo && M.fijo[l]){ var eF=c.pared && M.pared ? M.pared.eje : "y"; ["x","y","z"].forEach(function(a){ if(a!==eF) p[a]=M.fijo[l][a]; }); }
   if(c.o) p.add(new T.Vector3(c.o[0],c.o[1],c.o[2]));
-  if(c.pared && M.pared){ var e=M.pared.eje; p[e]=M.pared.v-M.pared.lado*.035; dir[e]=0; palma=new T.Vector3(); palma[e]=M.pared.lado;
+  if(c.pared && M.pared){ var e=M.pared.eje; p[e]=M.pared.v-M.pared.lado*.035; dir[e]=0; palma=new T.Vector3(); palma[e]=M.pared.lado; p.sup={ e:e, v:M.pared.v, s:M.pared.lado };
     /* codo: el antebrazo entero contra la pared */
     if(c.codo){ var nn=new T.Vector3(); nn[e]=M.pared.lado; p.plano={ n:nn, d:M.pared.v*M.pared.lado-.045 }; } }
-  else { p.y=.035; palma=new T.Vector3(0,-1,0);
+  else { p.y=.035; palma=new T.Vector3(0,-1,0); p.sup={ e:"y", v:0, s:-1 };
     /* en el suelo los dedos miran hacia donde está la cabeza, un poco abiertos */
     dir=M.hueso.cabeza.getWorldPosition(new T.Vector3()).sub(M.hueso.cadera.getWorldPosition(new T.Vector3()));
     var lado=new T.Vector3(1,0,0).applyQuaternion(M.hueso.espalda2.getWorldQuaternion(new T.Quaternion()).multiply(M.reposo[M.hueso.espalda2.uuid].mundo.clone().invert()));
@@ -19131,10 +19250,20 @@ function mqEscena(T, k, color){
     suelo.rotation.x=-Math.PI/2; suelo.receiveShadow=true; esc.add(suelo);
     esc.add(M.raiz);
     var tot=new T.Box3();
-    M.fijo=null; mqPon(M, F.A, T); tot.copy(M.caja);
-    /* las manos que se quedan quietas en el suelo (fijo): donde las deja la postura A */
-    M.fijo={}; ["L","R"].forEach(function(l){ var c=F.A.ik && F.A.ik[l]; if(c && c.fijo) M.fijo[l]=M.hueso["mano"+l].getWorldPosition(new T.Vector3()); });
-    mqPon(M, F.B, T); tot.union(M.caja);
+    /* ancla: lo que no se mueve del suelo, donde lo deja A; con una postura intermedia C puede haber
+       otra ancla para el tramo de C a B (["pieL", "pieR"]), que se queda donde la deja C */
+    var an=F.ancla ? (Array.isArray(F.ancla) ? F.ancla : [F.ancla, F.ancla]) : null;
+    if(F.C) F.B.tramo=1;
+    /* si B (o C) dice a qué altura va la cadera, A (y C) también, para mezclarla: la que tienen solas */
+    function alto(P){ if(P.alto==null){ M.fijo=null; M.fijoP=null; M.anclas=null; mqPon(M, P, T); P.alto=M.hueso.cadera.getWorldPosition(new T.Vector3()).y; } }
+    if(F.B.alto!=null || (F.C && F.C.alto!=null)){ alto(F.A); if(F.C) alto(F.C); }
+    M.fijo=null; M.fijoP=null; M.anclas=null; mqPon(M, F.A, T); tot.copy(M.caja);
+    if(an){ M.anclas=[{ h:an[0], en:mqAncla(T, M, an[0]) }, { h:an[1], en:null }];
+      if(F.C) mqPon(M, F.C, T); M.anclas[1].en=mqAncla(T, M, an[1]); mqPon(M, F.A, T); }
+    /* las manos que se quedan quietas (fijo): donde las deja la postura A */
+    function fija(){ M.fijo={}; M.fijoP={}; ["L","R"].forEach(function(l){ var c=F.A.ik && F.A.ik[l]; if(c && c.fijo) M.fijo[l]=M.hueso["mano"+l].getWorldPosition(new T.Vector3());
+      var e=F.A.ikp && F.A.ikp[l]; if(e && e.fijo) M.fijoP[l]={ p:M.hueso["pie"+l].getWorldPosition(new T.Vector3()), q:M.hueso["pie"+l].getWorldQuaternion(new T.Quaternion()) }; }); }
+    fija(); mqPon(M, F.B, T); tot.union(M.caja);
     if(F.pared){ var W=F.pared===true ? { h:"manoL", eje:"z", d:.035 } : F.pared, pm=M.hueso[W.h].getWorldPosition(new T.Vector3());
       var lado=W.d<0?-1:1, v=pm[W.eje]+W.d, cenW=M.caja.getCenter(new T.Vector3());
       var pared=new T.Mesh(new T.BoxGeometry(W.eje==="z"?1.6:.05, 2.1, W.eje==="z"?.05:1.6), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
@@ -19144,9 +19273,9 @@ function mqEscena(T, k, color){
         pared.geometry.dispose(); pared.geometry=new T.BoxGeometry(ot==="x"?1.4:gr, 2.1, ot==="z"?1.4:gr);
         pared.position[W.eje]=v+lado*gr/2; pared.position[ot]=ce+sg*.7; pared.castShadow=true; }
       pared.receiveShadow=true; esc.add(pared);
-      M.pared={ eje:W.eje, v:v, lado:lado };
+      M.pared={ eje:W.eje, v:v, lado:lado, canto:W.canto ? { eje:ot, v:ce, lado:sg } : null };
       var ex=new T.Vector3(cenW.x, 1.3, cenW.z); ex[W.eje]=v; tot.expandByPoint(ex);
-      mqPon(M, F.A, T); tot.union(M.caja); mqPon(M, F.B, T); tot.union(M.caja); }
+      M.fijo=null; M.fijoP=null; mqPon(M, F.A, T); fija(); tot.union(M.caja); mqPon(M, F.B, T); tot.union(M.caja); }
     var cen=tot.getCenter(new T.Vector3()), tam=tot.getSize(new T.Vector3());
     var cam=new T.PerspectiveCamera(30, 1, .05, 30);
     var radio=Math.max(tam.x, tam.y, tam.z)*.54+.06, dist=radio/Math.sin(15*MQ_R)*1.02;
@@ -19172,12 +19301,14 @@ function mqRenderer(T, lienzo){
 /* miniaturas: un solo renderer fuera de pantalla hace una foto de la postura B */
 var MQ_FOTOS={}, MQ_FOTO_R=null, MQ_COLA=Promise.resolve();
 function maniquiFoto(k){
-  var color=mqColor("var(--accent)"), clave=k+"|"+color+"|"+mqColor("var(--on-accent, #fff)")+"|"+document.documentElement.classList.contains("dark");
+  var color=mqColor("var(--accent)"), clave=k+"|"+color+"|"+mqColor("var(--on-accent, #fff)")+"|"+document.documentElement.classList.contains("dark")+"|"+(window.devicePixelRatio||1);
   if(MQ_FOTOS[clave]) return Promise.resolve(MQ_FOTOS[clave]);
   /* de una en una, que el renderer es compartido */
   var p=MQ_COLA.then(function(){ return maniquiCarga(); }).then(function(T){
     if(MQ_FOTOS[clave]) return MQ_FOTOS[clave];
-    if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); MQ_FOTO_R.setPixelRatio(1); MQ_FOTO_R.setSize(220,220,false); }
+    if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); MQ_FOTO_R.setSize(220,220,false); }
+    /* a la densidad de la pantalla, para que en el móvil no se vea borrosa */
+    var dpr=Math.min(3, window.devicePixelRatio||1); if(MQ_FOTO_R.getPixelRatio()!==dpr){ MQ_FOTO_R.setPixelRatio(dpr); MQ_FOTO_R.setSize(220,220,false); }
     return mqEscena(T, k, color).then(function(E){
       mqPon(E.M, E.F.B, T); mqCamara(E, E.az, 220);
       MQ_FOTO_R.render(E.esc, E.cam);
@@ -19205,7 +19336,7 @@ function maniquiVivo(lienzo, k, quieto, lado){
       if(vivo.fin) return;
       var r=mqRenderer(T, lienzo), t0=performance.now();
       E.dist*=1.12;   /* la cámara se balancea un poco: algo de margen para que no se salga */
-      function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(2, window.devicePixelRatio||1)); r.setSize(w,h,false); E.cam.aspect=w/h; E.cam.updateProjectionMatrix(); }
+      function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(3, window.devicePixelRatio||1)); r.setSize(w,h,false); E.cam.aspect=w/h; E.cam.updateProjectionMatrix(); }
       tam();
       function suave(x){ return x<.5 ? 2*x*x : 1-Math.pow(-2*x+2,2)/2; }
       function cuadro(ahora){
@@ -19214,7 +19345,7 @@ function maniquiVivo(lienzo, k, quieto, lado){
         if(quieto) t=1; else if(s<.32) t=suave(s/.32); else if(s<.68) t=1; else t=1-suave((s-.68)/.32);
         var espejo=typeof lado==="function" ? !!lado() : (lado===true && vuelta%2===1);
         if(espejo!==vivo.espejo){ vivo.espejo=espejo; lienzo.style.transform=espejo ? "scaleX(-1)" : ""; if(E.M.ropa) E.M.ropa.espejo.value=espejo ? -1 : 1; }
-        mqPon(E.M, mqMezcla(E.F.A, E.F.B, t, E.F.fases), T);
+        mqPon(E.M, mqFigT(E.F, t), T);
         mqCamara(E, E.az + (quieto?0:Math.sin((ahora-t0)/2600)*14), lienzo.clientHeight);
         if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
         r.render(E.esc, E.cam);
