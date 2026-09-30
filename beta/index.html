@@ -18419,30 +18419,49 @@ var LIB_TEMAS=[
   ]}
 ];
 
-/* rutinas de estiramientos: s = segundos de cada paso, v = búsqueda de vídeo */
+/* rutinas de estiramientos: s = segundos de cada paso, m = músculos, v = búsqueda de vídeo, f = postura de la persona 3D */
 var ESTIRA_RUTINAS=[
-  { k:"estudio", t:"Cuello y espalda", sub:"Para después de estudiar", c:"var(--accent)", pasos:[
-    { t:"Cuello hacia un lado", s:60, d:"Deja caer la oreja hacia el hombro sin subirlo. 30 segundos por lado.", v:"estiramiento cuello lateral" , f:"cuello" },
-    { t:"Barbilla al pecho", s:30, d:"Entrelaza las manos detrás de la cabeza y deja que su peso baje la barbilla.", v:"estiramiento barbilla al pecho cuello" , f:"barbilla" },
-    { t:"Brazo cruzado", s:60, d:"Cruza un brazo por delante del pecho y sujétalo con el otro. 30 segundos por lado.", v:"estiramiento hombro brazo cruzado" , f:"cruzado" },
-    { t:"Tríceps", s:60, d:"Lleva una mano a la espalda por detrás de la cabeza y tira suave del codo. 30 segundos por lado.", v:"estiramiento triceps detras de la cabeza" , f:"triceps" },
-    { t:"Espalda redonda", s:30, d:"Junta las manos delante, empuja hacia fuera y redondea la espalda alta.", v:"estiramiento espalda alta manos al frente" , f:"redonda" },
-    { t:"Inclinación lateral", s:60, d:"De pie, un brazo por encima de la cabeza e inclínate hacia el otro lado. 30 segundos por lado.", v:"estiramiento lateral de pie" , f:"lateral" }
+  { k:"superior", t:"Cuello, espalda alta y hombros", sub:"Tren superior", c:"var(--accent)", pasos:[
+    { t:"Inclinación lateral de cuello", s:60, m:"Trapecio superior y elevador de la escápula", d:"De pie, mirada al frente. Inclina la cabeza hacia el hombro derecho sin subirlo y pon la mano derecha sobre la sien izquierda para tirar suave hacia abajo. Espalda recta y hombros bajos. 30 segundos por lado.", v:"estiramiento cuello inclinacion lateral trapecio", f:"cuello" },
+    { t:"Barbilla a la clavícula", s:60, m:"Esplenio de la cabeza y trapecio posterior", d:"Gira la cabeza 45 grados a la derecha y baja la barbilla hacia la clavícula derecha. Con la mano derecha en la nuca, guía el movimiento hacia abajo con suavidad. 30 segundos por lado.", v:"estiramiento cuello rotacion flexion barbilla clavicula", f:"barbilla" },
+    { t:"Codo tras la cabeza", s:60, m:"Tríceps y dorsal ancho", d:"Sube los dos brazos. Dobla el codo derecho y lleva la palma a la escápula izquierda. Con la mano izquierda, coge el codo derecho y tira hacia la izquierda por detrás de la cabeza, con el tronco erguido. 30 segundos por lado.", v:"estiramiento triceps detras de la cabeza", f:"triceps" },
+    { t:"Brazo cruzado", s:60, m:"Deltoides posterior e infraespinoso", d:"Sube el brazo derecho al frente a la altura del hombro y crúzalo por delante del pecho. Engánchalo con el antebrazo izquierdo por debajo y apriétalo contra el pecho. 30 segundos por lado.", v:"estiramiento hombro brazo cruzado", f:"cruzado" },
+    { t:"Pecho con dedos entrelazados", s:30, m:"Pectoral mayor y deltoides anterior", d:"Lleva los brazos atrás y entrelaza los dedos detrás de la zona lumbar. Estira los codos, junta las paletillas y sube un poco los puños hacia atrás mientras abres el pecho.", v:"estiramiento pecho manos entrelazadas detras", f:"pecho" },
+    { t:"Pectoral en la pared", s:60, m:"Pectoral mayor y menor", d:"Brazo derecho en L: el hombro a 90 grados y el codo a 90 grados. Apoya el antebrazo y la palma en una pared, da un paso al frente con el pie izquierdo y gira un poco el tronco hacia la izquierda. 30 segundos por lado.", v:"estiramiento pectoral pared marco puerta", f:"pectoral" },
+    { t:"Enhebrar la aguja", s:60, m:"Romboides y movilidad de la columna torácica", d:"A cuatro patas, manos bajo los hombros y rodillas bajo la cadera. Pasa el brazo derecho por debajo del cuerpo hacia la izquierda hasta apoyar el hombro y la sien derechos en el suelo. La mano izquierda sigue apoyada. 30 segundos por lado.", v:"thread the needle estiramiento", f:"aguja" }
   ]},
-  { k:"piernas", t:"Piernas", sub:"Después de entrenar o de andar", c:"var(--good)", pasos:[
-    { t:"Isquiotibiales sentado", s:60, d:"Una pierna estirada, la otra doblada. Inclínate desde la cadera hacia el pie. 30 segundos por pierna.", v:"estiramiento isquiotibiales sentado" , f:"isquios" },
-    { t:"Cuádriceps de pie", s:60, d:"Coge el pie por detrás y lleva el talón al glúteo con las rodillas juntas. 30 segundos por pierna.", v:"estiramiento cuadriceps de pie" , f:"cuadriceps" },
-    { t:"Gemelos contra la pared", s:60, d:"Manos en la pared, una pierna atrás con el talón en el suelo. 30 segundos por pierna.", v:"estiramiento gemelos pared" , f:"gemelos" },
-    { t:"Flexor de cadera", s:60, d:"Rodilla atrás en el suelo, la otra delante a 90 grados. Lleva la cadera hacia delante. 30 segundos por lado.", v:"estiramiento flexor de cadera arrodillado" , f:"flexor" },
-    { t:"Mariposa", s:45, d:"Sentado, junta las plantas de los pies y deja caer las rodillas hacia fuera.", v:"estiramiento mariposa aductores" , f:"mariposa" },
-    { t:"Glúteo tumbado", s:60, d:"Boca arriba, cruza un tobillo sobre la rodilla contraria y acerca las piernas al pecho. 30 segundos por lado.", v:"estiramiento gluteo tumbado figura 4" , f:"gluteo" }
+  { k:"tronco", t:"Tronco y espalda", sub:"Lumbares y espalda completa", c:"var(--violet)", pasos:[
+    { t:"Gato-vaca", s:45, m:"Erectores de la columna, recto abdominal y movilidad de la espalda", d:"A cuatro patas. Vaca: hunde la tripa, lleva la pelvis atrás y mira arriba. Gato: redondea toda la espalda hacia el techo, mete la pelvis y lleva la barbilla al pecho. Alterna despacio.", v:"estiramiento gato vaca", f:"gato" },
+    { t:"Postura del camello", s:30, m:"Cadena anterior: flexores de cadera, abdomen y pectoral", d:"De rodillas, tronco vertical y muslos rectos. Arquea la espalda hacia atrás llevando los hombros atrás y pon las palmas en los talones (o en la zona lumbar si no llegas), con el pecho abierto hacia el techo.", v:"postura del camello ustrasana", f:"camello" },
+    { t:"Postura del niño", s:45, m:"Dorsal ancho, erectores de la espalda y glúteos", d:"De rodillas, junta los dedos gordos de los pies y abre las rodillas a la anchura de la cadera. Siéntate sobre los talones, estira los brazos al frente en el suelo y apoya la frente.", v:"postura del niño estiramiento", f:"nino" },
+    { t:"Perro bocarriba", s:30, m:"Abdominales, flexores del cuello y extensores de la espalda", d:"Boca abajo con las piernas estiradas y las palmas a los lados del pecho. Empuja el suelo estirando los codos, sube el tronco y deja la pelvis cerca del suelo mientras abres el pecho.", v:"perro bocarriba cobra estiramiento", f:"cobra" },
+    { t:"Rotación torácica a cuatro patas", s:60, m:"Oblicuos y movilidad torácica", d:"A cuatro patas, mano derecha en la nuca con el codo hacia fuera. Gira el tronco llevando el codo derecho hacia la muñeca izquierda y luego ábrelo hacia el techo. 30 segundos por lado.", v:"rotacion toracica cuadrupedia t spine", f:"tspine" },
+    { t:"Torsión tumbado", s:60, m:"Lumbares, glúteo medio y oblicuos", d:"Boca arriba con los brazos en cruz. Sube la pierna derecha con la cadera y la rodilla a 90 grados y déjala caer cruzando el cuerpo hacia la izquierda, con el hombro derecho pegado al suelo. 30 segundos por lado.", v:"torsion espinal tumbado estiramiento", f:"torsion" }
   ]},
-  { k:"dormir", t:"Antes de dormir", sub:"Suave, para relajarte", c:"var(--violet)", pasos:[
-    { t:"Postura del niño", s:60, d:"Siéntate sobre los talones y lleva los brazos hacia delante con la frente en el suelo.", v:"postura del niño estiramiento" , f:"nino" },
-    { t:"Gato y vaca", s:45, d:"A cuatro patas, alterna redondear la espalda y arquearla, despacio y respirando.", v:"estiramiento gato vaca" , f:"gato" },
-    { t:"Rodillas al pecho", s:45, d:"Boca arriba, abraza las rodillas por debajo y acércalas al pecho.", v:"estiramiento rodillas al pecho tumbado" , f:"rodillas" },
-    { t:"Torsión tumbado", s:60, d:"Boca arriba, deja caer las rodillas hacia un lado y mira al contrario. 30 segundos por lado.", v:"torsion lumbar tumbado estiramiento" , f:"torsion" },
-    { t:"Respirar", s:60, d:"Tumbado, una mano en la tripa. Coge aire en 4 segundos y suéltalo en 6.", v:"respiracion diafragmatica tumbado" , f:"respirar" }
+  { k:"cadera", t:"Cadera y glúteos", sub:"Cadera, glúteos y pelvis", c:"var(--warn)", pasos:[
+    { t:"La paloma", s:60, m:"Glúteo mayor, piriforme y rotadores de la cadera", d:"Desde cuatro patas, lleva la rodilla derecha detrás de la muñeca derecha con la espinilla hacia la izquierda. Estira la pierna izquierda atrás en el suelo y baja la pelvis. 30 segundos por lado.", v:"postura de la paloma estiramiento", f:"paloma" },
+    { t:"Figura de 4 en el suelo", s:60, m:"Piriforme y glúteo profundo", d:"Boca arriba con las rodillas dobladas y los pies en el suelo. Cruza el tobillo derecho sobre el muslo izquierdo, coge la pierna izquierda con las dos manos y acércala al pecho. 30 segundos por lado.", v:"estiramiento gluteo tumbado figura 4", f:"gluteo" },
+    { t:"Mariposa", s:45, m:"Aductores y pectíneo", d:"Sentado con el tronco erguido, dobla las rodillas hacia los lados y junta las plantas de los pies. Coge los pies con las manos e inclínate adelante desde la cadera con la espalda recta.", v:"estiramiento mariposa aductores", f:"mariposa" },
+    { t:"Estiramiento del caballero", s:60, m:"Psoas, ilíaco y recto femoral", d:"Rodilla izquierda en el suelo y pie derecho delante, las dos a 90 grados. Mete la pelvis apretando el glúteo izquierdo y lleva el peso hacia delante sin soltarla. 30 segundos por lado.", v:"estiramiento flexor de cadera arrodillado psoas", f:"flexor" },
+    { t:"Sentadilla del cosaco", s:60, m:"Aductores, isquiotibiales y tobillo", d:"De pie con las piernas muy abiertas. Dobla mucho la rodilla derecha llevando la cadera atrás, con el talón en el suelo. La pierna izquierda queda estirada con el talón apoyado y las puntas mirando al techo. 30 segundos por lado.", v:"sentadilla cosaco", f:"cosaco" },
+    { t:"Postura de la rana", s:45, m:"Aductores profundos y cadera", d:"A cuatro patas sobre algo blando, abre las rodillas todo lo que puedas con rodillas y tobillos a 90 grados. Apoya los antebrazos y lleva la cadera atrás con suavidad.", v:"frog stretch postura de la rana", f:"rana" }
+  ]},
+  { k:"muslos", t:"Cuádriceps e isquios", sub:"Muslos", c:"var(--good)", pasos:[
+    { t:"Cuádriceps de pie", s:60, m:"Cuádriceps", d:"De pie sobre la pierna izquierda. Dobla la rodilla derecha, lleva el talón al glúteo y coge el empeine con la mano derecha, con las rodillas juntas. 30 segundos por pierna.", v:"estiramiento cuadriceps de pie", f:"cuadriceps" },
+    { t:"Estiramiento en la pared", s:60, m:"Recto femoral y psoas", d:"De rodillas de espaldas a una pared. Apoya la espinilla izquierda en la pared con los dedos hacia arriba, pon el pie derecho delante a 90 grados y sube el tronco hasta quedar erguido, con la zona lumbar hacia la pared. 30 segundos por pierna.", v:"couch stretch estiramiento", f:"sofa" },
+    { t:"Isquios de pie con el talón", s:60, m:"Isquiotibiales", d:"Da medio paso al frente con la derecha y apoya solo el talón con las puntas arriba. Dobla la rodilla izquierda y echa el glúteo atrás con la espalda recta. 30 segundos por pierna.", v:"estiramiento isquiotibiales de pie talon", f:"isquiopie" },
+    { t:"Perro bocabajo", s:45, m:"Isquiotibiales, gemelos, sóleo y lumbares", d:"Desde cuatro patas, apoya los dedos de los pies y levanta las rodillas. Empuja la cadera arriba y atrás hasta formar una V invertida, con los talones hacia el suelo y la espalda y los brazos en línea.", v:"perro bocabajo downward dog", f:"perroabajo" },
+    { t:"Isquios sentado con una pierna", s:60, m:"Isquiotibiales y lumbares", d:"Sentado con la pierna derecha estirada. Apoya la planta del pie izquierdo en el muslo derecho por dentro e inclínate desde la cadera con las manos hacia el pie derecho y la espalda recta. 30 segundos por pierna.", v:"janu sirsasana estiramiento isquiotibiales", f:"janu" }
+  ]},
+  { k:"gemelos", t:"Gemelos y tobillos", sub:"Pierna baja", c:"var(--cyan)", pasos:[
+    { t:"Gemelos en la pared", s:60, m:"Gemelos", d:"De cara a una pared, palmas apoyadas a la altura de los hombros. Da un paso largo atrás con la derecha y mantén esa rodilla estirada y el talón pegado al suelo mientras llevas la cadera al frente. 30 segundos por pierna.", v:"estiramiento gemelos pared", f:"gemelos" },
+    { t:"Sóleo en la pared", s:60, m:"Sóleo", d:"Igual que el de gemelos, con un paso algo más corto. Dobla la rodilla de atrás y mantén el talón en el suelo, notándolo en el tendón de Aquiles. 30 segundos por pierna.", v:"estiramiento soleo pared rodilla flexionada", f:"soleo" },
+    { t:"Tobillo en zancada", s:60, m:"Tendón de Aquiles y tobillo", d:"Rodilla de atrás en el suelo y pie de delante adelantado. Lleva la rodilla de delante por encima y más allá de los dedos sin despegar el talón, cargando peso en el muslo. 30 segundos por pierna.", v:"movilidad tobillo dorsiflexion zancada rodilla", f:"tobillo" }
+  ]},
+  { k:"completo", t:"Cuerpo completo", sub:"Cadenas enteras en movimiento", c:"var(--alert)", pasos:[
+    { t:"El mejor estiramiento del mundo", s:60, m:"Psoas, isquios, cadera y rotación torácica", d:"Zancada larga con la derecha y las dos manos en el suelo por dentro del pie derecho. Baja el codo derecho hacia el tobillo y luego gira el tronco subiendo el brazo derecho hacia el techo. 30 segundos por lado.", v:"worlds greatest stretch", f:"mundo" },
+    { t:"Jefferson curl", s:45, m:"Espalda e isquiotibiales", d:"De pie con los pies juntos. Baja primero la barbilla al pecho y enrolla la espalda vértebra a vértebra dejando colgar los brazos, sin doblar las rodillas. Sube igual de despacio.", v:"jefferson curl estiramiento", f:"jefferson" },
+    { t:"De perro bocarriba a bocabajo", s:45, m:"Todo el cuerpo, de delante a atrás", d:"Empieza en perro bocarriba. Aprieta la tripa y sube la cadera atrás y arriba, doblando un poco las rodillas, hasta la V invertida del perro bocabajo. Vuelve y repite.", v:"perro bocarriba a perro bocabajo vinyasa", f:"vinyasa" }
   ]}
 ];
 var crecerTab="libros";
@@ -18507,7 +18526,7 @@ function sheetRutina(k){
   openSheet('<div class="flex items-start justify-between mb-2"><div><p class="eyebrow mb-1.5">Estiramientos · '+estiraMin(r)+' min</p><h3 class="display text-[20px] font-bold">'+esc(r.t)+'</h3></div>'+closeBtn()+'</div>'+
     '<p class="text-[12.5px] t3 mb-4 leading-relaxed">'+esc(r.sub)+'. Sin forzar: tiene que tirar, no doler.</p>'+
     '<ol class="cr-pasos" style="--c:'+r.c+'">'+r.pasos.map(function(p,i){
-      return '<li><span class="cr-mini"><img data-mq="'+p.f+'" alt=""></span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b><p>'+esc(p.d)+'</p>'+
+      return '<li><span class="cr-mini"><img data-mq="'+p.f+'" alt=""></span><div class="cr-p-t"><b><span class="cr-n num">'+(i+1)+'</span>'+esc(p.t)+' <span class="num">· '+(p.s>=60&&p.s%60===0?(p.s/60)+" min":p.s+" s")+'</span></b>'+(p.m?'<small class="cr-musc">'+esc(p.m)+'</small>':'')+'<p>'+esc(p.d)+'</p>'+
         '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver cómo se hace</a></div></li>'; }).join("")+'</ol>'+
     '<button class="btn btn-primary w-full !py-3 mt-4" data-act="x-cr-empieza" data-k="'+r.k+'">Empezar rutina guiada</button>'+
     (ya?'<p class="cr-nota" style="text-align:center">Ya la tienes en tus hábitos. Al terminarla se marca sola.</p>'
@@ -18568,6 +18587,7 @@ var CRECER_CSS=[
 '.cr-p-t{ flex:1; min-width:0; } .cr-p-t b{ font-size:14px; font-weight:700; } .cr-p-t b span{ font-weight:600; color:var(--t3); font-size:12.5px; }',
 '.cr-p-t b .cr-n{ color:#fff; font-size:11px; font-weight:800; }',
 '.cr-p-t p{ font-size:12.5px; color:var(--t2); margin-top:3px; line-height:1.4; }',
+'.cr-musc{ display:block; font-size:11.5px; font-weight:700; color:var(--c); margin-top:2px; }',
 '.cr-video{ display:inline-flex; align-items:center; gap:6px; margin-top:7px; font-size:12.5px; font-weight:700; color:var(--accent); }',
 '.cr-video .ic{ width:16px; height:16px; }'
 ].join("\n");
@@ -18579,47 +18599,67 @@ var CRECER_CSS=[
    un esqueleto guía invisible; el modelo copia los giros de la guía hueso a hueso.
    La figura va de la postura de partida (A) a la del estiramiento (B) y vuelve,
    en bucle. three.js y el modelo solo se cargan al abrir una rutina.
-   Claves: rx/ry/rz el cuerpo entero · tx/ty/tz el tronco (tx hacia delante, tz hacia su derecha)
-   hx/hy/hz la cabeza · aL/aR brazos: [adelante, abrir, girar, codo]
-   pL/pR piernas: [adelante, abrir, girar, rodilla] */
-var MQ_NEUTRO={ rx:0, ry:0, rz:0, tx:0, ty:0, tz:0, hx:0, hy:0, hz:0, aL:[0,8,0,6], aR:[0,8,0,6], pL:[0,3,0,0], pR:[0,3,0,0] };
-function mq(o){ var r={}, k; for(k in MQ_NEUTRO) r[k]=MQ_NEUTRO[k]; for(k in o) r[k]=o[k]; return r; }
-var MQ_SENTADO={ pL:[90,6,0,0], pR:[90,6,0,0] };
+   Claves: rx/ry/rz el cuerpo entero (rr: girado sobre su propio eje, p. ej. tumbado de lado) · tx/ty/tz el tronco (tx hacia delante, tz hacia su derecha)
+   hx/hy/hz la cabeza · aL/aR brazos: [adelante, abrir, girar, codo, rotar]
+   pL/pR piernas: [adelante, abrir, girar, rodilla, rotar]. «girar» mueve el brazo o el muslo alrededor del
+   eje vertical del tronco; «rotar» lo gira sobre su propio eje (+ = hacia fuera: el antebrazo sube, la espinilla va hacia dentro) · fL/fR tobillos (grados; + = puntas hacia arriba)
+   ik: contactos de las manos (ver mqContacto); con s:1 la mano se apoya en el suelo donde cae, y con
+   pared:1 en la pared. pared (en la postura): dónde va la pared, { h: hueso, eje:"z"|"x", d: metros } */
+var MQ_NEUTRO={ rx:0, ry:0, rz:0, tx:0, ty:0, tz:0, hx:0, hy:0, hz:0, aL:[0,8,0,6], aR:[0,8,0,6], pL:[0,3,0,0], pR:[0,3,0,0], fL:0, fR:0, rr:0 };
+function mq(o){ var r={}, k; for(k in MQ_NEUTRO) r[k]=MQ_NEUTRO[k]; for(k in o) r[k]=o[k];
+  ["aL","aR","pL","pR"].forEach(function(x){ if(r[x].length<5) r[x]=r[x].concat([0,0,0,0,0].slice(r[x].length)); });
+  return r; }
 function mqCon(base, o){ var r={}, k; for(k in base) r[k]=base[k]; for(k in o) r[k]=o[k]; return mq(r); }
-var MQ_TUMBADO={ rx:-90, pL:[62,6,0,105], pR:[62,6,0,105], aL:[0,14,0,5], aR:[0,14,0,5] };
-var MQ_CUATRO={ rx:90, tx:-12, hx:-10, aL:[78,4,0,0], aR:[78,4,0,0], pL:[90,4,0,90], pR:[90,4,0,90] };
-/* puntos de contacto de las manos (ik): la muñeca va a un hueso más un desplazamiento (ver mqContacto) */
+/* bases: de pie es la neutra; tumbado boca arriba y boca abajo, a cuatro patas, de rodillas y en zancada con una rodilla en el suelo */
+var MQ_SUPINO={ rx:-90, aL:[0,14,0,5], aR:[0,14,0,5], fL:-30, fR:-30 };
+var MQ_PRONO={ rx:90, fL:-60, fR:-60, aL:[0,14,0,5], aR:[0,14,0,5] };
+var MQ_CUATRO={ rx:90, tx:-6, hx:-14, aL:[84,4,0,0], aR:[84,4,0,0], pL:[90,5,0,90], pR:[90,5,0,90], fL:-80, fR:-80, ik:{ L:{ s:1 }, R:{ s:1 } } };
+var MQ_RODILLAS={ pL:[0,5,0,90], pR:[0,5,0,90], fL:-80, fR:-80 };
+var MQ_CABALLERO={ pR:[100,5,0,95], pL:[-10,5,0,70], fL:-80, fR:0 };
 var MQ_NUCA={ L:{ h:"cabeza", o:[.06,.09,-.09] }, R:{ h:"cabeza", o:[-.06,.09,-.09] } };
 var MQ_PIES={ L:{ h:"pieL", o:[.02,.03,.08] }, R:{ h:"pieR", o:[-.02,.03,.08] } };
-var MQ_TRIPA={ L:{ h:"espalda1", o:[.06,.07,.12], m:[-1,.15,-.35] } };
 /* cam: desde dónde se mira (grados alrededor de la figura; 0 de frente, 90 de lado) */
 var MQ_FIG={
+  /* 1. tren superior */
   cuello:{ cam:18, A:mq({}), B:mq({ hz:32, aR:[150,25,0,118], ik:{ R:{ h:"cabeza", o:[.075,.13,.01] } } }) },
-  barbilla:{ cam:58, A:mq({ aL:[150,38,0,125], aR:[150,38,0,125], ik:MQ_NUCA }), B:mq({ hx:42, aL:[135,34,0,128], aR:[135,34,0,128], ik:MQ_NUCA }) },
-  cruzado:{ cam:22, A:mq({}), B:mq({ aR:[90,0,72,0], aL:[55,0,-35,85], ik:{ L:{ h:"antebrazoR", f:"espalda2", o:[.02,-.09,.06] } } }) },
-  triceps:{ cam:62, A:mq({}), B:mq({ hx:8, aR:[172,12,0,145], aL:[150,10,-20,100], ik:{ L:{ h:"antebrazoR", f:"espalda2", o:[.07,.03,0] } } }) },
-  redonda:{ cam:82, A:mq({}), B:mq({ tx:22, hx:28, aL:[90,4,0,8], aR:[90,4,0,8] }) },
-  lateral:{ cam:0, A:mq({}), B:mq({ tz:24, hz:10, aL:[0,172,0,32], aR:[0,32,0,95] }) },
-  isquios:{ cam:78, A:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], aL:[35,6,0,20], aR:[35,6,0,20] }),
-                   B:mqCon(MQ_SENTADO,{ pR:[55,48,0,125], tx:50, hx:18, aL:[82,4,0,5], aR:[82,4,0,5],
-                     ik:{ L:{ h:"pieL", o:[.05,.02,.07] }, R:{ h:"pieL", o:[-.04,.02,.07] } } }) },
-  cuadriceps:{ cam:84, A:mq({ aR:[55,6,0,10] }), B:mq({ aR:[70,6,0,10], pL:[-8,3,0,150], aL:[-42,10,0,32], ik:{ L:{ h:"pieL", o:[.04,.03,.06] } } }) },
-  gemelos:{ cam:86, pared:true, A:mq({ rx:18, pL:[22,3,0,28], pR:[-14,3,0,0], aL:[92,6,0,22], aR:[92,6,0,22], hx:-10 }),
-                               B:mq({ rx:27, pL:[30,3,0,42], pR:[-18,3,0,0], aL:[90,6,0,40], aR:[90,6,0,40], hx:-14 }) },
-  flexor:{ cam:84, A:mq({ pL:[88,4,0,88], pR:[-22,4,0,100], aL:[18,18,0,70], aR:[18,18,0,70] }),
-                   B:mq({ pL:[70,4,0,98], pR:[-42,4,0,108], aL:[18,18,0,70], aR:[18,18,0,70], tx:-6 }) },
-  mariposa:{ cam:8, A:mqCon(MQ_SENTADO,{ pL:[82,48,0,135], pR:[82,48,0,135], tx:8, aL:[48,8,0,35], aR:[48,8,0,35], ik:MQ_PIES }),
-                    B:mqCon(MQ_SENTADO,{ pL:[80,68,0,140], pR:[80,68,0,140], tx:22, hx:8, aL:[60,8,0,25], aR:[60,8,0,25], ik:MQ_PIES }) },
-  gluteo:{ cam:74, A:mqCon(MQ_TUMBADO,{}), B:mqCon(MQ_TUMBADO,{ pL:[100,4,0,95], pR:[95,30,40,95], aL:[70,10,0,40], aR:[70,10,0,40],
+  barbilla:{ cam:60, A:mq({}), B:mq({ hy:-45, hx:45, aR:[150,38,0,125], ik:{ R:{ h:"cabeza", o:[-.03,.04,-.1] } } }) },
+  triceps:{ cam:150, A:mq({ aL:[0,170,0,10], aR:[0,170,0,10] }), B:mq({ hx:8, aR:[172,12,0,150], aL:[150,10,-20,100], ik:{ L:{ h:"antebrazoR", f:"espalda2", o:[.07,.03,0] } } }) },
+  cruzado:{ cam:22, A:mq({ aR:[90,0,0,0] }), B:mq({ aR:[90,0,72,0], aL:[55,0,-35,85], ik:{ L:{ h:"antebrazoR", f:"espalda2", o:[.02,-.09,.06] } } }) },
+  pecho:{ cam:130, A:mq({ aL:[-30,-4,0,10], aR:[-30,-4,0,10] }), B:mq({ tx:-6, hx:-10, aL:[-50,-12,0,0], aR:[-50,-12,0,0], ik:{ L:{ h:"manoR", f:"cadera", o:[.05,0,0] } } }) },
+  pectoral:{ cam:30, el:18, pared:{ h:"antebrazoR", eje:"x", d:-.06 }, A:mq({ aR:[0,90,0,90,90] }), B:mq({ ty:18, aR:[0,90,0,90,90], pL:[25,4,0,10], pR:[-12,4,0,0], fR:10 }) },
+  aguja:{ cam:-30, el:25, A:mqCon(MQ_CUATRO,{}), B:mqCon(MQ_CUATRO,{ ty:75, tx:20, hy:-40, ik:{ L:{ s:1 }, R:{ s:1, o:[.55,0,-.1] } } }) },
+  /* 2. tronco */
+  gato:{ cam:84, A:mqCon(MQ_CUATRO,{ tx:6, hx:34 }), B:mqCon(MQ_CUATRO,{ tx:-28, hx:-40 }) },
+  camello:{ cam:84, A:mqCon(MQ_RODILLAS,{ aL:[-20,8,0,30], aR:[-20,8,0,30] }), B:mqCon(MQ_RODILLAS,{ rx:-12, pL:[12,5,0,90], pR:[12,5,0,90], tx:-55, hx:-40, aL:[-40,10,0,0], aR:[-40,10,0,0], ik:{ L:{ h:"pieL", o:[.02,.06,-.02] }, R:{ h:"pieR", o:[-.02,.06,-.02] } } }) },
+  nino:{ cam:84, A:mq({ pL:[60,8,0,150], pR:[60,8,0,150], fL:-80, fR:-80, aL:[10,6,0,10], aR:[10,6,0,10] }),
+                 B:mq({ pL:[60,8,0,150], pR:[60,8,0,150], fL:-80, fR:-80, tx:112, hx:20, aL:[175,10,0,0], aR:[175,10,0,0] }) },
+  cobra:{ cam:80, A:mqCon(MQ_PRONO,{ hx:-10, aL:[-10,40,0,130], aR:[-10,40,0,130], ik:{ L:{ s:1 }, R:{ s:1 } } }), B:mqCon(MQ_PRONO,{ rx:68, pL:[-22,3,0,0], pR:[-22,3,0,0], tx:-62, hx:-25, aL:[5,10,0,0], aR:[5,10,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }) },
+  tspine:{ cam:-60, el:25, A:mqCon(MQ_CUATRO,{ ty:40, aR:[150,38,0,125], ik:{ L:{ s:1 }, R:MQ_NUCA.R } }), B:mqCon(MQ_CUATRO,{ ty:-50, hy:-30, aR:[150,38,0,125], ik:{ L:{ s:1 }, R:MQ_NUCA.R } }) },
+  torsion:{ cam:150, el:55, A:mqCon(MQ_SUPINO,{ aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,4,0,90] }), B:mqCon(MQ_SUPINO,{ rr:80, ty:-80, hy:-40, aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,-25,0,90] }) },
+  /* 3. cadera */
+  paloma:{ cam:60, el:18, A:mqCon(MQ_CUATRO,{}), B:mq({ rx:20, tx:-30, pR:[100,20,0,100,90], pL:[-60,5,0,0], fL:-80, aL:[30,8,0,0], aR:[30,8,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }) },
+  gluteo:{ cam:74, A:mqCon(MQ_SUPINO,{ pL:[62,6,0,105], pR:[62,6,0,105] }), B:mqCon(MQ_SUPINO,{ pL:[100,4,0,95], pR:[95,30,40,95], aL:[70,10,0,40], aR:[70,10,0,40],
                      ik:{ L:{ h:"piernaL", o:[.07,.1,-.06] }, R:{ h:"piernaL", o:[-.07,.1,-.06] } } }) },
-  nino:{ cam:84, A:mq({ pL:[60,4,0,150], pR:[60,4,0,150], aL:[10,6,0,10], aR:[10,6,0,10] }),
-                 B:mq({ pL:[60,4,0,150], pR:[60,4,0,150], tx:112, hx:20, aL:[175,10,0,0], aR:[175,10,0,0] }) },
-  gato:{ cam:84, A:mqCon(MQ_CUATRO,{ tx:4, hx:32 }), B:mqCon(MQ_CUATRO,{ tx:-26, hx:-38 }) },
-  rodillas:{ cam:76, A:mqCon(MQ_TUMBADO,{}), B:mqCon(MQ_TUMBADO,{ pL:[128,6,0,128], pR:[128,6,0,128], aL:[62,10,0,55], aR:[62,10,0,55],
-                     ik:{ L:{ h:"piernaL", o:[.05,.1,-.08] }, R:{ h:"piernaR", o:[-.05,.1,-.08] } } }) },
-  torsion:{ cam:6, el:34, A:mqCon(MQ_TUMBADO,{ aL:[0,82,0,0], aR:[0,82,0,0] }), B:mqCon(MQ_TUMBADO,{ hy:28, aL:[0,82,0,0], aR:[0,82,0,0], pL:[62,-40,0,105], pR:[62,55,0,105] }) },
-  respirar:{ cam:70, A:mqCon(MQ_TUMBADO,{ pL:[0,5,0,0], pR:[0,5,0,0], aL:[35,10,0,95], aR:[0,12,0,5], ik:MQ_TRIPA }),
-                     B:mqCon(MQ_TUMBADO,{ tx:-6, hx:-4, pL:[0,5,0,0], pR:[0,5,0,0], aL:[38,10,0,95], aR:[0,12,0,5], ik:MQ_TRIPA }) }
+  mariposa:{ cam:20, el:18, A:mq({ rx:-10, tx:15, pL:[100,60,0,130,55], pR:[100,60,0,130,55], aL:[55,8,0,25], aR:[55,8,0,25], ik:MQ_PIES }), B:mq({ rx:-10, tx:45, hx:10, pL:[100,66,0,130,55], pR:[100,66,0,130,55], aL:[65,8,0,20], aR:[65,8,0,20], ik:MQ_PIES }) },
+  flexor:{ cam:84, A:mqCon(MQ_CABALLERO,{ aL:[18,18,0,70], aR:[18,18,0,70] }), B:mqCon(MQ_CABALLERO,{ pR:[100,5,0,110], pL:[-20,5,0,60], fR:15, tx:-8, aL:[18,18,0,70], aR:[18,18,0,70] }) },
+  cosaco:{ cam:0, A:mq({ pL:[0,30,0,0], pR:[0,-30,0,0], aL:[30,8,0,10], aR:[30,8,0,10] }), B:mq({ rz:10, tx:30, pL:[40,50,0,0], pR:[90,-10,30,130], fL:40, aL:[70,8,0,40], aR:[70,8,0,40] }) },
+  rana:{ cam:40, el:30, A:mqCon(MQ_CUATRO,{}), B:mqCon(MQ_CUATRO,{ tx:-20, hx:-10, pL:[0,75,0,90,90], pR:[0,75,0,90,90], fL:0, fR:0, aL:[75,10,0,90], aR:[75,10,0,90] }) },
+  /* 4. muslos */
+  cuadriceps:{ cam:84, A:mq({ aL:[55,6,0,10] }), B:mq({ aL:[70,6,0,10], pR:[-8,3,0,150], aR:[-42,10,0,32], ik:{ R:{ h:"pieR", o:[-.04,.03,.06] } } }) },
+  sofa:{ cam:84, pared:{ h:"piernaL", eje:"z", d:-.08 }, A:mqCon(MQ_CABALLERO,{ pL:[0,5,0,175], fL:-10, tx:35, aL:[70,8,0,10], aR:[70,8,0,10] }), B:mqCon(MQ_CABALLERO,{ pR:[100,5,0,90], pL:[0,5,0,175], fL:-10, tx:-4, aL:[20,8,0,40], aR:[20,8,0,40] }) },
+  isquiopie:{ cam:84, A:mq({ pR:[25,4,0,0], pL:[-5,4,0,0] }), B:mq({ tx:45, hx:-10, pR:[35,4,0,0], fR:30, pL:[10,4,0,30], aL:[40,10,0,20], aR:[40,10,0,20] }) },
+  perroabajo:{ cam:84, A:mqCon(MQ_CUATRO,{}), B:mq({ rx:135, hx:-10, pL:[95,5,0,0], pR:[95,5,0,0], fL:15, fR:15, aL:[170,6,0,0], aR:[170,6,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }) },
+  janu:{ cam:70, A:mq({ pR:[90,4,0,0], pL:[85,60,0,140], aL:[30,8,0,20], aR:[30,8,0,20] }), B:mq({ pR:[90,4,0,0], pL:[85,60,0,140], fR:20, tx:55, hx:15, aL:[85,4,0,5], aR:[85,4,0,5], ik:{ L:{ h:"pieR", o:[.05,.02,.07] }, R:{ h:"pieR", o:[-.04,.02,.07] } } }) },
+  /* 5. pierna baja */
+  gemelos:{ cam:100, pared:true, A:mq({ pL:[0,3,0,0], pR:[0,3,0,0], aL:[80,6,0,40], aR:[80,6,0,40] }),
+                                B:mq({ rx:12, pL:[20,3,0,30], pR:[-30,3,0,0], fR:18, aL:[90,6,0,25], aR:[90,6,0,25], ik:{ L:{ pared:1 }, R:{ pared:1 } } }) },
+  soleo:{ cam:100, pared:true, A:mq({ rx:12, pL:[20,3,0,30], pR:[-30,3,0,0], fR:18, aL:[90,6,0,25], aR:[90,6,0,25], ik:{ L:{ pared:1 }, R:{ pared:1 } } }),
+                              B:mq({ rx:8, pL:[20,3,0,40], pR:[-5,3,0,45], fR:30, aL:[90,6,0,40], aR:[90,6,0,40], ik:{ L:{ pared:1 }, R:{ pared:1 } } }) },
+  tobillo:{ cam:84, A:mqCon(MQ_CABALLERO,{ aL:[40,8,0,60], aR:[40,8,0,60] }), B:mqCon(MQ_CABALLERO,{ pR:[90,5,0,120], pL:[0,5,0,70], fR:40, rx:8, aL:[60,8,0,60], aR:[60,8,0,60] }) },
+  /* 6. integración */
+  mundo:{ cam:40, el:22, A:mqCon(MQ_CABALLERO,{ pR:[95,8,0,110], pL:[-30,5,0,20], fL:10, tx:50, aL:[90,4,0,0], aR:[90,4,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }), B:mqCon(MQ_CABALLERO,{ pR:[95,8,0,110], pL:[-30,5,0,20], fL:10, tx:50, ty:-80, hy:-40, aL:[90,4,0,0], aR:[40,140,-60,0], ik:{ L:{ s:1 } } }) },
+  jefferson:{ cam:84, A:mq({ aL:[10,4,0,10], aR:[10,4,0,10] }), B:mq({ tx:95, hx:40, aL:[110,4,0,5], aR:[110,4,0,5] }) },
+  vinyasa:{ cam:84, A:mqCon(MQ_PRONO,{ rx:68, pL:[-22,3,0,0], pR:[-22,3,0,0], tx:-62, hx:-25, aL:[5,10,0,0], aR:[5,10,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }), B:mq({ rx:135, hx:-10, pL:[95,5,0,12], pR:[95,5,0,12], fL:15, fR:15, aL:[170,6,0,0], aR:[170,6,0,0], ik:{ L:{ s:1 }, R:{ s:1 } } }) },
 };
 
 var MQ_T=null, MQ_CARGA=null, MQ_GLB=null;
@@ -18686,15 +18726,18 @@ var MQ_R=Math.PI/180;
 function mqGira(C, P){
   var R=MQ_R;
   C.cuerpo.rotation.set(P.rx*R, P.ry*R, P.rz*R);
+  if(P.rr) C.cuerpo.quaternion.multiply(new C.cuerpo.quaternion.constructor().setFromAxisAngle({ x:0, y:1, z:0 }, P.rr*R));
   C.tronco.rotation.set(P.tx*R, P.ty*R, P.tz*R);
   C.cuello.rotation.set(P.hx*R*.35, P.hy*R*.4, P.hz*R*.4);
   C.cabeza.rotation.set(P.hx*R*.65, P.hy*R*.6, P.hz*R*.6);
   ["L","R"].forEach(function(l){
     var a=P["a"+l], b=C.brazos[l];
     b.h.rotation.set(-a[0]*R, a[2]*R*(l==="L"?-1:1), a[1]*R*b.s);
+    if(a[4]) b.h.quaternion.multiply(new b.h.quaternion.constructor().setFromAxisAngle({ x:0, y:1, z:0 }, a[4]*R*b.s));
     b.codo.rotation.set(-a[3]*R, 0, 0);
     var p=P["p"+l], q=C.piernas[l];
     q.c.rotation.set(-p[0]*R, p[2]*R*(l==="L"?-1:1), p[1]*R*q.s);
+    if(p[4]) q.c.quaternion.multiply(new q.c.quaternion.constructor().setFromAxisAngle({ x:0, y:1, z:0 }, p[4]*R*(l==="L"?1:-1)));
     q.rod.rotation.set(p[3]*R, 0, 0);
   });
   C.raiz.updateMatrixWorld(true);
@@ -18705,7 +18748,7 @@ function mqMezcla(A, B, t){
   /* los contactos de una mano: el de B si lo tiene (si no, el de A), con su peso mezclado */
   var a=A.ik||{}, b=B.ik||{}; r.ik={};
   ["L","R"].forEach(function(l){ var c=b[l]||a[l]; if(!c) return;
-    r.ik[l]={ h:c.h, f:c.f, o:c.o, w:(a[l]?(a[l].w==null?1:a[l].w):0)*(1-t)+(b[l]?(b[l].w==null?1:b[l].w):0)*t }; });
+    r.ik[l]={ h:c.h, f:c.f, o:c.o, m:c.m, s:c.s, pared:c.pared, w:(a[l]?(a[l].w==null?1:a[l].w):0)*(1-t)+(b[l]?(b[l].w==null?1:b[l].w):0)*t }; });
   return r;
 }
 
@@ -18918,15 +18961,52 @@ function mqPon(M, P, T){
       var dirC=new T.Vector3(0,1,0).applyQuaternion(t), eje=dirC.clone().cross(clav[b.name].up).normalize();
       if(eje.lengthSq()>.5) t=new T.Quaternion().setFromAxisAngle(eje, clav[b.name].ang).multiply(t);
     }
+    var tob=b.name==="pieL" ? P.fL : b.name==="pieR" ? P.fR : 0;
+    if(tob){ var ejeT=new T.Vector3(1,0,0).applyQuaternion(q[b.name==="pieL"?"rL":"rR"]); t=new T.Quaternion().setFromAxisAngle(ejeT, -tob*MQ_R).multiply(t); }
     meta[b.uuid]=t;
     b.quaternion.copy(padre.clone().invert().multiply(t));
   });
   M.raiz.position.set(0,0,0); M.raiz.updateMatrixWorld(true);
+  var apoyos=[];
   if(P.ik) ["R","L"].forEach(function(l){ var c=P.ik[l]; if(!c) return;
+    if(c.s || c.pared){ apoyos.push([l,c]); return; }
     var d=mqContacto(T, M, c); if(d) mqIK(T, M, l, d, c.w==null?1:c.w); });
-  M.malla.computeBoundingBox(); M.caja.copy(M.malla.boundingBox).applyMatrix4(M.malla.matrixWorld);
-  M.raiz.position.y=-M.caja.min.y;
-  M.caja.translate(new T.Vector3(0,M.raiz.position.y,0));
+  /* con las manos apoyadas, el cuerpo se apoya sin contar los brazos, y luego las manos bajan hasta el suelo */
+  var suelo=apoyos.some(function(x){ return x[1].s; });
+  mqSuelo(T, M, suelo);
+  if(apoyos.length){
+    apoyos.forEach(function(x){ var d=mqApoyo(T, M, x[0], x[1]); if(d) mqIK(T, M, x[0], d, x[1].w==null?1:x[1].w); });
+    mqSuelo(T, M, false);
+  }
+}
+/* apoya el cuerpo en el suelo: su punto más bajo (sin los brazos, si sinBrazos) a la altura 0.
+   Si una mano queda por debajo, sube todo lo que haga falta. */
+function mqSuelo(T, M, sinBrazos){
+  M.raiz.updateMatrixWorld(true);
+  var g=M.malla.geometry, n=g.attributes.position.count, v=new T.Vector3(), mw=M.malla.matrixWorld, min=Infinity, minB=Infinity;
+  if(!M.brazo){ var si=g.attributes.skinIndex, sw=g.attributes.skinWeight, nb=M.malla.skeleton.bones, i, j;
+    M.brazo=new Uint8Array(n);
+    for(i=0;i<n;i++){ var mejor=0, cual=0; for(j=0;j<4;j++){ var w=sw.getComponent(i,j); if(w>mejor){ mejor=w; cual=si.getComponent(i,j); } }
+      M.brazo[i]=/^(brazo|antebrazo|mano)/.test(nb[cual].name) ? 1 : 0; } }
+  M.caja.makeEmpty();
+  for(var k=0;k<n;k++){ M.malla.getVertexPosition(k, v); v.applyMatrix4(mw); M.caja.expandByPoint(v);
+    if(M.brazo[k]){ if(v.y<minB) minB=v.y; } else if(v.y<min) min=v.y; }
+  var baja=sinBrazos ? min : Math.min(min, minB);
+  if(!isFinite(baja)) baja=M.caja.min.y;
+  M.raiz.position.y-=baja; M.raiz.updateMatrixWorld(true);
+  M.caja.translate(new T.Vector3(0,-baja,0));
+}
+/* dónde se apoya una mano: donde cae la muñeca, bajada al suelo (s) o llevada a la pared, con la
+   mano plana (los dedos siguen hacia donde apuntaban, pero en el plano del apoyo). o: desplazamiento en metros */
+function mqApoyo(T, M, l, c){
+  var mu=M.hueso["mano"+l]; if(!mu) return null;
+  var p=mu.getWorldPosition(new T.Vector3()), dir=new T.Vector3(0,1,0).applyQuaternion(mu.getWorldQuaternion(new T.Quaternion()));
+  if(c.o) p.add(new T.Vector3(c.o[0],c.o[1],c.o[2]));
+  if(c.pared && M.pared){ var e=M.pared.eje; p[e]=M.pared.v-M.pared.lado*.035; dir[e]=0; }
+  else { p.y=.035; dir.y=0; }
+  if(dir.lengthSq()<1e-6) dir.set(0,0,1);
+  p.mano=dir.normalize();
+  return p;
 }
 /* escena, luces, suelo y cámara encuadrada para las dos posturas */
 function mqEscena(T, k, color){
@@ -18944,10 +19024,13 @@ function mqEscena(T, k, color){
     var tot=new T.Box3();
     mqPon(M, F.A, T); tot.copy(M.caja);
     mqPon(M, F.B, T); tot.union(M.caja);
-    if(F.pared){ var mano=null; M.huesos.forEach(function(b){ if(b.name==="manoL") mano=b; });
-      var pm=mano.getWorldPosition(new T.Vector3());
-      var pared=new T.Mesh(new T.BoxGeometry(1.4,2.1,.05), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
-      pared.position.set(0,1.05,pm.z+.1); pared.receiveShadow=true; esc.add(pared); tot.expandByPoint(new T.Vector3(0,1.5,pm.z)); }
+    if(F.pared){ var W=F.pared===true ? { h:"manoL", eje:"z", d:.035 } : F.pared, pm=M.hueso[W.h].getWorldPosition(new T.Vector3());
+      var lado=W.d<0?-1:1, v=pm[W.eje]+W.d, cenW=M.caja.getCenter(new T.Vector3());
+      var pared=new T.Mesh(new T.BoxGeometry(W.eje==="z"?1.6:.05, 2.1, W.eje==="z"?.05:1.6), new T.MeshStandardMaterial({ color:0xf1ece4, roughness:.9 }));
+      pared.position.set(W.eje==="x" ? v+lado*.025 : cenW.x, 1.05, W.eje==="z" ? v+lado*.025 : cenW.z); pared.receiveShadow=true; esc.add(pared);
+      M.pared={ eje:W.eje, v:v, lado:lado };
+      var ex=new T.Vector3(cenW.x, 1.3, cenW.z); ex[W.eje]=v; tot.expandByPoint(ex);
+      mqPon(M, F.A, T); tot.union(M.caja); mqPon(M, F.B, T); tot.union(M.caja); }
     var cen=tot.getCenter(new T.Vector3()), tam=tot.getSize(new T.Vector3());
     var cam=new T.PerspectiveCamera(30, 1, .05, 30);
     var radio=Math.max(tam.x, tam.y, tam.z)*.54+.06, dist=radio/Math.sin(15*MQ_R)*1.02;
@@ -19060,7 +19143,7 @@ function guiaPinta(){
       '<div class="gu-fila"><span>'+esc(r.t)+' · '+(GUIA.i+1)+' de '+r.pasos.length+'</span><button data-act="x-gu-cierra" aria-label="Cerrar">'+
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>'+
     '<div class="gu-escena"><canvas class="gu-3d"></canvas>'+(guiaPasoDoble(p)?'<span class="gu-lado'+(GUIA.cambio?" ve":"")+'">Cambia de lado</span>':'')+'</div>'+
-    '<div class="gu-info"><h2 class="display">'+esc(p.t)+'</h2><p>'+esc(p.d)+'</p>'+
+    '<div class="gu-info"><h2 class="display">'+esc(p.t)+'</h2>'+(p.m?'<small class="gu-musc">'+esc(p.m)+'</small>':'')+'<p>'+esc(p.d)+'</p>'+
       '<a class="cr-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
     '<div class="gu-mandos">'+
       '<button class="gu-b" data-act="x-gu-atras" aria-label="Anterior"'+(GUIA.i?'':' disabled')+'><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>'+
@@ -19138,6 +19221,7 @@ var CRECER2_CSS=[
 '.gu-info{ text-align:center; margin-top:8px; } .gu-info h2{ font-size:24px; font-weight:800; letter-spacing:-.02em; }',
 '.gu-info p{ font-size:14px; color:var(--t2); line-height:1.45; margin:6px auto 0; max-width:36ch; }',
 '.gu-info .cr-video{ margin-top:10px; }',
+'.gu-musc{ display:block; font-size:12.5px; font-weight:700; color:var(--c); margin-top:4px; }',
 '.gu-mandos{ display:flex; align-items:center; justify-content:center; gap:26px; margin-top:18px; }',
 '.gu-b{ display:grid; place-items:center; width:52px; height:52px; border-radius:99px; background:var(--fill); color:var(--t1); } .gu-b svg{ width:22px; height:22px; } .gu-b:disabled{ opacity:.35; }',
 '.gu-reloj{ position:relative; width:118px; height:118px; display:flex; flex-direction:column; align-items:center; justify-content:center; }',
