@@ -18859,7 +18859,7 @@ function mqModelo(T, color){
       var hueso={};
       huesos.forEach(function(b){ hueso[b.name]=b; reposo[b.uuid]={ mundo:b.getWorldQuaternion(new T.Quaternion()), local:b.quaternion.clone() }; });
       var r0=huesos[0].parent.getWorldQuaternion(new T.Quaternion());
-      ok({ raiz:raiz, malla:malla, huesos:huesos, hueso:hueso, reposo:reposo, grueso:grueso, base:r0, caja:new T.Box3(), tmp:new T.Quaternion() });
+      ok({ raiz:raiz, malla:malla, huesos:huesos, hueso:hueso, reposo:reposo, grueso:grueso, contorno:contorno, base:r0, caja:new T.Box3(), tmp:new T.Quaternion() });
     }, mal);
   });
 }
@@ -18956,7 +18956,7 @@ function mqEscena(T, k, color){
 }
 /* anchura del contorno: MQ_BORDE_PX píxeles de pantalla, para un dibujo de «alto» píxeles CSS */
 var MQ_BORDE_PX=1.3;
-function mqGrosor(M, alto, cam){ M.grueso.value=MQ_BORDE_PX*2*Math.tan(cam.fov*MQ_R/2)/Math.max(60, alto||300); }
+function mqGrosor(M, alto, cam){ if(M.contorno) M.contorno.visible=MQ_ROPA.conRibete!==false; M.grueso.value=MQ_BORDE_PX*2*Math.tan(cam.fov*MQ_R/2)/Math.max(60, alto||300); }
 function mqCamara(E, az, alto){
   mqGrosor(E.M, alto||E.alto, E.cam);
   var a=az*MQ_R, e=E.el*MQ_R;
