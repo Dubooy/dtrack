@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════════
-   DTrack · TEXTOS
+   Peak · TEXTOS
    ----------------------------------------------------------------------
    Este archivo manda sobre los textos que trae la app. Cambia lo que
    quieras entre comillas y guarda: al recargar, aparecen tus versiones.

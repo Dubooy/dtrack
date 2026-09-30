@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- DTrack · Social: chat de los grupos y fotos con likes, reacciones,
+-- Peak · Social: chat de los grupos y fotos con likes, reacciones,
 -- descripción y comentarios.
 --
 -- Cómo se instala (una sola vez):
