@@ -9141,6 +9141,7 @@ function novedadesTrasRender(st){
   if(typeof disenoTrasRender==="function") disenoTrasRender(st);
   if(typeof bucleTrasRender==="function") bucleTrasRender(st);
   if(typeof grupoTrasRender==="function") grupoTrasRender(st);
+  if(typeof lecturaTrasRender==="function") lecturaTrasRender(st);
   pintaRetoSemana(); pintaSemanas(); pintaAvisoSemana(); vigilaRetoSemana(); pintaInsignia(); avisoPomodoro(); vigilaTriple();
   if(document.getElementById("imp-box")) copiaMejora();
 }
@@ -11900,6 +11901,7 @@ function rumboAccion(a, el){
   if(typeof disenoAccion==="function" && disenoAccion(a, el)) return true;
   if(typeof bucleAccion==="function" && bucleAccion(a, el)) return true;
   if(typeof grupoAccion==="function" && grupoAccion(a, el)) return true;
+  if(typeof lecturaAccion==="function" && lecturaAccion(a, el)) return true;
   if(a==="x-anillo"){ anilloToca(el.dataset.k); return true; }
   if(a==="x-ir-habitos"){ var ci=document.getElementById("card-ideal"); if(ci) ci.scrollIntoView({behavior:"smooth", block:"start"}); return true; }
   if(a==="x-pomo-ya"){ pomodoroYa(); return true; }
@@ -18371,6 +18373,656 @@ var MEJORAS_CSS=[
 '.rc-pista{ text-align:center; font-size:12.5px; color:rgba(255,255,255,.5); padding:4px 16px calc(env(safe-area-inset-bottom) + 16px); }'
 ].join("\n");
 (function(){ var st=document.createElement("style"); st.id="mejoras-css"; st.textContent=MEJORAS_CSS; document.head.appendChild(st); })();
+
+/* ════════════ lectura: libros de verdad dentro de Hábitos ════════════
+   Una biblioteca de libros reales por tema, una encuesta que elige tu
+   siguiente libro y un bloque «Lectura» en la tarjeta de Hábitos.
+   Empezar un libro crea un hábito con cantidad (páginas al día), así que
+   el progreso del libro sale solo de lo que apuntas cada día.
+     S.lectura.libros[id] = { e:"leyendo"|"pausa"|"leido"|"quiero", habs:[ids], total, desde, fin }
+     S.lectura.enc        = { r:{respuestas}, top:[ids], f:fecha }
+   Las portadas son tipográficas y propias (sin imágenes con derechos). */
+ICO_B.libro=ICO_B.libro||ICO_B.estudiar;
+
+var LB_TEMAS=[
+  { k:"eco", t:"Economía y dinero", c:"#1f8a5b", pal:[["#10382b","#f3ead3","#d9a441"],["#ece3cc","#173a2b","#b5452f"],["#1f6f55","#fff8e7","#f2c14e"],["#f6f1e6","#0f3d2e","#2f8f6a"]] },
+  { k:"neg", t:"Negocio", c:"#d9822b", pal:[["#1c1c1e","#f5f5f0","#ff7a1a"],["#ff6b2c","#fff","#1c1c1e"],["#f2ede4","#1c1c1e","#ff6b2c"],["#23395b","#fdf6e9","#f5a623"]] },
+  { k:"pol", t:"Política y sociedad", c:"#c0392b", pal:[["#b3261e","#fff5ec","#1a1a1a"],["#1a1a1a","#f4efe6","#d63a2f"],["#efe7da","#241c1a","#b3261e"],["#3b3f4a","#f7f2e8","#e0b84f"]] },
+  { k:"des", t:"Desarrollo personal", c:"#6d5ce7", pal:[["#f7f3ea","#2b2a33","#6d5ce7"],["#4a3fc1","#fbf8ff","#ffd166"],["#fde7d8","#3a2330","#e2725b"],["#1e2a3a","#f1ede4","#7fc8a9"]] },
+  { k:"cie", t:"Historia y ciencia", c:"#1b8fb0", pal:[["#0b2239","#e9f1f7","#46b1d9"],["#e8eef0","#0e2a3c","#d9534f"],["#1b6f8a","#f5fbfc","#ffcf5c"],["#f3ecdc","#2a2118","#8a5a2b"]] }
+];
+/* e = cómo está contado · l = nivel (1 fácil, 3 exigente) · o = qué te llevas · n = páginas (aprox., según edición) */
+var LB=[
+  { id:"psico-dinero", k:"eco", t:"La psicología del dinero", a:"Morgan Housel", y:2020, n:256, e:["historia","ideas"], l:1, o:["calma","decidir"],
+    p:"Ahorrar e invertir tiene más de comportamiento que de matemáticas. Veinte historias cortas que se leen solas.",
+    i:["Ser rico es lo que no ves: el dinero que no te gastas.","El interés compuesto necesita tiempo, no genialidad.","Decide qué es «suficiente» para no arriesgar lo que ya tienes."] },
+  { id:"economia-leccion", k:"eco", t:"La economía en una lección", a:"Henry Hazlitt", y:1946, n:224, e:["ideas"], l:2, o:["entender","decidir"],
+    p:"Mira las consecuencias de una decisión para todos y a largo plazo, no solo lo que se ve a primera vista.",
+    i:["La falacia de la ventana rota: romper cosas no crea riqueza.","Toda medida tiene efectos que no se ven al principio.","Pregunta siempre: ¿y para quién más?, ¿y después qué?"] },
+  { id:"freakonomics", k:"eco", t:"Freakonomics", a:"Steven D. Levitt y Stephen J. Dubner", y:2005, n:320, e:["ciencia","historia"], l:1, o:["entender"],
+    p:"Preguntas raras respondidas con datos. Engancha desde la primera página.",
+    i:["Los incentivos explican casi todo lo que hace la gente.","Que dos cosas vayan juntas no significa que una cause la otra.","La sabiduría popular se equivoca más de lo que crees."] },
+  { id:"babilonia", k:"eco", t:"El hombre más rico de Babilonia", a:"George S. Clason", y:1926, n:160, e:["novela","practico"], l:1, o:["decidir","foco"],
+    p:"Las reglas básicas del dinero contadas como fábulas de la antigua Babilonia. Se lee en una tarde.",
+    i:["Guarda al menos una décima parte de lo que ganas.","Haz que tu dinero trabaje para ti.","Desconfía de las promesas demasiado buenas."] },
+  { id:"padre-rico", k:"eco", t:"Padre rico, padre pobre", a:"Robert T. Kiyosaki", y:1997, n:240, e:["historia","practico"], l:1, o:["inspirar","crear"],
+    p:"El libro que hizo a millones de personas pensar por primera vez en activos y pasivos. Léelo con espíritu crítico.",
+    i:["Un activo mete dinero en tu bolsillo; un pasivo lo saca.","De finanzas no te enseñan en el colegio: búscalo tú.","Trabaja para aprender, no solo para cobrar."] },
+  { id:"inversor-inteligente", k:"eco", t:"El inversor inteligente", a:"Benjamin Graham", y:1949, n:640, e:["practico","ideas"], l:3, o:["decidir","calma"],
+    p:"El clásico de la inversión en valor. Warren Buffett lo llama el mejor libro que se ha escrito sobre invertir.",
+    i:["El señor Mercado: el precio de hoy no es lo que algo vale.","Margen de seguridad: compra con descuento.","El mayor enemigo del inversor suele ser él mismo."] },
+  { id:"economista-camuflado", k:"eco", t:"El economista camuflado", a:"Tim Harford", y:2005, n:320, e:["ciencia","ideas"], l:2, o:["entender"],
+    p:"La economía de lo cotidiano: por qué un café cuesta lo que cuesta y quién se queda la diferencia.",
+    i:["Quien controla lo escaso puede poner el precio.","Las empresas intentan cobrar a cada uno lo máximo que pagaría.","Los mercados funcionan mejor cuando la información está clara."] },
+  { id:"capital-xxi", k:"eco", t:"El capital en el siglo XXI", a:"Thomas Piketty", y:2013, n:704, e:["ciencia","ideas"], l:3, o:["entender"],
+    p:"Tres siglos de datos sobre riqueza y desigualdad. Largo y exigente, pero marcó una época.",
+    i:["Cuando el capital rinde más de lo que crece la economía, la desigualdad sube.","La herencia vuelve a pesar mucho.","Los datos históricos cambian el debate."] },
+
+  { id:"cero-uno", k:"neg", t:"De cero a uno", a:"Peter Thiel", y:2014, n:224, e:["ideas"], l:2, o:["crear"],
+    p:"Cómo crear algo nuevo en vez de copiar lo que ya existe. Corto y lleno de ideas que incomodan.",
+    i:["Copiar lleva de 1 a n; crear algo nuevo, de 0 a 1.","Mejor dominar un mercado pequeño que pelear en uno enorme.","¿Qué verdad importante crees que casi nadie comparte contigo?"] },
+  { id:"lean-startup", k:"neg", t:"El método Lean Startup", a:"Eric Ries", y:2011, n:320, e:["practico"], l:2, o:["crear"],
+    p:"Probar una idea pequeña y barata antes de apostarlo todo. El manual de las startups modernas.",
+    i:["Construir, medir, aprender: cuanto más rápido, mejor.","Producto mínimo viable: lo justo para aprender algo real.","Cambiar de rumbo a tiempo no es fracasar."] },
+  { id:"nunca-te-pares", k:"neg", t:"Nunca te pares", a:"Phil Knight", y:2016, n:400, e:["historia"], l:1, o:["inspirar","crear"],
+    p:"Cómo empezó Nike vendiendo zapatillas desde el maletero de un coche, contado por su fundador.",
+    i:["Empezar pequeño está bien; parar, no.","Los primeros años son caos, deudas y fe.","Rodéate de gente rara, buena y leal."] },
+  { id:"ganar-amigos", k:"neg", t:"Cómo ganar amigos e influir sobre las personas", a:"Dale Carnegie", y:1936, n:288, e:["practico"], l:1, o:["gente"],
+    p:"Un clásico sobre tratar con la gente. Sirve para todo, no solo para vender.",
+    i:["No critiques, no condenes, no te quejes.","Habla de lo que le interesa al otro.","Recuerda los nombres: para cada uno, es el sonido más bonito."] },
+  { id:"semana-4h", k:"neg", t:"La semana laboral de 4 horas", a:"Timothy Ferriss", y:2007, n:400, e:["practico"], l:1, o:["crear","foco"],
+    p:"Trabajar menos y mejor: eliminar lo que sobra, automatizar y diseñar la vida que quieres.",
+    i:["Elimina antes de optimizar: muchas tareas sobran.","El 20 % de lo que haces da el 80 % del resultado.","Diseña tu estilo de vida, no solo tu carrera."] },
+  { id:"steve-jobs", k:"neg", t:"Steve Jobs", a:"Walter Isaacson", y:2011, n:752, e:["historia"], l:2, o:["inspirar","crear"],
+    p:"La biografía autorizada del fundador de Apple, con sus aciertos y sus sombras.",
+    i:["La simplicidad es la máxima sofisticación.","Unir tecnología y humanidades crea productos únicos.","Su intensidad fue a la vez su fuerza y su problema."] },
+  { id:"mito-emprendedor", k:"neg", t:"El mito del emprendedor", a:"Michael E. Gerber", y:1995, n:288, e:["practico"], l:2, o:["crear","foco"],
+    p:"Por qué la mayoría de negocios pequeños no funcionan y qué hacer para que el tuyo sí.",
+    i:["Trabaja en tu negocio, no solo dentro de él.","Crea sistemas como si fueras a abrir cien tiendas iguales.","Todo negocio necesita al técnico, al gerente y al emprendedor."] },
+  { id:"influencia", k:"neg", t:"Influencia", a:"Robert B. Cialdini", y:1984, n:400, e:["ciencia","practico"], l:2, o:["gente","decidir"],
+    p:"La psicología de la persuasión, con experimentos. Te sirve para convencer y para que no te convenzan.",
+    i:["Seis atajos: reciprocidad, compromiso, prueba social, simpatía, autoridad y escasez.","Si alguien te da algo, sientes que debes devolverlo.","Reconocer los atajos te protege de quien los usa contra ti."] },
+
+  { id:"rebelion-granja", k:"pol", t:"Rebelión en la granja", a:"George Orwell", y:1945, n:144, e:["novela"], l:1, o:["entender"],
+    p:"Una fábula corta sobre cómo el poder cambia a quien lo consigue. Se lee de una sentada.",
+    i:["Todos los animales son iguales, pero algunos son más iguales que otros.","El poder cambia a quien lo tiene.","Las palabras se retuercen para justificar lo injustificable."] },
+  { id:"1984", k:"pol", t:"1984", a:"George Orwell", y:1949, n:352, e:["novela"], l:2, o:["entender"],
+    p:"Vigilancia, propaganda y control. Para entender muchas noticias de hoy.",
+    i:["El Gran Hermano te vigila: la vigilancia como forma de control.","Si recortas las palabras, recortas lo que se puede pensar.","Quien controla el pasado controla el futuro."] },
+  { id:"principe", k:"pol", t:"El príncipe", a:"Nicolás Maquiavelo", y:1532, n:128, e:["ideas"], l:2, o:["entender","decidir"],
+    p:"El manual original del poder, escrito hace 500 años. Corto, directo y sin adornos.",
+    i:["Si no puedes ser amado y temido a la vez, es más seguro ser temido.","La fortuna manda en la mitad de lo que hacemos; la otra mitad es nuestra.","Juzga a quien gobierna por lo que hace, no por lo que dice."] },
+  { id:"fracasan-paises", k:"pol", t:"Por qué fracasan los países", a:"Daron Acemoglu y James A. Robinson", y:2012, n:592, e:["ciencia","historia"], l:3, o:["entender"],
+    p:"Por qué unos países son ricos y otros pobres. Sus autores ganaron el Nobel de Economía en 2024.",
+    i:["Las instituciones inclusivas crean riqueza; las extractivas la exprimen.","Nogales: una misma ciudad partida por una frontera, dos destinos.","La prosperidad depende más de la política que del clima."] },
+  { id:"mundo-feliz", k:"pol", t:"Un mundo feliz", a:"Aldous Huxley", y:1932, n:256, e:["novela"], l:2, o:["entender"],
+    p:"Una sociedad controlada con placer en vez de con miedo. Da más miedo que 1984.",
+    i:["Se puede controlar a la gente dándole lo que quiere.","El soma: felicidad química a cambio de libertad.","¿Prefieres estar cómodo o ser libre?"] },
+  { id:"sobre-tirania", k:"pol", t:"Sobre la tiranía", a:"Timothy Snyder", y:2017, n:128, e:["practico","historia"], l:1, o:["entender","decidir"],
+    p:"Veinte lecciones del siglo XX para defender la democracia. Muy corto y muy claro.",
+    i:["No obedezcas por adelantado.","Defiende las instituciones.","Investiga por tu cuenta y lee cosas largas."] },
+  { id:"rebelion-masas", k:"pol", t:"La rebelión de las masas", a:"José Ortega y Gasset", y:1930, n:272, e:["ideas"], l:3, o:["entender"],
+    p:"Un clásico español sobre la sociedad de masas que se sigue citando casi cien años después.",
+    i:["El «hombre masa» exige derechos sin sentir obligaciones.","La especialización puede crear sabios ignorantes.","Sin proyecto común, una sociedad se desorienta."] },
+  { id:"orden-mundial", k:"pol", t:"Orden mundial", a:"Henry Kissinger", y:2014, n:432, e:["ideas","historia"], l:3, o:["entender"],
+    p:"Cómo entiende el mundo cada gran potencia, contado por quien fue su diplomático más famoso.",
+    i:["Cada región del mundo entiende el «orden» de forma distinta.","Westfalia: el origen del sistema de Estados.","El equilibrio de poder evita más guerras que las buenas intenciones."] },
+
+  { id:"habitos-atomicos", k:"des", t:"Hábitos atómicos", a:"James Clear", y:2018, n:336, e:["practico"], l:1, o:["foco"],
+    p:"Cambios pequeños que se suman. Encaja con lo que ya haces en DTrack.",
+    i:["Mejora un 1 % cada día y en un año serás otro.","Hazlo obvio, atractivo, fácil y satisfactorio.","Cambia tu identidad: «soy alguien que lee», no «quiero leer»."] },
+  { id:"mindset", k:"des", t:"Mindset", a:"Carol S. Dweck", y:2006, n:320, e:["ciencia","ideas"], l:1, o:["inspirar"],
+    p:"La diferencia entre creer que tu talento es fijo o que se entrena, y por qué lo cambia todo.",
+    i:["Mentalidad fija frente a mentalidad de crecimiento.","Elogia el esfuerzo y el proceso, no el talento.","«Todavía no» cambia cómo ves un fallo."] },
+  { id:"hombre-sentido", k:"des", t:"El hombre en busca de sentido", a:"Viktor E. Frankl", y:1946, n:168, e:["historia"], l:1, o:["calma","inspirar"],
+    p:"Lo que aprendió un psiquiatra sobreviviendo a un campo de concentración. Corto y enorme.",
+    i:["Pueden quitarte todo menos la libertad de elegir tu actitud.","Quien tiene un porqué soporta casi cualquier cómo.","El sentido está en lo que haces, en quien quieres y en cómo afrontas lo difícil."] },
+  { id:"meditaciones", k:"des", t:"Meditaciones", a:"Marco Aurelio", y:"s. II", n:256, e:["ideas"], l:2, o:["calma"],
+    p:"Las notas privadas de un emperador romano para mantener la calma. Estoicismo de primera mano.",
+    i:["No te alteran las cosas, sino lo que piensas de ellas.","Céntrate en lo que depende de ti.","Haz cada cosa como si fuera la última."] },
+  { id:"centrate", k:"des", t:"Céntrate (Deep Work)", a:"Cal Newport", y:2016, n:304, e:["practico"], l:2, o:["foco"],
+    p:"Concentrarse a fondo es cada vez más raro y más valioso. Cómo entrenarlo.",
+    i:["El trabajo profundo se entrena como un músculo.","Reserva bloques sin móvil ni avisos.","Aburrirte también es entrenar: no cojas el móvil a la primera."] },
+  { id:"7-habitos", k:"des", t:"Los 7 hábitos de la gente altamente efectiva", a:"Stephen R. Covey", y:1989, n:432, e:["practico"], l:2, o:["foco","gente"],
+    p:"Un clásico de la efectividad personal y de trabajar con otros.",
+    i:["Sé proactivo: responde, no reacciones.","Empieza con un fin en mente.","Primero lo importante, aunque no sea urgente."] },
+  { id:"poder-ahora", k:"des", t:"El poder del ahora", a:"Eckhart Tolle", y:1997, n:240, e:["ideas"], l:2, o:["calma"],
+    p:"Un libro para salir del ruido de la cabeza y estar donde estás.",
+    i:["No eres tus pensamientos: puedes observarlos.","Casi todo el sufrimiento vive en el pasado o en el futuro.","Aceptar lo que es no es rendirse."] },
+  { id:"ikigai", k:"des", t:"Ikigai", a:"Héctor García y Francesc Miralles", y:2016, n:208, e:["practico","historia"], l:1, o:["calma","inspirar"],
+    p:"Lo que aprendieron en Okinawa, una de las zonas del mundo con más centenarios.",
+    i:["Tu ikigai: lo que amas, lo que se te da bien, lo que el mundo necesita y por lo que te pagarían.","Come hasta sentirte lleno al 80 %.","Muévete cada día y cuida a tus amigos."] },
+  { id:"pensar-rapido", k:"des", t:"Pensar rápido, pensar despacio", a:"Daniel Kahneman", y:2011, n:672, e:["ciencia"], l:3, o:["decidir"],
+    p:"Cómo decide tu cerebro y cuándo te engaña, por un premio Nobel. Largo, pero vale la pena.",
+    i:["Sistema 1 rápido e intuitivo; sistema 2 lento y racional.","Anclaje, miedo a perder y exceso de confianza nos engañan.","Para lo importante, frena y mira los datos."] },
+  { id:"grit", k:"des", t:"Grit", a:"Angela Duckworth", y:2016, n:400, e:["ciencia","historia"], l:2, o:["inspirar","foco"],
+    p:"El poder de la pasión y la perseverancia: por qué el esfuerzo sostenido gana al talento.",
+    i:["El talento importa, pero el esfuerzo cuenta dos veces.","La pasión se desarrolla; no aparece de golpe.","Practica justo por encima de tu nivel."] },
+
+  { id:"sapiens", k:"cie", t:"Sapiens. De animales a dioses", a:"Yuval Noah Harari", y:2011, n:496, e:["ideas","historia"], l:2, o:["entender"],
+    p:"La historia de la humanidad de un tirón: de cazadores a dueños del planeta.",
+    i:["Cooperamos a lo grande gracias a ficciones compartidas: dinero, naciones, leyes.","La agricultura nos dio más comida, pero no una vida más fácil.","Tres revoluciones: cognitiva, agrícola y científica."] },
+  { id:"factfulness", k:"cie", t:"Factfulness", a:"Hans Rosling", y:2018, n:336, e:["ciencia"], l:1, o:["entender","calma"],
+    p:"El mundo va mejor de lo que crees, y los datos lo demuestran.",
+    i:["Casi todos respondemos peor que al azar sobre cómo está el mundo.","Diez instintos distorsionan lo que vemos.","Busca la cifra antes de asustarte con la noticia."] },
+  { id:"breve-tiempo", k:"cie", t:"Breve historia del tiempo", a:"Stephen Hawking", y:1988, n:256, e:["ciencia"], l:2, o:["entender"],
+    p:"El universo, los agujeros negros y el big bang, sin fórmulas.",
+    i:["El universo empezó con el big bang y se sigue expandiendo.","Los agujeros negros no son del todo negros: emiten radiación.","El tiempo no pasa igual para todos."] },
+  { id:"armas-germenes", k:"cie", t:"Armas, gérmenes y acero", a:"Jared Diamond", y:1997, n:592, e:["ciencia","historia"], l:3, o:["entender"],
+    p:"Por qué la historia fue como fue en cada continente. Premio Pulitzer.",
+    i:["La geografía explica más que la biología.","La agricultura y los animales domésticos dieron ventaja a Eurasia.","Los gérmenes conquistaron América más que las armas."] },
+  { id:"gen-egoista", k:"cie", t:"El gen egoísta", a:"Richard Dawkins", y:1976, n:400, e:["ciencia"], l:3, o:["entender"],
+    p:"La evolución vista desde los genes. Un clásico que cambió la biología.",
+    i:["La selección natural actúa sobre los genes.","El altruismo también tiene explicación evolutiva.","Aquí nace la palabra «meme»."] },
+  { id:"casi-todo", k:"cie", t:"Una breve historia de casi todo", a:"Bill Bryson", y:2003, n:544, e:["ciencia","historia"], l:1, o:["entender"],
+    p:"Cómo sabemos lo que sabemos, contado con muchísimo humor.",
+    i:["La ciencia explicada a través de sus personajes y sus manías.","Del big bang a la célula, sin perderte.","Que estés aquí leyendo es un milagro estadístico."] },
+  { id:"infinito-junco", k:"cie", t:"El infinito en un junco", a:"Irene Vallejo", y:2019, n:452, e:["historia"], l:2, o:["entender","inspirar"],
+    p:"La invención de los libros en el mundo antiguo. Premio Nacional de Ensayo.",
+    i:["Cómo nacieron los libros y quién los salvó.","La biblioteca de Alejandría y el sueño de guardarlo todo.","Los libros han sobrevivido a guerras, incendios y censura."] },
+  { id:"por-que-dormimos", k:"cie", t:"Por qué dormimos", a:"Matthew Walker", y:2017, n:416, e:["ciencia","practico"], l:1, o:["foco","calma"],
+    p:"Lo que la ciencia sabe del sueño. Encaja con el sueño que ya apuntas en DTrack.",
+    i:["Dormir poco pasa factura a la memoria, al humor y a la salud.","Mantén horarios regulares, también el fin de semana.","El sueño asienta lo que has estudiado."] }
+];
+/* para quien no ha hecho la encuesta: una recomendación distinta cada semana */
+var LB_SEMANA=["habitos-atomicos","psico-dinero","nunca-te-pares","rebelion-granja","factfulness","hombre-sentido","freakonomics","sobre-tirania","ikigai","casi-todo","mindset","babilonia"];
+
+var LB_ENC=[
+  { k:"tema", q:"¿Qué te apetece entender o mejorar ahora?", ops:[
+    ["eco","💶","El dinero y la economía"],["neg","🚀","Crear algo: negocio y emprender"],["pol","🏛️","El poder, la política y la sociedad"],
+    ["des","🌱","A mí: hábitos, cabeza y calma"],["cie","🔭","Cómo hemos llegado hasta aquí"],["todo","✨","Sorpréndeme"] ]},
+  { k:"estilo", q:"¿Qué tipo de libro te engancha?", ops:[
+    ["historia","📖","Historias reales y biografías"],["practico","🛠️","Consejos que pueda usar mañana"],["ideas","💡","Ideas que me cambien la cabeza"],
+    ["novela","🎭","Novelas y fábulas"],["ciencia","🔬","Datos, experimentos y ciencia"] ]},
+  { k:"nivel", q:"¿Cuánto lees ahora mismo?", ops:[
+    ["1","🐣","Casi nada: quiero algo que enganche"],["2","📚","A ratos, de vez en cuando"],["3","🦉","Bastante: dame algo con chicha"] ]},
+  { k:"tiempo", q:"¿Cuánto tiempo al día le puedes dar?", ops:[
+    ["10","⏱️","Unos 10 minutos"],["20","☕","Unos 20 minutos"],["30","🛋️","Media hora o más"] ]},
+  { k:"obj", q:"¿Qué quieres llevarte al acabarlo?", ops:[
+    ["inspirar","🔥","Ganas de ponerme a ello"],["calma","🌊","Calma y perspectiva"],["decidir","🧭","Decidir mejor"],
+    ["foco","🎯","Más foco y disciplina"],["crear","🧱","Ideas para crear algo mío"],["gente","🤝","Entender mejor a la gente"],["entender","🧠","Saber de lo que hablo"] ]}
+];
+var LB_ESTILO_TXT={ historia:"Te lo cuenta con historias reales", practico:"Va al grano, con cosas que puedes aplicar ya", ideas:"Está lleno de ideas que cambian cómo piensas", novela:"Es una novela: se lee como una historia", ciencia:"Se apoya en datos y experimentos" };
+var LB_OBJ_TXT={ inspirar:"Da ganas de ponerse", calma:"Te deja más tranquilo y con perspectiva", decidir:"Te ayuda a decidir mejor", foco:"Te ayuda con el foco y la disciplina", crear:"Da ideas para crear algo tuyo", gente:"Te ayuda a entender a la gente", entender:"Sales sabiendo de lo que hablas" };
+var LB_NIVEL_TXT=["","Se lee fácil y engancha","Ni muy ligero ni muy denso","Exigente, de los de subrayar"];
+var LB_RITMOS=[10,15,20,30];
+
+var lbEncR=null, lbEncPaso=0, lbRitmoSel=null, lbTab="para";
+
+function lbSt(){ if(!S.lectura || typeof S.lectura!=="object") S.lectura={}; if(!S.lectura.libros) S.lectura.libros={}; return S.lectura; }
+function lbLibro(id){ for(var i=0;i<LB.length;i++) if(LB[i].id===id) return LB[i]; return null; }
+function lbTema(k){ for(var i=0;i<LB_TEMAS.length;i++) if(LB_TEMAS[i].k===k) return LB_TEMAS[i]; return LB_TEMAS[0]; }
+function lbEst(id){ return lbSt().libros[id]||null; }
+function lbEstado(id){ var s=lbEst(id); if(!s) return ""; if(s.e==="leyendo" && !lbHabActivo(id)) return "pausa"; return s.e; }
+function lbHabActivo(id){ var s=lbEst(id); if(!s || !s.habs) return null;
+  for(var i=s.habs.length-1;i>=0;i--){ var x=habPorId(s.habs[i]); if(x && !x.hasta) return x; } return null; }
+/* páginas de un hábito: lo apuntado cada día, o la meta entera si se marcó sin cantidad */
+function lbPagsHab(hid){
+  var x=habPorId(hid); if(!x) return 0; var n=0, vistos={};
+  if(S.cant) Object.keys(S.cant).forEach(function(d){ var v=S.cant[d] && S.cant[d][hid]; if(v){ n+=v; vistos[d]=1; } });
+  if(S.checks) Object.keys(S.checks).forEach(function(d){ if(!vistos[d] && (S.checks[d]||[]).indexOf(hid)>=0) n+=(x.meta||0); });
+  return n;
+}
+function lbPags(id){ var s=lbEst(id); if(!s || !s.habs) return 0; return Math.round(s.habs.reduce(function(a,h){ return a+lbPagsHab(h); },0)); }
+function lbTotal(id){ var s=lbEst(id), b=lbLibro(id); return (s && s.total) || (b && b.n) || 300; }
+function lbActual(){
+  var L=lbSt().libros, ids=Object.keys(L);
+  for(var i=0;i<ids.length;i++) if(L[ids[i]].e==="leyendo" && lbHabActivo(ids[i]) && lbLibro(ids[i])) return ids[i];
+  return null;
+}
+function lbLeidos(){ var L=lbSt().libros; return Object.keys(L).filter(function(id){ return L[id].e==="leido" && lbLibro(id); })
+  .sort(function(a,b){ return String(L[b].fin||"").localeCompare(String(L[a].fin||"")); }); }
+function lbGuardados(){ var L=lbSt().libros; return Object.keys(L).filter(function(id){ var e=lbEstado(id); return (e==="quiero"||e==="pausa") && lbLibro(id); }); }
+function lbDisponible(id){ var e=lbEstado(id); return e!=="leido" && e!=="leyendo"; }
+function lbAnyo(b){ return typeof b.y==="number" ? String(b.y) : b.y; }
+function lbDias(n, ritmo){ return Math.max(1, Math.ceil(n/Math.max(1,ritmo))); }
+function lbDiasTxt(d){ if(d<=10) return d+(d===1?" día":" días"); var s=Math.round(d/7); if(s<9) return "unas "+s+" semanas"; var m=Math.round(d/30); return m<=1?"un mes":"unos "+m+" meses"; }
+function lbRitmoEnc(){ var e=lbSt().enc; var t=e && e.r && +e.r.tiempo; return t>=30?30:t>=20?20:10; }
+
+/* ── portadas tipográficas ── */
+function lbHash(s){ var h=0; for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+function lbPortada(b, tam){
+  var T=lbTema(b.k), idx=0; for(var i=0,n=0;i<LB.length;i++){ if(LB[i].k===b.k){ if(LB[i].id===b.id) idx=n; n++; } }
+  var p=T.pal[idx%T.pal.length], v=(idx+Math.floor(idx/T.pal.length)+lbHash(b.k))%4;
+  var ini=b.t.replace(/^(el|la|los|las|un|una)\s+/i,"").charAt(0).toUpperCase();
+  return '<span class="lb-port '+(tam||"m")+' v'+v+'" style="--f:'+p[0]+';--t:'+p[1]+';--x:'+p[2]+'" aria-hidden="true"><i class="lb-deco"></i>'+
+    '<span class="lb-in"><small class="lb-p-a">'+esc(b.a.split(" y ")[0])+'</small><b class="lb-p-t">'+esc(b.t)+'</b></span><b class="lb-ini">'+esc(ini)+'</b></span>';
+}
+
+/* ── encuesta: puntuación ── */
+function lbPuntua(b, r){
+  var s=0;
+  if(r.tema===b.k) s+=6; else if(r.tema==="todo") s+=2.5;
+  if(b.e.indexOf(r.estilo)>=0) s+=3;
+  var dn=Math.abs(b.l-(+r.nivel||2)); s+= dn===0?2 : dn===1?0.5 : -1.5;
+  var dias=lbDias(b.n, +r.tiempo||10);
+  s+= dias<=21?1.5 : dias<=40?0.5 : dias>60?-1.5 : 0;
+  if(+r.nivel===1 && b.n>450) s-=1;
+  if(b.o.indexOf(r.obj)>=0) s+=2.5;
+  if(lbEstado(b.id)==="quiero") s+=0.3;
+  return s;
+}
+function lbRanking(r){
+  return LB.filter(function(b){ return lbDisponible(b.id); })
+    .map(function(b){ return { b:b, s:lbPuntua(b, r) }; })
+    .sort(function(x,y){ return y.s-x.s || x.b.n-y.b.n; });
+}
+function lbMatch(s){ return Math.round(58+40*Math.max(0, Math.min(1, s/15))); }
+function lbPorQue(b, r){
+  var w=[], rit=+r.tiempo||10;
+  if(r.tema===b.k) w.push("Va de "+lbTema(b.k).t.toLowerCase()+", justo lo que te apetece");
+  if(b.e.indexOf(r.estilo)>=0) w.push(LB_ESTILO_TXT[r.estilo]);
+  if(b.o.indexOf(r.obj)>=0) w.push(LB_OBJ_TXT[r.obj]);
+  if(Math.abs(b.l-(+r.nivel||2))===0) w.push(LB_NIVEL_TXT[b.l]);
+  w.push("Con "+rit+" páginas al día lo acabas en "+lbDiasTxt(lbDias(b.n, rit)));
+  return w.slice(0,4);
+}
+/* recomendaciones: las de la encuesta o, sin encuesta, la de la semana y compañía */
+function lbRecs(n){
+  var e=lbSt().enc;
+  if(e && e.r) return lbRanking(e.r).slice(0,n).map(function(x){ return x.b; });
+  var sem=Math.floor((Date.now()/864e5+3)/7), out=[];
+  for(var i=0;i<LB_SEMANA.length && out.length<n;i++){ var id=LB_SEMANA[(sem+i)%LB_SEMANA.length]; if(lbDisponible(id)) out.push(lbLibro(id)); }
+  return out;
+}
+
+/* ── acciones sobre un libro ── */
+function lbEmpieza(id, ritmo){
+  var b=lbLibro(id); if(!b) return;
+  var L=lbSt(), act=lbActual();
+  if(act && act!==id){ var hx=lbHabActivo(act); if(hx) hx.hasta=addDays(today(),1); L.libros[act].e="pausa"; }
+  var s=L.libros[id]||(L.libros[id]={ habs:[] });
+  if(!s.habs) s.habs=[];
+  var x=lbHabActivo(id);
+  ritmo=ritmo||lbRitmoEnc();
+  if(!x){
+    x={ id:uid(), time:"", text:"Leer «"+b.t+"»", tag:"personal", desde:today(), meta:ritmo, unidad:"páginas", libro:id };
+    S.ideal.push(x); s.habs.push(x.id);
+  } else x.meta=ritmo;
+  s.e="leyendo"; if(!s.desde) s.desde=today(); delete s.fin;
+  save(); sonido("pop");
+  avisoNube("Empiezas «"+b.t+"»: "+ritmo+" páginas al día en tus hábitos.");
+}
+function lbTermina(id){
+  var s=lbEst(id); if(!s) s=lbSt().libros[id]={ habs:[] };
+  var x=lbHabActivo(id); if(x) x.hasta=addDays(today(),1);   /* hoy aún cuenta; desde mañana ya no sale */
+  s.e="leido"; s.fin=today();
+  save(); sonido("gym");
+}
+function lbGuarda(id){
+  var L=lbSt(), s=L.libros[id];
+  if(s && s.e==="quiero"){ if(s.habs && s.habs.length) s.e="pausa"; else delete L.libros[id]; }
+  else { if(!s) s=L.libros[id]={ habs:[] }; s.e="quiero"; }
+  save(); sonido("tick");
+}
+function lbDeja(id){ var x=lbHabActivo(id); if(x) x.hasta=addDays(today(),1); var s=lbEst(id); if(s) s.e="pausa"; save(); sonido("des"); }
+
+/* ── bloque «Lectura» dentro de la tarjeta de Hábitos ── */
+function lbPinta(){
+  var card=document.getElementById("card-ideal"), lista=document.getElementById("ideal-list");
+  if(!card || !lista || !S || !S.ideal) return;
+  var el=document.getElementById("lb-hab");
+  if(!el){ el=document.createElement("div"); el.id="lb-hab"; el.className="lb-hab"; }
+  if(el.parentNode!==card || el.previousSibling!==lista) lista.parentNode.insertBefore(el, lista.nextSibling);
+  var act=lbActual(), h='<div class="lb-cab"><p class="eyebrow">'+ico("libro")+'Lectura</p><button data-act="x-lb-biblio" data-t="'+(act?"mis":"para")+'">Biblioteca</button></div>';
+  if(act){
+    var b=lbLibro(act), pg=lbPags(act), tot=lbTotal(act), pc=Math.min(100, Math.round(pg/tot*100)), x=lbHabActivo(act), rit=(x&&x.meta)||10;
+    var hoy=cantDe(today(), x.id), queda=Math.max(0, tot-pg), fin=lbDias(queda, rit);
+    h+='<div class="lb-now'+(pg>=tot?" fin":"")+'">'+
+      '<button class="lb-now-port" data-act="x-lb-libro" data-id="'+act+'" aria-label="Ver el libro">'+lbPortada(b,"m")+'</button>'+
+      '<div class="lb-now-t"><button data-act="x-lb-libro" data-id="'+act+'" class="lb-now-tit"><b>'+esc(b.t)+'</b><small>'+esc(b.a)+'</small></button>'+
+      '<div class="lb-barra"><i style="width:'+pc+'%"></i></div>'+
+      '<p class="lb-now-p num"><b>'+Math.min(pg,tot)+'</b> de '+tot+' págs · '+pc+' %</p>'+
+      (pg>=tot
+        ? '<button class="lb-pill lb-pill-ok" data-act="x-lb-termina" data-id="'+act+'">¡Lo he terminado!</button>'
+        : '<p class="lb-now-s">'+(hoy>=rit?"Hoy ya has leído tus "+rit+" páginas. ":"")+'A este ritmo lo acabas en '+lbDiasTxt(fin)+'.</p>'+
+          '<button class="lb-pill" data-act="x-lb-apunta" data-id="'+act+'">'+(hoy>0?"Hoy llevas "+fmtCant(hoy)+" · apuntar más":"Apuntar páginas de hoy")+'</button>')+
+      '</div></div>';
+  } else {
+    var e=lbSt().enc, rs=lbRecs(3), top=rs[0];
+    if(top){
+      h+='<div class="lb-desc">'+
+        '<button class="lb-pila" data-act="x-lb-libro" data-id="'+top.id+'" aria-label="Ver el libro">'+rs.slice(0,3).reverse().map(function(x){ return lbPortada(x,"m"); }).join("")+'</button>'+
+        '<div class="lb-desc-t">'+
+        (e&&e.r
+          ? '<small>Tu libro perfecto</small><button class="lb-desc-tit" data-act="x-lb-libro" data-id="'+top.id+'"><b>'+esc(top.t)+'</b></button><p>'+esc(top.a)+' · '+lbMatch(lbPuntua(top,e.r))+' % para ti</p>'+
+            '<div class="lb-desc-bt"><button class="lb-pill lb-pill-on" data-act="x-lb-libro" data-id="'+top.id+'">Empezarlo</button><button class="lb-pill" data-act="x-lb-biblio" data-t="para">Más para ti</button></div>'
+          : '<small>¿Qué leer ahora?</small><b>Encuentra tu libro perfecto</b><p>Cinco preguntas y te digo cuál, entre '+LB.length+' libros de verdad.</p>'+
+            '<div class="lb-desc-bt"><button class="lb-pill lb-pill-on" data-act="x-lb-enc">Hacer la encuesta</button><button class="lb-pill" data-act="x-lb-libro" data-id="'+top.id+'">El de esta semana</button></div>')+
+        '</div></div>';
+    }
+  }
+  el.innerHTML=h;
+}
+
+/* ── hojas ── */
+function lbFila(b, extra){
+  var e=lbEstado(b.id), tag=e==="leyendo"?'<em class="on">Leyendo</em>':e==="leido"?'<em class="ok">Leído</em>':e==="pausa"?'<em>A medias</em>':e==="quiero"?'<em>Guardado</em>':"";
+  return '<button class="lb-fila" data-act="x-lb-libro" data-id="'+b.id+'">'+lbPortada(b,"s")+
+    '<span class="lb-fila-t"><b>'+esc(b.t)+'</b><small>'+esc(b.a)+' · '+b.n+' págs</small><span>'+esc(b.p)+'</span></span>'+
+    '<span class="lb-fila-d">'+(extra||"")+tag+'</span></button>';
+}
+function lbSheetBiblio(t){
+  lbTab=t||lbTab||"para";
+  var L=lbSt(), e=L.enc, leidos=lbLeidos(), act=lbActual();
+  var tabs=[["para","Para ti"]].concat(LB_TEMAS.map(function(T){ return [T.k, T.t]; })).concat([["mis","Mis libros"]]);
+  var h='<div class="flex items-start justify-between mb-1"><div><p class="eyebrow mb-1.5">Hábitos · Lectura</p><h3 class="display text-[20px] font-bold">Biblioteca</h3></div>'+closeBtn()+'</div>'+
+    '<p class="text-[12.5px] t3 mb-4">'+LB.length+' libros de verdad para crecer'+(leidos.length?' · has leído '+leidos.length:'')+'.</p>'+
+    '<button class="lb-enc-ban" data-act="x-lb-enc"><span class="lb-enc-ico">✨</span><span><b>'+(e&&e.r?"Repetir la encuesta":"Encuentra tu libro perfecto")+'</b><small>'+(e&&e.r?"Si ha cambiado lo que te apetece, vuelve a hacerla.":"Cinco preguntas rápidas y te digo cuál leer.")+'</small></span>'+ico("flecha")+'</button>'+
+    '<div class="lb-chips">'+tabs.map(function(x){ var T=lbTema(x[0]), c=(x[0]==="para"||x[0]==="mis")?"var(--accent)":T.c;
+      return '<button data-act="x-lb-biblio" data-t="'+x[0]+'" class="'+(x[0]===lbTab?"on":"")+'" style="--c:'+c+'">'+esc(x[1])+'</button>'; }).join("")+'</div>';
+  if(lbTab==="para"){
+    if(e && e.r){
+      h+='<p class="lb-sec">Según tu encuesta</p><div class="lb-lista">'+lbRanking(e.r).slice(0,8).map(function(x){ return lbFila(x.b, '<i class="lb-match num">'+lbMatch(x.s)+' %</i>'); }).join("")+'</div>';
+    } else {
+      h+='<p class="lb-sec">Para empezar con buen pie</p><div class="lb-lista">'+lbRecs(8).map(function(b){ return lbFila(b); }).join("")+'</div>';
+    }
+  } else if(lbTab==="mis"){
+    var g=lbGuardados();
+    if(act) h+='<p class="lb-sec">Leyendo</p><div class="lb-lista">'+lbFila(lbLibro(act))+'</div>';
+    if(g.length) h+='<p class="lb-sec">Para luego</p><div class="lb-lista">'+g.map(function(id){ return lbFila(lbLibro(id)); }).join("")+'</div>';
+    if(leidos.length) h+='<p class="lb-sec">Leídos</p><div class="lb-lista">'+leidos.map(function(id){ return lbFila(lbLibro(id), '<i class="lb-fecha">'+esc(fmt(L.libros[id].fin||today()))+'</i>'); }).join("")+'</div>';
+    if(!act && !g.length && !leidos.length) h+='<p class="lb-vacio">Aquí saldrán el libro que estás leyendo, los que guardes para luego y los que termines.</p>';
+  } else {
+    h+='<div class="lb-lista">'+LB.filter(function(b){ return b.k===lbTab; }).map(function(b){ return lbFila(b); }).join("")+'</div>';
+  }
+  h+='<p class="lb-nota">Las páginas son aproximadas y cambian según la edición. Puedes ajustarlas en cada libro.</p>';
+  openSheet(h);
+  lbArriba();
+}
+function lbArriba(){ var sc=document.querySelector("#sheet .sheet-card"); if(sc) sc.scrollTop=0; }
+
+function lbSheetLibro(id){
+  var b=lbLibro(id); if(!b) return;
+  var T=lbTema(b.k), e=lbEstado(id), act=lbActual(), s=lbEst(id);
+  if(lbRitmoSel==null || lbRitmoSel.id!==id) lbRitmoSel={ id:id, n:(lbHabActivo(id)||{}).meta||lbRitmoEnc() };
+  var rit=lbRitmoSel.n, pg=lbPags(id), tot=lbTotal(id);
+  var h='<div class="flex items-center justify-between mb-4"><button class="lb-volver" data-act="x-lb-biblio">'+ico("flecha")+'Biblioteca</button>'+closeBtn()+'</div>'+
+    '<div class="lb-ficha">'+lbPortada(b,"l")+
+      '<div class="lb-ficha-t"><span class="lb-tema" style="--c:'+T.c+'">'+esc(T.t)+'</span><h3 class="display">'+esc(b.t)+'</h3><p>'+esc(b.a)+'</p>'+
+      '<small class="num">'+esc(lbAnyo(b))+' · '+tot+' págs · '+esc(LB_NIVEL_TXT[b.l])+'</small></div></div>'+
+    '<p class="lb-desc-l">'+esc(b.p)+'</p>'+
+    '<p class="lb-sec">Lo que te llevas</p><ul class="lb-ideas">'+b.i.map(function(x){ return '<li>'+esc(x)+'</li>'; }).join("")+'</ul>';
+  if(e==="leyendo"){
+    var x=lbHabActivo(id), pc=Math.min(100, Math.round(pg/tot*100));
+    h+='<div class="lb-prog"><div class="flex items-baseline justify-between"><b class="num">'+Math.min(pg,tot)+' <span>de '+tot+' págs</span></b><em class="num">'+pc+' %</em></div>'+
+      '<div class="lb-barra"><i style="width:'+pc+'%"></i></div>'+
+      '<p>'+(pg>=tot?"Ya has llegado al final.":"Te quedan "+(tot-pg)+" páginas: "+lbDiasTxt(lbDias(tot-pg, x.meta||10))+" a "+(x.meta||10)+" al día.")+'</p></div>'+
+      '<button class="btn btn-primary w-full !py-3.5 mt-4" data-act="x-lb-apunta" data-id="'+id+'">Apuntar páginas de hoy</button>'+
+      '<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-lb-termina" data-id="'+id+'">Lo he terminado</button>'+
+      '<p class="lb-sec">Páginas al día</p>'+lbRitmosHTML(id, rit)+
+      '<div class="lb-edicion"><span>Mi edición tiene</span><input id="lb-tot" class="field num text-center" inputmode="numeric" maxlength="4" value="'+tot+'"><span>págs</span><button class="btn btn-quiet !py-2" data-act="x-lb-total" data-id="'+id+'">Guardar</button></div>'+
+      '<button class="lb-link" data-act="x-lb-deja" data-id="'+id+'">Dejarlo por ahora</button>';
+  } else if(e==="leido"){
+    h+='<div class="lb-leido">'+ICON_CHECK+'<span>Lo terminaste el '+esc(fmt(s.fin||today(),{day:"numeric",month:"long",year:"numeric"}))+'.</span></div>'+
+      '<button class="btn btn-quiet w-full !py-3 mt-4" data-act="x-lb-siguiente">Qué leo ahora</button>';
+  } else {
+    h+='<p class="lb-sec">Páginas al día</p>'+lbRitmosHTML(id, rit)+
+      '<p class="lb-est" id="lb-est">'+lbEstTxt(b, rit, pg)+'</p>'+
+      '<button class="btn btn-primary w-full !py-3.5 mt-3" data-act="x-lb-empieza" data-id="'+id+'">'+(act?"Cambiar a este libro":e==="pausa"?"Seguir leyéndolo":"Empezar a leerlo")+'</button>'+
+      (act?'<p class="lb-nota" style="text-align:center">«'+esc(lbLibro(act).t)+'» se queda a medias, con tus páginas guardadas.</p>':'')+
+      '<div class="lb-dos"><button class="btn btn-quiet !py-3" data-act="x-lb-guarda" data-id="'+id+'">'+(e==="quiero"?"Guardado ✓":"Guardar para luego")+'</button>'+
+      '<button class="btn btn-quiet !py-3" data-act="x-lb-termina" data-id="'+id+'">Ya lo he leído</button></div>';
+  }
+  h+='<a class="lb-link" href="https://www.google.com/search?tbm=bks&q='+encodeURIComponent(b.t+" "+b.a)+'" target="_blank" rel="noopener noreferrer">Buscar el libro '+ico("flecha")+'</a>';
+  openSheet(h);
+  lbArriba();
+}
+function lbRitmosHTML(id, rit){
+  return '<div class="seg w-full" id="lb-ritmos" style="display:grid;grid-template-columns:repeat('+LB_RITMOS.length+',1fr)">'+LB_RITMOS.map(function(n){
+    return '<button data-act="x-lb-ritmo" data-id="'+id+'" data-n="'+n+'"'+(n===rit?' aria-pressed="true"':'')+'>'+n+'</button>'; }).join("")+'</div>';
+}
+function lbEstTxt(b, rit, pg){
+  var d=lbDias(Math.max(1, lbTotal(b.id)-(pg||0)), rit);
+  return 'Unos '+Math.round(rit*1.2)+' minutos al día. Lo acabas en '+lbDiasTxt(d)+', hacia el '+esc(fmt(addDays(today(), d),{day:"numeric",month:"long"}))+'.';
+}
+
+function lbSheetEnc(){
+  if(!lbEncR) lbEncR={};
+  var Q=LB_ENC[lbEncPaso];
+  var h='<div class="flex items-center justify-between mb-4">'+
+      (lbEncPaso>0?'<button class="icon-btn !w-8 !h-8 lb-atras" data-act="x-lb-atras" aria-label="Atrás">'+ico("flecha")+'</button>':'<span class="eyebrow">Tu libro perfecto</span>')+
+      closeBtn()+'</div>'+
+    '<div class="lb-pasos">'+LB_ENC.map(function(x,i){ return '<i class="'+(i<lbEncPaso?"ya":i===lbEncPaso?"on":"")+'"></i>'; }).join("")+'</div>'+
+    '<p class="lb-enc-n num">'+(lbEncPaso+1)+' de '+LB_ENC.length+'</p>'+
+    '<h3 class="display lb-enc-q">'+esc(Q.q)+'</h3>'+
+    '<div class="lb-ops">'+Q.ops.map(function(o){
+      return '<button class="lb-op'+(lbEncR[Q.k]===o[0]?" on":"")+'" data-act="x-lb-resp" data-v="'+o[0]+'"><span class="lb-op-e">'+o[1]+'</span><span>'+esc(o[2])+'</span><i>'+ICON_CHECK+'</i></button>'; }).join("")+'</div>';
+  openSheet(h);
+  lbArriba();
+}
+function lbSheetResultado(fin){
+  var L=lbSt(), e=L.enc; if(!e || !e.r){ lbEncPaso=0; lbEncR={}; lbSheetEnc(); return; }
+  var rk=lbRanking(e.r); if(!rk.length){ lbSheetBiblio("mis"); return; }
+  var top=rk[0].b, T=lbTema(top.k), rit=lbRitmoEnc();
+  lbRitmoSel={ id:top.id, n:rit };
+  var h='<div class="flex items-start justify-between mb-2"><p class="eyebrow mt-2">'+(fin?"Y ahora…":"Tu libro perfecto")+'</p>'+closeBtn()+'</div>'+
+    '<div class="lb-res">'+
+      '<div class="lb-res-port">'+lbPortada(top,"xl")+'<span class="lb-res-match num">'+lbMatch(rk[0].s)+' %</span></div>'+
+      '<span class="lb-tema" style="--c:'+T.c+'">'+esc(T.t)+'</span>'+
+      '<h3 class="display">'+esc(top.t)+'</h3><p>'+esc(top.a)+' · '+top.n+' págs</p></div>'+
+    '<p class="lb-sec">Por qué este</p><ul class="lb-porque">'+lbPorQue(top, e.r).map(function(x){ return '<li>'+ICON_CHECK+'<span>'+esc(x)+'</span></li>'; }).join("")+'</ul>'+
+    '<button class="btn btn-primary w-full !py-3.5 mt-5" data-act="x-lb-empieza" data-id="'+top.id+'">'+(lbActual()?"Cambiar a este libro":"Empezar a leerlo")+' · '+rit+' págs al día</button>'+
+    '<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-lb-libro" data-id="'+top.id+'">Ver de qué va</button>'+
+    (rk.length>1?'<p class="lb-sec">También te encajan</p><div class="lb-lista">'+rk.slice(1,3).map(function(x){ return lbFila(x.b, '<i class="lb-match num">'+lbMatch(x.s)+' %</i>'); }).join("")+'</div>':'')+
+    '<button class="lb-link" data-act="x-lb-enc">Repetir la encuesta</button>';
+  openSheet(h);
+  lbArriba();
+}
+function lbFiesta(){
+  var c=document.querySelector("#sheet .lb-res-port .lb-port") || document.querySelector("#sheet .lb-ficha .lb-port"); if(!c) return;
+  var r=c.getBoundingClientRect(); if(!r.width) return;
+  var capa=document.createElement("div"); capa.className="gym-fiesta tick-capa";
+  capa.style.cssText="left:"+(r.left+r.width/2)+"px;top:"+(r.top+r.height/2)+"px;--col:var(--violet)";
+  var h='<span class="tick-onda"></span>', cols=["#ffd45c","var(--accent)","var(--violet)","var(--good)"];
+  for(var i=0;i<14;i++) h+='<i style="--ang:'+(i*(360/14)+10)+'deg;--dist:'+(48+(i%3)*18)+'px;--del:'+((i%4)*.03)+'s;background:'+cols[i%4]+'"></i>';
+  capa.innerHTML=h; document.body.appendChild(capa);
+  setTimeout(function(){ if(capa.parentNode) capa.parentNode.removeChild(capa); }, 1300);
+  try{ if(navigator.vibrate) navigator.vibrate([12,40,12]); }catch(e){}
+}
+
+/* ── metas del mes: «Libros terminados» se cuenta solo ── */
+if(typeof METAS_TIPOS!=="undefined" && !METAS_TIPOS.some(function(x){ return x.k==="libros"; }))
+  METAS_TIPOS.push({ k:"libros", n:"Libros terminados", u:"libros" });
+var _metaValorLb=metaValor;
+metaValor=function(m, mk){
+  if(m.tipo==="libros"){ var L=(S.lectura&&S.lectura.libros)||{}; return Object.keys(L).filter(function(id){ return L[id].e==="leido" && String(L[id].fin||"").slice(0,7)===mk; }).length; }
+  return _metaValorLb(m, mk);
+};
+
+/* ── el editor de hábitos enseña la biblioteca ── */
+var _sheetIdealLb=sheetIdeal;
+sheetIdeal=function(){
+  var r=_sheetIdealLb.apply(this, arguments);
+  var lista=document.querySelector("#sheet-body .hb-lista");
+  if(lista && !document.getElementById("lb-ed")){
+    var act=lbActual(), d=document.createElement("button");
+    d.id="lb-ed"; d.className="lb-ed"; d.setAttribute("data-act", act?"x-lb-libro":"x-lb-biblio"); if(act) d.setAttribute("data-id", act); else d.setAttribute("data-t","para");
+    var rs=act?[lbLibro(act)]:lbRecs(2);
+    d.innerHTML='<span class="lb-ed-p">'+rs.map(function(b){ return lbPortada(b,"s"); }).join("")+'</span><span class="lb-ed-t"><b>'+(act?"Leyendo «"+esc(lbLibro(act).t)+"»":"Un hábito de lectura")+'</b><small>'+(act?"Cambia el ritmo o apunta páginas":"Elige un libro y se añade con sus páginas al día")+'</small></span>'+ico("flecha");
+    lista.parentNode.insertBefore(d, lista.nextSibling);
+  }
+  return r;
+};
+
+function lecturaAccion(a, el){
+  if(a.indexOf("x-lb-")!==0) return false;
+  var id=el.dataset.id;
+  if(a==="x-lb-biblio"){ sonido("tick"); lbSheetBiblio(el.dataset.t); return true; }
+  if(a==="x-lb-libro"){ lbSheetLibro(id); return true; }
+  if(a==="x-lb-ritmo"){
+    lbRitmoSel={ id:id, n:+el.dataset.n };
+    var x=lbHabActivo(id);
+    if(x && lbEstado(id)==="leyendo"){ x.meta=+el.dataset.n; save(); render(); lbSheetLibro(id); sonido("tick"); return true; }
+    document.querySelectorAll("#lb-ritmos button").forEach(function(bt){ bt.setAttribute("aria-pressed", bt===el?"true":"false"); });
+    var es=document.getElementById("lb-est"); if(es) es.innerHTML=lbEstTxt(lbLibro(id), lbRitmoSel.n, lbPags(id));
+    sonido("tick"); return true;
+  }
+  if(a==="x-lb-empieza"){ lbEmpieza(id, lbRitmoSel && lbRitmoSel.id===id ? lbRitmoSel.n : null); render(); lbSheetLibro(id); lbFiesta(); return true; }
+  if(a==="x-lb-guarda"){ lbGuarda(id); render(); lbSheetLibro(id); return true; }
+  if(a==="x-lb-deja"){ lbDeja(id); render(); lbSheetLibro(id); avisoNube("Lo dejas a medias. Tus páginas se quedan guardadas."); return true; }
+  if(a==="x-lb-termina"){
+    var leia=!!lbHabActivo(id) || lbEstado(id)==="pausa";
+    lbTermina(id); render();
+    var n=lbLeidos().length;
+    avisoNube(leia ? "¡Libro terminado! Ya "+(n===1?"llevas uno":"van "+n)+"." : "Apuntado como leído.");
+    if(leia && lbSt().enc && lbSt().enc.r) lbSheetResultado(true); else lbSheetLibro(id);
+    if(leia) lbFiesta(); return true;
+  }
+  if(a==="x-lb-siguiente"){ if(lbSt().enc && lbSt().enc.r) lbSheetResultado(true); else { lbEncPaso=0; lbEncR={}; lbSheetEnc(); } return true; }
+  if(a==="x-lb-apunta"){ var hx=lbHabActivo(id); if(hx) abrirCantidad(hx.id, today()); return true; }
+  if(a==="x-lb-total"){
+    var v=parseInt((document.getElementById("lb-tot")||{}).value, 10);
+    if(!(v>=20 && v<=3000)){ avisoNube("Pon un número de páginas entre 20 y 3000."); return true; }
+    var s=lbEst(id); if(s){ s.total=v; save(); render(); lbSheetLibro(id); avisoNube("Guardado: "+v+" páginas."); }
+    return true;
+  }
+  if(a==="x-lb-enc"){ lbEncPaso=0; lbEncR={}; sonido("tick"); lbSheetEnc(); return true; }
+  if(a==="x-lb-atras"){ lbEncPaso=Math.max(0, lbEncPaso-1); lbSheetEnc(); return true; }
+  if(a==="x-lb-resp"){
+    var Q=LB_ENC[lbEncPaso]; lbEncR[Q.k]=el.dataset.v; sonido("tick");
+    document.querySelectorAll("#sheet .lb-op").forEach(function(b){ b.classList.toggle("on", b===el); });
+    setTimeout(function(){
+      if(lbEncPaso<LB_ENC.length-1){ lbEncPaso++; lbSheetEnc(); return; }
+      var r=lbEncR, rk=lbRanking(r);
+      lbSt().enc={ r:r, top:rk.slice(0,3).map(function(x){ return x.b.id; }), f:today() };
+      save(); render(); lbSheetResultado(false); sonido("pop"); lbFiesta();
+    }, 260);
+    return true;
+  }
+  return false;
+}
+function lecturaTrasRender(){ if(view==="resumen") lbPinta(); }
+
+var LECTURA_CSS=[
+/* portadas */
+'.lb-port{ position:relative; display:block; flex:0 0 auto; container-type:inline-size; aspect-ratio:2/3; border-radius:2px 6px 6px 2px; overflow:hidden; background:var(--f); color:var(--t);',
+'  box-shadow:0 1px 1.5px rgba(0,0,0,.18), 0 8px 18px -8px rgba(0,0,0,.45); text-align:left; }',
+'.lb-port::before{ content:""; position:absolute; inset:0 auto 0 0; width:7%; z-index:3; background:linear-gradient(90deg, rgba(0,0,0,.28), rgba(255,255,255,.14) 70%, rgba(0,0,0,.06)); }',
+'.lb-port::after{ content:""; position:absolute; inset:0; z-index:3; background:linear-gradient(125deg, rgba(255,255,255,.16), transparent 38%); pointer-events:none; }',
+'.lb-port.s{ width:40px; border-radius:2px 4px 4px 2px; } .lb-port.m{ width:64px; } .lb-port.l{ width:104px; } .lb-port.xl{ width:148px; border-radius:3px 9px 9px 3px; }',
+'.lb-deco{ position:absolute; z-index:1; }',
+'.lb-in{ position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; gap:5cqw; padding:12cqw 10cqw 11cqw 16cqw; }',
+'.lb-p-a{ font-size:7cqw; font-weight:700; letter-spacing:.1em; text-transform:uppercase; line-height:1.15; opacity:.85; }',
+'.lb-p-t{ font-family:Georgia,"Iowan Old Style","Times New Roman",serif; font-size:13cqw; font-weight:700; line-height:1.04; letter-spacing:-.01em;',
+'  display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:6; overflow:hidden; overflow-wrap:break-word; hyphens:auto; }',
+'.lb-ini{ display:none; position:absolute; z-index:2; inset:0; place-items:center; padding-left:8%; font-family:Georgia,"Times New Roman",serif; font-size:52cqw; font-weight:700; }',
+'.lb-port.s .lb-in{ display:none; } .lb-port.s .lb-ini{ display:grid; }',
+/* variantes: banda, círculo, franjas, marco */
+'.lb-port.v0 .lb-deco{ left:0; right:0; bottom:0; height:30%; background:var(--x); }',
+'.lb-port.v0 .lb-p-t{ margin-top:auto; margin-bottom:36cqw; }',
+'.lb-port.v1 .lb-deco{ width:95%; aspect-ratio:1; border-radius:50%; right:-30%; bottom:-14%; background:var(--x); opacity:.95; }',
+'.lb-port.v1 .lb-in{ flex-direction:column-reverse; justify-content:flex-end; }',
+'.lb-port.v2 .lb-deco{ left:0; right:0; top:0; height:26%; background:repeating-linear-gradient(-45deg, var(--x) 0 5cqw, transparent 5cqw 10cqw); opacity:.9; }',
+'.lb-port.v2 .lb-in{ padding-top:36cqw; }',
+'.lb-port.v3 .lb-deco{ inset:6cqw 6cqw 6cqw 11cqw; border:1.5cqw solid var(--x); border-radius:1cqw; }',
+'.lb-port.v3 .lb-in{ padding:18cqw 14cqw 14cqw 20cqw; justify-content:center; text-align:center; align-items:center; }',
+'.lb-port.v3 .lb-p-t{ text-align:center; }',
+'.lb-port.s.v1 .lb-ini, .lb-port.s.v0 .lb-ini{ place-items:start center; padding-top:14%; }',
+/* bloque en Hábitos */
+'.lb-hab{ margin-top:20px; }',
+'.lb-cab{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }',
+'.lb-cab .eyebrow{ display:flex; align-items:center; gap:6px; } .lb-cab .eyebrow .ic{ width:14px; height:14px; }',
+'.lb-cab button{ font-size:12.5px; font-weight:600; color:var(--accent); }',
+'.lb-now{ display:flex; gap:14px; align-items:flex-start; padding:14px; border-radius:20px; background:var(--fill); }',
+'.lb-now-port{ flex:0 0 auto; transition:transform .25s var(--spring); } .lb-now-port:active{ transform:scale(.95) rotate(-2deg); }',
+'.lb-now-t{ flex:1; min-width:0; }',
+'.lb-now-tit{ display:block; text-align:left; width:100%; } .lb-now-tit b{ display:block; font-size:14.5px; font-weight:700; line-height:1.25; } .lb-now-tit small{ display:block; font-size:12px; color:var(--t3); margin-top:1px; }',
+'.lb-barra{ height:6px; border-radius:99px; overflow:hidden; background:var(--fill-hi); margin-top:10px; }',
+'.lb-barra i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--accent),var(--violet)); transition:width .6s var(--ease); }',
+'.lb-now-p{ font-size:12px; color:var(--t3); margin-top:6px; } .lb-now-p b{ color:var(--t1); font-weight:700; }',
+'.lb-now-s{ font-size:12px; color:var(--t2); margin-top:2px; line-height:1.4; }',
+'.lb-pill{ display:inline-flex; align-items:center; gap:6px; margin-top:10px; font-size:12.5px; font-weight:700; color:var(--accent); padding:7px 12px; border-radius:99px; background:var(--accent-soft); transition:transform .2s var(--spring); }',
+'.lb-pill:active{ transform:scale(.96); }',
+'.lb-pill-on{ background:var(--accent); color:var(--on-accent); }',
+'.lb-pill-ok{ background:var(--good); color:#fff; }',
+'.lb-now.fin{ background:color-mix(in srgb,var(--good) 12%,transparent); }',
+'.lb-desc{ display:flex; gap:16px; align-items:center; padding:16px; border-radius:20px;',
+'  background:linear-gradient(135deg, color-mix(in srgb,var(--accent) 11%,transparent), color-mix(in srgb,var(--violet) 8%,transparent));',
+'  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 16%,transparent); }',
+'.lb-pila{ position:relative; flex:0 0 auto; width:92px; height:100px; }',
+'.lb-pila .lb-port{ position:absolute; bottom:0; transition:transform .35s var(--spring); }',
+'.lb-pila .lb-port:nth-child(1){ left:0; transform:rotate(-9deg); } .lb-pila .lb-port:nth-child(2){ left:14px; transform:rotate(-2deg); } .lb-pila .lb-port:nth-child(3){ left:28px; transform:rotate(6deg); }',
+'.lb-pila .lb-port:only-child{ left:14px; }',
+'.lb-pila:active .lb-port:nth-child(3){ transform:rotate(2deg) translateY(-4px); }',
+'.lb-desc-t{ flex:1; min-width:0; } .lb-desc-t small{ display:block; font-size:10.5px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }',
+'.lb-desc-t > b, .lb-desc-tit b{ display:block; font-size:15px; font-weight:800; line-height:1.25; margin-top:3px; letter-spacing:-.01em; } .lb-desc-tit{ text-align:left; }',
+'.lb-desc-t p{ font-size:12.5px; color:var(--t2); margin-top:3px; line-height:1.4; }',
+'.lb-desc-bt{ display:flex; flex-wrap:wrap; gap:6px; } .lb-desc-bt .lb-pill{ margin-top:10px; }',
+/* hojas */
+'.lb-enc-ban{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:12px 14px; border-radius:16px; margin-bottom:14px;',
+'  background:linear-gradient(135deg, color-mix(in srgb,var(--accent) 14%,transparent), color-mix(in srgb,var(--violet) 10%,transparent)); }',
+'.lb-enc-ban > span:nth-child(2){ flex:1; min-width:0; } .lb-enc-ban b{ display:block; font-size:14px; font-weight:700; } .lb-enc-ban small{ display:block; font-size:12px; color:var(--t2); margin-top:1px; }',
+'.lb-enc-ico{ display:grid; place-items:center; width:36px; height:36px; border-radius:12px; background:var(--accent); font-size:17px; flex:0 0 auto; }',
+'.lb-enc-ban .ic{ width:16px; height:16px; color:var(--t3); }',
+'.lb-chips{ display:flex; gap:6px; overflow-x:auto; margin:0 -24px 6px; padding:2px 24px; scrollbar-width:none; } .lb-chips::-webkit-scrollbar{ display:none; }',
+'.lb-chips button{ flex:0 0 auto; font-size:12.5px; font-weight:700; padding:7px 12px; border-radius:99px; background:var(--fill); color:var(--t2); transition:background .2s var(--ease), color .2s var(--ease); }',
+'.lb-chips button.on{ background:var(--c); color:#fff; }',
+'.lb-sec{ font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--t3); margin:18px 0 6px; }',
+'.lb-lista{ display:flex; flex-direction:column; }',
+'.lb-fila{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:10px 0; box-shadow:inset 0 -1px 0 var(--hairline-2); }',
+'.lb-fila .lb-port.s{ width:42px; }',
+'.lb-fila-t{ flex:1; min-width:0; } .lb-fila-t b{ display:block; font-size:14px; font-weight:700; line-height:1.28; } .lb-fila-t small{ display:block; font-size:11.5px; color:var(--t3); margin-top:1px; }',
+'.lb-fila-t > span{ display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; font-size:12.5px; color:var(--t2); margin-top:3px; line-height:1.38; }',
+'.lb-fila-d{ flex:0 0 auto; display:flex; flex-direction:column; align-items:flex-end; gap:4px; }',
+'.lb-fila-d em{ font-style:normal; font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:99px; background:var(--fill-hi); color:var(--t2); }',
+'.lb-fila-d em.on{ background:var(--accent-soft); color:var(--accent); } .lb-fila-d em.ok{ background:color-mix(in srgb,var(--good) 16%,transparent); color:var(--good); }',
+'.lb-match{ font-style:normal; font-size:12px; font-weight:800; color:var(--accent); } .lb-fecha{ font-style:normal; font-size:11px; color:var(--t3); }',
+'.lb-vacio{ font-size:13px; color:var(--t3); text-align:center; padding:28px 12px; line-height:1.45; }',
+'.lb-nota{ font-size:11.5px; color:var(--t3); margin-top:14px; line-height:1.4; }',
+'.lb-ficha{ display:flex; gap:16px; align-items:flex-end; }',
+'.lb-ficha-t{ flex:1; min-width:0; padding-bottom:2px; } .lb-ficha-t h3{ font-size:21px; font-weight:800; line-height:1.15; letter-spacing:-.02em; margin-top:8px; }',
+'.lb-ficha-t p{ font-size:13.5px; color:var(--t2); margin-top:4px; } .lb-ficha-t small{ display:block; font-size:12px; color:var(--t3); margin-top:6px; line-height:1.35; }',
+'.lb-tema{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:99px; color:color-mix(in srgb,var(--c) 72%,var(--t1)); background:color-mix(in srgb,var(--c) 14%,transparent); }',
+'.lb-desc-l{ font-size:14px; color:var(--t1); line-height:1.5; margin-top:16px; }',
+'.lb-ideas{ display:flex; flex-direction:column; gap:8px; counter-reset:lb; }',
+'.lb-ideas li{ position:relative; padding-left:28px; font-size:13.5px; color:var(--t2); line-height:1.42; counter-increment:lb; }',
+'.lb-ideas li::before{ content:counter(lb); position:absolute; left:0; top:0; width:19px; height:19px; display:grid; place-items:center; border-radius:99px; font-size:10.5px; font-weight:800; background:var(--accent-soft); color:var(--accent); }',
+'.lb-est{ font-size:12.5px; color:var(--t2); margin-top:10px; line-height:1.4; }',
+'.lb-dos{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px; }',
+'.lb-link{ display:flex; align-items:center; justify-content:center; gap:4px; width:100%; margin-top:14px; font-size:12.5px; font-weight:600; color:var(--t3); }',
+'.lb-link .ic{ width:13px; height:13px; }',
+'.lb-prog{ margin-top:18px; padding:14px; border-radius:16px; background:var(--fill); }',
+'.lb-prog b{ font-size:22px; font-weight:800; } .lb-prog b span{ font-size:13px; font-weight:600; color:var(--t3); } .lb-prog em{ font-style:normal; font-size:13px; font-weight:700; color:var(--accent); }',
+'.lb-prog p{ font-size:12.5px; color:var(--t2); margin-top:8px; }',
+'.lb-edicion{ display:flex; align-items:center; gap:8px; margin-top:12px; font-size:12.5px; color:var(--t2); } .lb-edicion input{ width:78px; padding:8px; }',
+'.lb-leido{ display:flex; align-items:center; gap:10px; margin-top:18px; padding:12px 14px; border-radius:14px; font-size:13.5px; font-weight:600; color:var(--good); background:color-mix(in srgb,var(--good) 12%,transparent); }',
+'.lb-leido svg{ width:18px; height:18px; flex:0 0 auto; }',
+/* encuesta */
+'.lb-volver{ display:flex; align-items:center; gap:2px; font-size:13px; font-weight:600; color:var(--accent); } .lb-volver .ic{ width:15px; height:15px; transform:rotate(180deg); }',
+'.lb-atras .ic{ transform:rotate(180deg); width:16px; height:16px; }',
+'.lb-pasos{ display:flex; gap:5px; } .lb-pasos i{ flex:1; height:4px; border-radius:99px; background:var(--fill-hi); transition:background .3s var(--ease); }',
+'.lb-pasos i.ya, .lb-pasos i.on{ background:var(--accent); } .lb-pasos i.on{ opacity:.55; }',
+'.lb-enc-n{ font-size:12px; font-weight:600; color:var(--t3); margin-top:16px; }',
+'.lb-enc-q{ font-size:22px; font-weight:800; line-height:1.2; letter-spacing:-.02em; margin:4px 0 16px; }',
+'.lb-ops{ display:flex; flex-direction:column; gap:8px; }',
+'.lb-op{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:12px 14px; border-radius:16px; font-size:14.5px; font-weight:600; background:var(--fill);',
+'  box-shadow:inset 0 0 0 1.5px transparent; transition:background .2s var(--ease), box-shadow .2s var(--ease), transform .2s var(--spring); animation:lbEntra .35s var(--ease) both; }',
+'.lb-op:nth-child(2){ animation-delay:.03s } .lb-op:nth-child(3){ animation-delay:.06s } .lb-op:nth-child(4){ animation-delay:.09s } .lb-op:nth-child(5){ animation-delay:.12s } .lb-op:nth-child(6){ animation-delay:.15s } .lb-op:nth-child(7){ animation-delay:.18s }',
+'.lb-op:active{ transform:scale(.98); }',
+'.lb-op > span:nth-child(2){ flex:1; }',
+'.lb-op-e{ display:grid; place-items:center; width:36px; height:36px; border-radius:12px; font-size:18px; background:var(--glass-bg-hi); flex:0 0 auto; }',
+'.lb-op i{ display:grid; place-items:center; width:22px; height:22px; border-radius:99px; color:transparent; box-shadow:inset 0 0 0 1.5px var(--hairline-2); flex:0 0 auto; }',
+'.lb-op i svg{ width:12px; height:12px; }',
+'.lb-op.on{ background:var(--accent-soft); box-shadow:inset 0 0 0 1.5px var(--accent); } .lb-op.on i{ background:var(--accent); color:var(--on-accent); box-shadow:none; }',
+'@keyframes lbEntra{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }',
+'.lb-res{ display:flex; flex-direction:column; align-items:center; text-align:center; padding-top:4px; }',
+'.lb-res-port{ position:relative; margin-bottom:16px; animation:lbSale .6s var(--spring) both; }',
+'.lb-res-port .lb-port{ box-shadow:0 2px 3px rgba(0,0,0,.2), 0 22px 40px -14px rgba(0,0,0,.55); }',
+'.lb-res-match{ position:absolute; right:-14px; top:-10px; z-index:4; font-size:13px; font-weight:800; padding:6px 10px; border-radius:99px; background:var(--accent); color:var(--on-accent); box-shadow:0 6px 16px -6px var(--accent); }',
+'.lb-res h3{ font-size:23px; font-weight:800; line-height:1.15; letter-spacing:-.02em; margin-top:10px; } .lb-res p{ font-size:13.5px; color:var(--t2); margin-top:4px; }',
+'@keyframes lbSale{ from{ opacity:0; transform:translateY(16px) rotate(-4deg) scale(.92); } to{ opacity:1; transform:none; } }',
+'.lb-porque{ display:flex; flex-direction:column; gap:8px; }',
+'.lb-porque li{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; color:var(--t2); line-height:1.4; }',
+'.lb-porque svg{ width:16px; height:16px; flex:0 0 auto; color:var(--good); margin-top:1px; }',
+/* fila en el editor de hábitos */
+'.lb-ed{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; margin:-12px 0 22px; padding:12px 14px; border-radius:16px; background:var(--fill); }',
+'.lb-ed-p{ display:flex; } .lb-ed-p .lb-port.s{ width:30px; } .lb-ed-p .lb-port + .lb-port{ margin-left:-10px; transform:rotate(5deg); }',
+'.lb-ed-t{ flex:1; min-width:0; } .lb-ed-t b{ display:block; font-size:13.5px; font-weight:700; } .lb-ed-t small{ display:block; font-size:12px; color:var(--t3); margin-top:1px; }',
+'.lb-ed .ic{ width:16px; height:16px; color:var(--t3); }',
+'@media (prefers-reduced-motion: reduce){ .lb-op, .lb-res-port{ animation:none; } }'
+].join("\n");
+(function(){ var st=document.createElement("style"); st.id="lectura-css"; st.textContent=LECTURA_CSS; document.head.appendChild(st); })();
 
 
 if(!load()) save();
