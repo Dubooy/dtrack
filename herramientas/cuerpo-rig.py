@@ -41,6 +41,13 @@ bpy.ops.object.mode_set(mode='OBJECT')
 bpy.ops.object.select_all(action='DESELECT')
 o.select_set(True); arm.select_set(True); bpy.context.view_layer.objects.active=arm
 bpy.ops.object.parent_set(type='ARMATURE_AUTO')
+# pesos más suaves en hombros y caderas, y como mucho 4 huesos por vértice (lo que usa el visor)
+bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); bpy.context.view_layer.objects.active=o
+bpy.ops.object.mode_set(mode='WEIGHT_PAINT')
+bpy.ops.object.vertex_group_smooth(group_select_mode='ALL', factor=0.5, repeat=4, expand=0.0)
+bpy.ops.object.vertex_group_limit_total(group_select_mode='ALL', limit=4)
+bpy.ops.object.vertex_group_normalize_all(group_select_mode='ALL', lock_active=False)
+bpy.ops.object.mode_set(mode='OBJECT')
 print("vgroups", len(o.vertex_groups), [g.name for g in o.vertex_groups])
 # vértices sin peso
 sin=[v.index for v in o.data.vertices if not any(g.weight>0.01 for g in v.groups)]
