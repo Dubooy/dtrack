@@ -18638,12 +18638,14 @@ var MQ_FIG={
   torsion:{ cam:150, el:55, A:mqCon(MQ_SUPINO,{ aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,4,0,90] }), B:mqCon(MQ_SUPINO,{ rr:80, ty:-80, hy:-40, aL:[0,88,0,0], aR:[0,88,0,0], pR:[90,-25,0,90] }) },
   /* 3. cadera */
   paloma:{ cam:60, el:18, ancla:"manoL+manoR", A:mqCon(MQ_CUATRO,{ ikp:{ R:{ rod:[0,1], tob:[0,-1] }, L:{ rod:[0,-1], tob:[0,-1] } } }), B:mq({ rx:55, tx:-50, hx:-10, alto:.15, aL:[12,12,4,0], aR:[22,19,35,0], pL:[-32,5,0,5], pR:[115,35,15,85,90], fL:-110, fR:6, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } }, ikp:{ R:{ rod:[-1.6,1], tob:[1,-.45] }, L:{ rod:[0,-1], tob:[0,-1] } } }) },
-  gluteo:{ cam:74, A:mqCon(MQ_SUPINO,{ pL:[62,6,0,105], pR:[62,6,0,105] }), B:mqCon(MQ_SUPINO,{ pL:[100,4,0,95], pR:[95,30,40,95], aL:[70,10,0,40], aR:[70,10,0,40],
-                     ik:{ L:{ h:"piernaL", o:[.07,.1,-.06] }, R:{ h:"piernaL", o:[-.07,.1,-.06] } } }) },
-  mariposa:{ cam:20, el:18, A:mq({ rx:-10, tx:15, pL:[100,60,0,130,55], pR:[100,60,0,130,55], aL:[55,8,0,25], aR:[55,8,0,25], ik:MQ_PIES }), B:mq({ rx:-10, tx:45, hx:10, pL:[100,66,0,130,55], pR:[100,66,0,130,55], aL:[65,8,0,20], aR:[65,8,0,20], ik:MQ_PIES }) },
-  flexor:{ cam:84, A:mqCon(MQ_CABALLERO,{ aL:[18,18,0,70], aR:[18,18,0,70] }), B:mqCon(MQ_CABALLERO,{ pR:[100,5,0,110], pL:[-20,5,0,60], fR:15, tx:-8, aL:[18,18,0,70], aR:[18,18,0,70] }) },
-  cosaco:{ cam:0, A:mq({ pL:[0,30,0,0], pR:[0,-30,0,0], aL:[30,8,0,10], aR:[30,8,0,10] }), B:mq({ rz:10, tx:30, pL:[40,50,0,0], pR:[90,-10,30,130], fL:40, aL:[70,8,0,40], aR:[70,8,0,40] }) },
-  rana:{ cam:40, el:30, A:mqCon(MQ_CUATRO,{}), B:mqCon(MQ_CUATRO,{ tx:-20, hx:-10, pL:[0,75,0,90,90], pR:[0,75,0,90,90], fL:0, fR:0, aL:[75,10,0,90], aR:[75,10,0,90] }) },
+  gluteo:{ cam:-60, el:25, tc:.45, fases:{ rx:[.3,.7], tx:[.3,.7], hx:[.3,.7], aR:[.1,.5], aL:[.1,.5], dL:[.1,.5], dR:[.1,.5], ik:[.35,1] }, A:mqCon(MQ_SUPINO,{ rx:-81, tx:2, hx:-50, aL:[5,10,0,5], aR:[5,10,0,5], pL:[55,6,0,85], pR:[55,6,0,85], fL:-48, fR:-48 }),
+  C:mqCon(MQ_SUPINO,{ rx:-81, tx:2, hx:-50, aL:[5,10,0,5], aR:[5,10,0,5], pL:[55,6,0,85], pR:[80,45,0,90,50], fL:-48, fR:10, ikp:{ R:{ h:"musloL", o:[-.02,-.30,.10] } } }),
+  B:mqCon(MQ_SUPINO,{ rx:-73.5, tx:8, hx:-38, aL:[68,23,0,70], aR:[100,33,-5,81], dL:40, dR:40, pL:[110,6,0,90], pR:[113,30,0,90,80], fL:0, fR:10, ikp:{ R:{ h:"musloL", o:[-.02,-.30,.10] } }, ik:{ L:{ h:"musloL", o:[.07,-.18,-.11] }, R:{ h:"musloL", o:[-.15,-.30,-.04] } } }) },
+  mariposa:{ cam:20, el:18, ancla:"pieL+pieR", A:mq({ rx:-9, tx:22, pL:[113,48,8,106,55], pR:[113,48,8,106,55], fL:-10, fR:-10, aL:[55,15,0,25], aR:[55,15,0,25], ik:MQ_PIES }), B:mq({ rx:-9, tx:45, hx:-8, pL:[113,48,8,106,55], pR:[113,48,8,106,55], fL:-10, fR:-10, aL:[55,3,-35,70], aR:[55,3,-35,70], ik:MQ_PIES }) },
+  flexor:{ cam:84, ancla:"piernaL", anclaRod:1, A:mqCon(MQ_CABALLERO,{ alto:.4, tx:2, pR:[90,5,0,90], pL:[0,5,0,90], fL:-60, fR:0, aL:[10,25,0,80], aR:[10,25,0,80], ik:{ L:{ h:"cadera", o:[.17,.10,.02] }, R:{ h:"cadera", o:[-.17,.10,.02] } }, ikp:{ L:{ rod:[0,-1], tob:[0,-1] }, R:{ h:"cadera", o:[-.1,-.31,.32] } } }), B:mqCon(MQ_CABALLERO,{ alto:.36, rx:-4, tx:-2, pR:[80,5,0,105], pL:[-15,5,0,90], fL:-60, fR:15, aL:[10,25,0,80], aR:[10,25,0,80], ik:{ L:{ h:"cadera", o:[.17,.10,.02] }, R:{ h:"cadera", o:[-.17,.10,.02] } }, ikp:{ L:{ rod:[0,-1], tob:[0,-1] }, R:{ fijo:1 } } }) },
+  cosaco:{ cam:0, ancla:"pieL+pieR", A:mq({ pL:[0,30,0,0,15], pR:[0,30,0,0,15], aL:[30,12,0,10], aR:[30,12,0,10], ikp:{ L:{ fijo:1 }, R:{ fijo:1 } } }), B:mq({ alto:.44, tx:12, rx:8, hx:-18, pL:[10,62,0,0,66], pR:[97,32,24,130,9], fL:30, fR:0, aL:[80,8,0,20], aR:[80,8,0,20], ikp:{ L:{ fijo:1 }, R:{ fijo:1 } } }) },
+  rana:{ cam:120, el:30, ancla:"piernaL+piernaR", anclaRod:1, A:mq({ rx:84, tx:-1, hx:-10, alto:.21, aL:[84,3,0,81], aR:[84,3,0,81], fL:-10, fR:-10, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } }, ikp:{ L:{ rod:[1,0], tob:[0,-1] }, R:{ rod:[-1,0], tob:[0,-1] } } }),
+  B:mq({ rx:82, hx:-10, alto:.18, aL:[107,3,0,80], aR:[107,3,0,80], fL:-10, fR:-10, ik:{ L:{ s:1, fijo:1 }, R:{ s:1, fijo:1 } }, ikp:{ L:{ rod:[1,.37], tob:[0,-1] }, R:{ rod:[-1,.37], tob:[0,-1] } } }) },
   /* 4. muslos */
   cuadriceps:{ cam:84, A:mq({ aL:[55,6,0,10] }), B:mq({ aL:[70,6,0,10], pR:[-8,3,0,150], aR:[-42,10,0,32], ik:{ R:{ h:"pieR", o:[-.04,.03,.06] } } }) },
   sofa:{ cam:84, pared:{ h:"piernaL", eje:"z", d:-.08 }, A:mqCon(MQ_CABALLERO,{ pL:[0,5,0,175], fL:-10, tx:35, aL:[70,8,0,10], aR:[70,8,0,10] }), B:mqCon(MQ_CABALLERO,{ pR:[100,5,0,90], pL:[0,5,0,175], fL:-10, tx:-4, aL:[20,8,0,40], aR:[20,8,0,40] }) },
@@ -18772,7 +18774,8 @@ function mqMezcla(A, B, t, fases, C, tc, arco){
       if(x && y && x.rod && y.rod){ o.rod=[x.rod[0]+(y.rod[0]-x.rod[0])*tp, x.rod[1]+(y.rod[1]-x.rod[1])*tp]; o.rk=(x.rk||.03)+((y.rk||.03)-(x.rk||.03))*tp;
         if(x.tob && y.tob) o.tob=x.tob.map(function(v,i){ return v+((y.tob[i]||0)-v)*tp; }); }
       if(x && y && x.h && y.h && x.h===y.h && x.o && y.o) o.o=x.o.map(function(v,i){ return v+(y.o[i]-v)*tp; });
-      o.fijo=x && y ? (x.fijo && y.fijo) : c.fijo;
+      /* A con el pie en un punto (h) y B con fijo: ese punto es justo donde se queda fijo */
+      o.fijo=x && y ? ((x.fijo || (x.h && !x.rod)) && y.fijo) : c.fijo;
       o.w=wx*(1-tp)+wy*tp; r.ikp[l]=o; }); }
   return r;
 }
@@ -19167,10 +19170,14 @@ function mqPon(M, P, T){
   /* ancla: lo que se queda quieto en el suelo (los pies, las rodillas…) no resbala: el cuerpo entero
      se desplaza para que siga donde lo dejó la postura A */
   var an=M.anclas && M.anclas[P.tramo||0];
-  if(an && an.en){ var ac=mqAncla(T, M, an.h), dx=an.en.x-ac.x, dz=an.en.z-ac.z;
+  function ancla(){ var ac=mqAncla(T, M, an.h), dx=an.en.x-ac.x, dz=an.en.z-ac.z;
     M.raiz.position.x+=dx; M.raiz.position.z+=dz; M.raiz.updateMatrixWorld(true); M.caja.translate(new T.Vector3(dx,0,dz)); }
+  /* con anclaRod, lo que no resbala es una rodilla apoyada (rod): el cuerpo se desplaza después de apoyarla */
+  var tras=an && an.en && M.anclaRod && P.ikp;
+  if(an && an.en && !tras) ancla();
   if(P.ikp){ mqBajaHastaPies(T, M, P);
-    ["L","R"].forEach(function(l){ var c=P.ikp[l]; if(c) mqPierna(T, M, l, c, c.w==null?1:c.w); });
+    ["L","R"].forEach(function(l){ var c=P.ikp[l]; if(c && (!tras || c.rod)) mqPierna(T, M, l, c, c.w==null?1:c.w); });
+    if(tras){ ancla(); ["L","R"].forEach(function(l){ var c=P.ikp[l]; if(c && !c.rod) mqPierna(T, M, l, c, c.w==null?1:c.w); }); }
     if(!apoyos.length) mqSuelo(T, M, false); }
   if(apoyos.length){
     apoyos.forEach(function(x){ var d=mqApoyo(T, M, x[0], x[1]), w=x[1].w==null?1:x[1].w; if(!d) return; mqIK(T, M, x[0], d, w);
@@ -19257,12 +19264,12 @@ function mqEscena(T, k, color){
     /* si B (o C) dice a qué altura va la cadera, A (y C) también, para mezclarla: la que tienen solas */
     function alto(P){ if(P.alto==null){ M.fijo=null; M.fijoP=null; M.anclas=null; mqPon(M, P, T); P.alto=M.hueso.cadera.getWorldPosition(new T.Vector3()).y; } }
     if(F.B.alto!=null || (F.C && F.C.alto!=null)){ alto(F.A); if(F.C) alto(F.C); }
-    M.fijo=null; M.fijoP=null; M.anclas=null; mqPon(M, F.A, T); tot.copy(M.caja);
+    M.fijo=null; M.fijoP=null; M.anclas=null; M.anclaRod=!!F.anclaRod; mqPon(M, F.A, T); tot.copy(M.caja);
     if(an){ M.anclas=[{ h:an[0], en:mqAncla(T, M, an[0]) }, { h:an[1], en:null }];
       if(F.C) mqPon(M, F.C, T); M.anclas[1].en=mqAncla(T, M, an[1]); mqPon(M, F.A, T); }
     /* las manos que se quedan quietas (fijo): donde las deja la postura A */
     function fija(){ M.fijo={}; M.fijoP={}; ["L","R"].forEach(function(l){ var c=F.A.ik && F.A.ik[l]; if(c && c.fijo) M.fijo[l]=M.hueso["mano"+l].getWorldPosition(new T.Vector3());
-      var e=F.A.ikp && F.A.ikp[l]; if(e && e.fijo) M.fijoP[l]={ p:M.hueso["pie"+l].getWorldPosition(new T.Vector3()), q:M.hueso["pie"+l].getWorldQuaternion(new T.Quaternion()) }; }); }
+      var e=F.A.ikp && F.A.ikp[l], eb=F.B.ikp && F.B.ikp[l]; if((e && e.fijo) || (eb && eb.fijo)) M.fijoP[l]={ p:M.hueso["pie"+l].getWorldPosition(new T.Vector3()), q:M.hueso["pie"+l].getWorldQuaternion(new T.Quaternion()) }; }); }
     fija(); mqPon(M, F.B, T); tot.union(M.caja);
     if(F.pared){ var W=F.pared===true ? { h:"manoL", eje:"z", d:.035 } : F.pared, pm=M.hueso[W.h].getWorldPosition(new T.Vector3());
       var lado=W.d<0?-1:1, v=pm[W.eje]+W.d, cenW=M.caja.getCenter(new T.Vector3());
