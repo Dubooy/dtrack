@@ -14012,6 +14012,194 @@ sheetSettings=function(){
   tu.appendChild(b);
 };
 
+/* ════════════ Google Calendar: los eventos de hoy en Hoy ════════════
+   Todo va desde el navegador, sin servidor propio: Google Identity Services
+   da un permiso de una hora y con él se leen los eventos del calendario
+   principal. El permiso y la preferencia viven solo en este móvil
+   (localStorage), nunca en la copia ni en la nube.
+   Para que funcione hay que poner el ID de cliente OAuth de Google Cloud
+   (tipo "Aplicación web") en GCAL_CLIENT_ID. */
+var GCAL_CLIENT_ID="";
+var GCAL_LEER="https://www.googleapis.com/auth/calendar.events.readonly";
+var GCAL_ESCRIBIR="https://www.googleapis.com/auth/calendar.events";
+var GCAL_KEY="dtrack-gcal";
+var gcalCli=null, gcalCb=null, gcalEventos=null, gcalDia=null, gcalCargando=false;
+function gcalEstado(){ try{ return JSON.parse(localStorage.getItem(GCAL_KEY)||"null")||{}; }catch(e){ return {}; } }
+function gcalGuarda(o){ try{ localStorage.setItem(GCAL_KEY, JSON.stringify(o)); }catch(e){} }
+function gcalConectado(){ return !!gcalEstado().on; }
+function gcalTokenVale(){ var g=gcalEstado(); return !!(g.tok && g.exp && g.exp>Date.now()+60000); }
+function gcalScript(fn){
+  if(window.google && google.accounts && google.accounts.oauth2){ fn(); return; }
+  var s=document.getElementById("gsi-js");
+  if(!s){ s=document.createElement("script"); s.id="gsi-js"; s.src="https://accounts.google.com/gsi/client"; s.async=true; document.head.appendChild(s); }
+  s.addEventListener("load", function(){ fn(); });
+  s.addEventListener("error", function(){ avisoNube("No se pudo abrir Google. Mira la conexión."); });
+}
+/* pide el permiso; tiene que salir de un toque, o el navegador bloquea la ventana */
+function gcalPide(escribir, luego){
+  if(!GCAL_CLIENT_ID){ avisoNube("Google Calendar aún no está configurado en esta versión."); return; }
+  gcalScript(function(){
+    var g=gcalEstado();
+    gcalCb=luego||null;
+    gcalCli=google.accounts.oauth2.initTokenClient({
+      client_id:GCAL_CLIENT_ID,
+      scope: escribir ? GCAL_ESCRIBIR : GCAL_LEER,
+      include_granted_scopes:true,
+      callback:function(r){
+        if(!r || r.error || !r.access_token){ if(r && r.error!=="access_denied") avisoNube("Google no dio permiso. Prueba otra vez."); return; }
+        var g2=gcalEstado();
+        g2.on=true; g2.tok=r.access_token; g2.exp=Date.now()+((+r.expires_in||3600)*1000);
+        g2.escribir=google.accounts.oauth2.hasGrantedAnyScope(r, GCAL_ESCRIBIR) ? !!g2.escribir || !!escribir : false;
+        gcalGuarda(g2); gcalEventos=null; gcalDia=null;
+        var cb=gcalCb; gcalCb=null; if(cb) cb();
+        gcalRepinta();
+      }
+    });
+    gcalCli.requestAccessToken({ prompt: g.on ? "" : "consent", hint: g.email||undefined });
+  });
+}
+function gcalApi(ruta, opt){
+  var g=gcalEstado(); opt=opt||{};
+  return fetch("https://www.googleapis.com/calendar/v3/"+ruta, {
+    method:opt.method||"GET",
+    headers: Object.assign({ "Authorization":"Bearer "+g.tok }, opt.body?{ "Content-Type":"application/json" }:{}),
+    body: opt.body?JSON.stringify(opt.body):undefined
+  }).then(function(res){
+    if(res.status===401){ var g2=gcalEstado(); g2.tok=null; g2.exp=0; gcalGuarda(g2); throw new Error("caducado"); }
+    if(!res.ok) throw new Error("http "+res.status);
+    return res.json();
+  });
+}
+function gcalCarga(){
+  var t=today();
+  if(gcalCargando || !gcalConectado() || !gcalTokenVale()) return;
+  if(gcalDia===t && gcalEventos) return;
+  gcalCargando=true;
+  var ini=new Date(); ini.setHours(0,0,0,0); var fin=new Date(ini); fin.setDate(fin.getDate()+1);
+  gcalApi("calendars/primary/events?singleEvents=true&orderBy=startTime&maxResults=20&timeMin="+encodeURIComponent(ini.toISOString())+"&timeMax="+encodeURIComponent(fin.toISOString()))
+    .then(function(j){
+      gcalEventos=(j.items||[]).filter(function(e){ return e.status!=="cancelled"; }).sort(function(a,b){ return (a.start&&a.start.dateTime?1:0)-(b.start&&b.start.dateTime?1:0); });
+      gcalDia=t;
+      if(j.summary && /@/.test(j.summary)){ var g=gcalEstado(); g.email=j.summary; gcalGuarda(g); }
+    })
+    .catch(function(){ gcalEventos=null; })
+    .then(function(){ gcalCargando=false; gcalPintaHoy(); });
+}
+function gcalHora(e){
+  if(!e.start || !e.start.dateTime) return "Todo el día";
+  var d=new Date(e.start.dateTime); return (d.getHours()<10?"0":"")+d.getHours()+":"+(d.getMinutes()<10?"0":"")+d.getMinutes();
+}
+function gcalPintaHoy(){
+  var box=document.getElementById("hoy"); if(!box) return;
+  var c=document.getElementById("hy-gcal");
+  if(!gcalConectado()){ if(c) c.remove(); return; }
+  if(!c){ c=document.createElement("div"); c.id="hy-gcal"; c.className="gc-caja"; box.appendChild(c); }
+  var cab='<div class="gc-cab"><span class="gc-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></span><b>Tu calendario</b></div>';
+  if(!gcalTokenVale()){
+    c.innerHTML=cab+'<button class="gc-renueva" data-act="x-gcal-renueva">Toca para ver los eventos de hoy</button>';
+    return;
+  }
+  if(!gcalEventos || gcalDia!==today()){ c.innerHTML=cab+'<p class="gc-vacio">Cargando…</p>'; gcalCarga(); return; }
+  var ahora=Date.now();
+  var filas=gcalEventos.slice(0,6).map(function(e){
+    var fin=e.end && e.end.dateTime ? new Date(e.end.dateTime).getTime() : 0;
+    return '<a class="gc-fila'+(fin && fin<ahora?" gc-pasado":"")+'" href="'+esc(e.htmlLink||"#")+'" target="_blank" rel="noopener"><span class="gc-h num">'+gcalHora(e)+'</span><span class="gc-t">'+esc(e.summary||"(Sin título)")+'</span></a>';
+  }).join("");
+  c.innerHTML=cab+(filas||'<p class="gc-vacio">Hoy no tienes nada en el calendario.</p>')+
+    (gcalEventos.length>6?'<p class="gc-vacio">y '+(gcalEventos.length-6)+' más</p>':'');
+}
+function gcalRepinta(){
+  gcalPintaHoy();
+  var p=document.getElementById("aj-cal"); if(p) gcalPintaAjustes(p);
+}
+/* ── en Ajustes, su propia sección ── */
+function gcalPintaAjustes(p){
+  var g=gcalEstado(), h='';
+  var vuelta=p.querySelector(".aj-atras"), tit=p.querySelector(".aj-h");
+  if(!GCAL_CLIENT_ID){
+    h='<p class="gc-txt">La conexión con Google Calendar está preparada, pero falta activarla en esta versión de la app.</p>';
+  } else if(!g.on){
+    h='<p class="gc-txt">Conecta tu cuenta de Google y verás los eventos del día en Hoy. Solo se lee tu calendario principal y todo se queda en este móvil.</p>'+
+      '<button class="btn btn-primary w-full !py-3.5 mt-4" data-act="x-gcal-conecta">Conectar con Google</button>';
+  } else {
+    h='<div class="soc-ajustes"><div><span>Conectado'+(g.email?' como <b>'+esc(g.email)+'</b>':'')+'</span></div>'+
+      '<label><span>Apuntar mis sesiones de estudio</span><input type="checkbox" id="gcal-escribir"'+(g.escribir?' checked':'')+' data-act="x-gcal-escribir"></label>'+
+      '<button data-act="x-gcal-desconecta"><span class="rojo">Desconectar</span></button></div>'+
+      '<p class="gc-txt" style="margin-top:12px">Con la opción de estudio, cada sesión que empieces se añade a tu calendario con su duración.</p>';
+  }
+  p.innerHTML=""; if(vuelta) p.appendChild(vuelta); if(tit) p.appendChild(tit);
+  p.insertAdjacentHTML("beforeend", h);
+}
+var _sheetSettingsGc=sheetSettings;
+sheetSettings=function(){
+  _sheetSettingsGc.apply(this, arguments);
+  var menu=document.getElementById("aj-menu"); if(!menu || document.getElementById("aj-cal")) return;
+  var s={ k:"cal", t:"Calendario", s:"Google Calendar", ico:'<rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/>' };
+  var fila='<button class="aj-fila" data-act="x-aj-sec" data-k="cal"><span class="aj-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+s.ico+'</svg></span>'+
+    '<span class="aj-txt"><b>'+s.t+'</b><small>'+(gcalConectado()?"Conectado":s.s)+'</small></span><svg class="aj-fl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>';
+  var ref=menu.querySelector('[data-k="datos"]')||menu.querySelector(".aj-pie");
+  if(ref) ref.insertAdjacentHTML("beforebegin", fila); else menu.insertAdjacentHTML("beforeend", fila);
+  var p=document.createElement("div"); p.className="aj-pag"; p.id="aj-cal"; p.hidden=true;
+  p.innerHTML='<button class="aj-atras" data-act="x-aj-sec" data-k=""><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>Ajustes</button><h4 class="display aj-h">Calendario</h4>';
+  menu.parentNode.appendChild(p);
+  gcalPintaAjustes(p);
+  if(ajSeccion==="cal") ajMuestra("cal", true);
+};
+function gcalAccion(a, el){
+  if(a==="x-gcal-conecta"){ gcalPide(false); return true; }
+  if(a==="x-gcal-renueva"){ gcalPide(!!gcalEstado().escribir); return true; }
+  if(a==="x-gcal-desconecta"){
+    var g=gcalEstado();
+    try{ if(g.tok && window.google && google.accounts) google.accounts.oauth2.revoke(g.tok, function(){}); }catch(e){}
+    try{ localStorage.removeItem(GCAL_KEY); }catch(e){}
+    gcalEventos=null; gcalDia=null; gcalRepinta(); avisoNube("Calendario desconectado."); return true;
+  }
+  if(a==="x-gcal-escribir"){
+    var on=!!el.checked, g2=gcalEstado();
+    if(!on){ g2.escribir=false; gcalGuarda(g2); return true; }
+    el.checked=false;
+    gcalPide(true, function(){ var g3=gcalEstado(); g3.escribir=true; gcalGuarda(g3); avisoNube("Tus sesiones de estudio irán a tu calendario."); });
+    return true;
+  }
+  return false;
+}
+var _gcalGA=grupoAccion;
+grupoAccion=function(a, el){ if(gcalAccion(a, el)) return true; return _gcalGA.apply(this, arguments); };
+/* los eventos, debajo de las tarjetas de Hoy */
+var _pintaHoyGc=pintaHoy;
+pintaHoy=function(){ var r=_pintaHoyGc.apply(this, arguments); gcalPintaHoy(); hoyAjusta(); return r; };
+/* cada sesión de estudio, al calendario (si lo has pedido y el permiso sigue vivo) */
+var _estudioEmpiezaGc=estudioEmpieza;
+estudioEmpieza=function(){
+  var r=_estudioEmpiezaGc.apply(this, arguments);
+  var g=gcalEstado(), a=S.estudio&&S.estudio.actual;
+  if(g.on && g.escribir && a && gcalTokenVale()){
+    var ini=new Date(), fin=new Date(ini.getTime()+a.est*60000);
+    gcalApi("calendars/primary/events", { method:"POST", body:{ summary:"Estudio · "+a.nombre, description:"Apuntado desde Peak.",
+      start:{ dateTime:ini.toISOString() }, end:{ dateTime:fin.toISOString() } } })
+      .then(function(){ gcalEventos=null; gcalDia=null; })
+      .catch(function(){});
+  }
+  return r;
+};
+/* al volver a la app otro día, se recargan */
+document.addEventListener("visibilitychange", function(){ if(!document.hidden && gcalDia && gcalDia!==today()){ gcalEventos=null; gcalPintaHoy(); } });
+(function(){ var st=document.createElement("style"); st.id="gcal-css"; st.textContent=[
+'.gc-caja{ margin-top:12px; padding:14px 16px 10px; border-radius:22px; background:var(--fill); }',
+'.gc-cab{ display:flex; align-items:center; gap:8px; margin-bottom:6px; font-size:14.5px; }',
+'.gc-ico{ width:26px; height:26px; border-radius:9px; display:grid; place-items:center; color:var(--accent); background:var(--accent-soft); }',
+'.gc-ico svg{ width:16px; height:16px; }',
+'.gc-fila{ display:flex; align-items:baseline; gap:12px; padding:8px 0; font-size:14px; color:var(--t1); text-decoration:none; }',
+'.gc-fila + .gc-fila{ box-shadow:inset 0 1px 0 var(--hairline); }',
+'.gc-h{ flex:0 0 auto; width:76px; font-size:12.5px; font-weight:700; color:var(--t2); }',
+'.gc-t{ min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }',
+'.gc-pasado{ opacity:.5; }',
+'.gc-vacio{ padding:6px 0 4px; font-size:13px; color:var(--t3); }',
+'.gc-renueva{ width:100%; text-align:left; padding:8px 0 6px; font-size:14px; font-weight:600; color:var(--accent); }',
+'.gc-txt{ font-size:14px; line-height:1.45; color:var(--t2); }',
+'#aj-cal .soc-ajustes label input{ width:20px; height:20px; accent-color:var(--accent); }'
+].join("\n"); document.head.appendChild(st); })();
+
 /* ════════════ acciones y repintado ════════════ */
 function bucleAccion(a, el){
   if(a==="x-metas"){ closeSheet(); setTimeout(sheetMetas, 60); return true; }
