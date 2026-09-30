@@ -18755,6 +18755,39 @@ function mqNormalesBorde(T, geo){
   for(i=0;i<n;i++){ var o=grupo[i]*3; f.set(suma[o],suma[o+1],suma[o+2]).normalize(); out[i*3]=f.x; out[i*3+1]=f.y; out[i*3+2]=f.z; }
   geo.setAttribute("borde", new T.BufferAttribute(out, 3));
 }
+/* la ropa: camiseta del color de la app, pantalón corto oscuro y zapatillas. Se pinta sobre la piel
+   según dónde está cada punto en la pose de reposo (en metros; y arriba, x a los lados), así los
+   bordes salen limpios aunque la malla tenga pocos vértices. Un dobladillo algo más oscuro marca el final. */
+var MQ_ROPA={ pantalon:"#2b2e3b", zapas:"#f3f3f6", suela:"#3b3d47" };
+function mqRopa(T, mat, color){
+  var u={ camiseta:{ value:new T.Color(color||"#4f46e5") }, pantalon:{ value:new T.Color(MQ_ROPA.pantalon) },
+          zapas:{ value:new T.Color(MQ_ROPA.zapas) }, suela:{ value:new T.Color(MQ_ROPA.suela) } };
+  mat.onBeforeCompile=function(sh){
+    for(var k in u) sh.uniforms[k]=u[k];
+    sh.vertexShader="varying vec3 vReposo;\n"+sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  vReposo = position;");
+    sh.fragmentShader="varying vec3 vReposo;\nuniform vec3 camiseta, pantalon, zapas, suela;\n"+
+      "float mqBorde(float d){ return smoothstep(-1.0, 1.0, d/max(fwidth(d), 1e-5)); }\n"+
+      sh.fragmentShader.replace("#include <map_fragment>", [
+        "#include <map_fragment>",
+        "  vec3 r = vReposo; float ax = abs(r.x);",
+        /* camiseta: de la cintura a los hombros, manga corta hasta media altura del brazo, con cuello redondo */
+        "  float dC = min(min(r.y - 0.855, 0.335 - ax), min((length(vec2(r.x / 0.088, (r.y - 1.315) / 0.066)) - 1.0) * 0.066, max(1.30 - r.y, ax - 0.12)));",
+        /* pantalón: de la cadera a medio muslo */
+        "  float dP = min(r.y - 0.60, 0.875 - r.y);",
+        "  float dZ = 0.10 - r.y;",
+        "  float aC = mqBorde(dC), aP = mqBorde(dP), aZ = mqBorde(dZ);",
+        "  float doblC = 1.0 - 0.16 * (1.0 - smoothstep(0.004, 0.012, min(r.y - 0.855, 0.335 - ax)));",
+        "  float doblP = 1.0 - 0.2 * (1.0 - smoothstep(0.004, 0.012, r.y - 0.60));",
+        "  vec3 col = diffuseColor.rgb;",
+        "  col = mix(col, mix(suela, zapas, smoothstep(0.018, 0.024, r.y)), aZ);",
+        "  col = mix(col, pantalon * doblP, aP);",
+        "  col = mix(col, camiseta * doblC, aC);",
+        "  diffuseColor.rgb = col;",
+        "  float tela = max(aC, max(aP, aZ));"
+      ].join("\n")).replace("#include <roughnessmap_fragment>", "#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.88, tela);");
+  };
+  mat.customProgramCacheKey=function(){ return "mq-ropa"; };
+}
 function mqModelo(T, color){
   return new Promise(function(ok, mal){
     new T.GLTFLoader().parse(MQ_GLB.slice(0), "./", function(g){
@@ -18763,6 +18796,7 @@ function mqModelo(T, color){
       /* la piel original del modelo: su textura tal cual, con el mismo material que en Blender (rugosidad 0,5) */
       var piel=malla.material.map; piel.anisotropy=8;
       malla.material=new T.MeshStandardMaterial({ map:piel, roughness:.5, metalness:0 });
+      mqRopa(T, malla.material, color);
       malla.castShadow=true; malla.frustumCulled=false;
       /* el contorno, hecho como en el modelo original (una copia vuelta del revés que asoma por fuera
          siguiendo la normal de cada vértice, del mismo casi negro que su material OL), pero fino:
