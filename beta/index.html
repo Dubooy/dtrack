@@ -18760,7 +18760,7 @@ function mqNormalesBorde(T, geo){
    ribete negro en el cuello, las mangas y la boca de la zapatilla. Se pinta sobre la piel según dónde
    está cada punto en la pose de reposo (en metros; y arriba, x hacia su izquierda, z hacia delante),
    así los bordes salen limpios aunque la malla tenga pocos vértices. */
-var MQ_ROPA={ pantalon:"#2b2e3b", zapas:"#f3f3f6", suela:"#3b3d47", ribete:"#141418" };
+var MQ_ROPA={ pantalon:"#2b2e3b", zapas:"#f3f3f6", suela:"#3b3d47", ribete:"#141418", conRibete:true };
 /* el logo (el mismo dibujo que el icono de la app, en sus unidades: 15,4 × 35,2): 1 = parte de arriba,
    0,45 = parte de abajo, 0 = fuera */
 var MQ_LOGO_GLSL=[
@@ -18774,8 +18774,8 @@ var MQ_LOGO_GLSL=[
   "}",
   "float mqLogo(vec2 p){",
   "  float w = max(0.5 * length(vec2(fwidth(p.x), fwidth(p.y))), 1e-4);",
-  "  float arriba = max(mqTri(p, vec2(7.7,0.), vec2(15.4,21.5), vec2(7.7,20.)), mqTri(p, vec2(7.7,0.), vec2(7.7,20.), vec2(0.,21.5)));",
-  "  float abajo = max(mqTri(p, vec2(7.7,35.2), vec2(15.4,21.5), vec2(7.7,23.)), mqTri(p, vec2(7.7,35.2), vec2(7.7,23.), vec2(0.,21.5)));",
+  "  float arriba = min(mqTri(p, vec2(7.7,0.), vec2(15.4,21.5), vec2(0.,21.5)), -mqTri(p, vec2(0.,21.5), vec2(15.4,21.5), vec2(7.7,20.)));",
+  "  float abajo = min(mqTri(p, vec2(7.7,35.2), vec2(15.4,21.5), vec2(0.,21.5)), -mqTri(p, vec2(0.,21.5), vec2(15.4,21.5), vec2(7.7,23.)));",
   "  return max(smoothstep(-w, w, arriba), .45*smoothstep(-w, w, abajo));",
   "}",
   /* c: centro del logo (en metros) en el plano de la superficie, alto: su altura en metros */
@@ -18787,11 +18787,11 @@ function mqRopa(T, mat, color){
   var u={ camiseta:{ value:new T.Color(acento) }, logoC:{ value:new T.Color(mqColor("var(--on-accent, #ffffff)")) },
           pantalon:{ value:new T.Color(MQ_ROPA.pantalon) }, logoP:{ value:new T.Color(oscuro ? acento : "#ffffff") },
           zapas:{ value:new T.Color(MQ_ROPA.zapas) }, logoZ:{ value:new T.Color(acento) },
-          suela:{ value:new T.Color(MQ_ROPA.suela) }, ribete:{ value:new T.Color(MQ_ROPA.ribete) } };
+          suela:{ value:new T.Color(MQ_ROPA.suela) }, ribete:{ value:new T.Color(MQ_ROPA.ribete) }, conRib:{ value:MQ_ROPA.conRibete?1:0 } };
   mat.onBeforeCompile=function(sh){
     for(var k in u) sh.uniforms[k]=u[k];
     sh.vertexShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\n"+sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  vReposo = position; vReposoN = normal;");
-    sh.fragmentShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\nuniform vec3 camiseta, logoC, pantalon, logoP, zapas, logoZ, suela, ribete;\n"+
+    sh.fragmentShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\nuniform vec3 camiseta, logoC, pantalon, logoP, zapas, logoZ, suela, ribete;\nuniform float conRib;\n"+
       "float mqBorde(float d){ return smoothstep(-1.0, 1.0, d/max(fwidth(d), 1e-5)); }\n"+MQ_LOGO_GLSL+"\n"+
       sh.fragmentShader.replace("#include <map_fragment>", [
         "#include <map_fragment>",
@@ -18807,8 +18807,8 @@ function mqRopa(T, mat, color){
         "  float doblC = 1.0 - 0.16 * (1.0 - smoothstep(0.004, 0.012, r.y - 0.855));",
         "  float doblP = 1.0 - 0.2 * (1.0 - smoothstep(0.004, 0.012, r.y - 0.60));",
         /* ribetes negros de 7 mm */
-        "  float ribC = 1.0 - mqBorde(min(dCuello, dManga) - 0.007);",
-        "  float ribZ = 1.0 - mqBorde(dZ - 0.007);",
+        "  float ribC = (1.0 - mqBorde(min(dCuello, dManga) - 0.007)) * conRib;",
+        "  float ribZ = (1.0 - mqBorde(dZ - 0.007)) * conRib;",
         /* logos: pecho izquierdo y pantalón abajo a la izquierda, por delante; en la cara de fuera de cada zapatilla */
         "  float delante = step(0.12, n.z);",
         "  float lC = mqLogoEn(r.xy, vec2(0.08, 1.13), 0.085) * delante;",
