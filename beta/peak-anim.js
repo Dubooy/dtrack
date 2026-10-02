@@ -26,8 +26,7 @@ var WM_X0 = 65, WM_X1 = 3546, WM_YC = 395, A_X0 = 1564, A_X1 = 2421, A_Y0 = -4, 
 
 var CREAM = "#F5F0E6", INK = "#1C1B19", FAINT_L = "#E3DACA", FAINT_D = "#2B2925";
 var T = 12, SPIN = Math.PI*2/6;              // una vuelta cada 6 s, siempre igual
-var ROT0 = Math.PI/3;                        // a 0° la cara del logo mira de frente
-var FACES = [[2, 0, "logo"], [0, 1, "lisa"], [1, 2, "rayas"]];
+var ORDER = ["logo", "rayas", "lisa"];       // a 0° se ve la cara del logo de frente
 var STRIPES = 6, GAP = 0.34;
 
 function mod(a, n){ return ((a % n) + n) % n; }
@@ -57,37 +56,31 @@ window.PeakAnim = function(cv, o){
   function quad(a, b, c, d){ ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.lineTo(c[0], c[1]); ctx.lineTo(d[0], d[1]); ctx.closePath(); ctx.fill(); }
   function l2(a, b, u){ return [a[0] + (b[0]-a[0])*u, a[1] + (b[1]-a[1])*u]; }
 
-  // montaña plana: contorno fijo (cima arriba al centro, base de ancho w y alto h);
-  // por dentro pasan las tres caras según el giro th
+  // montaña plana: contorno fijo (cima arriba al centro, base de ancho w y alto h).
+  // Las caras pasan por dentro como en una cinta, a ritmo constante: cada tercio
+  // de vuelta la cara siguiente entra por la izquierda y empuja a la actual.
   function mountain(cx, cy, w, h, th, fg, bg){
-    var ang = [], xs = [], i;
-    for (i = 0; i < 3; i++){ ang.push(ROT0 + th + i*Math.PI*2/3); xs.push(Math.sin(ang[i])); }
-    var vis = [], lo = 9, hi = -9;
-    for (i = 0; i < 3; i++){
-      var F = FACES[i];
-      if (Math.cos(ang[F[0]] + Math.PI/3) <= 1e-6) continue;   // cara de espaldas
-      vis.push(F);
-      lo = Math.min(lo, xs[F[0]], xs[F[1]]); hi = Math.max(hi, xs[F[0]], xs[F[1]]);
+    var n = th/(Math.PI*2/3), k = Math.floor(n), f = n - k;
+    var cur = ORDER[mod(k, 3)], nxt = ORDER[mod(k + 1, 3)];
+    var A = [cx, cy - h/2], by = cy + h/2, x0 = cx - w/2, xr = x0 + f*w;
+    face(nxt, A, [x0, by], [xr, by], fg, bg);
+    face(cur, A, [xr, by], [x0 + w, by], fg, bg);
+  }
+  function face(kind, A, B, C, fg, bg){
+    if (C[0] - B[0] < 0.3) return;
+    ctx.fillStyle = fg;
+    if (kind === "logo"){
+      // el logo 2D pegado a la cara: (450,0) cima, (0,900) y (900,900) base
+      var a1 = (C[0]-B[0])/900, c1 = ((B[0]+C[0])/2 - A[0])/900, d1 = (B[1] - A[1])/900;
+      ctx.save(); ctx.transform(a1, 0, c1, d1, A[0] - 450*a1, A[1]); ctx.fill(markPath); ctx.restore();
+      return;
     }
-    var span = hi - lo || 1, A = [cx, cy - h/2], by = cy + h/2;
-    function bx(x){ return [cx - w/2 + (x - lo)/span*w, by]; }
-    for (i = 0; i < vis.length; i++){
-      var G = vis[i], B = bx(xs[G[0]]), C = bx(xs[G[1]]);
-      if (C[0] - B[0] < 0.3) continue;
-      ctx.fillStyle = fg;
-      if (G[2] === "logo"){
-        // el logo 2D pegado a la cara: (450,0) cima, (0,900) y (900,900) base
-        var a1 = (C[0]-B[0])/900, c1 = ((B[0]+C[0])/2 - A[0])/900, d1 = (by - A[1])/900;
-        ctx.save(); ctx.transform(a1, 0, c1, d1, A[0] - 450*a1, A[1]); ctx.fill(markPath); ctx.restore();
-        continue;
-      }
-      tri(A, B, C);
-      if (G[2] !== "rayas") continue;
-      ctx.fillStyle = bg;
-      for (var j = 0; j < STRIPES; j++){
-        var t0 = (j + 0.5)/STRIPES - GAP/STRIPES/2, t1 = t0 + GAP/STRIPES;
-        quad(l2(B, C, t0), l2(B, A, t0), l2(B, A, t1), l2(B, C, t1));
-      }
+    tri(A, B, C);
+    if (kind !== "rayas") return;
+    ctx.fillStyle = bg;
+    for (var j = 0; j < STRIPES; j++){
+      var t0 = (j + 0.5)/STRIPES - GAP/STRIPES/2, t1 = t0 + GAP/STRIPES;
+      quad(l2(B, C, t0), l2(B, A, t0), l2(B, A, t1), l2(B, C, t1));
     }
   }
 
@@ -188,26 +181,28 @@ window.PeakAnim = function(cv, o){
     despliega: function(fg, bg){ seq(fg, bg, true); }
   };
 
-  // secuencia de 6 s: logo completo girando → letras dentro → icono grande quieto
-  // (despliega es la misma al revés)
+  // secuencias de 6 s, con la montaña quieta y de frente al empezar y al acabar.
+  // Mientras las letras entran o salen da exactamente una vuelta a ritmo constante.
+  // recoge: logo → letras dentro → icono grande en el centro
+  // despliega: icono grande → baja a su sitio → salen las letras
   function seq(fg, bg, back){
-    var P = 6, tau = mod(t, P), x = back ? P - tau : tau;
+    var P = 6, x = mod(t, P);
     var w = bigW(), s = w/(WM_X1 - WM_X0), ac = (A_X0 + A_X1)/2;
     var aDxEnd = W/2 - (W/2 - w/2 - WM_X0*s + ac*s);       // lo que se mueve la A hasta el centro
-    var order = [0.1, 0, 0, 0.1];                           // E y K entran antes que P y el punto
-    var p = [], i;
-    for (i = 0; i < 4; i++){
-      var q = (x - 1.0 - order[i])/1.0;
-      p.push(back ? 1 - easeBack(1 - clamp(q)) : easeIO(q));
+    var order = [0.2, 0, 0, 0.2];                           // E y K van antes que P y el punto
+    var p = [], m, th, i, t0;
+    if (!back){
+      t0 = 0.8;
+      for (i = 0; i < 4; i++) p.push(easeIO((x - t0 - order[i])/1.2));
+      m = easeIO((x - 2.25)/1.0);
+    } else {
+      t0 = 1.6;
+      for (i = 0; i < 4; i++) p.push(1 - easeBack((x - t0 - order[i])/1.2));
+      m = 1 - easeIO((x - 0.6)/1.0);
     }
-    var m = easeIO((x - 2.0)/1.1);
-    // giro: constante y frenando hasta quedar de frente justo cuando llega al centro
-    var t1 = 2.0, d = 1.1, end = Math.ceil((SPIN*(t1 + d/2))/(Math.PI*2))*Math.PI*2, th0 = end - SPIN*(t1 + d/2);
-    var th = x < t1 ? th0 + SPIN*x : x < t1 + d ? th0 + SPIN*t1 + SPIN*(x - t1) - SPIN*(x - t1)*(x - t1)/(2*d) : end;
-    if (back) th = -th;
+    th = Math.PI*2*clamp((x - t0)/1.4);
     ctx.save();
-    var fade = Math.min(clamp(tau/0.35), clamp((P - tau)/0.35));
-    ctx.globalAlpha = fade;
+    ctx.globalAlpha = Math.min(clamp(x/0.35), clamp((P - x)/0.35));
     wordmark(W/2, Hc/2, w, th, fg, bg, p, aDxEnd*m, mix(1, 3.2, m));
     ctx.restore();
   }
