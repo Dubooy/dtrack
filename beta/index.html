@@ -448,7 +448,7 @@ html.embebido #acciones-flotantes{ top:94px; }
   if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   var c=document.createElement("canvas"); s.appendChild(c); s.classList.add("anim");
   var oscuro=document.documentElement.classList.contains("dark");
-  window.__splashAnim=PeakAnim(c,{ pattern:"despliega", dark:oscuro, t0:0.5, speed:1.25 });
+  window.__splashAnim=PeakAnim(c,{ pattern:"frena", dark:oscuro, t0:0.5, speed:1.25 });
   window.__splashMin=Date.now()+2400;
   s.addEventListener("pointerdown", function(){ window.__splashMin=0; if(window.splashFuera) splashFuera(); });
 })();

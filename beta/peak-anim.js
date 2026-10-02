@@ -34,6 +34,8 @@ function mod(a, n){ return ((a % n) + n) % n; }
 function clamp(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
 function easeIO(x){ x = clamp(x); return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2; }
 function easeOutBack(x, c){ x = clamp(x); return 1 + (c + 1)*Math.pow(x - 1, 3) + c*Math.pow(x - 1, 2); }
+// arranca suave pero enseguida va rápida y luego frena larga hasta pararse (sin golpe)
+function kick(x){ x = clamp(x); return 1 - Math.pow(1 - x, 4)*(1 + 4*x); }
 function easeBack(x){ x = clamp(x); var c = 1.6; return 1 + (c + 1)*Math.pow(x - 1, 3) + c*Math.pow(x - 1, 2); }
 function mix(a, b, u){ return a + (b - a)*u; }
 
@@ -87,18 +89,18 @@ window.PeakAnim = function(cv, o){
   }
 
   // PEAK. completo; p[i] = cuánto se ha metido cada letra en la montaña (0 fuera, 1 dentro)
-  function wordmark(cx, cy, w, th, fg, bg, p, aDx, aScale, dy){
+  function wordmark(cx, cy, w, th, fg, bg, p, aDx, aScale, dy, dx){
     var s = w/(WM_X1 - WM_X0), ox = cx - w/2 - WM_X0*s, ac = (A_X0 + A_X1)/2;
-    p = p || [0, 0, 0, 0]; aDx = aDx || 0; aScale = aScale || 1; dy = dy || [0, 0, 0, 0, 0];
+    p = p || [0, 0, 0, 0]; aDx = aDx || 0; aScale = aScale || 1; dy = dy || [0, 0, 0, 0, 0]; dx = dx || [0, 0, 0, 0, 0];
     ctx.fillStyle = fg;
     for (var i = 0; i < 4; i++){
       var g = L[LETTERS[i]], u = p[i];
       if (u >= 0.999) continue;
       var gc = (g.x0 + g.x1)/2, x = mix(gc, ac, u), k = 1 - 0.8*u;
-      ctx.save(); ctx.translate(ox + x*s + aDx*u, cy + dy[i < 2 ? i : i + 1]*s); ctx.scale(s*k, s*k); ctx.translate(-gc, -WM_YC); ctx.fill(g.p); ctx.restore();
+      ctx.save(); ctx.translate(ox + (x + dx[i < 2 ? i : i + 1])*s + aDx*u, cy + dy[i < 2 ? i : i + 1]*s); ctx.scale(s*k, s*k); ctx.translate(-gc, -WM_YC); ctx.fill(g.p); ctx.restore();
     }
     var aw = (A_X1 - A_X0)*s*aScale, ah = (A_Y1 - A_Y0)*s*aScale;
-    mountain(ox + ac*s + aDx, cy + dy[2]*s + ((A_Y0 + A_Y1)/2 - WM_YC)*s*aScale, aw, ah, th, fg, bg);
+    mountain(ox + (ac + dx[2])*s + aDx, cy + dy[2]*s + ((A_Y0 + A_Y1)/2 - WM_YC)*s*aScale, aw, ah, th, fg, bg);
   }
 
   // ancho del logo grande centrado
@@ -165,6 +167,34 @@ window.PeakAnim = function(cv, o){
       }
       wordmark(W/2, Hc/2, bigW(), th, fg, bg, null, 0, 1, dy);
     },
+    // cada vuelta de la A lanza ecos del logo hacia arriba y hacia abajo
+    eco: function(fg, bg){
+      var P = 3, x = mod(t, P), H = kick((x - 0.3)/2.2), th = Math.PI*2*H;
+      var w = bigW()*0.8, gap = w*0.38, a = easeIO((H - 0.25)/0.35)*(1 - easeIO((H - 0.8)/0.2));
+      ctx.save();
+      for (var k = 3; k >= 1; k--){
+        ctx.globalAlpha = a*0.5/k;
+        wordmark(W/2, Hc/2 - k*gap*H, w, th, fg, bg);
+        wordmark(W/2, Hc/2 + k*gap*H, w, th, fg, bg);
+      }
+      ctx.restore();
+      wordmark(W/2, Hc/2, w, th, fg, bg);
+    },
+    // las letras llegan desde los lados empujadas por la vuelta de la A y luego se van
+    llega: function(fg, bg){
+      var P = 6, x = mod(t, P), w = bigW(), s = w/(WM_X1 - WM_X0);
+      var D = (W/2 + w/2)/s + 200, side = [-1, -1, 0, 1, 1], o = [0, 0.12, 0, 0.12, 0];
+      var dx = [], th, i;
+      if (x < 3.3){
+        for (i = 0; i < 5; i++) dx.push(side[i]*D*(1 - kick((x - 0.3 - o[i])/2.2)));
+        th = Math.PI*2*kick((x - 0.3)/2.4);
+      } else {
+        // salida: al revés, arranca suave y se va acelerando
+        for (i = 0; i < 5; i++) dx.push(side[i]*D*(1 - kick(1 - (x - 3.6 - (0.12 - o[i]))/2.2)));
+        th = Math.PI*2*(2 - kick(1 - (x - 3.6)/2.3));
+      }
+      wordmark(W/2, Hc/2, w, th, fg, bg, null, 0, 1, null, dx);
+    },
     // montañas pequeñas caen y forman una montaña grande; luego giran en ola
     construye: function(fg, bg){
       var P = 6, x = mod(t, P), N = 5, bw = Math.min(W*0.8, Hc*0.55), m = bw/N, top = Hc/2 - bw/2;
@@ -207,6 +237,12 @@ window.PeakAnim = function(cv, o){
       t0 = 0.8;
       for (i = 0; i < 4; i++) p.push(easeIO((x - t0 - order[i])/1.2));
       m = easeIO((x - 2.25)/1.0);
+    } else if (curve === "frena"){
+      // todo cuelga del giro: encoger y salir de las letras van al ritmo de la vuelta
+      var H = kick((x - 0.6)/2.4), q = clamp(H/0.45);
+      th = Math.PI*2*H;
+      m = Math.pow(1 - q, 2);
+      for (i = 0; i < 4; i++) p.push(1 - easeOutBack((H - 0.3 - order[i]*0.4)/0.6, 1.2));
     } else {
       t0 = 1.6;
       for (i = 0; i < 4; i++) p.push(1 - easeBack((x - t0 - order[i])/1.2));
@@ -216,10 +252,8 @@ window.PeakAnim = function(cv, o){
     // colocan las letras (con velocidad curva); en recoge, al revés y constante
     var u;
     if (!back) u = clamp((x - 0.8)/2.45);
-    else if (curve === "frena"){
-      u = clamp((x - 0.6)/2.6);
-      u = 1 - Math.pow(1 - u, 4);
-    } else {
+    else if (curve === "frena") u = th/(Math.PI*2);
+    else {
       u = clamp((x - 0.6)/2.7);
       u = easeOutBack(Math.pow(u, 2.6), 1.1);
     }
@@ -259,5 +293,5 @@ window.PeakAnim = function(cv, o){
     setPaused: function(v){ paused = !!v; }
   };
 };
-window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "construye", "recoge", "despliega", "frena"];
+window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "eco", "llega", "construye", "recoge", "despliega", "frena"];
 })();
