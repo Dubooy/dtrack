@@ -2,14 +2,15 @@
    La montaña se ve siempre plana y del mismo tamaño: el contorno es el del
    logo y nunca cambia; lo que gira son sus tres caras, que pasan por dentro
    (una es el logo 2D tal cual, otra lisa y otra rayada).
-   Fondos en bucle: "palabras", "ajedrez", "anillos", "cuadricula", "logo", "tunel".
-   Animaciones: "recoge" (las letras se meten en la montaña y queda el icono
+   Fondos en bucle: "palabras", "ajedrez", "cuadricula", "columnas", "logo".
+   Animaciones: "salto" (las letras saltan en ola), "construye" (montañas
+   pequeñas forman una grande), "recoge" (las letras se meten en la montaña y queda el icono
    quieto) y "despliega" (del icono sale el logo completo).
    No responde al dedo. Todo se repite exactamente cada 12 s (vídeo en bucle).
    Los trazos son los del logo (sacados de Unbounded, licencia OFL).
 
    Uso: var a = PeakAnim(canvas, { pattern: "cuadricula", dark: false });
-        a.setPattern("tunel");  a.setDark(true);  a.setPaused(true);  a.restart();  a.stop(); */
+        a.setPattern("salto");  a.setDark(true);  a.setPaused(true);  a.restart();  a.stop(); */
 (function(){
 var MARK = "M450 0 0 900 600 900 525 648 538 607 634 900 680 900 561 534 577 481 714 900 760 900 497 94 594 288ZM594 288 794 900 840 900 727 554ZM900 900 824 748 874 900Z";
 var L = {
@@ -85,18 +86,18 @@ window.PeakAnim = function(cv, o){
   }
 
   // PEAK. completo; p[i] = cuánto se ha metido cada letra en la montaña (0 fuera, 1 dentro)
-  function wordmark(cx, cy, w, th, fg, bg, p, aDx, aScale){
+  function wordmark(cx, cy, w, th, fg, bg, p, aDx, aScale, dy){
     var s = w/(WM_X1 - WM_X0), ox = cx - w/2 - WM_X0*s, ac = (A_X0 + A_X1)/2;
-    p = p || [0, 0, 0, 0]; aDx = aDx || 0; aScale = aScale || 1;
+    p = p || [0, 0, 0, 0]; aDx = aDx || 0; aScale = aScale || 1; dy = dy || [0, 0, 0, 0, 0];
     ctx.fillStyle = fg;
     for (var i = 0; i < 4; i++){
       var g = L[LETTERS[i]], u = p[i];
       if (u >= 0.999) continue;
       var gc = (g.x0 + g.x1)/2, x = mix(gc, ac, u), k = 1 - 0.8*u;
-      ctx.save(); ctx.translate(ox + x*s + aDx*u, cy); ctx.scale(s*k, s*k); ctx.translate(-gc, -WM_YC); ctx.fill(g.p); ctx.restore();
+      ctx.save(); ctx.translate(ox + x*s + aDx*u, cy + dy[i < 2 ? i : i + 1]*s); ctx.scale(s*k, s*k); ctx.translate(-gc, -WM_YC); ctx.fill(g.p); ctx.restore();
     }
     var aw = (A_X1 - A_X0)*s*aScale, ah = (A_Y1 - A_Y0)*s*aScale;
-    mountain(ox + ac*s + aDx, cy + ((A_Y0 + A_Y1)/2 - WM_YC)*s*aScale, aw, ah, th, fg, bg);
+    mountain(ox + ac*s + aDx, cy + dy[2]*s + ((A_Y0 + A_Y1)/2 - WM_YC)*s*aScale, aw, ah, th, fg, bg);
   }
 
   // ancho del logo grande centrado
@@ -139,41 +140,47 @@ window.PeakAnim = function(cv, o){
       }
       ctx.restore();
     },
-    anillos: function(fg, bg){
-      var cx = W/2, cy = Hc/2, D = W*0.19, maxR = Math.hypot(W, Hc)/2 + D, n = Math.ceil(maxR/D);
-      for (var r = n; r >= 0; r--){
-        ctx.fillStyle = r % 2 ? fg : bg;
-        ctx.beginPath(); ctx.arc(cx, cy, (r + 0.5)*D, 0, Math.PI*2); ctx.fill();
-      }
-      mountain(cx, cy, D*0.62, D*0.62, SPIN*t, fg, bg);
-      for (r = 1; r <= n; r++){
-        var cnt = 6*r, dir = r % 2 ? 1 : -1, rot = dir*(t/T)*(Math.PI*2/cnt) + (r % 2 ? 0 : Math.PI/cnt);
-        var f = r % 2 ? bg : fg, b = r % 2 ? fg : bg;
-        for (var i = 0; i < cnt; i++){
-          var a = rot + i*Math.PI*2/cnt;
-          mountain(cx + Math.cos(a)*r*D, cy + Math.sin(a)*r*D, D*0.5, D*0.5, SPIN*t + r*Math.PI/4, f, b);
-        }
+    // columnas crema y tinta; las montañas suben y bajan en sentidos alternos
+    columnas: function(fg, bg){
+      var C = 4, cw = W/C, sp = cw*1.08, m = cw*0.56, u = mod(t/T, 1);
+      for (var c = 0; c < C; c++){
+        var inv = c % 2 === 1, f = inv ? bg : fg, b = inv ? fg : bg, dir = inv ? 1 : -1, sh = dir*u*sp*2;
+        ctx.fillStyle = b; ctx.fillRect(c*cw - 0.5, 0, cw + 1, Hc);
+        var i0 = Math.floor((-sp - sh)/sp), i1 = Math.ceil((Hc + sp - sh)/sp);
+        for (var i = i0; i <= i1; i++) mountain(c*cw + cw/2, i*sp + sh + sp/2, m, m, SPIN*t + i*Math.PI + c*Math.PI/2, f, b);
       }
     },
     logo: function(fg, bg){
       DRAW.cuadricula(dark ? FAINT_D : FAINT_L, bg);
       wordmark(W/2, Hc/2, bigW(), SPIN*t, fg, bg);
     },
-    // túnel: el logo de la montaña repetido hacia dentro, acercándose sin parar
-    tunel: function(fg, bg){
-      var cx = W/2, cy = Hc/2, S0 = Math.min(W, Hc)*0.05, R = 1.42, u = mod(t/1.5, 4);
-      var D = Math.hypot(W, Hc), kMax = Math.ceil(Math.log(D*2.6/S0)/Math.log(R)), kMin = -4;
-      for (var k = kMax; k >= kMin; k--){
-        var size = S0*Math.pow(R, k + u);
-        if (size < 2) continue;
-        ctx.save(); ctx.translate(cx, cy); ctx.rotate((k + u)*0.04 + Math.PI*2*t/T);
-        ctx.scale(size/900, size/900); ctx.translate(-450, -622);
-        ctx.fillStyle = mod(k, 2) ? fg : bg;
-        // triángulos lisos alternos; uno de cada cuatro es el logo con sus rayas
-        if (mod(k, 4) === 1) ctx.fill(markPath);
-        else { ctx.beginPath(); ctx.moveTo(450, 0); ctx.lineTo(900, 900); ctx.lineTo(0, 900); ctx.closePath(); ctx.fill(); }
-        ctx.restore();
+    // PEAK. con las letras saltando en ola; la A da una vuelta en su salto
+    salto: function(fg, bg){
+      var P = 3, x = mod(t, P), dy = [], th = 0;
+      for (var i = 0; i < 5; i++){
+        var q = clamp((x - 0.5 - i*0.14)/0.55);
+        dy.push(-Math.sin(q*Math.PI)*300);
+        if (i === 2) th = Math.PI*2*q;
       }
+      wordmark(W/2, Hc/2, bigW(), th, fg, bg, null, 0, 1, dy);
+    },
+    // montañas pequeñas caen y forman una montaña grande; luego giran en ola
+    construye: function(fg, bg){
+      var P = 6, x = mod(t, P), N = 5, bw = Math.min(W*0.8, Hc*0.55), m = bw/N, top = Hc/2 - bw/2;
+      ctx.save();
+      ctx.globalAlpha = Math.min(clamp(x/0.3), clamp((P - x)/0.35));
+      var n = 0;
+      for (var r = N - 1; r >= 0; r--){
+        for (var j = 0; j <= r; j++, n++){
+          var cx = W/2 + (j - r/2)*m, cy = top + r*m + m/2;
+          var q = (x - 0.3 - n*0.07)/0.55;
+          if (q <= 0) continue;
+          var drop = (1 - easeBack(q))*(cy + m);
+          var th = Math.PI*2*clamp((x - 2.4 - (N - 1 - r)*0.15 - j*0.05)/1.2);
+          mountain(cx, cy - drop, m*0.98, m*0.98, th, fg, bg);
+        }
+      }
+      ctx.restore();
     },
     // las letras se meten en la montaña y queda el icono solo, quieto
     recoge: function(fg, bg){ seq(fg, bg, false); },
@@ -200,7 +207,9 @@ window.PeakAnim = function(cv, o){
       for (i = 0; i < 4; i++) p.push(1 - easeBack((x - t0 - order[i])/1.2));
       m = 1 - easeIO((x - 0.6)/1.0);
     }
-    th = Math.PI*2*clamp((x - t0)/1.4);
+    // una vuelta exacta a ritmo constante: en despliega desde que empieza a encogerse
+    // hasta que se colocan las letras; en recoge, al revés
+    th = back ? Math.PI*2*clamp((x - 0.6)/2.4) : Math.PI*2*clamp((x - 0.8)/2.45);
     ctx.save();
     ctx.globalAlpha = Math.min(clamp(x/0.35), clamp((P - x)/0.35));
     wordmark(W/2, Hc/2, w, th, fg, bg, p, aDxEnd*m, mix(1, 3.2, m));
@@ -236,5 +245,5 @@ window.PeakAnim = function(cv, o){
     setPaused: function(v){ paused = !!v; }
   };
 };
-window.PeakAnim.patterns = ["palabras", "ajedrez", "anillos", "cuadricula", "logo", "tunel", "recoge", "despliega"];
+window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "construye", "recoge", "despliega"];
 })();
