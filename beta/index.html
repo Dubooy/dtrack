@@ -441,14 +441,14 @@ html.embebido #acciones-flotantes{ top:94px; }
 </style><svg viewBox="58 -6 3496 800" role="img" aria-label="Peak."><path d="M494 34Q592 34 662.5 67Q733 100 770 159.5Q807 219 807 300Q807 380 770 440Q733 500 662.5 533Q592 566 494 566H173V382H479Q523 382 547.5 360Q572 338 572 300Q572 260 547.5 239Q523 218 479 218H193L298 112V784H65V34ZM1507 327V491H950V327ZM1109 409 1062 699 971 598H1542V784H831L887 409L831 34H1537V220H971L1062 119ZM2092.1 485.8 2082.6 513.7 2183.0 784.0 2213.6 784.0 2097.3 470.7 2119.4 405.8 2107.5 440.7 2235.0 784.0 2265.6 784.0 2092.3 317.3 1994.0 -4.0 1564.0 784.0 2137.3 784.0 2161.6 784.0 2072.4 543.7ZM2091.1 174.0 1995.2 -1.8 2287.0 784.0 2317.6 784.0ZM2253.8 472.2 2157.9 296.3 2339.0 784.0 2369.6 784.0ZM2416.6 770.4 2320.6 594.5 2391.0 784.0 2421.6 784.0ZM2446 784V34H2677V601L2617 552L3016 34H3260L2657 784ZM2805 433 2976 295 3271 784H3007ZM3420 795Q3385 795 3356 778.5Q3327 762 3310.5 733Q3294 704 3294 669Q3294 633 3310.5 604.5Q3327 576 3356 559.5Q3385 543 3420 543Q3456 543 3484.5 559.5Q3513 576 3529.5 604.5Q3546 633 3546 669Q3546 704 3529.5 733Q3513 762 3484.5 778.5Q3456 795 3420 795Z" fill="var(--t1,#1c1b19)"/></svg></div>
 <script src="peak-anim.js"></script>
 <script>
-/* arranque animado: montañas del logo girando unos segundos; tocar lo salta */
+/* arranque animado: PEAK. con la montaña girando en 3D sobre un fondo de montañas; tocar lo salta */
 (function(){
   var s=document.getElementById("splash");
   if(!s || !window.PeakAnim || !window.Path2D) return;
   if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   var c=document.createElement("canvas"); s.appendChild(c); s.classList.add("anim");
   var oscuro=document.documentElement.classList.contains("dark");
-  window.__splashAnim=PeakAnim(c,{ darkFirst:oscuro, t0:1.2 });
+  window.__splashAnim=PeakAnim(c,{ pattern:"logo", dark:oscuro });
   window.__splashMin=Date.now()+1700;
   s.addEventListener("pointerdown", function(){ window.__splashMin=0; if(window.splashFuera) splashFuera(); });
 })();
