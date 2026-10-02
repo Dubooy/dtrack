@@ -167,6 +167,11 @@ window.PeakAnim = function(cv, o){
       }
       wordmark(W/2, Hc/2, bigW(), th, fg, bg, null, 0, 1, dy);
     },
+    // pantalla de carga: solo la montaña, girando a ritmo constante (una vuelta cada 2,4 s)
+    gira: function(fg, bg){
+      var h = Math.min(W, Hc)*0.24, w = h*(A_X1 - A_X0)/(A_Y1 - A_Y0);
+      mountain(W/2, Hc/2, w, h, Math.PI*2*t/2.4, fg, bg);
+    },
     // cada vuelta de la A lanza ecos del logo hacia arriba y hacia abajo
     eco: function(fg, bg){
       var P = 3, x = mod(t, P), H = kick((x - 0.3)/2.2), th = Math.PI*2*H;
@@ -293,5 +298,5 @@ window.PeakAnim = function(cv, o){
     setPaused: function(v){ paused = !!v; }
   };
 };
-window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "eco", "llega", "construye", "recoge", "despliega", "frena"];
+window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "eco", "llega", "construye", "recoge", "despliega", "frena", "gira"];
 })();

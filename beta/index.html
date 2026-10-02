@@ -441,15 +441,15 @@ html.embebido #acciones-flotantes{ top:94px; }
 </style><svg viewBox="58 -6 3496 800" role="img" aria-label="Peak."><path d="M494 34Q592 34 662.5 67Q733 100 770 159.5Q807 219 807 300Q807 380 770 440Q733 500 662.5 533Q592 566 494 566H173V382H479Q523 382 547.5 360Q572 338 572 300Q572 260 547.5 239Q523 218 479 218H193L298 112V784H65V34ZM1507 327V491H950V327ZM1109 409 1062 699 971 598H1542V784H831L887 409L831 34H1537V220H971L1062 119ZM2092.1 485.8 2082.6 513.7 2183.0 784.0 2213.6 784.0 2097.3 470.7 2119.4 405.8 2107.5 440.7 2235.0 784.0 2265.6 784.0 2092.3 317.3 1994.0 -4.0 1564.0 784.0 2137.3 784.0 2161.6 784.0 2072.4 543.7ZM2091.1 174.0 1995.2 -1.8 2287.0 784.0 2317.6 784.0ZM2253.8 472.2 2157.9 296.3 2339.0 784.0 2369.6 784.0ZM2416.6 770.4 2320.6 594.5 2391.0 784.0 2421.6 784.0ZM2446 784V34H2677V601L2617 552L3016 34H3260L2657 784ZM2805 433 2976 295 3271 784H3007ZM3420 795Q3385 795 3356 778.5Q3327 762 3310.5 733Q3294 704 3294 669Q3294 633 3310.5 604.5Q3327 576 3356 559.5Q3385 543 3420 543Q3456 543 3484.5 559.5Q3513 576 3529.5 604.5Q3546 633 3546 669Q3546 704 3529.5 733Q3513 762 3484.5 778.5Q3456 795 3420 795Z" fill="var(--t1,#1c1b19)"/></svg></div>
 <script src="peak-anim.js"></script>
 <script>
-/* arranque animado: la montaña sola y de ella sale PEAK. completo; tocar lo salta */
+/* arranque animado: la montaña del logo girando mientras carga; tocar lo salta */
 (function(){
   var s=document.getElementById("splash");
   if(!s || !window.PeakAnim || !window.Path2D) return;
   if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   var c=document.createElement("canvas"); s.appendChild(c); s.classList.add("anim");
   var oscuro=document.documentElement.classList.contains("dark");
-  window.__splashAnim=PeakAnim(c,{ pattern:"frena", dark:oscuro, t0:0.5, speed:1.25 });
-  window.__splashMin=Date.now()+2400;
+  window.__splashAnim=PeakAnim(c,{ pattern:"gira", dark:oscuro });
+  window.__splashMin=Date.now()+1200;
   s.addEventListener("pointerdown", function(){ window.__splashMin=0; if(window.splashFuera) splashFuera(); });
 })();
 </script>
@@ -6120,6 +6120,7 @@ var CAR_CSS =
    Sin fotos. Cada lámina es un titular grande y una pieza real de la app
    que se anima sola cuando la lámina está delante. */
 var CARRUSEL=[
+  { marca:true },
   { t:"Cuida <br>el cuerpo.",          s:"Ejercicio, sueño, pantallas y meditación. Un toque y apuntado.",   e:escenaGym },
   { t:"Una racha <br>que engancha.",   s:"Tres retos al día, XP y niveles. Si haces los tres, ×1,5.",   e:escenaRacha },
   { t:"Con <br>los tuyos.",            s:"Tu grupo, un objetivo en común y quién tira más del carro.",       e:escenaGrupo },
@@ -6206,6 +6207,8 @@ function escenaGrupo(){
 }
 
 function laminaHTML(L, copia){
+  /* la primera lámina es solo la marca: PEAK. en bandas que se mueven (peak-anim.js) */
+  if(L.marca) return '<div class="car-lam bv-peak'+(copia?" copia":"")+'"><canvas class="bv-peak-c" aria-label="Peak."></canvas></div>';
   return '<div class="car-lam bv'+(copia?" copia":"")+'">'+
     '<div class="bv-cabeza">'+marcaColor()+
       '<h2 class="bv-t display">'+L.t+'</h2>'+
@@ -6266,6 +6269,8 @@ function carPinta(animar){
 }
 var BV_CSS=[
 '#puerta .car{ background:var(--bg); }',
+'#puerta .bv-peak canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }',
+'#puerta .bv-peak::after{ content:""; position:absolute; inset:auto 0 0 0; height:22%; pointer-events:none; background:linear-gradient(180deg, color-mix(in srgb,var(--bg) 0%,transparent), var(--bg) 85%); }',
 '#puerta .car-lam.bv{ display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top) + 26px) 26px 44px; }',
 '#puerta .bv-marca{ display:flex; align-items:center; gap:8px; }',
 '#puerta .bv-marca svg{ height:20px; width:auto; }',
@@ -14877,7 +14882,7 @@ function abrirPuerta(paso){
 }
 function cerrarPuerta(){
   var d=puertaEl(); if(d&&d.parentNode) d.parentNode.removeChild(d);
-  clearInterval(puertaCrono); clearInterval(googleT); carPara();
+  clearInterval(puertaCrono); clearInterval(googleT); carPara(); peakFondosPara();
   puertaAviso="";
 }
 
@@ -14921,11 +14926,20 @@ function repintaPie(){
   var t=document.createElement("div"); t.innerHTML=pieHTML();
   pie.parentNode.replaceChild(t.firstChild, pie);
 }
+var peakFondos=[];
+function peakFondosPara(){ peakFondos.forEach(function(a){ a.stop(); }); peakFondos=[]; }
+function peakFondosArranca(d){
+  peakFondosPara();
+  if(!window.PeakAnim || !window.Path2D) return;
+  var oscuro=document.documentElement.classList.contains("dark");
+  d.querySelectorAll(".bv-peak-c").forEach(function(c){ peakFondos.push(PeakAnim(c,{ pattern:"palabras", dark:oscuro })); });
+}
 function pintarBase(d){
   if(d.dataset.base==="1") return;
   d.className="bienve";
   d.innerHTML = carHTML() + pieHTML();
   d.dataset.base="1";
+  peakFondosArranca(d);
   carGestos(); carPinta(false); carArranca();
 }
 
