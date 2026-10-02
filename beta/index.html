@@ -448,8 +448,11 @@ html.embebido #acciones-flotantes{ top:94px; }
   if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   var c=document.createElement("canvas"); s.appendChild(c); s.classList.add("anim");
   var oscuro=document.documentElement.classList.contains("dark");
-  window.__splashAnim=PeakAnim(c,{ pattern:"gira", dark:oscuro });
-  window.__splashMin=Date.now()+1200;
+  /* la primera vez que se abre la app, el logo se despliega entero (icono → PEAK.) y de ahí a la
+     entrada; las demás veces, solo la montaña girando mientras carga */
+  var primera=false; try{ primera=!localStorage.getItem("peak-intro"); localStorage.setItem("peak-intro","1"); }catch(e){}
+  window.__splashAnim=PeakAnim(c,{ pattern:primera ? "frena" : "gira", dark:oscuro });
+  window.__splashMin=Date.now()+(primera ? 3700 : 1200);
   s.addEventListener("pointerdown", function(){ window.__splashMin=0; if(window.splashFuera) splashFuera(); });
 })();
 </script>
@@ -6098,7 +6101,7 @@ var CAR_CSS =
    Sin fotos. Cada lámina es un titular grande y una pieza real de la app
    que se anima sola cuando la lámina está delante. */
 var CARRUSEL=[
-  { marca:true },
+  /* { marca:true },  la lámina de la marca («Palabras»): fuera de momento, falta decidir dónde va */
   { t:"Cuida <br>el cuerpo.",          s:"Ejercicio, sueño, pantallas y meditación. Un toque y apuntado.",   e:escenaGym },
   { t:"Una racha <br>que engancha.",   s:"Tres retos al día, XP y niveles. Si haces los tres, ×1,5.",   e:escenaRacha },
   { t:"Con <br>los tuyos.",            s:"Tu grupo, un objetivo en común y quién tira más del carro.",       e:escenaGrupo },
