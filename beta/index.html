@@ -19752,38 +19752,37 @@ function mqNormalesBorde(T, geo){
   for(i=0;i<n;i++){ var o=grupo[i]*3; f.set(suma[o],suma[o+1],suma[o+2]).normalize(); out[i*3]=f.x; out[i*3+1]=f.y; out[i*3+2]=f.z; }
   geo.setAttribute("borde", new T.BufferAttribute(out, 3));
 }
-/* la ropa: camiseta del color de acento del tema con el logo de Peak. en el pecho izquierdo (del color
-   que la app pone sobre el acento), pantalón corto oscuro y zapatillas blancas, también con el logo, y
+/* la ropa: camiseta del color de acento del tema con la montaña de Peak. en el pecho izquierdo (del color
+   que la app pone sobre el acento), pantalón corto y zapatillas crema con suela de tinta, también con la montaña, y
    ribete negro en el cuello, las mangas y la boca de la zapatilla. Se pinta sobre la piel según dónde
    está cada punto en la pose de reposo (en metros; y arriba, x hacia su izquierda, z hacia delante),
    así los bordes salen limpios aunque la malla tenga pocos vértices. */
-var MQ_ROPA={ pantalon:"#2b2e3b", zapas:"#f3f3f6", suela:"#3b3d47", ribete:"#141418", conRibete:false };
-/* el logo (el mismo dibujo que el icono de la app, en sus unidades: 15,4 × 35,2): 1 = parte de arriba,
-   0,45 = parte de abajo, 0 = fuera */
+/* colores de la paleta crema y tinta: el pantalón, un gris cálido que se separa de la camiseta en los dos modos */
+var MQ_ROPA={ pantalon:"#57524b", pantalonOsc:"#3a3631", zapas:"#f5f0e6", suela:"#1c1b19", ribete:"#141311", conRibete:false };
+/* el logo: la montaña del icono de la app (PEAK_MK_D, caja de 900 × 900) dibujada una vez en una
+   textura; el shader la lee como máscara (1 = montaña, 0 = tela) */
+var MQ_LOGO_TEX=null;
+/* tres.js va recortado y no trae CanvasTexture: se clona la textura de la piel y se le cambia la imagen */
+function mqLogoTex(base){
+  if(MQ_LOGO_TEX) return MQ_LOGO_TEX;
+  var cv=document.createElement("canvas"); cv.width=cv.height=512;
+  var x=cv.getContext("2d"); x.fillStyle="#fff"; x.translate(16,16); x.scale(480/900, 480/900); x.fill(new Path2D(PEAK_MK_D));   /* con margen: si no, el borde de arriba recoge la base al filtrar */
+  /* ojo: la copia comparte la imagen (source) con la piel; se le da una propia antes de tocarla */
+  var t=base.clone(); t.source=Object.assign(Object.create(Object.getPrototypeOf(base.source)), base.source, { uuid:"mq-logo", version:0 });
+  t.image=cv; t.colorSpace=""; t.flipY=true; t.wrapS=t.wrapT=1001;   /* ClampToEdgeWrapping */ t.anisotropy=8; t.needsUpdate=true;
+  MQ_LOGO_TEX=t; return t;
+}
 var MQ_LOGO_GLSL=[
-  "float mqTri(vec2 p, vec2 a, vec2 b, vec2 c){",
-  "  float s = sign((b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x));",
-  "  vec2 e0=b-a, e1=c-b, e2=a-c;",
-  "  float d0 = s*((p.x-a.x)*e0.y-(p.y-a.y)*e0.x)/length(e0);",
-  "  float d1 = s*((p.x-b.x)*e1.y-(p.y-b.y)*e1.x)/length(e1);",
-  "  float d2 = s*((p.x-c.x)*e2.y-(p.y-c.y)*e2.x)/length(e2);",
-  "  return -max(d0, max(d1, d2));",
-  "}",
-  "float mqLogo(vec2 p){",
-  "  float w = max(0.5 * length(vec2(fwidth(p.x), fwidth(p.y))), 1e-4);",
-  "  float arriba = min(mqTri(p, vec2(7.7,0.), vec2(15.4,21.5), vec2(0.,21.5)), -mqTri(p, vec2(0.,21.5), vec2(15.4,21.5), vec2(7.7,20.)));",
-  "  float abajo = min(mqTri(p, vec2(7.7,35.2), vec2(15.4,21.5), vec2(0.,21.5)), -mqTri(p, vec2(0.,21.5), vec2(15.4,21.5), vec2(7.7,23.)));",
-  "  return max(smoothstep(-w, w, arriba), .45*smoothstep(-w, w, abajo));",
-  "}",
-  /* c: centro del logo (en metros) en el plano de la superficie, alto: su altura en metros */
-  "float mqLogoEn(vec2 q, vec2 c, float alto){ vec2 p = vec2((q.x-c.x), (c.y-q.y)) * (35.2/alto) + vec2(7.7, 17.6);",
-  "  if(p.x < -2. || p.x > 17.4 || p.y < -2. || p.y > 37.2) return 0.; return mqLogo(p); }"
+  "uniform sampler2D logoTex;",
+  /* c: centro del logo (en metros) en el plano de la superficie, alto: su lado en metros */
+  "float mqLogoEn(vec2 q, vec2 c, float alto){ vec2 p = (q - c) / alto * (480. / 512.) + 0.5;",
+  "  if(p.x < 0. || p.x > 1. || p.y < 0. || p.y > 1.) return 0.; return texture2D(logoTex, p).a; }"
 ].join("\n");
 function mqRopa(T, mat, color){
   var oscuro=document.documentElement.classList.contains("dark"), acento=color||"#4f46e5";
   var u={ camiseta:{ value:new T.Color(acento) }, logoC:{ value:new T.Color(mqColor("var(--on-accent, #ffffff)")) },
-          pantalon:{ value:new T.Color(MQ_ROPA.pantalon) }, logoP:{ value:new T.Color(oscuro ? acento : "#ffffff") },
-          zapas:{ value:new T.Color(MQ_ROPA.zapas) }, logoZ:{ value:new T.Color(acento) },
+          pantalon:{ value:new T.Color(oscuro ? MQ_ROPA.pantalonOsc : MQ_ROPA.pantalon) }, logoP:{ value:new T.Color(MQ_ROPA.zapas) },
+          zapas:{ value:new T.Color(MQ_ROPA.zapas) }, logoZ:{ value:new T.Color(MQ_ROPA.suela) }, logoTex:{ value:mqLogoTex(mat.map) },
           suela:{ value:new T.Color(MQ_ROPA.suela) }, ribete:{ value:new T.Color(MQ_ROPA.ribete) }, conRib:{ value:MQ_ROPA.conRibete?1:0 }, espejo:{ value:1 } };
   mat.userData.ropa=u;
   mat.onBeforeCompile=function(sh){
@@ -19809,10 +19808,10 @@ function mqRopa(T, mat, color){
         "  float ribZ = (1.0 - mqBorde(dZ - 0.007)) * conRib;",
         /* logos: pecho izquierdo y pantalón abajo a la izquierda, por delante; en la cara de fuera de cada zapatilla */
         "  float delante = step(0.12, n.z);",
-        "  float lC = mqLogoEn(vec2(r.x * espejo, r.y), vec2(0.08, 1.13), 0.085) * delante;",
-        "  float lP = mqLogoEn(vec2(r.x * espejo, r.y), vec2(0.095, 0.665), 0.06) * delante;",
+        "  float lC = mqLogoEn(vec2(r.x * espejo, r.y), vec2(0.08, 1.135), 0.075) * delante;",
+        "  float lP = mqLogoEn(vec2(r.x * espejo, r.y), vec2(0.1, 0.67), 0.045) * delante;",
         "  float fuera = step(0.12, n.x * sign(r.x));",
-        "  float lZ = mqLogoEn(vec2(r.y, r.z), vec2(0.037, 0.02), 0.06) * fuera;",   /* tumbado, apuntando a la puntera */
+        "  float lZ = mqLogoEn(vec2((0.02 - r.z) * sign(r.x), r.y), vec2(0.0, 0.052), 0.04) * fuera;",   /* de pie, mirando desde fuera */
         "  vec3 cZ = mix(mix(suela, zapas, smoothstep(0.018, 0.024, r.y)), logoZ, lZ);",
         "  cZ = mix(cZ, ribete, ribZ);",
         "  vec3 cP = mix(pantalon * doblP, logoP, lP);",
@@ -20551,7 +20550,7 @@ function maniquiMusculos(lienzo, zonas){
       if(vivo.fin) return;
       /* la camiseta, gris: así lo marcado (del color de acento) se ve también en el pecho */
       var oscuro=document.documentElement.classList.contains("dark");
-      if(M.ropa){ M.ropa.camiseta.value.set(oscuro ? "#5b5e69" : "#d5d8e0"); M.ropa.logoC.value.set(oscuro ? "#8b8f9c" : "#ffffff"); }
+      if(M.ropa){ M.ropa.camiseta.value.set(oscuro ? "#4a463f" : "#d9d1c3"); M.ropa.logoC.value.set(oscuro ? "#8a8378" : "#f5f0e6"); }
       mqMusculos(T, M.malla.material, zonas, acento);
       var esc=new T.Scene();
       esc.add(new T.HemisphereLight(0xffffff, 0xffffff, Math.PI));
@@ -20590,9 +20589,9 @@ var CRECER2_CSS=[
 '.cr-r-ico img, .cr-mini img{ width:100%; height:100%; object-fit:contain; opacity:0; transition:opacity .35s var(--ease); } .cr-r-ico img.ve, .cr-mini img.ve{ opacity:1; }',
 /* miniatura de la figura en la lista de pasos */
 '.cr-pasos li .cr-mini{ flex:0 0 auto; width:68px; height:68px; border-radius:14px; padding:2px; background:color-mix(in srgb,var(--accent) 10%,transparent); }',
-/* pantalla del modo guiado: fondo liso (blanco; en oscuro, el del tema), la persona en el centro,
+/* pantalla del modo guiado: fondo liso (el crema o el oscuro del tema, como el resto de Peak.), la persona en el centro,
    la fase en grande, el nombre con su «?» y abajo solo el número */
-'#guia, #gu-info{ --gu-fondo:#ffffff; --c:var(--accent); font-family:"Geist", "Inter", system-ui, sans-serif; }',
+'#guia, #gu-info{ --gu-fondo:var(--bg); --c:var(--accent); font-family:"Geist", "Inter", system-ui, sans-serif; }',
 '#guia *, #gu-info *{ font-family:inherit; }',
 'html.dark #guia, html.dark #gu-info{ --gu-fondo:var(--bg); }',
 '#guia{ position:fixed; inset:0; z-index:70; display:flex; flex-direction:column; padding:calc(env(safe-area-inset-top) + 14px) 20px calc(env(safe-area-inset-bottom) + 22px);',
