@@ -40,8 +40,11 @@ window.PeakAnim = function(cv, o){
   if (ro) ro.observe(cv); else window.addEventListener("resize", resize);
   resize();
 
+  // Todo se repite exactamente cada T segundos (bucle perfecto para vídeo):
+  // las ondas usan múltiplos de 2π/T y cada fila avanza 10 o 20 letras por ciclo.
+  var T = 12, F = Math.PI*2/T, KP = Math.PI*2/10;
   var rows = [];
-  for (var r = 0; r < ROWS; r++) rows.push({ k: r*2 + 3, x: -((r*37) % 60), dir: r % 2 ? -1 : 1, v: 34 + (r*7 % 3)*14, cy: 0, h: 0, y: 0, wt: 1 });
+  for (var r = 0; r < ROWS; r++) rows.push({ u: r*2.3 + 3, dir: r % 2 ? -1 : 1, rate: (r % 3 === 1 ? 20 : 10)/T, cy: 0, h: 0, y: 0, wt: 1 });
 
   var ptr = { x: 0, y: 0, tx: 0, ty: 0, s: 0, ts: 0, down: false, last: -1e9 };
   function move(e){
@@ -59,17 +62,17 @@ window.PeakAnim = function(cv, o){
   }
 
   function letterFx(k, r){
-    var a = Math.sin(k*0.62 + t*1.25*(r%2 ? 1 : -1) + r*0.8);
-    var b = Math.sin(k*0.23 - t*0.55 + r*1.7);
+    var a = Math.sin(k*KP + t*2*F*(r%2 ? 1 : -1) + r*0.8);
+    var b = Math.sin(k*2*KP - t*F + r*1.7);
     return 0.62 + 0.5*(0.5 + 0.5*a) + 0.18*b;
   }
-  function letterFy(k, r){ return 0.62 + 0.38*(0.5 + 0.5*Math.sin(k*0.47 - t*1.05 + r*0.55)); }
+  function letterFy(k, r){ return 0.62 + 0.38*(0.5 + 0.5*Math.sin(k*KP + 2.1 - t*2*F + r*0.55)); }
   function bulge(cx, cy){
     var R = Math.min(W, H)*0.34, dx = cx - ptr.x, dy = cy - ptr.y;
     return ptr.s*Math.exp(-(dx*dx + dy*dy)/(R*R));
   }
   function spinAngle(k, r){
-    var P = 5.2, off = r*0.21 + k*0.09, f = mod((t - off)/P, 1), SP = 0.32;
+    var P = 6, off = r*0.21 + k*0.6, f = mod((t - off)/P, 1), SP = 0.32;
     return f < SP ? ease(f/SP)*Math.PI*2 : 0;
   }
   function adv(k, r, s, xLeft, cy){
@@ -97,17 +100,17 @@ window.PeakAnim = function(cv, o){
     ctx.restore();
   }
 
-  function drawRow(row, r, dt){
+  function drawRow(row, r){
     var dark = r % 2 === parity, fg = dark ? CREAM : INK;
     ctx.fillStyle = dark ? INK : CREAM;
     ctx.fillRect(0, row.y - 0.5, W, row.h + 1);
-    var s = row.h*0.74/YH, a, i;
-    row.x += row.dir*row.v*dt;
-    for (i = 0; i < 20 && row.x > 0; i++){ a = adv(row.k - 1, r, s, row.x - 300*s, row.cy); row.k--; row.x -= a.w + a.gap; }
-    for (i = 0; i < 20; i++){ a = adv(row.k, r, s, row.x, row.cy); if (row.x + a.w + a.gap < 0){ row.x += a.w + a.gap; row.k++; } else break; }
+    var s = row.h*0.74/YH, a;
+    // u = índice (con decimales) de la letra que asoma por la izquierda
+    var u = row.u + row.dir*row.rate*t, k = Math.floor(u);
+    a = adv(k, r, s, -100*s, row.cy);
+    var x = -(u - k)*(a.w + a.gap);
     ctx.save();
     ctx.beginPath(); ctx.rect(0, row.y, W, row.h); ctx.clip();
-    var x = row.x, k = row.k;
     while (x < W){
       a = adv(k, r, s, x, row.cy);
       var fy = Math.min(1.12, letterFy(k, r) + a.b*0.9);
@@ -128,19 +131,19 @@ window.PeakAnim = function(cv, o){
     t += dt;
     var idle = performance.now() - ptr.last > 1800 && !ptr.down;
     if (idle || o.fixedTime){
-      ptr.tx = W*(0.5 + 0.36*Math.sin(t*0.37)); ptr.ty = H*(0.5 + 0.38*Math.sin(t*0.23 + 1.3)); ptr.ts = 0.7;
+      ptr.tx = W*(0.5 + 0.36*Math.sin(t*F)); ptr.ty = H*(0.5 + 0.38*Math.sin(t*2*F + 1.3)); ptr.ts = 0.7;
     } else ptr.ts = 1.25;
     var lk = 1 - Math.pow(0.0015, dt || 0.016);
     ptr.x += (ptr.tx - ptr.x)*lk; ptr.y += (ptr.ty - ptr.y)*lk; ptr.s += (ptr.ts - ptr.s)*lk*0.6;
     var sum = 0, R = Math.min(W, H)*0.34, r, row, dy, y = 0;
     for (r = 0; r < ROWS; r++){
       row = rows[r]; dy = (row.cy || H*(r + .5)/ROWS) - ptr.y;
-      row.wt = 1 + 0.42*Math.sin(t*0.62 + r*0.95) + 1.4*ptr.s*Math.exp(-dy*dy/(R*R));
+      row.wt = 1 + 0.42*Math.sin(t*F + r*0.95) + 1.4*ptr.s*Math.exp(-dy*dy/(R*R));
       sum += row.wt;
     }
     for (r = 0; r < ROWS; r++){ row = rows[r]; row.h = row.wt/sum*H; row.cy = y + row.h/2; row.y = y; y += row.h; }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    for (r = 0; r < ROWS; r++) drawRow(rows[r], r, dt);
+    for (r = 0; r < ROWS; r++) drawRow(rows[r], r);
   }
 
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
