@@ -33,6 +33,7 @@ var STRIPES = 6, GAP = 0.34;
 function mod(a, n){ return ((a % n) + n) % n; }
 function clamp(x){ return x < 0 ? 0 : x > 1 ? 1 : x; }
 function easeIO(x){ x = clamp(x); return x < .5 ? 4*x*x*x : 1 - Math.pow(-2*x + 2, 3)/2; }
+function easeOutBack(x, c){ x = clamp(x); return 1 + (c + 1)*Math.pow(x - 1, 3) + c*Math.pow(x - 1, 2); }
 function easeBack(x){ x = clamp(x); var c = 1.6; return 1 + (c + 1)*Math.pow(x - 1, 3) + c*Math.pow(x - 1, 2); }
 function mix(a, b, u){ return a + (b - a)*u; }
 
@@ -185,14 +186,18 @@ window.PeakAnim = function(cv, o){
     // las letras se meten en la montaña y queda el icono solo, quieto
     recoge: function(fg, bg){ seq(fg, bg, false); },
     // del icono quieto sale el logo completo
-    despliega: function(fg, bg){ seq(fg, bg, true); }
+    // del icono quieto sale el logo completo; la vuelta arranca muy lenta, acelera
+    // y al final se pasa un poco de largo y vuelve a su sitio, como con inercia
+    despliega: function(fg, bg){ seq(fg, bg, true, "acelera"); },
+    // igual, pero la vuelta arranca rápida y se va frenando hasta quedar de frente
+    frena: function(fg, bg){ seq(fg, bg, true, "frena"); }
   };
 
   // secuencias de 6 s, con la montaña quieta y de frente al empezar y al acabar.
   // Mientras las letras entran o salen da exactamente una vuelta a ritmo constante.
   // recoge: logo → letras dentro → icono grande en el centro
   // despliega: icono grande → baja a su sitio → salen las letras
-  function seq(fg, bg, back){
+  function seq(fg, bg, back, curve){
     var P = 6, x = mod(t, P);
     var w = bigW(), s = w/(WM_X1 - WM_X0), ac = (A_X0 + A_X1)/2;
     var aDxEnd = W/2 - (W/2 - w/2 - WM_X0*s + ac*s);       // lo que se mueve la A hasta el centro
@@ -207,9 +212,18 @@ window.PeakAnim = function(cv, o){
       for (i = 0; i < 4; i++) p.push(1 - easeBack((x - t0 - order[i])/1.2));
       m = 1 - easeIO((x - 0.6)/1.0);
     }
-    // una vuelta exacta a ritmo constante: en despliega desde que empieza a encogerse
-    // hasta que se colocan las letras; en recoge, al revés
-    th = back ? Math.PI*2*clamp((x - 0.6)/2.4) : Math.PI*2*clamp((x - 0.8)/2.45);
+    // una vuelta exacta: en despliega desde que empieza a encogerse hasta que se
+    // colocan las letras (con velocidad curva); en recoge, al revés y constante
+    var u;
+    if (!back) u = clamp((x - 0.8)/2.45);
+    else if (curve === "frena"){
+      u = clamp((x - 0.6)/2.6);
+      u = 1 - Math.pow(1 - u, 4);
+    } else {
+      u = clamp((x - 0.6)/2.7);
+      u = easeOutBack(Math.pow(u, 2.6), 1.1);
+    }
+    th = Math.PI*2*u;
     ctx.save();
     ctx.globalAlpha = Math.min(clamp(x/0.35), clamp((P - x)/0.35));
     wordmark(W/2, Hc/2, w, th, fg, bg, p, aDxEnd*m, mix(1, 3.2, m));
@@ -245,5 +259,5 @@ window.PeakAnim = function(cv, o){
     setPaused: function(v){ paused = !!v; }
   };
 };
-window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "construye", "recoge", "despliega"];
+window.PeakAnim.patterns = ["palabras", "ajedrez", "cuadricula", "columnas", "logo", "salto", "construye", "recoge", "despliega", "frena"];
 })();
