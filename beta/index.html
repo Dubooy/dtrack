@@ -6117,49 +6117,34 @@ var CAR_CSS =
 "@media (min-height:900px){ #puerta .car-tel{ max-width:244px; } }"+
 "@media (max-height:700px){ #puerta .car-caja{ padding-top:9%; } #puerta .car-tel{ width:40%; } }";
 
-/* ── la entrada con la imagen de Peak.: Unbounded en titulares y botones, crema y tinta,
-   esquinas rectas suaves y las rayas de la montaña como detalle ── */
+/* ── la entrada con la imagen de Peak.: titulares en Unbounded, crema y tinta, todo liso ── */
 var PK_PUERTA_CSS=[
-'#puerta{ --pk:#1C1B19; --pk-on:#F5F0E6; --pk-sup:#FFFCF6; --pk-linea:rgba(28,27,25,.16); }',
-'html.dark #puerta{ --pk:#F1EBDF; --pk-on:#141311; --pk-sup:#1E1C19; --pk-linea:rgba(241,235,223,.18); }',
-'#puerta .bv-t, #puerta .pu-t, #puerta .bv-cuenta, #puerta .bv-mini b, #puerta .bv-bonus b, #puerta .bv-comun-t b,',
-'#puerta .pu-boton-t, #puerta .pu-codigo{ font-family:Unbounded,"Plus Jakarta Sans",sans-serif!important; }',
-'#puerta .bv-t{ font-size:33px; font-weight:700; letter-spacing:-.035em; line-height:1.08; }',
-'#puerta .pu-t{ font-size:23px; font-weight:700; letter-spacing:-.03em; line-height:1.15; }',
-'#puerta .bv-cuenta{ font-weight:700!important; letter-spacing:-.04em!important; }',
-'@media (max-height:720px){ #puerta .bv-t{ font-size:26px; } }',
-/* botón principal: tinta maciza con las rayas del logo asomando a la derecha */
-'#puerta .pu-boton{ position:relative; overflow:hidden; border-radius:16px; color:var(--pk-on); background:var(--pk); box-shadow:none; }',
-'#puerta .pu-boton:after{ content:""; position:absolute; top:0; bottom:0; right:0; width:34%; pointer-events:none;',
-'  background:repeating-linear-gradient(118deg, transparent 0 7px, color-mix(in srgb,var(--pk-on) 22%,transparent) 7px 9px);',
-'  -webkit-mask-image:linear-gradient(90deg, transparent, #000 85%); mask-image:linear-gradient(90deg, transparent, #000 85%); }',
-'#puerta .pu-boton-t, #puerta .pu-boton > :not(.pu-boton-sub){ position:relative; z-index:1; }',
-'#puerta .pu-boton{ font-family:Unbounded,sans-serif; font-size:14px; font-weight:600; letter-spacing:.01em; }',
-'#puerta .pu-boton-t{ font-size:14px; font-weight:600; letter-spacing:.01em; }',
-'#puerta .pu-boton-sub{ position:relative; z-index:1; font-family:Inter,sans-serif; letter-spacing:0; }',
-'#puerta .pu-google{ border-radius:16px; }',
-'#puerta .pu-enlace{ color:var(--pk); font-weight:600; text-decoration:underline; text-decoration-thickness:1.5px; text-underline-offset:4px; }',
-'#puerta .pu-enlace[disabled]{ color:var(--t3); text-decoration:none; }',
-'#puerta .pu-campo, #puerta .pu-grupo{ border-radius:14px; background:var(--pk-sup); box-shadow:inset 0 0 0 1.5px var(--pk-linea); }',
-'#puerta .pu-campo:focus{ background:var(--pk-sup); box-shadow:inset 0 0 0 2px var(--pk); }',
-'#puerta .pu-codigo{ font-weight:700; letter-spacing:.22em; }',
-'#puerta .pu-o{ text-transform:uppercase; letter-spacing:.12em; font-size:10.5px; font-weight:600; }',
+'#puerta{ --pk:#1C1B19; --pk-on:#F5F0E6; --pk-sup:#FFFCF6; --pk-campo:rgba(28,27,25,.05); --pk-linea:rgba(28,27,25,.10); }',
+'html.dark #puerta{ --pk:#F1EBDF; --pk-on:#141311; --pk-sup:#1E1C19; --pk-campo:rgba(241,235,223,.06); --pk-linea:rgba(241,235,223,.12); }',
+/* titulares en Unbounded, como el logo; el resto en Inter */
+'#puerta .bv-t, #puerta .pu-t{ font-family:Unbounded,"Plus Jakarta Sans",sans-serif!important; font-weight:600; }',
+'#puerta .bv-t{ font-size:31px; letter-spacing:-.04em; line-height:1.1; }',
+'#puerta .pu-t{ font-size:22px; letter-spacing:-.035em; line-height:1.2; }',
+'@media (max-height:720px){ #puerta .bv-t{ font-size:25px; } }',
+/* botón principal: tinta lisa, sin degradado ni sombra de color */
+'#puerta .pu-boton{ border-radius:999px; color:var(--pk-on); background:var(--pk); box-shadow:none; font-size:15.5px; font-weight:600; letter-spacing:-.005em; }',
+'#puerta .pu-boton-t{ font-size:15.5px; font-weight:600; }',
+'#puerta .pu-google{ border-radius:999px; }',
+'#puerta .pu-enlace{ color:var(--pk); font-weight:600; }',
+'#puerta .pu-enlace[disabled]{ color:var(--t3); }',
+/* campos: relleno suave sin borde; al escribir, un filo de tinta */
+'#puerta .pu-campo, #puerta .pu-grupo{ border-radius:16px; background:var(--pk-campo); box-shadow:none; }',
+'#puerta .pu-campo:focus{ background:var(--pk-campo); box-shadow:inset 0 0 0 1.5px var(--pk); }',
 '#puerta .pu-o:before, #puerta .pu-o:after{ background:var(--pk-linea); }',
-/* la hoja: papel crema liso con un filo de tinta, sin cristal */
-'#puerta .puerta-tarjeta{ border-radius:24px!important; background:var(--pk-sup); backdrop-filter:none; -webkit-backdrop-filter:none;',
-'  box-shadow:0 30px 80px -30px rgba(0,0,0,.45), inset 0 0 0 1px var(--pk-linea); }',
-'#puerta .puerta-velo{ background:color-mix(in srgb,var(--pk) 22%,transparent); }',
-'#puerta .hoja-x{ border-radius:12px!important; background:transparent; box-shadow:inset 0 0 0 1.5px var(--pk-linea); color:var(--pk); }',
-/* puntos del carrusel: el activo es una montañita */
-'#puerta .car-puntos{ align-items:flex-end; gap:8px; }',
+/* la hoja: lisa, sin cristal ni filo */
+'#puerta .puerta-tarjeta{ border-radius:28px!important; background:var(--pk-sup); backdrop-filter:none; -webkit-backdrop-filter:none;',
+'  box-shadow:0 24px 60px -24px rgba(0,0,0,.35); }',
+'#puerta .puerta-velo{ background:rgba(20,19,17,.28); }',
+'#puerta .hoja-x{ background:var(--pk-campo); color:var(--t2); }',
+/* puntos del carrusel: barritas, la activa más larga y en tinta */
 '#puerta .car-puntos .car-punto{ width:6px; height:6px; border-radius:99px; background:var(--pk-linea); }',
-'#puerta .car-puntos .car-punto.on{ width:12px; height:11px; border-radius:0; background:var(--pk); clip-path:polygon(50% 0,0 100%,100% 100%); }',
-/* esperando a Google: la montaña con sus caras pasando, como la pantalla de carga */
-'#puerta .pu-espera i{ width:38px; height:35px; border:0; border-radius:0; clip-path:polygon(50% 0,0 100%,100% 100%);',
-'  background:linear-gradient(90deg, var(--pk) 0 50%, transparent 50%), repeating-linear-gradient(90deg, var(--pk) 0 3px, transparent 3px 6px);',
-'  background-size:76px 100%, 100% 100%; animation:pkCaras 1.2s linear infinite; }',
-'@keyframes pkCaras{ from{ background-position:-38px 0, 0 0; } to{ background-position:38px 0, 0 0; } }',
-'@media (prefers-reduced-motion:reduce){ #puerta .pu-espera i{ animation-duration:3s; } }'
+'#puerta .car-puntos .car-punto.on{ width:20px; background:var(--pk); }',
+'#puerta .pu-espera i{ border-color:var(--pk-linea); border-top-color:var(--pk); }'
 ].join("\n");
 
 /* ════════════════ bienvenida: la app en movimiento ════════════════
