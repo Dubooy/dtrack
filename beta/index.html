@@ -1242,6 +1242,9 @@ var I18N_FILAS=[
 ["Vital","Health","Santé","Salute"],
 ["Académico","School","Scolaire","Scuola"],
 ["Social","Social","Social","Social"],
+["Cuerpo","Body","Corps","Corpo"],
+["Mente","Mind","Esprit","Mente"],
+["Cabeza y estudio","Mind and study","Esprit et études","Mente e studio"],
 ["Tareas","Tasks","Tâches","Compiti"],
 ["Horario","Timetable","Emploi du temps","Orario"],
 ["Inicio","Home","Accueil","Home"],
@@ -3088,7 +3091,7 @@ function seed(){
     .map(function(s,i){ return {id:"s"+(i+1),name:s[0],short:s[1],color:PAL[i%PAL.length]}; });
   return {
     profile:{ name:"", evento:"", ebau:"", school:{ name:"", links:[] } },
-    labels:{ app:"Peak.", sub:"", resumen:"Resumen", retos:"Objetivos", vital:"Vital", academico:"Organización", tareas:"Tareas", social:"Social" },
+    labels:{ app:"Peak.", sub:"", resumen:"Hoy", retos:"Objetivos", vital:"Cuerpo", academico:"Mente", tareas:"Tareas", social:"Social" },
     subjects:subs, schedule:{}, timetable:defaultTimetable(), agenda:{modo:"libre", ini:"07:00", fin:"22:00", paso:60},
     exams:[],
     tasks:[],
@@ -18341,10 +18344,69 @@ var MEJORAS_CSS=[
 (function(){ var st=document.createElement("style"); st.id="mejoras-css"; st.textContent=MEJORAS_CSS; document.head.appendChild(st); })();
 
 
+/* ════════ secciones de Peak.: Hoy · Objetivos · Cuerpo · Mente · Social ════════
+   Las vistas por dentro siguen llamándose resumen, retos, vital, academico y social;
+   aquí solo cambian los nombres, el orden de abajo y dónde vive la meditación.
+   Mente junta la meditación con el estudio (horario, exámenes y tareas). Si no
+   estudias, Mente abre Tareas con la meditación arriba. */
+var ICO_MENTE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.5 3.5 5v13.5c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5V20"/></svg>';
+function seccionesPeak(){
+  var L=S.labels||(S.labels={});
+  if(!L.resumen || L.resumen==="Resumen") L.resumen="Hoy";
+  if(!L.vital || L.vital==="Vital") L.vital="Cuerpo";
+  if(!L.academico || L.academico==="Organización" || L.academico==="Académico") L.academico="Mente";
+  if(!L.retos) L.retos="Objetivos";
+  /* el icono de Mente, en la barra lateral y en la de abajo */
+  $$('#rail button[data-view="academico"] svg, #mtabs button[data-view="academico"] svg').forEach(function(sv){ sv.outerHTML=ICO_MENTE; });
+  /* abajo, Mente va antes que Social */
+  var bar=$("#mtabs"), bm=bar && bar.querySelector('button[data-view="academico"]'), bs=bar && bar.querySelector('button[data-view="social"]');
+  if(bm && bs && bm.compareDocumentPosition(bs) & Node.DOCUMENT_POSITION_PRECEDING) bar.insertBefore(bm, bs);
+  /* los títulos pequeños de encima */
+  var ea=$("#v-academico .eyebrow"); if(ea) ea.textContent="Cabeza y estudio";
+  ["academico","tareas"].forEach(function(k){
+    var v=$("#v-"+k); if(!v || $("#mente-"+k)) return;
+    var d=document.createElement("div"); d.id="mente-"+k; d.className="mente-hueco";
+    var cab=v.querySelector(":scope > div"); if(cab) cab.parentNode.insertBefore(d, cab.nextSibling);
+  });
+  save();
+}
+/* sin estudios, la pestaña sigue siendo Mente (antes pasaba a llamarse Tareas) */
+var _academicoAplicaPeak=academicoAplica;
+academicoAplica=function(){
+  var r=_academicoAplicaPeak.apply(this, arguments);
+  var bTa=document.querySelector('#mtabs button[data-view="tareas"]');
+  if(bTa && academicoOff()) bTa.innerHTML=ICO_MENTE+'<span data-label="academico">'+esc((S.labels&&S.labels.academico)||"Mente")+'</span>';
+  return r;
+};
+/* la meditación vive en Mente, en la vista que esté abierta */
+function menteHueco(){
+  var k=(academicoOff() || view==="tareas") ? "tareas" : "academico";
+  return document.getElementById("mente-"+k);
+}
+var _medPintaPeak=medPintaTarjeta;
+medPintaTarjeta=function(){
+  var h=menteHueco(), c=document.getElementById("med-card");
+  if(h){
+    if(!c){ c=document.createElement("div"); c.id="med-card"; c.className="glass rounded-[24px] pad"; }
+    if(c.parentNode!==h) h.appendChild(c);
+  }
+  return _medPintaPeak.apply(this, arguments);
+};
+var _goPeak=go;
+go=function(v){
+  var r=_goPeak.apply(this, arguments);
+  if(v==="academico" || v==="tareas"){ try{ medPintaTarjeta(); }catch(e){} }
+  return r;
+};
+(function(){ var st=document.createElement("style"); st.textContent=
+  '.mente-hueco:empty{ display:none; } .mente-hueco{ margin-bottom:20px; }'; document.head.appendChild(st); })();
+
+
 if(!load()) save();
 if(S.cats.length) newCat=S.cats[0].id;
 trArranca();
 extrasArranca();
+seccionesPeak();
 go("resumen");
 arrancarCuenta();
 if(!S.tour && !puertaEl()) setTimeout(function(){ tourStep=0; renderTour(); }, 700);
