@@ -74,10 +74,13 @@ class PeakViewController: CAPBridgeViewController, UITabBarDelegate, WKScriptMes
         "social": ("person.2", "person.2.fill")
     ]
 
-    override func webViewConfiguration(for instanceConfiguration: InstanceConfiguration) -> WKWebViewConfiguration {
-        let c = super.webViewConfiguration(for: instanceConfiguration)
-        c.userContentController.add(Debil(self), name: "peakBarra")
-        return c
+    // Capacitor cambia el userContentController de la configuración por el suyo
+    // al crear la web, así que el canal se añade al suyo cuando ya existe.
+    override func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        guard let ucc = webView?.configuration.userContentController else { return }
+        ucc.removeScriptMessageHandler(forName: "peakBarra")
+        ucc.add(Debil(self), name: "peakBarra")
     }
 
     override func viewDidLoad() {
