@@ -1,5 +1,5 @@
 -- ════════════════════════════════════════════════════════════════
--- DTrack · varios grupos a la vez
+-- Peak · varios grupos a la vez
 --
 -- Cómo se instala (una sola vez, después de social.sql):
 --   Supabase → SQL Editor → New query → pega TODO este archivo → Run.

@@ -1,13 +1,13 @@
 {
-  "name": "DTrack Pruebas",
-  "short_name": "DTrack β",
-  "description": "Hábitos, retos, tareas, estudio y el parte del día. Para ti, y si quieres, con tus amigos.",
+  "name": "Peak.",
+  "short_name": "Peak.",
+  "description": "Hábitos, cuerpo y mente en un solo sitio. Para ti, y si quieres, con tus amigos.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#4f46e5",
-  "theme_color": "#0b0b0f",
+  "background_color": "#1c1b19",
+  "theme_color": "#f5f0e6",
   "lang": "es",
   "icons": [
     {
