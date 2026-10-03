@@ -18,6 +18,14 @@
 --     perfil (la escribes tú) y sus likes (❤️) y reacciones.
 --   · Funciones gc_* (chat) y gf_* (fotos) que usa la app.
 --   · Tiempo real: g_chat se apunta a «supabase_realtime».
+--   · Moderación: g_denuncias (lo que alguien denuncia) y g_bloqueos
+--     (a quién has bloqueado). Un mensaje con 3 denuncias de personas
+--     distintas se esconde solo para todos menos para quien lo escribió.
+--     No ves nada de quien has bloqueado. Funciones gm_*.
+--
+-- Revisar denuncias: Supabase → Table Editor → g_denuncias (las nuevas
+-- tienen estado «pendiente»). Para borrar un mensaje, bórralo en g_chat;
+-- para devolver uno escondido por error, pon «oculto» a false.
 --
 -- Quién ve qué: solo los miembros de un grupo ven y escriben en su
 -- chat; las fotos de tu perfil (descripción, likes) solo las ven quienes
@@ -80,6 +88,16 @@ create index if not exists g_chat_grupo_id on public.g_chat (grupo, id desc);
 create index if not exists g_chat_padre on public.g_chat (padre) where padre is not null;
 create index if not exists g_chat_evento on public.g_chat (grupo, evento) where evento is not null;
 
+-- ── moderación: lo que hace falta antes de los permisos del chat ──
+alter table public.g_chat add column if not exists oculto boolean not null default false;
+create table if not exists public.g_bloqueos (
+  uid       uuid        not null default auth.uid(),
+  bloqueado uuid        not null,
+  creado    timestamptz not null default now(),
+  primary key (uid, bloqueado),
+  constraint g_bloqueos_no_a_ti check (uid <> bloqueado)
+);
+
 alter table public.g_chat enable row level security;
 revoke all on public.g_chat from anon, authenticated;
 grant select on public.g_chat to authenticated;
@@ -89,7 +107,9 @@ grant delete on public.g_chat to authenticated;
 
 drop policy if exists g_chat_ver on public.g_chat;
 create policy g_chat_ver on public.g_chat for select to authenticated
-  using (grupo in (select public.gc_mis_ids()));
+  using (grupo in (select public.gc_mis_ids())
+         and (not oculto or uid = auth.uid())
+         and not exists (select 1 from public.g_bloqueos b where b.uid = auth.uid() and b.bloqueado = g_chat.uid));
 drop policy if exists g_chat_escribir on public.g_chat;
 create policy g_chat_escribir on public.g_chat for insert to authenticated
   with check (uid = auth.uid() and grupo in (select public.gc_mis_ids()));
@@ -356,6 +376,117 @@ begin
     where dueno = p_dueno and dia = p_dia group by emoji) x;
   return r;
 end $$;
+
+-- ════════════════ MODERACIÓN ════════════════
+alter table public.g_bloqueos enable row level security;
+revoke all on public.g_bloqueos from anon, authenticated;
+grant select, delete on public.g_bloqueos to authenticated;
+grant insert (bloqueado) on public.g_bloqueos to authenticated;
+drop policy if exists gb_ver on public.g_bloqueos;
+create policy gb_ver on public.g_bloqueos for select to authenticated using (uid = auth.uid());
+drop policy if exists gb_poner on public.g_bloqueos;
+create policy gb_poner on public.g_bloqueos for insert to authenticated with check (uid = auth.uid());
+drop policy if exists gb_quitar on public.g_bloqueos;
+create policy gb_quitar on public.g_bloqueos for delete to authenticated using (uid = auth.uid());
+
+create table if not exists public.g_denuncias (
+  id     bigint generated always as identity primary key,
+  uid    uuid        not null default auth.uid(),
+  tipo   text        not null check (tipo in ('mensaje', 'foto', 'perfil')),
+  ref    text        not null check (char_length(ref) between 1 and 500),
+  autor  uuid,
+  motivo text        not null check (motivo in ('acoso', 'sexual', 'violencia', 'odio', 'spam', 'otro')),
+  nota   text        not null default '' check (char_length(nota) <= 500),
+  estado text        not null default 'pendiente' check (estado in ('pendiente', 'revisada', 'retirada')),
+  creado timestamptz not null default now(),
+  unique (uid, tipo, ref)
+);
+alter table public.g_denuncias enable row level security;
+revoke all on public.g_denuncias from anon, authenticated;
+grant select on public.g_denuncias to authenticated;
+grant insert (tipo, ref, autor, motivo, nota) on public.g_denuncias to authenticated;
+grant update (motivo, nota) on public.g_denuncias to authenticated;
+drop policy if exists gd_ver on public.g_denuncias;
+create policy gd_ver on public.g_denuncias for select to authenticated using (uid = auth.uid());
+drop policy if exists gd_poner on public.g_denuncias;
+create policy gd_poner on public.g_denuncias for insert to authenticated with check (uid = auth.uid());
+drop policy if exists gd_cambiar on public.g_denuncias;
+create policy gd_cambiar on public.g_denuncias for update to authenticated using (uid = auth.uid()) with check (uid = auth.uid());
+
+-- ── con 3 denuncias de personas distintas, el mensaje se esconde ──
+-- Corre con los permisos del dueño de la base (security definer) porque
+-- quien denuncia no puede tocar los mensajes de otros.
+create or replace function public.gm_tras_denuncia()
+returns trigger
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if new.tipo = 'mensaje' and new.ref ~ '^[0-9]{1,18}$' then
+    if (select count(distinct uid) from public.g_denuncias where tipo = 'mensaje' and ref = new.ref) >= 3 then
+      update public.g_chat set oculto = true where id = new.ref::bigint;
+    end if;
+  end if;
+  return new;
+end $$;
+revoke execute on function public.gm_tras_denuncia() from anon, authenticated, public;
+drop trigger if exists g_denuncias_tras on public.g_denuncias;
+create trigger g_denuncias_tras after insert on public.g_denuncias
+  for each row execute function public.gm_tras_denuncia();
+
+-- ── denunciar un mensaje, una foto o a una persona ──
+create or replace function public.gm_denunciar(p_tipo text, p_ref text, p_motivo text,
+                                               p_nota text default '', p_autor uuid default null)
+returns boolean
+language plpgsql volatile security invoker
+set search_path = public
+as $$
+declare a uuid := p_autor;
+begin
+  if auth.uid() is null then raise exception 'sin_sesion'; end if;
+  if p_tipo = 'mensaje' and coalesce(p_ref, '') ~ '^[0-9]{1,18}$' then
+    select uid into a from public.g_chat where id = p_ref::bigint;
+  end if;
+  insert into public.g_denuncias (tipo, ref, autor, motivo, nota)
+  values (p_tipo, left(coalesce(p_ref, ''), 500), a, p_motivo, left(coalesce(p_nota, ''), 500))
+  on conflict (uid, tipo, ref) do update set motivo = excluded.motivo, nota = excluded.nota;
+  return true;
+end $$;
+
+-- ── bloquear, desbloquear y la lista de bloqueados ──
+create or replace function public.gm_bloquear(p_uid uuid)
+returns boolean
+language plpgsql volatile security invoker
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then raise exception 'sin_sesion'; end if;
+  if p_uid is null or p_uid = auth.uid() then return false; end if;
+  insert into public.g_bloqueos (bloqueado) values (p_uid) on conflict do nothing;
+  return true;
+end $$;
+
+create or replace function public.gm_desbloquear(p_uid uuid)
+returns boolean
+language sql volatile security invoker
+set search_path = public
+as $$
+  with x as (delete from public.g_bloqueos where uid = auth.uid() and bloqueado = p_uid returning 1)
+  select exists (select 1 from x);
+$$;
+
+create or replace function public.gm_bloqueados()
+returns json
+language sql stable security invoker
+set search_path = public
+as $$
+  select coalesce(json_agg(bloqueado order by creado), '[]'::json) from public.g_bloqueos where uid = auth.uid();
+$$;
+
+revoke execute on function public.gm_denunciar(text, text, text, text, uuid), public.gm_bloquear(uuid),
+  public.gm_desbloquear(uuid), public.gm_bloqueados() from anon, public;
+grant execute on function public.gm_denunciar(text, text, text, text, uuid), public.gm_bloquear(uuid),
+  public.gm_desbloquear(uuid), public.gm_bloqueados() to authenticated;
 
 -- ════════════════ PERMISOS DE LAS FUNCIONES ════════════════
 revoke execute on function public.gc_mis_ids(), public.gc_leer(text, bigint, int),
