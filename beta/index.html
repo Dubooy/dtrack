@@ -19261,7 +19261,7 @@ function lcAbre(id){
     LC.rend.on("relocated", lcMovido);
     LC.book.loaded.navigation.then(function(nav){ LC.toc=nav && nav.toc || []; });
     var s=lbEst(id)||{};
-    return LC.rend.display(s.cfi || undefined).then(function(){ return lcPaginas(id); });
+    return (s.cfi ? LC.rend.display(s.cfi) : LC.book.ready.then(function(){ return LC.rend.display(window.lcInicio ? lcInicio(LC.book) : undefined); })).then(function(){ return lcPaginas(id); });
   }).catch(function(e){
     var c=document.getElementById("lc-carga");
     if(c) c.innerHTML='<p>No he podido abrir el libro.<br><small>'+(navigator.onLine?"Vuelve a intentarlo en un momento.":"Sin internet: la primera vez hace falta conexión para bajarlo.")+'</small></p>';
@@ -21803,6 +21803,142 @@ rcSubeAvatar=function(blob, previa){
   go=function(){ var r=_goNativo.apply(this, arguments); setTimeout(manda, 30); return r; };
   setInterval(manda, 400);
   setTimeout(manda, 50);
+})();
+/* ════════════════════════════════════════════════════════════════
+   ESTIRAR Y LEER, A UN TOQUE (oct 2026)
+   Los estiramientos viven en Cuerpo y los libros en Mente, arriba del
+   todo, en filas que se deslizan de lado. Un toque en una rutina la
+   empieza ya en modo guiado (la explicación de cada postura está en el
+   «?» de la guía); un toque en un libro gratis lo abre en el lector. En
+   Hoy solo queda una fila para seguir leyendo, y «Para crecer» sale de
+   Objetivos para que no haya nada repetido.
+   ════════════════════════════════════════════════════════════════ */
+(function(){
+  var st=document.createElement("style"); st.id="tq-css"; st.textContent=[
+'.tq{ margin-bottom:36px; }',
+'.tq-cab{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; }',
+'.tq-cab h2{ font-size:22px; font-weight:800; letter-spacing:-.035em; line-height:1.1; }',
+'.tq-cab .tq-link{ font-size:14px; font-weight:700; color:var(--accent); padding:4px 0 4px 10px; }',
+'.tq-sub{ font-size:13px; font-weight:650; color:var(--t2); margin:20px 0 10px; letter-spacing:-.01em; }',
+'.tq-fila{ display:flex; gap:12px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scroll-padding:0 20px;',
+'  margin:0 -20px; padding:2px 20px 10px; scrollbar-width:none; -webkit-overflow-scrolling:touch; overscroll-behavior-x:contain; }',
+'.tq-fila::-webkit-scrollbar{ display:none; }',
+'@media (min-width:640px){ .tq-fila{ margin:0 -32px; padding-left:32px; padding-right:32px; scroll-padding:0 32px; } }',
+'@media (min-width:1024px){ .tq-fila{ margin:0; padding-left:0; padding-right:0; scroll-padding:0; } }',
+/* rutinas */
+'.tq-est{ position:relative; flex:0 0 66%; max-width:250px; scroll-snap-align:start; text-align:left; border-radius:26px; overflow:hidden;',
+'  background:color-mix(in srgb, var(--t1) 4.5%, var(--bg)); box-shadow:inset 0 0 0 1px var(--hairline-2); transition:transform .35s var(--spring); }',
+'.tq-est:active{ transform:scale(.97); transition-duration:.12s; }',
+'.tq-est-f{ display:block; aspect-ratio:1/1.08; background:radial-gradient(70% 55% at 50% 60%, color-mix(in srgb, var(--t1) 7%, transparent), transparent 70%); }',
+'.tq-est-f img{ width:100%; height:100%; object-fit:contain; display:block; opacity:0; transform:scale(.96); transition:opacity .45s ease, transform .6s var(--spring); }',
+'.tq-est-f img.ve{ opacity:1; transform:none; }',
+'.tq-est-t{ display:block; padding:2px 16px 16px; }',
+'.tq-est-t b{ display:block; font-family:"Plus Jakarta Sans",sans-serif; font-size:15.5px; font-weight:750; letter-spacing:-.02em; line-height:1.2; color:var(--t1); }',
+'.tq-est-t small{ display:block; font-size:12.5px; color:var(--t3); margin-top:4px; }',
+'.tq-play{ position:absolute; top:12px; right:12px; width:38px; height:38px; border-radius:99px; display:grid; place-items:center;',
+'  background:var(--accent); color:var(--on-accent); box-shadow:0 6px 14px -6px rgba(0,0,0,.4); }',
+'.tq-play svg{ width:15px; height:15px; margin-left:2px; }',
+'.tq-min{ position:absolute; top:14px; left:14px; font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--t3); }',
+/* libros */
+'.tq-now{ display:flex; align-items:center; gap:16px; width:100%; text-align:left; padding:14px; border-radius:24px;',
+'  background:color-mix(in srgb, var(--t1) 4.5%, var(--bg)); box-shadow:inset 0 0 0 1px var(--hairline-2); transition:transform .35s var(--spring); }',
+'.tq-now:active{ transform:scale(.98); transition-duration:.12s; }',
+'.tq-now .lb-port{ width:66px; box-shadow:0 2px 3px rgba(0,0,0,.14), 0 12px 22px -10px rgba(0,0,0,.4); }',
+'.tq-now-t{ flex:1; min-width:0; display:block; }',
+'.tq-now-t small{ display:block; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--t3); }',
+'.tq-now-t b{ display:block; font-family:"Plus Jakarta Sans",sans-serif; font-size:16.5px; font-weight:750; letter-spacing:-.02em; line-height:1.2; margin-top:3px; color:var(--t1);',
+'  overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
+'.tq-barra{ display:block; height:4px; border-radius:4px; background:var(--fill-hi); margin-top:10px; overflow:hidden; }',
+'.tq-barra i{ display:block; height:100%; border-radius:inherit; background:var(--accent); }',
+'.tq-now-t em{ display:block; font-style:normal; font-size:12px; color:var(--t3); margin-top:6px; }',
+'.tq-seguir{ flex:0 0 auto; padding:9px 16px; border-radius:99px; background:var(--accent); color:var(--on-accent); font-size:13.5px; font-weight:700; }',
+'.tq-libro{ flex:0 0 auto; width:108px; scroll-snap-align:start; text-align:left; transition:transform .35s var(--spring); }',
+'.tq-libro:active{ transform:scale(.95); transition-duration:.12s; }',
+'.tq-libro .lb-port{ width:108px; box-shadow:0 2px 3px rgba(0,0,0,.12), 0 14px 24px -12px rgba(0,0,0,.45); }',
+'.tq-libro > b{ display:block; font-size:12.5px; font-weight:650; line-height:1.25; margin-top:9px; color:var(--t1);',
+'  overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
+'.tq-libro > small{ display:block; font-size:11.5px; color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.tq-subir{ flex:0 0 auto; width:108px; aspect-ratio:2/3; scroll-snap-align:start; border-radius:4px 8px 8px 4px; display:flex; flex-direction:column;',
+'  align-items:center; justify-content:center; gap:8px; color:var(--t2); font-size:12px; font-weight:650; text-align:center; padding:10px;',
+'  box-shadow:inset 0 0 0 1.5px var(--hairline); }',
+'.tq-subir i{ font-style:normal; font-size:26px; font-weight:300; line-height:1; color:var(--t1); }',
+/* Hoy: solo una fila para seguir leyendo */
+'#lb-hab.tq-hoy{ margin-top:18px; }',
+'#lb-hab.tq-hoy .tq-now{ padding:12px; border-radius:20px; } #lb-hab.tq-hoy .tq-now .lb-port{ width:44px; }',
+'#lb-hab.tq-hoy .tq-now-t b{ font-size:14.5px; -webkit-line-clamp:1; }',
+'#rt-crecer{ display:none!important; }'
+  ].join("\n"); document.head.appendChild(st);
+
+  var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>';
+  function pon(el, dentro, despues){
+    if(el.parentNode!==dentro || el.previousElementSibling!==despues) dentro.insertBefore(el, despues ? despues.nextSibling : dentro.firstChild);
+  }
+  function pinta(el, h){ if(el._h!==h){ el._h=h; el.innerHTML=h; return true; } return false; }
+
+  /* ── Cuerpo: estirar ── */
+  function pintaEstirar(){
+    var v=document.getElementById("v-vital"); if(!v || typeof ESTIRA_RUTINAS==="undefined") return;
+    var el=document.getElementById("cu-estirar");
+    if(!el){ el=document.createElement("div"); el.id="cu-estirar"; el.className="tq"; }
+    pon(el, v, document.getElementById("vital-daybar") || v.firstElementChild);
+    var h='<div class="tq-cab"><h2 class="display">Estirar</h2></div><div class="tq-fila">'+ESTIRA_RUTINAS.map(function(r){
+      return '<button class="tq-est" data-act="x-cr-empieza" data-k="'+r.k+'" aria-label="Empezar '+esc(r.t)+'">'+
+        '<span class="tq-est-f"><img data-mq="'+r.pasos[0].f+'" alt=""></span>'+
+        '<span class="tq-min num">'+estiraMin(r)+' min</span><span class="tq-play">'+PLAY+'</span>'+
+        '<span class="tq-est-t"><b>'+esc(r.t)+'</b><small>'+esc(r.sub)+' · '+r.pasos.length+' estiramientos</small></span></button>';
+    }).join("")+'</div>';
+    if(pinta(el, h)) maniquiFotos(el);
+  }
+
+  /* ── Mente: leer ── */
+  function lbTarjetaAhora(act){
+    var b=lbLibro(act), pg=Math.min(lbPags(act), lbTotal(act)), tot=lbTotal(act), pc=Math.min(100, Math.round(pg/tot*100));
+    return '<button class="tq-now" data-act="'+(b.d?"x-lb-lee":"x-lb-apunta")+'" data-id="'+act+'">'+lbPortada(b,"m")+
+      '<span class="tq-now-t"><small>Leyendo ahora</small><b>'+esc(b.t)+'</b><span class="tq-barra"><i style="width:'+pc+'%"></i></span>'+
+      '<em class="num">'+pg+' de '+tot+' págs · '+pc+' %</em></span><span class="tq-seguir">'+(b.d?"Seguir":"Apuntar")+'</span></button>';
+  }
+  function tqLibro(b, act){
+    return '<button class="tq-libro" data-act="'+act+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+esc(b.a)+'</small></button>';
+  }
+  function pintaLeer(){
+    var vid=view==="tareas" ? "v-tareas" : view==="academico" ? "v-academico" : null; if(!vid) return;
+    var v=document.getElementById(vid); if(!v || typeof LB==="undefined") return;
+    var el=document.getElementById("mt-leer");
+    if(!el){ el=document.createElement("div"); el.id="mt-leer"; el.className="tq"; }
+    pon(el, v, v.firstElementChild);
+    var act=lbActual(), P=lcPropios();
+    var gratis=Object.keys(P).map(function(id){ return P[id]; }).concat(LB.filter(function(b){ return b.d; })).filter(function(b){ return b.id!==act; });
+    var recs=lbRecs(10).filter(function(b){ return b && !b.d && b.id!==act; });
+    var h='<div class="tq-cab"><h2 class="display">Leer</h2><button class="tq-link" data-act="x-lb-biblio" data-t="'+(act?"mis":"para")+'">Biblioteca</button></div>'+
+      (act ? lbTarjetaAhora(act) : '')+
+      '<p class="tq-sub"'+(act?'':' style="margin-top:0"')+'>Léelos aquí, gratis</p><div class="tq-fila">'+gratis.map(function(b){ return tqLibro(b, "x-lb-lee"); }).join("")+
+        '<button class="tq-subir" data-act="x-lb-subir"><i>+</i>Subir tu EPUB</button></div>'+
+      (recs.length ? '<p class="tq-sub">Para ti</p><div class="tq-fila">'+recs.map(function(b){ return tqLibro(b, "x-lb-libro"); }).join("")+'</div>' : '');
+    pinta(el, h);
+  }
+
+  /* ── Hoy: solo seguir leyendo ── */
+  lbPinta=function(){
+    var card=document.getElementById("card-ideal"), lista=document.getElementById("ideal-list");
+    var el=document.getElementById("lb-hab"), act=S && S.lectura ? lbActual() : null;
+    if(!card || !lista || !act){ if(el && el.parentNode) el.parentNode.removeChild(el); return; }
+    if(!el){ el=document.createElement("div"); el.id="lb-hab"; }
+    el.className="tq-hoy";
+    if(el.parentNode!==lista.parentNode || el.previousSibling!==lista) lista.parentNode.insertBefore(el, lista.nextSibling);
+    pinta(el, lbTarjetaAhora(act));
+  };
+
+  /* Objetivos ya no lleva «Para crecer» */
+  pintaCrecer=function(){ var el=document.getElementById("rt-crecer"); if(el && el.parentNode) el.parentNode.removeChild(el); };
+  crecerTrasRender=function(){ pintaCrecer(); if(view==="vital") pintaEstirar(); };
+  lecturaTrasRender=function(){ if(view==="resumen") lbPinta(); pintaLeer(); };
+
+  /* el lector empieza en el texto, no en la portada de la edición */
+  window.lcInicio=function(bk){
+    try{ var it=(bk.spine && bk.spine.spineItems) || [];
+      for(var i=0;i<it.length;i++){ var x=it[i]; if(!/cover|wrap0000|portada/i.test((x.idref||"")+" "+(x.href||""))) return x.href; } }catch(e){}
+    return undefined;
+  };
 })();
 setTimeout(function(){ moveMarker(); moveMTab(); fitBottomBar(); },80);
 window.addEventListener("load",function(){ setTimeout(function(){ moveMarker(); moveMTab(); },160); });
