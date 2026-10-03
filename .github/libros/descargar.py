@@ -69,8 +69,12 @@ def limpia_html(datos):
         if txt and PG.search(txt.get_text(" ")):
             np.decompose(); quitado += 1
     # libros antiguos: la licencia va en <pre> o párrafos sueltos con las marcas *** START/END
-    for el in soup.find_all(["pre", "p", "div"]):
-        if el.find(["p", "div", "pre"]):
+    for el in soup.find_all("meta"):
+        if PG.search(" ".join(str(v) for v in el.attrs.values())):
+            el.decompose(); quitado += 1
+    hojas = ["pre", "p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "td", "span", "blockquote"]
+    for el in soup.find_all(hojas):
+        if el.find(hojas):
             continue
         if PG.search(el.get_text(" ")):
             el.decompose(); quitado += 1
@@ -85,29 +89,64 @@ def limpia_opf(datos):
     for el in soup.find_all("meta"):
         if PG.search(el.get_text(" ") + " " + str(el.attrs)):
             el.decompose()
+    for el in soup.find_all("identifier"):
+        if PG.search(el.get_text(" ")):
+            el.string = "urn:peak:libro"
     meta = soup.find("metadata")
     if meta is not None:
         r = soup.new_tag("dc:rights"); r.string = "Dominio público"; meta.append(r)
     return str(soup).encode("utf-8")
 
 
+def es_licencia(datos):
+    """Archivos que son solo la licencia de Gutenberg (su <title> lo dice)."""
+    t = BeautifulSoup(datos, "xml").find("title")
+    return bool(t and PG.search(t.get_text(" ")))
+
+
+def quita_refs(datos, fuera, opf=False):
+    soup = BeautifulSoup(datos, "xml")
+    base = lambda h: (h or "").split("#")[0].rsplit("/", 1)[-1]
+    if opf:
+        ids = []
+        for it in soup.find_all("item"):
+            if base(it.get("href")) in fuera:
+                ids.append(it.get("id")); it.decompose()
+        for ir in soup.find_all("itemref"):
+            if ir.get("idref") in ids:
+                ir.decompose()
+    else:
+        for a in soup.find_all(["a", "content"]):
+            if base(a.get("href") or a.get("src")) in fuera:
+                (a.find_parent("navPoint") or a.find_parent("li") or a).decompose()
+    return str(soup).encode("utf-8")
+
+
 def limpia_epub(datos):
     zin = zipfile.ZipFile(io.BytesIO(datos))
+    fuera = set()
+    for info in zin.infolist():
+        if info.filename.lower().endswith((".xhtml", ".html", ".htm")) and es_licencia(zin.read(info.filename)):
+            fuera.add(info.filename.rsplit("/", 1)[-1])
     out = io.BytesIO()
     zout = zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED)
     zout.writestr(zipfile.ZipInfo("mimetype"), "application/epub+zip", compress_type=zipfile.ZIP_STORED)
-    quedan, quitado = [], 0
+    quedan, quitado = [], len(fuera)
     for info in zin.infolist():
-        if info.filename == "mimetype":
+        if info.filename == "mimetype" or info.filename.rsplit("/", 1)[-1] in fuera:
             continue
         d = zin.read(info.filename)
         nombre = info.filename.lower()
         if nombre.endswith((".xhtml", ".html", ".htm", ".ncx")):
+            if fuera:
+                d = quita_refs(d, fuera)
             d, q = limpia_html(d); quitado += q
-            if PG.search(BeautifulSoup(d, "xml").get_text(" ")):
-                quedan.append(info.filename)
         elif nombre.endswith(".opf"):
+            if fuera:
+                d = quita_refs(d, fuera, opf=True)
             d = limpia_opf(d)
+        if nombre.endswith((".xhtml", ".html", ".htm", ".ncx", ".opf")) and PG.search(d.decode("utf-8", "ignore")):
+            quedan.append(info.filename)
         zi = zipfile.ZipInfo(info.filename, date_time=(2026, 1, 1, 0, 0, 0))
         zout.writestr(zi, d, compress_type=zipfile.ZIP_DEFLATED)
     zout.close()

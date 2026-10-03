@@ -1,9 +1,10 @@
 /* DTrack · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v177";
+const CACHE = "dtrack-beta-v178";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js",
+  "./vendor/jszip.min.js", "./vendor/epub.min.js",
   "./icon-192.png", "./icon-512.png", "./icon-maskable.png", "./apple-touch-icon.png"
 ];
 
@@ -98,7 +99,9 @@ self.addEventListener("push", e => {
       /* el título del aviso de prueba lo pone la app, no el servidor:
          iOS ya escribe el nombre de la app debajo y si no, sale dos veces */
       return self.registration.showNotification(d.tipo === "prueba" ? "Los avisos funcionan" : (d.t || "Aviso"), {
-        body: d.b || "", icon:"./icon-192.png", badge:"./icon-192.png",
+        body: d.b || "", icon:"./vendor/jszip.min.js", "./vendor/epub.min.js",
+  "./icon-192.png", badge:"./vendor/jszip.min.js", "./vendor/epub.min.js",
+  "./icon-192.png",
         tag:"dtrack-"+(d.tipo || "prueba"), data:{ url:"./index.html" }
       });
     }
@@ -120,7 +123,9 @@ self.addEventListener("push", e => {
     for (let i = 0; i < avisos.length && i < 2; i++) {
       await self.registration.showNotification(avisos[i].t || "Aviso", {
         body: avisos[i].b || "",
-        icon:"./icon-192.png", badge:"./icon-192.png",
+        icon:"./vendor/jszip.min.js", "./vendor/epub.min.js",
+  "./icon-192.png", badge:"./vendor/jszip.min.js", "./vendor/epub.min.js",
+  "./icon-192.png",
         tag: "dtrack-" + (d.tipo || "x") + "-" + i,
         data:{ url:"./index.html" }
       });
