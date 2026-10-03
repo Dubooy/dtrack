@@ -1,0 +1,9 @@
+{
+  "name": "peak-ios",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Peak. como app de iPhone: Capacitor carga la web publicada y pone la barra de abajo nativa de Apple",
+  "scripts": { "sync": "cap sync ios", "abrir": "cap open ios" },
+  "dependencies": { "@capacitor/core": "^7.0.0", "@capacitor/ios": "^7.0.0" },
+  "devDependencies": { "@capacitor/cli": "^7.0.0" }
+}

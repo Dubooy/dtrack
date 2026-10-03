@@ -1,0 +1,49 @@
+# Compila la app de iPhone de Peak. (app-ios/) en un Mac de GitHub, sin firmar.
+# El .ipa sale en «Artifacts» de cada ejecución; se instala en el iPhone con
+# Sideloadly desde Windows o Mac usando tu cuenta de Apple (ver app-ios/LEEME.md).
+name: App de iPhone
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["app-ios/**", ".github/workflows/app-ios.yml"]
+
+jobs:
+  ipa:
+    runs-on: macos-26
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Usar el Xcode más nuevo (iOS 26 para el Liquid Glass)
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$X" ]; then sudo xcode-select -s "$X"; fi
+          xcodebuild -version
+
+      - name: Preparar el proyecto
+        working-directory: app-ios
+        run: |
+          npm ci
+          npx cap copy ios
+
+      - name: Compilar sin firmar
+        working-directory: app-ios/ios/App
+        run: |
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/App.app Payload/
+          zip -qry Peak.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Peak-iPhone
+          path: app-ios/ios/App/Peak.ipa
+          retention-days: 30

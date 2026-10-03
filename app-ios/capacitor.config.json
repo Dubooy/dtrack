@@ -1,0 +1,14 @@
+{
+  "appId": "com.dubooy.peak",
+  "appName": "Peak.",
+  "webDir": "www",
+  "server": {
+    "url": "https://dubooy.github.io/dtrack/beta/",
+    "errorPath": "index.html"
+  },
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#f5f0e6",
+    "limitsNavigationsToAppBoundDomains": false
+  }
+}
