@@ -18,6 +18,7 @@
 --     perfil (la escribes tú) y sus likes (❤️) y reacciones.
 --   · Funciones gc_* (chat) y gf_* (fotos) que usa la app.
 --   · Tiempo real: g_chat se apunta a «supabase_realtime».
+--   · g_grupo_foto: la foto de cada grupo (funciones gg_foto_pon y gg_fotos).
 --   · Moderación: g_denuncias (lo que alguien denuncia) y g_bloqueos
 --     (a quién has bloqueado). Un mensaje con 3 denuncias de personas
 --     distintas se esconde solo para todos menos para quien lo escribió.
@@ -487,6 +488,64 @@ revoke execute on function public.gm_denunciar(text, text, text, text, uuid), pu
   public.gm_desbloquear(uuid), public.gm_bloqueados() from anon, public;
 grant execute on function public.gm_denunciar(text, text, text, text, uuid), public.gm_bloquear(uuid),
   public.gm_desbloquear(uuid), public.gm_bloqueados() to authenticated;
+
+-- ════════════════ FOTO DEL GRUPO ════════════════
+-- Cada grupo puede tener una foto. La cambia cualquiera del grupo desde
+-- la app (el lápiz de la ficha del grupo): la imagen se sube a su carpeta
+-- de «avatares» y aquí solo se guarda la dirección.
+create table if not exists public.g_grupo_foto (
+  grupo    text primary key,
+  url      text not null,
+  por      uuid not null,
+  cambiado timestamptz not null default now()
+);
+alter table public.g_grupo_foto enable row level security;
+revoke all on public.g_grupo_foto from anon, authenticated;
+
+-- poner o cambiar la foto de uno de tus grupos
+create or replace function public.gg_foto_pon(p_grupo text, p_url text)
+returns void
+language plpgsql security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then raise exception 'sin_sesion'; end if;
+  if not exists (select 1 from public.gc_mis_ids() g where g = p_grupo) then raise exception 'no_eres_miembro'; end if;
+  if p_url is null or p_url !~ ('^https://zznytqlurhxhdwludrxm\.supabase\.co/storage/v1/object/public/avatares/' || auth.uid()::text || '/') then
+    raise exception 'foto_mal';
+  end if;
+  insert into public.g_grupo_foto (grupo, url, por, cambiado) values (p_grupo, p_url, auth.uid(), now())
+  on conflict (grupo) do update set url = excluded.url, por = excluded.por, cambiado = excluded.cambiado;
+end $$;
+
+-- las fotos de todos tus grupos: [{"grupo": "…", "url": "…"}]
+create or replace function public.gg_fotos()
+returns json
+language sql stable security definer
+set search_path = public
+as $$
+  select coalesce(json_agg(json_build_object('grupo', f.grupo, 'url', f.url)), '[]'::json)
+  from public.g_grupo_foto f
+  where f.grupo in (select public.gc_mis_ids());
+$$;
+
+revoke execute on function public.gg_foto_pon(text, text), public.gg_fotos() from anon, public;
+grant execute on function public.gg_foto_pon(text, text), public.gg_fotos() to authenticated;
+
+-- la carpeta de cada uno en «avatares»: ahí van tu foto y las de tus grupos
+do $$
+begin
+  drop policy if exists peak_avatares_subir on storage.objects;
+  create policy peak_avatares_subir on storage.objects for insert to authenticated
+    with check (bucket_id = 'avatares' and (storage.foldername(name))[1] = auth.uid()::text);
+  drop policy if exists peak_avatares_cambiar on storage.objects;
+  create policy peak_avatares_cambiar on storage.objects for update to authenticated
+    using (bucket_id = 'avatares' and (storage.foldername(name))[1] = auth.uid()::text);
+  drop policy if exists peak_avatares_ver on storage.objects;
+  create policy peak_avatares_ver on storage.objects for select to authenticated
+    using (bucket_id = 'avatares' and (storage.foldername(name))[1] = auth.uid()::text);
+exception when others then null;
+end $$;
 
 -- ════════════════ PERMISOS DE LAS FUNCIONES ════════════════
 revoke execute on function public.gc_mis_ids(), public.gc_leer(text, bigint, int),

@@ -912,15 +912,15 @@ html.embebido #acciones-flotantes{ top:94px; }
      style="bottom:0;padding:0 12px calc(4px + env(safe-area-inset-bottom));pointer-events:none">
   <div class="barpill" id="mtabs"><span id="mind"></span>
     <button class="mtab" data-view="resumen" aria-current="true">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/></svg><span data-label="resumen">Resumen</span></button>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="10" rx="2.6"/><rect x="13" y="3" width="8" height="6" rx="2.6"/><rect x="3" y="15" width="8" height="6" rx="2.6"/><rect x="13" y="11" width="8" height="10" rx="2.6"/></svg><span data-label="resumen">Hoy</span></button>
     <button class="mtab" data-view="retos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4a4 4 0 0 1-8 0V3z"/><path d="M16 4.5h3v2a3 3 0 0 1-3 3M8 4.5H5v2a3 3 0 0 0 3 3"/><path d="M12 11v4M9 21h6l-.5-3h-5L9 21z"/></svg><span data-label="retos">Objetivos</span></button>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v5.6a5 5 0 0 1-10 0V3z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M7 5H4.6v1.4A3.6 3.6 0 0 0 8.2 10M17 5h2.4v1.4A3.6 3.6 0 0 1 15.8 10"/><rect x="10.8" y="12.6" width="2.4" height="4.6"/><rect x="7" y="17.2" width="10" height="3.8" rx="1.5"/></svg><span data-label="retos">Objetivos</span></button>
     <button class="mtab" data-view="vital">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l4.5-6.5L12 13l4-6.5 5 6"/><path d="M3 20.5h18"/></svg><span data-label="vital">Vital</span></button>
-    <button class="mtab" data-view="social">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.3 2.9-5.6 6.5-5.6s6.5 2.3 6.5 5.6"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.6M18 14.6c2.1.6 3.5 2.3 3.5 4.6"/></svg><span data-label="social">Social</span></button>
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="14.2" cy="4.2" r="2.5"/><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="M13 8.4l-2.2 5.4M7.6 10.2l5.4-1.8 2.8 2.8 2.8.4M10.8 13.8l3.6 2.4-1 4.6M10.8 13.8l-2 3.8-3.6.8"/></svg><span data-label="vital">Cuerpo</span></button>
     <button class="mtab" data-view="academico">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8.5 3v4M15.5 3v4"/></svg><span data-label="academico">Clase</span></button>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6.2C9 4.9 6.3 4.4 3 4.7v14.2c3.2-.3 5.9.2 8 1.5V6.2z"/><path d="M13 6.2c2-1.3 4.7-1.8 8-1.5v14.2c-3.2-.3-5.9.2-8 1.5V6.2z"/></svg><span data-label="academico">Mente</span></button>
+    <button class="mtab" data-view="social">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.4" r="3.7"/><path d="M2 19.4c0-3.6 3.1-6.3 7-6.3s7 2.7 7 6.3c0 .8-.6 1.4-1.4 1.4H3.4C2.6 20.8 2 20.2 2 19.4z"/><circle cx="16.8" cy="8" r="3" opacity=".6"/><path opacity=".6" d="M17.6 13.4c2.7.4 4.4 2.6 4.4 5.4 0 .8-.5 1.3-1.3 1.3h-2.9c.2-.4.3-.9.3-1.4 0-2.1-.9-4-2.3-5.2.6-.1 1.2-.1 1.8-.1z"/></svg><span data-label="social">Social</span></button>
   </div>
 </nav>
 
@@ -6718,9 +6718,9 @@ function caraDe(m, tam){
   tam = tam || 34;
   var letra = (m.usuario||"?").charAt(0).toUpperCase();
   if(m.avatar)
-    return '<span style="display:block;width:'+tam+'px;height:'+tam+'px;border-radius:999px;overflow:hidden;flex:0 0 auto">'+
+    return '<span class="av-lp" style="display:block;width:'+tam+'px;height:'+tam+'px;border-radius:999px;overflow:hidden;flex:0 0 auto">'+
       '<img src="'+esc(m.avatar)+'" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></span>';
-  return '<span class="display" style="width:'+tam+'px;height:'+tam+'px;border-radius:999px;'+
+  return '<span class="display av-lp" style="width:'+tam+'px;height:'+tam+'px;border-radius:999px;'+
     'flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:var(--accent-soft);'+
     'color:var(--accent);font-weight:800;font-size:'+Math.round(tam*0.42)+'px">'+esc(letra)+'</span>';
 }
@@ -6736,7 +6736,7 @@ function socYo(){
     '<button class="soc-yo-foto" data-act="x-perfil" aria-label="Ver tu perfil">'+
       (foto ? '<img src="'+esc(foto)+'" alt="">'
             : '<span class="display" style="font-weight:800;font-size:26px">'+esc(u.charAt(0).toUpperCase())+'</span>')+
-      '<span class="soc-mas-foto"><svg viewBox="0 0 24 24" style="width:11px;height:11px" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>'+
+      '<span class="av-lapiz" role="button" data-act="nube-foto" aria-label="Cambiar foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></span>'+
     '</button>'+
     '<div style="min-width:0;flex:1">'+
       '<h2 class="display">'+esc(u)+'</h2>'+
@@ -7190,7 +7190,7 @@ function abrirPerfil(u){
       '<span>'+(p.yo?"Tu perfil":"Perfil")+'</span></div>'+
     '<div class="pf-scroll">'+
       '<div class="pf-cabeza">'+
-        (p.yo ? '<button class="pf-foto" data-act="nube-foto" aria-label="Cambiar foto">'+foto+'</button>'
+        (p.yo ? '<div class="pf-foto">'+foto+'<button class="av-lapiz" data-act="nube-foto" aria-label="Cambiar foto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg></button></div>'
               : '<div class="pf-foto">'+foto+'</div>')+
         (p.yo
           ? '<input id="pf-nombre" class="pf-nombre display" maxlength="16" autocapitalize="words" autocorrect="off" spellcheck="false" value="'+esc(p.usuario)+'" aria-label="Tu nombre">'+
@@ -21453,6 +21453,286 @@ arrancarCuenta();
 if(!S.tour && !puertaEl()) setTimeout(function(){ tourStep=0; renderTour(); }, 700);
 guardarEspejo();
 setTimeout(refrescarAvisos, 2500);
+/* ════════════════════════════════════════════════════════════════
+   BARRA DE ABAJO DE CRISTAL LÍQUIDO (oct 2026)
+   Iconos macizos y gruesos, con su nombre debajo. El de la pestaña
+   abierta se pinta del color de la app. La burbuja que marca la
+   pestaña tiene volumen (luz arriba, sombra abajo) y un borde
+   arcoíris fino, como el cristal de iOS: al pulsar o arrastrar crece
+   y el arcoíris se enciende; al moverla deprisa se estira un poco.
+   Todo va con transform/opacity, en su propia capa, a 60 fps.
+   ════════════════════════════════════════════════════════════════ */
+var ICO_BARRA_MENTE='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6.2C9 4.9 6.3 4.4 3 4.7v14.2c3.2-.3 5.9.2 8 1.5V6.2z"/><path d="M13 6.2c2-1.3 4.7-1.8 8-1.5v14.2c-3.2-.3-5.9.2-8 1.5V6.2z"/></svg>';
+var ICO_BARRA_TAREAS='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="4"/><path fill="none" stroke="var(--barra-hueco)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M7.5 12.5l3 3 6-6.5"/></svg>';
+menteTab=function(){
+  var b=document.querySelector('#mtabs button[data-view="academico"], #mtabs button[data-view="tareas"]');
+  if(b) b.innerHTML=ICO_BARRA_MENTE+'<span data-label="academico">'+esc((S.labels&&S.labels.academico)||"Mente")+'</span>';
+};
+ICO_TAREAS=ICO_BARRA_TAREAS;
+(function(){
+  var st=document.createElement("style"); st.id="barra-cristal-css"; st.textContent=[
+'@property --arco{ syntax:"<angle>"; inherits:false; initial-value:0deg; }',
+'#mtabs{ --barra-hueco:var(--bg); gap:0; padding:6px; isolation:isolate;',
+'  box-shadow:0 14px 34px -14px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.55), inset 0 0 0 1px var(--hairline)!important; }',
+'html.dark #mtabs{ box-shadow:0 14px 34px -14px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.10), inset 0 0 0 1px rgba(255,255,255,.10)!important; }',
+'#mtabs .mtab{ width:68px; height:58px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--t2); }',
+'#mtabs .mtab svg, #mtabs button[data-view="resumen"] svg{ width:25px; height:25px; flex:none; transform:translateZ(0);',
+'  filter:drop-shadow(0 1px 0 rgba(255,255,255,.45)) drop-shadow(0 1.5px 1.5px rgba(0,0,0,.16));',
+'  transition:transform .45s cubic-bezier(.3,1.5,.5,1), color .3s ease; }',
+'html.dark #mtabs .mtab svg{ filter:drop-shadow(0 1px 0 rgba(255,255,255,.08)) drop-shadow(0 1.5px 2px rgba(0,0,0,.5)); }',
+'#mtabs .mtab span{ position:static; opacity:1; transform:none; font-size:10.5px; font-weight:700; letter-spacing:-.005em; color:inherit; }',
+'#mtabs .mtab[aria-current="true"]{ color:var(--accent); }',
+'#mtabs .mtab[aria-current="true"] span{ opacity:1; }',
+'#mtabs .mtab[aria-current="true"] svg{ transform:translateZ(0) scale(1.08); }',
+'#mtabs .mtab.cerca{ color:var(--accent); }',
+'#mtabs .mtab:active svg{ transform:translateZ(0) scale(.88); }',
+/* la burbuja */
+'#mind{ top:6px; height:58px; width:68px; opacity:0; overflow:visible; transform-origin:50% 50%;',
+'  background:linear-gradient(180deg, rgba(255,255,255,.78), rgba(255,255,255,.32));',
+'  box-shadow:inset 0 1px 0 rgba(255,255,255,.95), inset 0 -1.5px 2px rgba(0,0,0,.06), 0 6px 16px -6px rgba(0,0,0,.28), 0 1px 2px rgba(0,0,0,.08);',
+'  backdrop-filter:blur(6px) saturate(170%); -webkit-backdrop-filter:blur(6px) saturate(170%);',
+'  scale:var(--sx,1) var(--sy,1); will-change:transform, scale;',
+'  transition:transform .55s cubic-bezier(.3,1.25,.45,1), width .45s var(--spring), opacity .3s ease, scale .45s cubic-bezier(.3,1.5,.45,1); }',
+'html.dark #mind{ background:linear-gradient(180deg, rgba(255,255,255,.20), rgba(255,255,255,.06));',
+'  box-shadow:inset 0 1px 0 rgba(255,255,255,.28), inset 0 -1.5px 2px rgba(0,0,0,.25), 0 6px 18px -6px rgba(0,0,0,.6); }',
+'#mind::before{ content:""; position:absolute; inset:0; border-radius:inherit; padding:1.6px; pointer-events:none;',
+'  background:conic-gradient(from var(--arco), #ff6b6b, #ffb35c, #ffe66d, #7ef0a6, #5cd6ff, #8f7dff, #ff7ad9, #ff6b6b);',
+'  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor;',
+'  mask:linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);',
+'  opacity:.5; filter:saturate(1.3); transition:opacity .35s ease; }',
+'#mind::after{ content:""; position:absolute; left:14%; right:14%; top:2px; height:42%; border-radius:999px; pointer-events:none;',
+'  background:linear-gradient(180deg, rgba(255,255,255,.75), rgba(255,255,255,0)); opacity:.55; }',
+'html.dark #mind::after{ opacity:.18; }',
+'#mtabs.apretada #mind, #mtabs.grabbing #mind{ --sy:1.12; }',
+'#mtabs.apretada #mind::before, #mtabs.grabbing #mind::before{ opacity:1; animation:arcoGira 2.4s linear infinite; }',
+'@keyframes arcoGira{ to{ --arco:360deg; } }',
+'#mind.suelto{ transition:width .45s var(--spring), opacity .3s ease, scale .2s ease-out; }',
+'@media (max-width:370px){ #mtabs .mtab{ width:calc((100vw - 40px) / 5)!important; } }',
+'@media (prefers-reduced-motion:reduce){ #mind, #mind::before{ animation:none!important; transition:none!important; } }',
+/* ── fotos: mantener pulsado ── */
+'.av-lp, .soc-yo-foto, .pf-foto, .gr-foto{ -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;',
+'  transition:transform .5s cubic-bezier(.3,1.6,.5,1); }',
+'.av-lp img, .soc-yo-foto img, .pf-foto img, .gr-foto img{ -webkit-user-drag:none; pointer-events:none; }',
+'.av-pulsa{ transform:scale(.88)!important; transition:transform .42s cubic-bezier(.2,.7,.3,1)!important; }',
+'#av-ver{ position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:18px;',
+'  background:rgba(10,10,12,0); backdrop-filter:blur(0px); -webkit-backdrop-filter:blur(0px);',
+'  transition:background .35s ease, backdrop-filter .35s ease, -webkit-backdrop-filter .35s ease; cursor:zoom-out; }',
+'#av-ver.ve{ background:rgba(10,10,12,.62); backdrop-filter:blur(22px) saturate(140%); -webkit-backdrop-filter:blur(22px) saturate(140%); }',
+'#av-ver .av-grande{ position:relative; overflow:hidden; border-radius:999px; will-change:transform, border-radius;',
+'  box-shadow:0 30px 80px -20px rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center;',
+'  background:var(--accent-soft); color:var(--accent); background-color:color-mix(in srgb,var(--bg) 88%,var(--accent)); }',
+'#av-ver .av-grande img{ width:100%; height:100%; object-fit:cover; display:block; }',
+'#av-ver .av-grande .av-letra{ font-weight:800; letter-spacing:-.04em; }',
+'#av-ver .av-nombre{ color:#fff; font-size:20px; font-weight:800; letter-spacing:-.02em; opacity:0; transform:translateY(8px);',
+'  transition:opacity .3s ease .12s, transform .45s cubic-bezier(.3,1.4,.5,1) .12s; }',
+'#av-ver.ve .av-nombre{ opacity:1; transform:none; }',
+/* ── el lápiz para cambiar la foto ── */
+'.av-lapiz{ position:absolute; right:-2px; bottom:-2px; width:26px; height:26px; border-radius:99px; z-index:2;',
+'  display:flex; align-items:center; justify-content:center; background:var(--accent); color:var(--on-accent);',
+'  box-shadow:0 0 0 3px var(--bg), 0 3px 8px -2px rgba(0,0,0,.3); cursor:pointer; transition:transform .35s cubic-bezier(.3,1.6,.5,1); }',
+'.av-lapiz:active{ transform:scale(.85); }',
+'.av-lapiz svg{ width:13px; height:13px; }',
+'.pf-foto{ position:relative; overflow:visible!important; }',
+'.pf-foto > img{ border-radius:999px; }',
+'.pf-foto .av-lapiz{ width:34px; height:34px; right:0; bottom:0; } .pf-foto .av-lapiz svg{ width:16px; height:16px; }',
+/* ── la foto del grupo ── */
+'.gr-foto{ position:relative; width:96px; height:96px; border-radius:999px; flex:0 0 auto; display:flex; align-items:center; justify-content:center;',
+'  background:var(--accent-soft); color:var(--accent); }',
+'.gr-foto > img{ width:100%; height:100%; object-fit:cover; border-radius:999px; display:block; }',
+'.gr-foto .av-lapiz{ width:32px; height:32px; right:0; bottom:0; } .gr-foto .av-lapiz svg{ width:15px; height:15px; }',
+'.gr-foto-caras{ display:flex; } .gr-foto-caras > span{ margin-left:-14px; border-radius:999px; box-shadow:0 0 0 3px var(--bg); } .gr-foto-caras > span:first-child{ margin-left:0; }',
+'.gr-foto.sin{ width:auto; height:auto; background:none; }',
+'.gr-foto.sin .av-lapiz{ right:-10px; bottom:-6px; }',
+'.soc-caras .gr-foto-s{ width:40px; height:40px; border-radius:999px; overflow:hidden; display:block; }',
+'.soc-caras .gr-foto-s img{ width:100%; height:100%; object-fit:cover; display:block; }'
+  ].join("\n"); document.head.appendChild(st);
+
+  /* la burbuja se estira con la velocidad del dedo (solo mientras arrastras) */
+  var bar=$("#mtabs"), ind=$("#mind"); if(!bar || !ind) return;
+  var ultX=0, ultT=0, vel=0, raf=0, pulsado=false;
+  function paso(){
+    raf=0; if(!pulsado) return;
+    vel*=0.82;                                   /* se va calmando aunque el dedo pare */
+    var e=Math.min(0.28, Math.abs(vel)/2600);
+    ind.style.setProperty("--sx", (1.1+e).toFixed(3));
+    ind.style.setProperty("--sy", (1.12-e*0.6).toFixed(3));
+    raf=requestAnimationFrame(paso);
+  }
+  bar.addEventListener("pointerdown", function(e){ pulsado=true; ultX=e.clientX; ultT=performance.now(); vel=0;
+    ind.style.setProperty("--sx","1.1"); if(!raf) raf=requestAnimationFrame(paso); }, {passive:true});
+  bar.addEventListener("pointermove", function(e){ if(!pulsado) return; var t=performance.now(), dt=Math.max(1,t-ultT);
+    vel=vel*0.5+((e.clientX-ultX)/dt*1000)*0.5; ultX=e.clientX; ultT=t; }, {passive:true});
+  function suelta(){ pulsado=false; if(raf){ cancelAnimationFrame(raf); raf=0; } ind.style.removeProperty("--sx"); ind.style.removeProperty("--sy"); }
+  bar.addEventListener("pointerup", suelta); bar.addEventListener("pointercancel", suelta);
+  try{ menteTab(); if(typeof academicoAplica==="function") academicoAplica(); }catch(e){}
+  setTimeout(moveMTab, 60);
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   FOTOS DE PERFIL EN GRANDE (oct 2026)
+   Mantén pulsada cualquier foto de perfil (la tuya, la de tus amigos
+   o la del grupo): mientras aprietas se hunde un poco, como un botón
+   de verdad, y al rato se abre en grande a pantalla completa saliendo
+   desde donde estaba. Se cierra tocando en cualquier sitio.
+   Para cambiar tu foto o la del grupo está el lápiz de abajo a la derecha.
+   ════════════════════════════════════════════════════════════════ */
+(function(){
+  var SEL=".av-lp, .soc-yo-foto, .pf-foto, .gr-foto";
+  var el=null, t=null, x0=0, y0=0, tragar=0;
+  function nombreDe(a){
+    var c=a.closest(".soc-yo"); if(c){ var h=c.querySelector("h2"); if(h) return h.textContent; }
+    c=a.closest(".pf-cabeza"); if(c){ var n=c.querySelector("#pf-nombre"); if(n) return n.value; var h1=c.querySelector("h1"); if(h1) return h1.textContent; }
+    if(a.classList.contains("gr-foto") || a.classList.contains("gr-foto-s")) return GRUPO ? GRUPO.nombre : "";
+    var f=a.closest("[data-u]"); if(f) return f.dataset.u;
+    return "";
+  }
+  function suelta(){ clearTimeout(t); t=null; if(el) el.classList.remove("av-pulsa"); el=null; }
+  document.addEventListener("pointerdown", function(ev){
+    if(ev.button) return;
+    var a=ev.target.closest && ev.target.closest(SEL);
+    if(!a || ev.target.closest(".av-lapiz") || document.getElementById("av-ver")) return;
+    if(a.classList.contains("gr-foto") && a.classList.contains("sin")) a=ev.target.closest(".av-lp");
+    if(!a) return;
+    el=a; x0=ev.clientX; y0=ev.clientY;
+    a.classList.add("av-pulsa");
+    clearTimeout(t); t=setTimeout(function(){ var b=el; suelta(); if(b && document.body.contains(b)) abrir(b); }, 430);
+  }, {passive:true});
+  document.addEventListener("pointermove", function(ev){ if(el && Math.abs(ev.clientX-x0)+Math.abs(ev.clientY-y0)>10) suelta(); }, {passive:true});
+  document.addEventListener("pointerup", suelta);
+  document.addEventListener("pointercancel", suelta);
+  window.addEventListener("scroll", suelta, {passive:true, capture:true});
+  /* tras abrirla, el «click» de soltar el dedo no debe abrir el perfil */
+  document.addEventListener("click", function(ev){ if(Date.now()<tragar){ tragar=0; ev.stopPropagation(); ev.preventDefault(); } }, true);
+  document.addEventListener("contextmenu", function(ev){ if(ev.target.closest && ev.target.closest(SEL)) ev.preventDefault(); });
+
+  function abrir(a){
+    tragar=Date.now()+700;
+    try{ if(navigator.vibrate) navigator.vibrate(8); }catch(e){}
+    var r=a.getBoundingClientRect(), img=a.querySelector("img");
+    var lado=Math.min(window.innerWidth-40, window.innerHeight-200, 460);
+    var capa=document.createElement("div"); capa.id="av-ver"; capa.setAttribute("role","dialog"); capa.setAttribute("aria-label","Foto de perfil");
+    var g=document.createElement("div"); g.className="av-grande"; g.style.width=lado+"px"; g.style.height=lado+"px";
+    if(img){ var im=document.createElement("img"); im.src=img.currentSrc||img.src; im.alt=""; g.appendChild(im); }
+    else { var l=document.createElement("span"); l.className="av-letra display"; l.textContent=(a.textContent||"?").trim().charAt(0).toUpperCase()||"?"; l.style.fontSize=Math.round(lado*.42)+"px"; g.appendChild(l); }
+    var n=document.createElement("p"); n.className="av-nombre display"; n.textContent=nombreDe(a);
+    capa.appendChild(g); if(n.textContent) capa.appendChild(n);
+    document.body.appendChild(capa);
+    /* sale desde la foto pequeña (FLIP): mismo sitio y tamaño, y de ahí crece */
+    var gr=g.getBoundingClientRect(), s=r.width/lado;
+    var dx=(r.left+r.width/2)-(gr.left+gr.width/2), dy=(r.top+r.height/2)-(gr.top+gr.height/2);
+    g.style.transform="translate3d("+dx+"px,"+dy+"px,0) scale("+s+")";
+    g.style.borderRadius="999px";
+    a.style.visibility="hidden";
+    void g.offsetWidth;
+    requestAnimationFrame(function(){
+      capa.classList.add("ve");
+      g.style.transition="transform .55s cubic-bezier(.2,1.12,.3,1), border-radius .45s ease";
+      g.style.transform="translate3d(0,0,0) scale(1)";
+      g.style.borderRadius="32px";
+    });
+    function cerrar(){
+      capa.removeEventListener("click", cerrar); document.removeEventListener("keydown", tecla);
+      var r2=document.body.contains(a) ? a.getBoundingClientRect() : r, gr2=g.getBoundingClientRect();
+      var s2=r2.width/lado, dx2=(r2.left+r2.width/2)-(gr2.left+gr2.width/2), dy2=(r2.top+r2.height/2)-(gr2.top+gr2.height/2);
+      capa.classList.remove("ve");
+      g.style.transition="transform .42s cubic-bezier(.3,.9,.3,1), border-radius .35s ease";
+      g.style.transform="translate3d("+dx2+"px,"+dy2+"px,0) scale("+s2+")";
+      g.style.borderRadius="999px";
+      setTimeout(function(){ a.style.visibility=""; if(capa.parentNode) capa.parentNode.removeChild(capa); }, 430);
+    }
+    function tecla(e){ if(e.key==="Escape") cerrar(); }
+    /* se cierra con un toque después de soltar */
+    setTimeout(function(){ capa.addEventListener("click", cerrar); }, 50);
+    document.addEventListener("keydown", tecla);
+  }
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   FOTO DEL GRUPO (oct 2026)
+   Cada grupo puede tener su foto; la cambia cualquiera del grupo con
+   el lápiz, en la ficha del grupo. Se recorta igual que la tuya y se
+   sube a tu carpeta de «avatares»; la dirección se guarda en la tabla
+   g_grupo_foto con gg_foto_pon y se leen todas con gg_fotos
+   (servidor/social.sql). Sin foto se ven las caras, como antes.
+   ════════════════════════════════════════════════════════════════ */
+var FOTO_DESTINO="yo", GF_KEY="peak-grupo-fotos", GF_LEIDO=0;
+var GFOTOS=(function(){ try{ return JSON.parse(localStorage.getItem(GF_KEY)||"{}")||{}; }catch(e){ return {}; } })();
+function gfGuarda(){ try{ localStorage.setItem(GF_KEY, JSON.stringify(GFOTOS)); }catch(e){} }
+function grupoFoto(){ return (GRUPO && GRUPO.id && GFOTOS[GRUPO.id]) || ""; }
+function gfLee(){
+  if(!GRUPO || !GRUPO.real || !(typeof gReal==="function" && gReal()) || esPrueba()) return;
+  if(Date.now()-GF_LEIDO < 120000) return; GF_LEIDO=Date.now();
+  pedirAuth("/rest/v1/rpc/gg_fotos", { method:"POST", body:{} }).then(function(r){
+    if(!r.ok || !r.datos || typeof r.datos!=="object") return;
+    var antes=JSON.stringify(GFOTOS), nuevo={};
+    (Array.isArray(r.datos)?r.datos:[]).forEach(function(x){ if(x && x.grupo && x.url) nuevo[x.grupo]=x.url; });
+    GFOTOS=nuevo;
+    if(JSON.stringify(GFOTOS)!==antes){ gfGuarda(); gfRepinta(); }
+  }).catch(function(){});
+}
+function gfRepinta(){
+  if(view==="social" && typeof rSocial==="function") rSocial();
+  if(document.getElementById("grupo-capa") && document.querySelector("#grupo-capa .gr-cabeza")) gfPonEnFicha();
+}
+var LAPIZ_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>';
+/* en la ficha del grupo: la foto grande (o las caras) con el lápiz */
+function gfPonEnFicha(){
+  var cab=document.querySelector("#grupo-capa .gr-cabeza"); if(!cab || !GRUPO) return;
+  var viejo=cab.querySelector(".gr-foto"); if(viejo) viejo.parentNode.removeChild(viejo);
+  var caras=cab.querySelector(".gr-caras");
+  var f=grupoFoto(), d=document.createElement("div");
+  d.className="gr-foto"+(f?"":" sin");
+  d.innerHTML=(f ? '<img src="'+esc(f)+'" alt="">' : '<div class="gr-foto-caras">'+(caras?caras.innerHTML:"")+'</div>')+
+    '<button class="av-lapiz" data-act="x-gr-foto" aria-label="Cambiar la foto del grupo">'+LAPIZ_SVG+'</button>';
+  if(caras){ caras.style.display="none"; caras.parentNode.insertBefore(d, caras); } else cab.insertBefore(d, cab.firstChild);
+}
+var _abrirGrupoGf=abrirGrupo;
+abrirGrupo=function(){ var r=_abrirGrupoGf.apply(this, arguments); gfPonEnFicha(); gfLee(); return r; };
+/* en Social: si el grupo tiene foto, sale la foto en vez de las caras */
+var _socGrupoGf=socGrupo;
+socGrupo=function(){
+  var h=_socGrupoGf.apply(this, arguments), f=grupoFoto();
+  setTimeout(gfLee, 0);
+  if(!f) return h;
+  return h.replace(/<div class="soc-caras">[\s\S]*?<\/div>(?=<div style="min-width:0;flex:1">)/,
+    '<div class="soc-caras"><span class="gr-foto-s av-lp"><img src="'+esc(f)+'" alt=""></span></div>');
+};
+var _grupoAccionGf=grupoAccion;
+grupoAccion=function(a, el){
+  if(a==="x-gr-foto"){ FOTO_DESTINO="grupo"; elegirFoto(); return true; }
+  return _grupoAccionGf.apply(this, arguments);
+};
+document.addEventListener("click", function(ev){ if(ev.target.closest && ev.target.closest('[data-act="nube-foto"]')) FOTO_DESTINO="yo"; }, true);
+var _rcSubeAvatarGf=rcSubeAvatar;
+rcSubeAvatar=function(blob, previa){
+  if(FOTO_DESTINO!=="grupo") return _rcSubeAvatarGf.apply(this, arguments);
+  FOTO_DESTINO="yo";
+  var gid=GRUPO && GRUPO.id, url="";
+  if(!gid){ avisoNube("No hay grupo abierto."); return; }
+  var listo=function(u){
+    GFOTOS[gid]=u; gfGuarda(); rcCierra(); gfRepinta(); avisoNube("Foto del grupo puesta.");
+  };
+  var falla=function(m){
+    avisoNube(m||"No se ha podido subir la foto del grupo.");
+    var bt=document.querySelector("#rc-capa .rc-ok"); if(bt){ bt.disabled=false; bt.textContent="Usar"; }
+  };
+  tokenFresco().then(function(){
+    return fetch(NUBE_URL+"/storage/v1/object/avatares/"+ses.uid+"/grupo-"+gid+".jpg", {
+      method:"POST",
+      headers:{ "apikey":NUBE_KEY, "Authorization":"Bearer "+ses.access_token, "Content-Type":"image/jpeg", "x-upsert":"true" },
+      body:blob
+    });
+  }).then(function(r){
+    if(!r || !r.ok) throw new Error("subida");
+    url=NUBE_URL+"/storage/v1/object/public/avatares/"+ses.uid+"/grupo-"+gid+".jpg?v="+Date.now();
+    return pedirAuth("/rest/v1/rpc/gg_foto_pon", { method:"POST", body:{ p_grupo:String(gid), p_url:url } });
+  }).then(function(r2){
+    if(r2.estado===404 || (r2.datos && r2.datos.code==="PGRST202")) return falla("Falta actualizar el servidor para las fotos de grupo.");
+    if(!r2.ok) return falla();
+    listo(url);
+  }).catch(function(){ falla(); });
+};
+
 setTimeout(function(){ moveMarker(); moveMTab(); fitBottomBar(); },80);
 window.addEventListener("load",function(){ setTimeout(function(){ moveMarker(); moveMTab(); },160); });
 })();
