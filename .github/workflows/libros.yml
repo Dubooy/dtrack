@@ -1,0 +1,32 @@
+name: Libros de dominio público
+
+# Baja los clásicos que se leen dentro de Peak y los deja en beta/libros/.
+# Corre solo al cambiar la lista o el script, o a mano desde Actions.
+on:
+  push:
+    paths:
+      - ".github/libros/**"
+      - ".github/workflows/libros.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  libros:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install beautifulsoup4 lxml
+      - run: python .github/libros/descargar.py
+      - name: Guardar los libros en la rama
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add beta/libros
+          git diff --cached --quiet && exit 0
+          git commit -m "Libros: clásicos de dominio público para leer en Peak"
+          git push
