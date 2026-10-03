@@ -1,0 +1,120 @@
+{
+ "libros": {
+  "quijote": {
+   "g": 2000,
+   "titulo": "Don Quijote",
+   "autor": "Cervantes Saavedra, Miguel de",
+   "kb": 922,
+   "quitado": 9,
+   "quedan_pg": [
+    "OEBPS/4848817459119743746_2000-h-34.htm.html"
+   ]
+  },
+  "novelas-ejemplares": {
+   "g": 61202,
+   "titulo": "Novelas ejemplares",
+   "autor": "Cervantes Saavedra, Miguel de",
+   "kb": 479,
+   "quitado": 9,
+   "quedan_pg": [
+    "OEBPS/5072550072335900865_61202-h-28.htm.html"
+   ]
+  },
+  "lazarillo": {
+   "g": 320,
+   "titulo": "Vida De Lazarillo De Tormes Y De Sus Fortunas Y Adversidades",
+   "autor": "Anonymous",
+   "kb": 112,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "celestina": {
+   "g": 1619,
+   "titulo": "La Celestina",
+   "autor": "Rojas, Fernando de",
+   "kb": 340,
+   "quitado": 26,
+   "quedan_pg": []
+  },
+  "si-ninas": {
+   "g": 50027,
+   "titulo": "El sí de las niñas",
+   "autor": "Fernández de Moratín, Leandro",
+   "kb": 102,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "marianela": {
+   "g": 17340,
+   "titulo": "Marianela",
+   "autor": "Pérez Galdós, Benito",
+   "kb": 248,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "regenta": {
+   "g": 17073,
+   "titulo": "La Regenta",
+   "autor": "Alas, Leopoldo",
+   "kb": 836,
+   "quitado": 9,
+   "quedan_pg": [
+    "OEBPS/4823272417199536084_17073-h-28.htm.html"
+   ]
+  },
+  "pazos-ulloa": {
+   "g": 18005,
+   "titulo": "Los pazos de Ulloa",
+   "autor": "Pardo Bazán, Emilia, condesa de",
+   "kb": 273,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "barraca": {
+   "g": 14944,
+   "titulo": "La Barraca",
+   "autor": "Blasco Ibáñez, Vicente",
+   "kb": 195,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "niebla": {
+   "g": 49836,
+   "titulo": "Niebla (Nivola)",
+   "autor": "Unamuno, Miguel de",
+   "kb": 203,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "cuentos-quiroga": {
+   "g": 13507,
+   "titulo": "Cuentos de Amor de Locura y de Muerte",
+   "autor": "Quiroga, Horacio",
+   "kb": 191,
+   "quitado": 9,
+   "quedan_pg": [
+    "OEBPS/7701811127610113592_13507-0-7.txt.html"
+   ]
+  },
+  "azul": {
+   "g": 52894,
+   "titulo": "Azul...: Obras Completas Vol. IV",
+   "autor": "Darío, Rubén",
+   "kb": 143,
+   "quitado": 9,
+   "quedan_pg": []
+  },
+  "tonicos-voluntad": {
+   "g": 66373,
+   "titulo": "Reglas y consejos sobre investigación científica: (Los tónicos de la voluntad)",
+   "autor": "Ramón y Cajal, Santiago",
+   "kb": 256,
+   "quitado": 9,
+   "quedan_pg": []
+  }
+ },
+ "fallos": [
+  "oraculo-manual: no está en Gutenberg",
+  "rimas-leyendas: no está en Gutenberg"
+ ]
+}
