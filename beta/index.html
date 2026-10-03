@@ -21465,12 +21465,15 @@ setTimeout(refrescarAvisos, 2500);
    de contorno y rellenos en la pestaña abierta.
    ════════════════════════════════════════════════════════════════ */
 var BARRA_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">';
+/* r: se rellena debajo de la burbuja · d: detalle que debajo de la burbuja
+   toma el color de la burbuja (la línea del libro) · f: solo relleno, solo
+   debajo de la burbuja · h: contorno que separa figuras rellenas */
 var BARRA_ICO={
   resumen:'<rect class="r" x="3.5" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="3.5" y="13.25" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="13.25" width="7.25" height="7.25" rx="2"/>',
   retos:'<path class="r" d="M7 3.5h10v5.75a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.25v1.25a3.6 3.6 0 0 0 3.1 3.55M17 5.5h2.75v1.25a3.6 3.6 0 0 1-3.1 3.55M12 14.25v3.75"/><path class="r" d="M8.25 20.5h7.5v-.4a2 2 0 0 0-2-2h-3.5a2 2 0 0 0-2 2z"/>',
   vital:'<circle class="r" cx="14.6" cy="4.4" r="2"/><path stroke-width="2" d="M13.2 8.6l-2.1 5M7.8 10.3l5.4-1.7 2.6 2.7 2.7.4M11.1 13.6l3.4 2.4-.9 4.4M11.1 13.6l-1.9 3.7-3.6.8"/>',
-  academico:'<path class="r" d="M12 6.4C10 5 7.1 4.5 3.5 4.8v13.9c3.6-.3 6.5.2 8.5 1.6V6.4z"/><path class="r" d="M12 6.4c2-1.4 4.9-1.9 8.5-1.6v13.9c-3.6-.3-6.5.2-8.5 1.6V6.4z"/>',
-  social:'<circle class="r" cx="9" cy="7.75" r="3.25"/><path class="r" d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/><circle class="r" cx="16.6" cy="7.4" r="2.6"/><path d="M17.2 13.4c2.4.3 4.05 2.2 4.05 4.6v.35a.6.6 0 0 1-.6.6h-2.6"/>',
+  academico:'<path class="r" d="M12 6.4C10 5 7.1 4.5 3.5 4.8v13.9c3.6-.3 6.5.2 8.5 1.6V6.4z"/><path class="r" d="M12 6.4c2-1.4 4.9-1.9 8.5-1.6v13.9c-3.6-.3-6.5.2-8.5 1.6V6.4z"/><path class="d" d="M12 6.9v12.9"/>',
+  social:'<circle class="r" cx="16.6" cy="7.4" r="2.6"/><path d="M17.2 13.4c2.4.3 4.05 2.2 4.05 4.6v.35a.6.6 0 0 1-.6.6h-2.6"/><path class="f" d="M15.6 13.35h1.2c2.6.2 4.45 2.25 4.45 4.65v.35a.65.65 0 0 1-.65.65H15.6z"/><g class="h"><circle cx="9" cy="7.75" r="3.25"/><path d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/></g><circle class="r" cx="9" cy="7.75" r="3.25"/><path class="r" d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/>',
   tareas:'<path d="M3.5 6.25l1.6 1.6 3-3.1M3.5 12.75l1.6 1.6 3-3.1M3.5 19.25l1.6 1.6 3-3.1M11 6.5h9.5M11 13h9.5M11 19.5h9.5"/>'
 };
 function barraIco(k){ return BARRA_SVG+BARRA_ICO[k]+'</svg>'; }
@@ -21494,17 +21497,26 @@ ICO_TAREAS=barraIco("tareas");
 '#mtabs .mtab[aria-current="true"], #mtabs .mtab.cerca{ color:var(--accent); }',
 '#mtabs .mtab[aria-current="true"] span{ opacity:1; font-weight:600; }',
 '#mtabs .mtab[aria-current="true"] svg{ transform:none; }',
-'#mtabs .mtab svg .r{ transition:fill .25s ease; }',
-'#mtabs .mtab[aria-current="true"] svg .r{ fill:currentColor; }',
+'#mtabs .mtab svg .f, #mtabs .mtab svg .h{ display:none; }',
 '#mtabs .mtab:active svg{ transform:scale(.9); }',
 /* la burbuja de siempre: pastilla del color de la app que salta con muelle */
-'#mind{ top:5px; height:54px; width:66px; opacity:0; background:none!important; box-shadow:none!important; will-change:transform;',
+'#mind{ top:5px; height:54px; width:66px; opacity:0; background:none!important; box-shadow:none!important; will-change:transform; z-index:2; pointer-events:none;',
 '  transition:transform .55s var(--spring), width .45s var(--spring), opacity .3s var(--ease); }',
 /* lo que se ve va en ::before, así crecer al pulsar no mueve la burbuja de su sitio */
 '#mind::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; will-change:transform;',
-'  background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent-line);',
+'  background:var(--accent); box-shadow:0 4px 12px -6px rgba(0,0,0,.35);',
 '  transition:transform .35s cubic-bezier(.3,1.4,.5,1); }',
 '#mind::after{ content:none; }',
+/* debajo de la burbuja: una copia de la barra en colores invertidos, recortada por la burbuja */
+'.mind-capa{ position:absolute; inset:0; border-radius:inherit; overflow:hidden; pointer-events:none; transition:transform .35s cubic-bezier(.3,1.4,.5,1); }',
+'#mtabs.grabbing .mind-capa, #mtabs.apretada .mind-capa{ transform:scale(1.1); }',
+'.mind-fila{ position:absolute; left:0; top:0; height:100%; width:2000px; will-change:transform; }',
+'#mtabs .mind-fila .mind-copia{ position:absolute; top:0; height:100%; color:var(--on-accent)!important; }',
+'#mtabs .mind-fila .mind-copia span{ font-weight:600; }',
+'#mtabs .mind-fila svg .r{ fill:currentColor; }',
+'#mtabs .mind-fila svg .d{ stroke:var(--accent); stroke-width:1.6; }',
+'#mtabs .mind-fila svg .f{ display:inline; fill:currentColor; stroke:none; }',
+'#mtabs .mind-fila svg .h{ display:inline; fill:none; stroke:var(--accent); stroke-width:3.2; }',
 '#mind.suelto{ transition:width .4s ease, opacity .3s ease; }',
 '#mtabs.grabbing #mind::before, #mtabs.apretada #mind::before{ transform:scale(1.1); }',
 '@media (max-width:370px){ #mtabs .mtab{ width:calc((100vw - 40px) / 5)!important; } }',
@@ -21547,6 +21559,36 @@ ICO_TAREAS=barraIco("tareas");
 '.soc-caras .gr-foto-s img{ width:100%; height:100%; object-fit:cover; display:block; }'
   ].join("\n"); document.head.appendChild(st);
 
+  /* la copia de la barra que se ve a través de la burbuja */
+  (function(){
+    var ind=$("#mind"); if(!ind) return;
+    var capa=document.createElement("div"); capa.className="mind-capa"; capa.setAttribute("aria-hidden","true");
+    var fila=document.createElement("div"); fila.className="mind-fila"; capa.appendChild(fila); ind.appendChild(capa);
+    var antes="";
+    function copia(){
+      var h="";
+      $$("#mtabs button[data-view]").forEach(function(b){
+        h+='<div class="mtab mind-copia" style="left:'+b.offsetLeft+'px;width:'+b.offsetWidth+'px">'+b.innerHTML.replace(/ (data-label|id)="[^"]*"/g,"")+'</div>';
+      });
+      if(h!==antes){ antes=h; fila.innerHTML=h; }
+    }
+    /* la copia va justo al revés que la burbuja y con la misma transición,
+       así las dos se mueven a la vez en la GPU y la copia se queda quieta */
+    var xAntes=null;
+    function sigue(){
+      copia();
+      var m=/translate3d\((-?[\d.]+)px/.exec(ind.style.transform||""), x=m ? parseFloat(m[1]) : 0;
+      if(x===xAntes) return; xAntes=x;
+      var suelto=ind.classList.contains("suelto") || ind.classList.contains("liquido");
+      fila.style.transition=suelto ? "none" : "transform .55s var(--spring)";   /* la misma que #mind */
+      fila.style.transform="translate3d("+(-x)+"px,0,0)";
+    }
+    new MutationObserver(sigue).observe(ind, { attributes:true, attributeFilter:["style","class"] });
+    window.addEventListener("resize", sigue);
+    var _moveMTabCopia=moveMTab; moveMTab=function(){ var r=_moveMTabCopia.apply(this, arguments); sigue(); return r; };
+    var _menteTabCopia=menteTab; menteTab=function(){ var r=_menteTabCopia.apply(this, arguments); setTimeout(sigue, 0); return r; };
+    sigue();
+  })();
   /* los iconos */
   $$("#mtabs button[data-view]").forEach(function(b){
     var k=b.dataset.view, sv=b.querySelector("svg"); if(sv && BARRA_ICO[k]) sv.outerHTML=barraIco(k);
