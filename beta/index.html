@@ -21460,19 +21460,18 @@ setTimeout(refrescarAvisos, 2500);
    BARRA DE ABAJO «LIQUID GLASS» (oct 2026)
    Cápsula flotante de cristal esmerilado separada del borde, con un
    borde fino de cristal. Iconos de trazo fino (1,5) y texto pequeño.
-   La pestaña abierta la marca una gota transparente con borde de
-   cristal; al cambiar de pestaña se estira hacia la nueva y se recoge
-   como un líquido. Solo se anima transform (y scale), en la GPU: nada
-   de filtros ni desenfoques en la gota, para ir a 60 fps de verdad.
+   La pestaña abierta la marca la burbuja de siempre (del color de la
+   app, salta con muelle). Los iconos son como los de la app de iPhone:
+   de contorno y rellenos en la pestaña abierta.
    ════════════════════════════════════════════════════════════════ */
 var BARRA_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">';
 var BARRA_ICO={
-  resumen:'<rect x="3.75" y="3.75" width="7" height="8.5" rx="2"/><rect x="13.25" y="3.75" width="7" height="5" rx="2"/><rect x="3.75" y="14.75" width="7" height="5.5" rx="2"/><rect x="13.25" y="11.25" width="7" height="9" rx="2"/>',
-  retos:'<path d="M7.5 3.75h9v4.5a4.5 4.5 0 0 1-9 0v-4.5z"/><path d="M7.5 5.25H4.75v1.25a3.25 3.25 0 0 0 3.1 3.25M16.5 5.25h2.75v1.25a3.25 3.25 0 0 1-3.1 3.25"/><path d="M12 12.75v3.5M8.75 20.25h6.5l-.6-4h-5.3l-.6 4z"/>',
-  vital:'<circle cx="14.6" cy="4.6" r="1.85"/><path d="M13.2 8.6l-2.1 5M7.8 10.3l5.4-1.7 2.6 2.7 2.7.4M11.1 13.6l3.4 2.4-.9 4.4M11.1 13.6l-1.9 3.7-3.6.8"/>',
-  academico:'<path d="M12 6.6C10 5.2 7.2 4.7 3.75 5v13.6c3.45-.3 6.25.2 8.25 1.6 2-1.4 4.8-1.9 8.25-1.6V5C16.8 4.7 14 5.2 12 6.6z"/><path d="M12 6.6v13.6"/>',
-  social:'<circle cx="9" cy="8" r="3.25"/><path d="M3 19.5c0-3.2 2.7-5.5 6-5.5s6 2.3 6 5.5"/><path d="M15.75 5a3.1 3.1 0 0 1 0 6M17.25 14.3c2.1.5 3.5 2.4 3.5 4.9"/>',
-  tareas:'<rect x="3.75" y="4.25" width="16.5" height="16" rx="3.5"/><path d="M8.25 12.4l2.6 2.6 5-5.4"/>'
+  resumen:'<rect class="r" x="3.5" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="3.5" y="13.25" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="13.25" width="7.25" height="7.25" rx="2"/>',
+  retos:'<path class="r" d="M7 3.5h10v5.75a5 5 0 0 1-10 0z"/><path d="M7 5.5H4.25v1.25a3.6 3.6 0 0 0 3.1 3.55M17 5.5h2.75v1.25a3.6 3.6 0 0 1-3.1 3.55M12 14.25v3.75"/><path class="r" d="M8.25 20.5h7.5v-.4a2 2 0 0 0-2-2h-3.5a2 2 0 0 0-2 2z"/>',
+  vital:'<circle class="r" cx="14.6" cy="4.4" r="2"/><path stroke-width="2" d="M13.2 8.6l-2.1 5M7.8 10.3l5.4-1.7 2.6 2.7 2.7.4M11.1 13.6l3.4 2.4-.9 4.4M11.1 13.6l-1.9 3.7-3.6.8"/>',
+  academico:'<path class="r" d="M12 6.4C10 5 7.1 4.5 3.5 4.8v13.9c3.6-.3 6.5.2 8.5 1.6V6.4z"/><path class="r" d="M12 6.4c2-1.4 4.9-1.9 8.5-1.6v13.9c-3.6-.3-6.5.2-8.5 1.6V6.4z"/>',
+  social:'<circle class="r" cx="9" cy="7.75" r="3.25"/><path class="r" d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/><circle class="r" cx="16.6" cy="7.4" r="2.6"/><path d="M17.2 13.4c2.4.3 4.05 2.2 4.05 4.6v.35a.6.6 0 0 1-.6.6h-2.6"/>',
+  tareas:'<path d="M3.5 6.25l1.6 1.6 3-3.1M3.5 12.75l1.6 1.6 3-3.1M3.5 19.25l1.6 1.6 3-3.1M11 6.5h9.5M11 13h9.5M11 19.5h9.5"/>'
 };
 function barraIco(k){ return BARRA_SVG+BARRA_ICO[k]+'</svg>'; }
 menteTab=function(){
@@ -21495,20 +21494,17 @@ ICO_TAREAS=barraIco("tareas");
 '#mtabs .mtab[aria-current="true"], #mtabs .mtab.cerca{ color:var(--accent); }',
 '#mtabs .mtab[aria-current="true"] span{ opacity:1; font-weight:600; }',
 '#mtabs .mtab[aria-current="true"] svg{ transform:none; }',
+'#mtabs .mtab svg .r{ transition:fill .25s ease; }',
+'#mtabs .mtab[aria-current="true"] svg .r{ fill:currentColor; }',
 '#mtabs .mtab:active svg{ transform:scale(.9); }',
-/* la gota: transparente, solo el borde de cristal y un brillo arriba */
+/* la burbuja de siempre: pastilla del color de la app que salta con muelle */
 '#mind{ top:5px; height:54px; width:66px; opacity:0; background:none!important; box-shadow:none!important; will-change:transform;',
-'  transition:transform .5s cubic-bezier(.3,1.2,.4,1), width .4s ease, opacity .3s ease; }',
-/* lo que se ve va en ::before, así crecer al pulsar no mueve la gota de su sitio */
+'  transition:transform .55s var(--spring), width .45s var(--spring), opacity .3s var(--ease); }',
+/* lo que se ve va en ::before, así crecer al pulsar no mueve la burbuja de su sitio */
 '#mind::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; will-change:transform;',
-'  background:radial-gradient(60% 40% at 50% 8%, rgba(255,255,255,.45), rgba(255,255,255,0) 70%), linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.03));',
-'  box-shadow:inset 0 0 0 1px rgba(255,255,255,.6), inset 0 1.5px 1px rgba(255,255,255,.75), inset 0 -1px 2px rgba(0,0,0,.07),',
-'    0 0 0 .5px rgba(0,0,0,.07), 0 3px 10px -4px rgba(0,0,0,.16);',
+'  background:var(--accent-soft); box-shadow:inset 0 0 0 1px var(--accent-line);',
 '  transition:transform .35s cubic-bezier(.3,1.4,.5,1); }',
-'html.dark #mind::before{ background:radial-gradient(60% 40% at 50% 8%, rgba(255,255,255,.12), rgba(255,255,255,0) 70%), linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.015));',
-'  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16), inset 0 1px 0 rgba(255,255,255,.24), inset 0 -1px 2px rgba(0,0,0,.3), 0 3px 10px -4px rgba(0,0,0,.45); }',
 '#mind::after{ content:none; }',
-'#mind.liquido{ transition:width .4s ease, opacity .3s ease; }',
 '#mind.suelto{ transition:width .4s ease, opacity .3s ease; }',
 '#mtabs.grabbing #mind::before, #mtabs.apretada #mind::before{ transform:scale(1.1); }',
 '@media (max-width:370px){ #mtabs .mtab{ width:calc((100vw - 40px) / 5)!important; } }',
@@ -21551,29 +21547,7 @@ ICO_TAREAS=barraIco("tareas");
 '.soc-caras .gr-foto-s img{ width:100%; height:100%; object-fit:cover; display:block; }'
   ].join("\n"); document.head.appendChild(st);
 
-  /* al cambiar de pestaña la gota se estira hacia la nueva y se recoge, como un líquido */
-  var anim=null, reduce=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var _moveMTabLiq=moveMTab;
-  moveMTab=function(){
-    var ind=$("#mind"), bar=$("#mtabs");
-    var puede=ind && bar && ind.animate && !reduce && ind.style.opacity==="1" &&
-              !bar.classList.contains("grabbing") && !ind.classList.contains("suelto");
-    var antes=mindX, r=_moveMTabLiq.apply(this, arguments);
-    if(!puede) return r;
-    var d=mindX-antes; if(Math.abs(d)<2) return r;
-    var w=ind.offsetWidth||66, k=Math.min(.9, Math.abs(d)/w*.38), fin=mindX;
-    if(anim) anim.cancel();
-    ind.classList.add("liquido");
-    anim=ind.animate([
-      { transform:"translate3d("+antes+"px,0,0) scale(1,1)" },
-      { transform:"translate3d("+(antes+d*.5)+"px,0,0) scale("+(1+k)+","+(1-k*.16)+")", offset:.4 },
-      { transform:"translate3d("+(fin+d*.035)+"px,0,0) scale("+(1-k*.07)+","+(1+k*.05)+")", offset:.78 },
-      { transform:"translate3d("+fin+"px,0,0) scale(1,1)" }
-    ], { duration:520, easing:"cubic-bezier(.42,.25,.3,1)" });
-    var a=anim; a.onfinish=a.oncancel=function(){ if(anim===a){ anim=null; ind.classList.remove("liquido"); } };
-    return r;
-  };
-  /* los iconos de trazo fino */
+  /* los iconos */
   $$("#mtabs button[data-view]").forEach(function(b){
     var k=b.dataset.view, sv=b.querySelector("svg"); if(sv && BARRA_ICO[k]) sv.outerHTML=barraIco(k);
   });
