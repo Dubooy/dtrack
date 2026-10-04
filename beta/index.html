@@ -3244,7 +3244,7 @@ var TEMAS=[
   {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16}
 ];
 var TEMAS_OSCUROS=["dark","medianoche","oro"];
-var COLOR_TEMA={ light:"#f5f0e6", dark:"#141311", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
+var COLOR_TEMA={ light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
 function applyTheme(mode){
   var root=document.documentElement;
   var real=mode;
@@ -21977,7 +21977,9 @@ window.addEventListener("load",function(){ setTimeout(function(){ moveMarker(); 
    · una sola tarjeta (hoja crema con borde fino) para todo lo que ya era
      tarjeta;
    · sin degradados de color: la barra de hábitos brilla en grises y el
-     halo de la luna de Parte del día es tinta (en oscuro, morado).
+     halo de la luna de Parte del día es tinta (en oscuro, morado). El oscuro
+     lleva algo más de contraste: fondo un punto más claro y tarjetas que se
+     separan de él.
    ════════════════════════════════════════════════════ */
 (function(){
   var P="html:not(.sage):not(.neo):not(.arena):not(.porcelana):not(.medianoche):not(.oro)", D=P+".dark";
@@ -21986,7 +21988,8 @@ window.addEventListener("load",function(){ setTimeout(function(){ moveMarker(); 
 P+'{ --good:#0E8A6E; --violet:#0E8A6E; --cyan:#0E8A6E; --gold:#0E8A6E; --warn:#0E8A6E;',
 '  --tarjeta:#fffcf6; --tarjeta-borde:rgba(28,27,25,.08); --halo:rgba(28,27,25,.55); }',
 D+'{ --good:#3fbf98; --violet:#3fbf98; --cyan:#3fbf98; --gold:#3fbf98; --warn:#3fbf98;',
-'  --tarjeta:#1d1b18; --tarjeta-borde:rgba(241,235,223,.08); --halo:rgba(185,160,255,.6); }',
+'  --bg:#181715; --tarjeta:#272420; --tarjeta-borde:rgba(241,235,223,.13); --halo:rgba(185,160,255,.6);',
+'  --fill:rgba(255,255,255,.08); --fill-hi:rgba(255,255,255,.15); --t2:#c9c1b4; --t3:#a0988b; --hairline:rgba(255,255,255,.15); }',
 /* una sola tarjeta */
 TARJETAS.map(function(s){ return P+' '+s; }).join(",")+'{',
 '  background:var(--tarjeta) !important; background-image:none !important; border:0 !important; border-radius:24px !important;',
@@ -21997,10 +22000,8 @@ P+' #ideal-bar{ background:linear-gradient(90deg,var(--t1),color-mix(in srgb,var
 '  box-shadow:0 0 12px -2px color-mix(in srgb,var(--t1) 35%,transparent); }',
 /* puntos de los hábitos: tinta suave */
 P+' #ideal-list .rounded-full[style*="background"]{ background:var(--t3) !important; }',
-/* anillos de Hoy y de nivel: mismo fondo y el acento */
+/* anillos de Hoy: mismo fondo (el de nivel conserva el color de su rango) */
 P+' .hy-anillo circle:first-of-type{ stroke:var(--fill-hi) !important; }',
-P+' .hy-xp-an circle:first-of-type{ stroke:var(--fill-hi) !important; stroke-opacity:1 !important; }',
-P+' .hy-xp-an .an-arco{ stroke:var(--good) !important; }',
 /* Parte del día: luna en tinta con su halo */
 P+' .hy-parte .hy-semana i{ background:var(--fill-hi) !important; }',
 P+' .hy-parte .hy-semana i.on{ background:var(--good) !important; }',

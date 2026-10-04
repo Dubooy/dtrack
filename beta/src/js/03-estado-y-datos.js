@@ -222,7 +222,7 @@ var TEMAS=[
   {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16}
 ];
 var TEMAS_OSCUROS=["dark","medianoche","oro"];
-var COLOR_TEMA={ light:"#f5f0e6", dark:"#141311", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
+var COLOR_TEMA={ light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
 function applyTheme(mode){
   var root=document.documentElement;
   var real=mode;
