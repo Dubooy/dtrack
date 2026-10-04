@@ -1,5 +1,7 @@
 /* si algo peta, se avisa y se quitan las capas que puedan estar tapando la app */
 window.addEventListener("error",function(ev){
+  /* este aviso del navegador no es un fallo de verdad: no se enseña */
+  if(/ResizeObserver loop/i.test(ev.message||"")){ if(ev.stopImmediatePropagation) ev.stopImmediatePropagation(); return; }
   try{
     var t=document.getElementById("tour"); if(t) t.hidden=true;
     var pp=document.getElementById("parte"); if(pp) pp.hidden=true;

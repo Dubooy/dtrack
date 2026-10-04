@@ -517,7 +517,7 @@ if(window.visualViewport){
   window.visualViewport.addEventListener("scroll",fitBottomBar);
 }
 if(window.ResizeObserver){
-  try{ new ResizeObserver(function(){ fitBottomBar(); }).observe(document.body); }catch(e){}
+  try{ new ResizeObserver(function(){ requestAnimationFrame(fitBottomBar); }).observe(document.body); }catch(e){}
 }
 var rafP=false,lastE=null;
 document.addEventListener("pointermove",function(e){
