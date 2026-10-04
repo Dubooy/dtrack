@@ -1,50 +1,50 @@
 /* Ficha «?» del modo guiado: mapa del cuerpo en 2D (delante y detrás) dibujado músculo a músculo.
    Los músculos que trabaja el estiramiento se pintan en verde con las rayas del logo; el resto en gris.
    Las claves son las de MUSC_CLAVES / MUSC_NOMBRE (34-estiramientos-guia.js). Se dibuja la mitad izquierda y se refleja. Las piezas van con tramos rectos, como facetas. */
-var MM_COMUN={ cabeza:"M100 10 L90 13 L86 24 L87 38 L92 47 L100 51 Z",
- antebrazo:"M42 146 L38 160 L38 178 L42 194 L50 194 L54 176 L58 156 L56 144 Z",
- mano:"M42 198 L40 208 L44 218 L50 218 L52 208 L50 198 Z" };
+var MM_COMUN={ cabeza:"M100.0 -11.9 L84.7 -7.3 L78.5 9.6 L80.1 31.1 L87.7 44.9 L100.0 51.0 Z",
+ antebrazo:"M30.6 146.0 L24.4 160.0 L24.4 178.0 L30.6 194.0 L43.0 194.0 L49.2 176.0 L55.4 156.0 L52.3 144.0 Z",
+ mano:"M30.6 198.0 L27.5 208.0 L33.7 218.0 L43.0 218.0 L46.1 208.0 L43.0 198.0 Z" };
 var MM_DEL=Object.assign({}, MM_COMUN, {
- cuelloF:"M92 50 L89 58 L97 68 L100 68 L100 54 Z",
- trapecio:"M90 56 L64 64 L78 66 L95 66 Z",
- deltA:"M64 64 L50 70 L43 84 L44 98 L52 104 L60 90 L70 72 L78 66 Z",
- pectoral:"M98 70 L80 68 L70 74 L62 92 L64 104 L80 110 L98 108 Z",
- biceps:"M52 106 L44 112 L42 130 L46 142 L54 140 L58 124 L58 108 Z",
- abdomen:"M100 112 L88 114 L87 130 L100 130 Z", abd2:"M100 133 L87 133 L87 150 L100 150 Z",
- abd3:"M100 153 L87 153 L88 170 L100 170 Z", abd4:"M100 173 L88 173 L92 196 L100 200 Z",
- oblicuos:"M85 112 L68 108 L66 122 L70 150 L74 172 L86 196 L85 170 Z",
- psoas:"M88 200 L76 196 L72 202 L84 214 L96 228 L98 214 Z",
- cuadriceps:"M70 202 L64 220 L62 256 L66 290 L72 312 L78 314 L76 280 L74 240 L80 214 Z",
- rectoFem:"M82 214 L76 240 L78 280 L82 306 L88 304 L92 270 L92 236 Z",
- vastoM:"M92 276 L88 304 L84 314 L92 320 L98 310 L98 290 Z",
- aductores:"M96 230 L93 238 L93 268 L98 284 L99 236 Z",
- rodilla:"M74 318 L86 320 L96 322 L94 334 L80 334 L74 328 Z",
- tibial:"M74 338 L70 358 L74 380 L80 398 L84 398 L84 370 L86 340 Z",
- gemeloF:"M88 338 L96 352 L96 372 L90 398 L86 398 L86 360 Z",
- pie:"M78 402 L90 402 L94 412 L92 418 L76 418 L74 410 Z" });
+ cuelloF:"M92.0 50.0 L89.0 58.0 L97.0 68.0 L100.0 68.0 L100.0 54.0 Z",
+ trapecio:"M90.0 56.0 L63.0 64.0 L78.0 66.0 L95.0 66.0 Z",
+ deltA:"M64.0 64.0 L45.1 70.9 L35.6 87.0 L37.0 103.1 L47.8 110.0 L58.6 93.9 L72.1 73.2 L82.9 66.3 Z",
+ pectoral:"M98.0 70.0 L80.0 68.0 L69.8 74.0 L60.8 92.0 L63.0 104.0 L80.0 110.0 L98.0 108.0 Z",
+ biceps:"M46.1 106.0 L33.7 112.0 L30.6 130.0 L36.8 142.0 L49.2 140.0 L55.4 124.0 L55.4 108.0 Z",
+ abdomen:"M100.0 112.0 L88.0 114.0 L87.0 130.0 L100.0 130.0 Z", abd2:"M100.0 133.0 L87.0 133.0 L87.0 150.0 L100.0 150.0 Z",
+ abd3:"M100.0 153.0 L87.0 153.0 L88.0 170.0 L100.0 170.0 Z", abd4:"M100.0 173.0 L88.0 173.0 L92.0 196.0 L100.0 200.0 Z",
+ oblicuos:"M85.0 112.0 L67.5 108.0 L65.3 122.0 L69.8 150.0 L74.0 172.0 L86.0 196.0 L85.0 170.0 Z",
+ psoas:"M86.6 200.0 L73.1 196.0 L68.6 202.0 L82.1 214.0 L95.5 228.0 L97.8 214.0 Z",
+ cuadriceps:"M66.4 202.0 L59.7 220.0 L57.4 256.0 L61.9 290.0 L68.6 312.0 L75.4 314.0 L73.1 280.0 L70.9 240.0 L77.6 214.0 Z",
+ rectoFem:"M79.8 214.0 L73.1 240.0 L75.4 280.0 L79.8 306.0 L86.6 304.0 L91.0 270.0 L91.0 236.0 Z",
+ vastoM:"M91.0 276.0 L86.6 304.0 L82.1 314.0 L91.0 320.0 L97.8 310.0 L97.8 290.0 Z",
+ aductores:"M95.5 230.0 L92.2 238.0 L92.2 268.0 L97.8 284.0 L98.9 236.0 Z",
+ rodilla:"M70.9 318.0 L84.3 320.0 L95.5 322.0 L93.3 334.0 L77.6 334.0 L70.9 328.0 Z",
+ tibial:"M70.9 338.0 L66.4 358.0 L70.9 380.0 L77.6 398.0 L82.1 398.0 L82.1 370.0 L84.3 340.0 Z",
+ gemeloF:"M86.6 338.0 L95.5 352.0 L95.5 372.0 L88.8 398.0 L84.3 398.0 L84.3 360.0 Z",
+ pie:"M75.4 402.0 L88.8 402.0 L93.3 412.0 L91.0 418.0 L73.1 418.0 L70.9 410.0 Z" });
 var MM_DET=Object.assign({}, MM_COMUN, {
- cuello:"M92 48 L90 58 L100 60 L100 50 Z",
- trapecio:"M100 52 L92 52 L90 58 L62 64 L80 72 L94 84 L100 86 Z",
- toracica:"M100 86 L94 84 L90 104 L94 124 L100 146 Z",
- romboides:"M94 84 L80 72 L76 80 L82 100 L90 104 Z",
- deltP:"M62 64 L50 70 L43 84 L44 98 L52 104 L58 92 L66 78 Z",
- infra:"M66 78 L58 92 L60 104 L74 104 L82 100 L76 80 Z",
- redondo:"M60 106 L58 114 L68 117 L76 106 Z",
- dorsal:"M58 117 L62 134 L66 160 L74 178 L94 192 L95 160 L94 124 L90 104 L82 100 L76 108 L68 119 Z",
- erectores:"M100 146 L96 154 L96 196 L100 198 Z",
- lumbares:"M74 180 L72 196 L74 204 L100 206 L100 199 L95 197 L93 193 Z",
- triceps:"M52 106 L44 112 L42 130 L46 142 L54 140 L58 124 L58 108 Z",
- tricepsL:"M44 112 L42 130 L46 142 L50 137 L50 116 Z",
- gluteoMed:"M74 207 L68 210 L64 222 L72 218 L84 210 Z",
- gluteo:"M86 210 L72 219 L64 231 L66 246 L76 256 L90 258 L99 252 L99 210 Z",
- isquios:"M66 252 L64 280 L68 304 L74 318 L84 318 L82 290 L84 262 L76 258 Z",
- semiten:"M86 262 L84 290 L86 318 L94 318 L96 290 L97 258 L90 260 Z",
- rodilla:"M74 320 L94 320 L94 330 L74 330 Z",
- gemelos:"M72 334 L66 348 L68 364 L74 374 L82 370 L83 338 Z",
- gemeloM:"M85 336 L84 370 L90 376 L96 362 L96 344 L92 334 Z",
- soleo:"M72 378 L76 390 L80 398 L90 398 L92 388 L94 376 L88 380 L82 374 Z",
- tobillo:"M80 400 L90 400 L90 405 L80 405 Z",
- pie:"M78 407 L92 407 L92 418 L78 418 Z" });
+ cuello:"M92.0 48.0 L90.0 58.0 L100.0 60.0 L100.0 50.0 Z",
+ trapecio:"M100.0 52.0 L92.0 52.0 L90.0 58.0 L60.8 64.0 L80.0 72.0 L94.0 84.0 L100.0 86.0 Z",
+ toracica:"M100.0 86.0 L94.0 84.0 L90.0 104.0 L94.0 124.0 L100.0 146.0 Z",
+ romboides:"M94.0 84.0 L80.0 72.0 L76.0 80.0 L82.0 100.0 L90.0 104.0 Z",
+ deltP:"M61.3 64.0 L45.1 70.9 L35.6 87.0 L37.0 103.1 L47.8 110.0 L55.9 96.2 L66.7 80.1 Z",
+ infra:"M65.3 78.0 L56.3 92.0 L58.6 104.0 L74.0 104.0 L82.0 100.0 L76.0 80.0 Z",
+ redondo:"M58.6 106.0 L56.3 114.0 L67.5 117.0 L76.0 106.0 Z",
+ dorsal:"M56.3 117.0 L60.8 134.0 L65.3 160.0 L74.0 178.0 L94.0 192.0 L95.0 160.0 L94.0 124.0 L90.0 104.0 L82.0 100.0 L76.0 108.0 L67.5 119.0 Z",
+ erectores:"M100.0 146.0 L96.0 154.0 L96.0 196.0 L100.0 198.0 Z",
+ lumbares:"M74.0 180.0 L72.0 196.0 L74.0 204.0 L100.0 206.0 L100.0 199.0 L95.0 197.0 L93.0 193.0 Z",
+ triceps:"M46.1 106.0 L33.7 112.0 L30.6 130.0 L36.8 142.0 L49.2 140.0 L55.4 124.0 L55.4 108.0 Z",
+ tricepsL:"M33.7 112.0 L30.6 130.0 L36.8 142.0 L43.0 137.0 L43.0 116.0 Z",
+ gluteoMed:"M70.9 207.0 L64.2 210.0 L59.7 222.0 L68.6 218.0 L82.1 210.0 Z",
+ gluteo:"M84.3 210.0 L68.6 219.0 L59.7 231.0 L61.9 246.0 L73.1 256.0 L88.8 258.0 L98.9 252.0 L98.9 210.0 Z",
+ isquios:"M61.9 252.0 L59.7 280.0 L64.2 304.0 L70.9 318.0 L82.1 318.0 L79.8 290.0 L82.1 262.0 L73.1 258.0 Z",
+ semiten:"M84.3 262.0 L82.1 290.0 L84.3 318.0 L93.3 318.0 L95.5 290.0 L96.6 258.0 L88.8 260.0 Z",
+ rodilla:"M70.9 320.0 L93.3 320.0 L93.3 330.0 L70.9 330.0 Z",
+ gemelos:"M68.6 334.0 L61.9 348.0 L64.2 364.0 L70.9 374.0 L79.8 370.0 L81.0 338.0 Z",
+ gemeloM:"M83.2 336.0 L82.1 370.0 L88.8 376.0 L95.5 362.0 L95.5 344.0 L91.0 334.0 Z",
+ soleo:"M68.6 378.0 L73.1 390.0 L77.6 398.0 L88.8 398.0 L91.0 388.0 L93.3 376.0 L86.6 380.0 L79.8 374.0 Z",
+ tobillo:"M77.6 400.0 L88.8 400.0 L88.8 405.0 L77.6 405.0 Z",
+ pie:"M75.4 407.0 L91.0 407.0 L91.0 418.0 L75.4 418.0 Z" });
 /* claves que también encienden otras piezas del dibujo */
 var MM_ALIAS={ gemelos:["gemeloF","gemeloM"], cuello:["cuelloF"], cuelloF:["cuello"], abdomen:["abd2","abd3","abd4"],
   cuadriceps:["vastoM","rectoFem"], isquios:["semiten"], infra:["redondo"], triceps:["tricepsL"], dorsal:["redondo"] };
@@ -52,7 +52,7 @@ function mapaMusculosVista(P, on, abs){
   var s="";
   for(var k in P){ var c=on.indexOf(k)>=0 ? "mm-on" : "";
     s+='<path class="'+c+'" d="'+P[k]+'"/><path class="'+c+'" d="'+P[k]+'" transform="translate(200 0) scale(-1 1)"/>'; }
-  return '<svg class="mm" viewBox="36 6 128 416" aria-hidden="true">'+s+'</svg>';
+  return '<svg class="mm" viewBox="20 -14 160 436" aria-hidden="true">'+s+'</svg>';
 }
 function mapaMusculos(claves){
   var on=[]; (claves||[]).forEach(function(k){ on.push(k); (MM_ALIAS[k]||[]).forEach(function(a){ on.push(a); }); });

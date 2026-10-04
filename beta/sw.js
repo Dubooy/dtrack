@@ -1,7 +1,7 @@
 /* Peak · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v238";
+const CACHE = "dtrack-beta-v239";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js", "./peak-anim.js",
   "./vendor/jszip.min.js", "./vendor/epub.min.js",
