@@ -62,6 +62,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `37-fotos-grandes-grupo.js` | Fotos de perfil en grande, foto del grupo |
 | `38-app-iphone.js` | Dentro de la app de iPhone (Capacitor, canal `peakBarra`) |
 | `39-estirar-y-leer.js` | Estirar en Cuerpo y leer en Mente, a un toque |
+| `40-estilo-orden.js` | Estilo ordenado: crema, tinta y un acento, una sola tarjeta (solo temas Claro y Oscuro) |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
