@@ -205,18 +205,13 @@ function guiaInfo(){
   var mus=(p.m||"").split(/,\s*|\s+y\s+/).map(function(x){ return x.trim(); }).filter(Boolean);
   c.innerHTML='<div class="gi-fondo" data-act="x-gu-info-cierra"></div><div class="gi-hoja"><span class="gi-asa"></span>'+
     '<div class="gi-cuerpo"><h2>'+esc(p.t)+'</h2>'+
-      '<div class="gi-escena">'+[["del","Delante"],["det","Detrás"]].map(function(x){
-        return '<div class="gi-vista gi-'+x[0]+'"><canvas class="gi-3d"></canvas><div class="gi-capa"></div><p class="gi-gira">'+x[1]+'</p></div>'; }).join("")+'</div>'+
+      '<div class="gi-escena">'+mapaMusculos(muscClaves(p.m))+'</div>'+
       (mus.length?'<p class="gi-et">Zona principal</p><div class="gi-musc">'+mus.map(function(m){ return '<span><i></i>'+esc(m.charAt(0).toUpperCase()+m.slice(1))+'</span>'; }).join("")+'</div>':'')+
       '<p class="gi-et">Instrucciones</p><p class="gi-txt">'+esc(p.d)+'</p>'+
       '<a class="gi-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
     '<div class="gi-pie"><button data-act="x-gu-info-cierra">Cerrar</button></div></div>';
   document.body.appendChild(c);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ c.classList.add("ve"); }); });
-  var zs=muscZonas(p.m), ks=muscClaves(p.m), vd=c.querySelector(".gi-del"), vt=c.querySelector(".gi-det");
-  var a1=maniquiMusculos(vd.querySelector(".gi-3d"), zs, ks, vd.querySelector(".gi-capa"), 1);
-  var a2=maniquiMusculos(vt.querySelector(".gi-3d"), zs, ks, vt.querySelector(".gi-capa"), -1);
-  GUIA.infoVivo={ para:function(){ a1.para(); a2.para(); } };
 }
 function guiaInfoCierra(sinSeguir){
   var c=document.getElementById("gu-info"); if(!c) return;
