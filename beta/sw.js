@@ -1,7 +1,7 @@
 /* Peak · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v237";
+const CACHE = "dtrack-beta-v238";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js", "./peak-anim.js",
   "./vendor/jszip.min.js", "./vendor/epub.min.js",
@@ -31,7 +31,8 @@ self.addEventListener("fetch", e => {
   // (la vuelta del login con Google trae un código de un solo uso).
   if (url.origin === location.origin) {
     e.respondWith(
-      fetch(req).then(res => {
+      // «no-cache»: pregunta siempre al servidor si hay versión nueva (GitHub Pages deja copias de 10 min en el móvil)
+      fetch(req.mode === "navigate" ? new Request(req.url, { cache: "no-cache", credentials: "same-origin" }) : new Request(req, { cache: "no-cache" })).then(res => {
         if (res.ok) {
           const copy = res.clone(), clave = url.search ? url.origin + url.pathname : req;
           caches.open(CACHE).then(c => c.put(clave, copy)).catch(() => {});
