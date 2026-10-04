@@ -280,35 +280,26 @@
             <div class="pad sf-caja">
               <h2 class="display text-[17px] font-bold mb-1">Salud del día</h2>
               <p class="text-[12.5px] t3 mb-4">Agua, sueño y pantalla</p>
-              <div class="sf-fila glass" data-k="water" data-act="x-valor" role="button" aria-label="Apuntar agua">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-agua" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-gota" d="M12 3c3.5 4.2 6 7.6 6 10.8A6 6 0 0 1 6 13.8C6 10.6 8.5 7.2 12 3z"/><path class="sf-brillo" d="M9.3 14.4a2.8 2.8 0 0 0 2.5 2.5"/></svg><i class="sf-onda"></i></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Agua</b><span class="sf-num num" id="water-val">—</span></div>
-                  <p class="sf-msg" id="water-lab">Empieza con un vaso</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="water" data-act="x-valor" role="button" aria-label="Apuntar agua">
+                <div class="sf-cab"><span class="sf-ic" id="mg-agua" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5c3.8 4.5 6.5 8.1 6.5 11.5a6.5 6.5 0 0 1-13 0c0-3.4 2.7-7 6.5-11.5z"/></svg></span><b>Agua</b><button class="sf-mas" data-act="x-sf-vaso" aria-label="Añadir un vaso">+ vaso</button><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="water-val">—</span><p class="sf-msg" id="water-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-sf-vaso" data-k="water" aria-label="Añadir">+</button>
               </div>
-              <div class="sf-fila glass" data-k="sleep" data-act="x-valor" role="button" aria-label="Apuntar sueño">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-sueno" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-luna" d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><em class="sf-z">z</em><em class="sf-z sf-z2">z</em></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Sueño</b><span class="sf-num num" id="sleep-val">—</span></div>
-                  <p class="sf-msg" id="sleep-lab">¿Cuánto dormiste anoche?</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="sleep" data-act="x-valor" role="button" aria-label="Apuntar sueño">
+                <div class="sf-cab"><span class="sf-ic" id="mg-sueno" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.6A8.3 8.3 0 0 1 9.4 4a8.3 8.3 0 1 0 10.6 10.6z"/></svg></span><b>Sueño</b><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="sleep-val">—</span><p class="sf-msg" id="sleep-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-valor" data-k="sleep" aria-label="Añadir">+</button>
               </div>
-              <div class="sf-fila glass" data-k="screen" data-act="x-valor" role="button" aria-label="Apuntar pantalla">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-pantalla" aria-hidden="true"><svg viewBox="0 0 24 24"><g class="sf-movil"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.6"/><path d="M10.5 18h3"/></g></svg></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Pantalla</b><span class="sf-num num" id="screen-val">—</span></div>
-                  <p class="sf-msg" id="screen-lab">Toca + para apuntarla</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="screen" data-act="x-valor" role="button" aria-label="Apuntar pantalla">
+                <div class="sf-cab"><span class="sf-ic" id="mg-pantalla" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.5 2h7A2.5 2.5 0 0 1 18 4.5v15a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6 19.5v-15A2.5 2.5 0 0 1 8.5 2zM8 5v12.5h8V5z"/></svg></span><b>Pantalla</b><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="screen-val">—</span><p class="sf-msg" id="screen-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-valor" data-k="screen" aria-label="Añadir">+</button>
               </div>
             </div>
             <div class="glass rounded-[24px] pad">

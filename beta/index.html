@@ -787,35 +787,26 @@ html.embebido #acciones-flotantes{ top:94px; }
             <div class="pad sf-caja">
               <h2 class="display text-[17px] font-bold mb-1">Salud del día</h2>
               <p class="text-[12.5px] t3 mb-4">Agua, sueño y pantalla</p>
-              <div class="sf-fila glass" data-k="water" data-act="x-valor" role="button" aria-label="Apuntar agua">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-agua" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-gota" d="M12 3c3.5 4.2 6 7.6 6 10.8A6 6 0 0 1 6 13.8C6 10.6 8.5 7.2 12 3z"/><path class="sf-brillo" d="M9.3 14.4a2.8 2.8 0 0 0 2.5 2.5"/></svg><i class="sf-onda"></i></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Agua</b><span class="sf-num num" id="water-val">—</span></div>
-                  <p class="sf-msg" id="water-lab">Empieza con un vaso</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="water" data-act="x-valor" role="button" aria-label="Apuntar agua">
+                <div class="sf-cab"><span class="sf-ic" id="mg-agua" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5c3.8 4.5 6.5 8.1 6.5 11.5a6.5 6.5 0 0 1-13 0c0-3.4 2.7-7 6.5-11.5z"/></svg></span><b>Agua</b><button class="sf-mas" data-act="x-sf-vaso" aria-label="Añadir un vaso">+ vaso</button><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="water-val">—</span><p class="sf-msg" id="water-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-sf-vaso" data-k="water" aria-label="Añadir">+</button>
               </div>
-              <div class="sf-fila glass" data-k="sleep" data-act="x-valor" role="button" aria-label="Apuntar sueño">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-sueno" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-luna" d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><em class="sf-z">z</em><em class="sf-z sf-z2">z</em></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Sueño</b><span class="sf-num num" id="sleep-val">—</span></div>
-                  <p class="sf-msg" id="sleep-lab">¿Cuánto dormiste anoche?</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="sleep" data-act="x-valor" role="button" aria-label="Apuntar sueño">
+                <div class="sf-cab"><span class="sf-ic" id="mg-sueno" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.6A8.3 8.3 0 0 1 9.4 4a8.3 8.3 0 1 0 10.6 10.6z"/></svg></span><b>Sueño</b><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="sleep-val">—</span><p class="sf-msg" id="sleep-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-valor" data-k="sleep" aria-label="Añadir">+</button>
               </div>
-              <div class="sf-fila glass" data-k="screen" data-act="x-valor" role="button" aria-label="Apuntar pantalla">
-                <span class="sf-hecho">¡Hecho!</span>
-                <div class="sf-ic" id="mg-pantalla" aria-hidden="true"><svg viewBox="0 0 24 24"><g class="sf-movil"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.6"/><path d="M10.5 18h3"/></g></svg></div>
-                <div class="sf-mid">
-                  <div class="sf-top"><b>Pantalla</b><span class="sf-num num" id="screen-val">—</span></div>
-                  <p class="sf-msg" id="screen-lab">Toca + para apuntarla</p>
-                  <div class="sf-barra"><u></u></div>
+              <div class="sf-fila" data-k="screen" data-act="x-valor" role="button" aria-label="Apuntar pantalla">
+                <div class="sf-cab"><span class="sf-ic" id="mg-pantalla" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.5 2h7A2.5 2.5 0 0 1 18 4.5v15a2.5 2.5 0 0 1-2.5 2.5h-7A2.5 2.5 0 0 1 6 19.5v-15A2.5 2.5 0 0 1 8.5 2zM8 5v12.5h8V5z"/></svg></span><b>Pantalla</b><span class="sf-cuando">hoy</span><svg class="sf-chev" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+                <div class="sf-cuerpo">
+                  <div class="sf-dato"><span class="sf-num num" id="screen-val">—</span><p class="sf-msg" id="screen-lab"></p></div>
+                  <div class="sf-sem" aria-hidden="true"></div>
                 </div>
-                <button class="sf-mas" data-act="x-valor" data-k="screen" aria-label="Añadir">+</button>
               </div>
             </div>
             <div class="glass rounded-[24px] pad">
@@ -22870,17 +22861,32 @@ function sfTexto(k, v){
            msg: v<2 ? (queda>=1 ? "Te quedan "+sfHoras(queda)+" h libres" : "Te queda "+(queda===.5?"media hora":sfHoras(queda)+" h")+" libre")
                     : v===2 ? "Justo en el límite" : "Te has pasado "+sfHoras(v-2)+" h" };
 }
+/* la semana en barritas, como en Salud del iPhone: grises y hoy en color */
+var SF_TOPE={ water:10, sleep:10, screen:6 };
+function sfSemana(k){
+  var hoy=curDay(), out="";
+  for(var i=6;i>=0;i--){
+    var d=addDays(hoy,-i), v=((S.habits&&S.habits[d])||{})[k];
+    var tiene=(v!=null && (k==="screen" || v>0));
+    var alto=tiene ? Math.max(14, Math.min(100, Math.round(v/SF_TOPE[k]*100))) : 8;
+    out+='<i class="'+(i===0?"hoy":"")+(tiene?"":" nada")+'" style="height:'+alto+'%"></i>';
+  }
+  return out;
+}
 function saludFilas(){
   var t=curDay(), h=habit(t);
   document.querySelectorAll(".sf-fila").forEach(function(f){
     var k=f.dataset.k, v=h[k], o=sfTexto(k, k==="water" ? (v||0) : v), ok=SALUD[k].ok(v);
-    f.style.setProperty("--sf", "var("+(o.pasa ? "--sf-pasa" : SF_COLOR[k])+")");
-    var n=f.querySelector(".sf-num"); n.innerHTML=o.n+(o.u?'<small>'+o.u+'</small>':"");
+    f.style.setProperty("--sf", "var("+SF_COLOR[k]+")");
+    var n=f.querySelector(".sf-num"); n.innerHTML=o.n+(o.u?'<small>'+(o.u==="/8"?"de 8 vasos":o.u==="h"?"horas":o.u)+'</small>':"");
+    n.classList.toggle("vacio", o.n==="—");
     f.querySelector(".sf-msg").textContent=o.msg;
-    f.querySelector(".sf-barra u").style.width=Math.round(Math.min(1,o.f)*100)+"%";
+    f.querySelector(".sf-sem").innerHTML=sfSemana(k);
+    f.querySelector(".sf-cuando").textContent = t===today() ? "hoy" : "ese día";
     f.classList.toggle("ok", !!ok);
     f.classList.toggle("pasa", !!o.pasa);
     f.querySelectorAll("[data-act]").forEach(function(b){ b.dataset.day=t; });
+    if(f.dataset.act) f.dataset.day=t;
   });
 }
 /* un toque: la animación del icono vuelve a empezar */
@@ -22902,52 +22908,46 @@ function sfToca(k, cls){
       sonido("pop"); sfToca("water", "sf-cae");
       return true;
     }
-    if(a==="x-valor" && el.classList.contains("sf-fila")) sfToca(el.dataset.k, "sf-cae");
     return acc(a, el);
   };
 
   var st=document.createElement("style");
   st.textContent=[
-/* todo en tinta, como el resto de la app; lo cumplido lleva las rayas del logo */
-':root{ --sf-agua:var(--t1); --sf-sueno:var(--t1); --sf-pantalla:var(--t1); --sf-pasa:var(--alert); }',
+/* como Salud del iPhone: tarjeta lisa, el color solo en el título y en la barra de hoy */
+':root{ --sf-agua:#2f8fd8; --sf-sueno:#5e5ce6; --sf-pantalla:#f2652a; }',
+'html.dark{ --sf-agua:#4fb1f5; --sf-sueno:#8583ff; --sf-pantalla:#ff7d45; }',
 '.sf-caja{ padding:0!important; background:none!important; box-shadow:none!important; }',
-/* una sola tarjeta con tres filas separadas por una línea */
-'.sf-fila{ --sf:var(--t1); position:relative; display:flex; align-items:center; gap:14px; padding:16px 16px!important; margin:0; border-radius:0!important; cursor:pointer;',
-'  background:var(--tarjeta, var(--glass-bg))!important; background-image:none!important; border:0!important;',
-'  box-shadow:0 0 0 1px var(--tarjeta-borde, var(--hairline))!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important;',
-'  -webkit-tap-highlight-color:transparent; transition:background .2s var(--ease); }',
-'.sf-fila:first-of-type{ border-radius:24px 24px 0 0!important; }',
-'.sf-fila:last-child{ border-radius:0 0 24px 24px!important; }',
-'.sf-fila + .sf-fila{ margin-top:1px; }',
-'.sf-fila:active{ background:color-mix(in srgb, var(--t1) 4%, var(--tarjeta, var(--bg)))!important; }',
-'.sf-ic{ position:relative; flex:none; width:28px; height:28px; display:grid; place-items:center; color:var(--t1); }',
-'.sf-ic svg{ width:26px; height:26px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; overflow:visible; }',
-'.sf-z, .sf-hecho{ display:none!important; }',
-'.sf-mid{ flex:1; min-width:0; }',
-'.sf-top{ display:flex; align-items:baseline; justify-content:space-between; gap:8px; }',
-'.sf-top b{ font-size:15px; font-weight:600; }',
-'.sf-num{ font-family:Unbounded,sans-serif; font-weight:700; font-size:19px; letter-spacing:-.05em; line-height:1; }',
-'.sf-num small{ font-family:Inter,sans-serif; font-size:12px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:2px; }',
-'.sf-msg{ font-size:12.5px; color:var(--t3); margin:3px 0 10px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
-'.sf-fila.ok .sf-msg{ color:var(--good); }',
-'.sf-fila.pasa .sf-msg{ color:var(--alert); }',
-'.sf-barra{ height:6px; border-radius:4px; overflow:hidden; background:var(--fill-hi); }',
-'.sf-barra u{ display:block; height:100%; width:0; border-radius:4px; background:var(--sf); transition:width .6s var(--spring); }',
-'.sf-fila.ok .sf-barra{ height:7px; box-shadow:inset 0 0 0 1.2px var(--t1); background:transparent; }',
-'.sf-fila.ok .sf-barra u{ background:repeating-linear-gradient(118deg,var(--t1) 0 1.6px,transparent 1.6px 5px); }',
-'.sf-mas{ flex:none; width:36px; height:36px; border-radius:50%; display:grid; place-items:center; font-size:20px; font-weight:400; line-height:1;',
-'  color:var(--t1); box-shadow:inset 0 0 0 1.5px var(--t1); transition:transform .25s var(--spring), background .2s; }',
-'.sf-mas:active{ transform:scale(.88); background:var(--t1); color:var(--bg); }',
-'.sf-num.salud-ok{ animation:sfNum .6s var(--spring); background:none!important; color:inherit!important; }',
-'@keyframes sfNum{ 30%{ transform:scale(1.18); } }',
-/* movimiento discreto: solo al apuntar algo, sin nada dando vueltas en reposo */
-'.sf-onda{ position:absolute; left:50%; bottom:1px; width:22px; height:6px; margin-left:-11px; border-radius:50%; border:1.5px solid var(--t1); opacity:0; pointer-events:none; }',
-'.sf-cae .sf-ic svg{ animation:sfCae .55s cubic-bezier(.3,1.5,.5,1); }',
-'@keyframes sfCae{ 0%{ transform:translateY(-8px); opacity:.2; } 100%{ transform:none; } }',
-'.sf-cae .sf-onda{ animation:sfOnda .7s .2s ease-out; }',
-'@keyframes sfOnda{ 0%{ transform:scale(.3); opacity:.7; } 100%{ transform:scale(1.6); opacity:0; } }',
-'.sf-fila.pasa .sf-movil{ transform-origin:12px 12px; animation:sfVibra 3.2s ease-in-out infinite; }',
-'@keyframes sfVibra{ 0%,84%,100%{ transform:none; } 87%{ transform:rotate(-7deg); } 90%{ transform:rotate(7deg); } 93%{ transform:rotate(-4deg); } 96%{ transform:none; } }',
+'.sf-fila{ --sf:var(--accent); display:block; padding:16px 18px 18px; margin-bottom:12px; border-radius:24px; cursor:pointer;',
+'  background:var(--tarjeta, var(--glass-bg)); box-shadow:0 0 0 1px var(--tarjeta-borde, var(--hairline));',
+'  -webkit-tap-highlight-color:transparent; transition:transform .25s var(--spring); }',
+'.sf-fila:last-child{ margin-bottom:0; }',
+'.sf-fila:active{ transform:scale(.985); }',
+'.sf-cab{ display:flex; align-items:center; gap:7px; color:var(--sf); }',
+'.sf-cab b{ font-size:15.5px; font-weight:600; flex:1; }',
+'.sf-ic{ display:grid; place-items:center; width:20px; height:20px; }',
+'.sf-ic svg{ width:19px; height:19px; fill:currentColor; }',
+'.sf-cuando{ font-size:13.5px; color:var(--t3); }',
+'.sf-chev{ width:15px; height:15px; fill:none; stroke:var(--t3); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; margin-right:-3px; }',
+'.sf-mas{ font-size:12.5px; font-weight:600; color:var(--sf); padding:5px 10px; border-radius:99px; margin-right:4px;',
+'  background:color-mix(in srgb, var(--sf) 13%, transparent); transition:transform .2s var(--spring); }',
+'.sf-mas:active{ transform:scale(.9); }',
+'.sf-cuerpo{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-top:22px; }',
+'.sf-dato{ min-width:0; }',
+'.sf-fila .sf-num{ display:block; font-family:Unbounded,sans-serif!important; font-weight:700!important; font-size:34px!important; letter-spacing:-.05em; line-height:1; color:var(--t1)!important; background:none!important; }',
+'.sf-num small{ font-family:Inter,sans-serif; font-size:14px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:6px; }',
+'.sf-fila .sf-num.vacio{ color:var(--t3)!important; }',
+'.sf-msg{ font-size:12.5px; color:var(--t3); margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.sf-fila.pasa .sf-msg{ color:var(--sf); }',
+'.sf-sem{ flex:none; display:flex; align-items:flex-end; gap:4px; height:52px; }',
+'.sf-sem i{ width:8px; border-radius:2.5px; background:color-mix(in srgb, var(--t1) 22%, transparent); transition:height .5s var(--spring); }',
+'.sf-sem i.nada{ background:color-mix(in srgb, var(--t1) 10%, transparent); }',
+'.sf-sem i.hoy{ background:var(--sf); }',
+'.sf-sem i.hoy.nada{ background:color-mix(in srgb, var(--sf) 35%, transparent); }',
+/* al apuntar: el número da un saltito y el icono también */
+'.sf-num.salud-ok{ animation:sfNum .6s var(--spring); background:none!important; color:var(--t1)!important; }',
+'@keyframes sfNum{ 30%{ transform:scale(1.08); } }',
+'.sf-cae .sf-ic{ animation:sfIc .5s var(--spring); }',
+'@keyframes sfIc{ 40%{ transform:scale(1.35); } }',
 '@media (prefers-reduced-motion: reduce){ .sf-fila *{ animation:none!important; } }'
   ].join("\n"); document.head.appendChild(st);
 })();
