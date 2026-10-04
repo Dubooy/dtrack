@@ -21578,27 +21578,33 @@ function mqMusculos(T, mat, zonas, color){
   /* los vec4 van seguidos en un Float32Array: centro + cara, y radios */
   var c=new Float32Array(MUSC_MAX*4), rr=new Float32Array(MUSC_MAX*4).fill(1);
   for(var i=0;i<MUSC_MAX && i<zonas.length;i++){ var e=zonas[i]; c.set([e[0][0],e[0][1],e[0][2],e[2]], i*4); rr.set([e[1][0],e[1][1],e[1][2],0], i*4); }
-  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) }, mPx:{ value:8*(window.devicePixelRatio||1) }, mAncho:{ value:.46 } };
+  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) }, mPx:{ value:.026 }, mAncho:{ value:.45 } };
   var antes=mat.onBeforeCompile;
   mat.onBeforeCompile=function(sh, r){
     if(antes) antes.call(this, sh, r);
     for(var k in u) sh.uniforms[k]=u[k];
     sh.fragmentShader="uniform vec4 mZ["+MUSC_MAX+"]; uniform vec4 mR["+MUSC_MAX+"]; uniform int mN; uniform vec3 mCol; uniform float mPx, mAncho;\n"+
       sh.fragmentShader.replace("#include <roughnessmap_fragment>", [
-        "  float mq_m = 0.;",
+        "  float mq_m = 0., mq_o = 0.;",
         "  for(int i = 0; i < "+MUSC_MAX+"; i++){",
         "    if(i >= mN) break;",
         "    vec3 q = (vec3(abs(r.x), r.y, r.z) - mZ[i].xyz) / mR[i].xyz;",
         "    float a = 1. - smoothstep(.94, 1., length(q));",
         "    if(mZ[i].w > .5) a *= smoothstep(-.15, .2, n.z);",
         "    if(mZ[i].w < -.5) a *= smoothstep(-.15, .2, -n.z);",
+        "    float lq = length(q), cara = 1.;",
+        "    if(mZ[i].w > .5) cara = smoothstep(-.15, .2, n.z);",
+        "    if(mZ[i].w < -.5) cara = smoothstep(-.15, .2, -n.z);",
         "    mq_m = max(mq_m, a);",
+        "    mq_o = max(mq_o, cara * smoothstep(.9, .935, lq) * (1. - smoothstep(.975, 1., lq)));",
         "  }",
+        /* rayas pegadas al cuerpo (en sus coordenadas, no en la pantalla): se tuercen con la perspectiva al girar */
+        "  float mq_t = (r.y + r.x * .85) / mPx, mq_f = fract(mq_t), mq_e = fwidth(mq_t) * 1.2;",
+        "  float mq_s = smoothstep(1. - mAncho - mq_e, 1. - mAncho, mq_f) * (1. - smoothstep(1. - mq_e, 1., mq_f));",
         "#include <roughnessmap_fragment>"].join("\n"));
     /* al final de todo: rayas como las del logo, más gruesas y separadas que las de la sombra */
     sh.fragmentShader=sh.fragmentShader.replace(/\}\s*$/, [
-        "  float mq_s = step(1. - mAncho, fract((gl_FragCoord.x - gl_FragCoord.y) / mPx));",
-        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol, mq_s * mq_m);",
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol, max(mq_s * mq_m, mq_o));",
         "}"].join("\n"));
   };
   mat.customProgramCacheKey=function(){ return "mq-ropa-musc"; };
@@ -21628,7 +21634,10 @@ function muscEtiquetas(T, M, claves, capa){
   var svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","gi-lineas"); capa.insertBefore(svg, capa.firstChild);
   var p=new T.Vector3(), w=new T.Vector3(), cen=new T.Vector3(), haciaCam=new T.Vector3();
   var vistaAtras=0; grupos.forEach(function(G){ vistaAtras+=G.cara; });
+  var ant=performance.now();
+  function suave(x){ return 1-Math.pow(1-x,3); }
   var fn=function(cam, W, H){
+    var ahora=performance.now(), dt=Math.min(60, ahora-ant); ant=ahora;
     M.malla.updateMatrixWorld();
     M.caja.getCenter(cen);
     var cc=cen.clone().project(cam), cx=(cc.x+1)/2*W;
@@ -21644,7 +21653,10 @@ function muscEtiquetas(T, M, claves, capa){
       var frente=G.cara ? G.cara*haciaCam.z : 1;
       p.copy(mejor).project(cam);
       var x=(p.x+1)/2*W, y=(1-p.y)/2*H, lado=x<cx ? "i" : "d";
-      G.x=x; G.y=y; G.op=G.cara ? Math.max(0, Math.min(1, (frente+.15)/.35)) : 1;
+      G.x=x; G.y=y;
+      /* se ve o no (con un margen para que no parpadee en el límite) y la animación va hacia ahí */
+      if(G.cara){ if(frente>.12) G.ve=true; else if(frente<-.02) G.ve=false; } else G.ve=true;
+      G.p=G.p||0; G.p=G.ve ? Math.min(1, G.p+dt/420) : Math.max(0, G.p-dt/300);
       filas[lado].push(G); G.lado=lado;
     });
     /* que no se pisen: de arriba abajo, con un hueco mínimo */
@@ -21655,11 +21667,16 @@ function muscEtiquetas(T, M, claves, capa){
     /* la línea: del borde, recta, hasta cerca del músculo y, si la etiqueta se ha apartado, un quiebro corto hasta él */
     var h="";
     grupos.forEach(function(G){
-      var izq=G.lado==="i", bx=izq ? 12 : W-12, kx=G.x+(izq?-1:1)*Math.min(22, Math.abs(G.x-bx)/3), o=G.op.toFixed(2);
-      h+='<g opacity="'+o+'"><path d="M'+bx+' '+G.ty+' H'+kx.toFixed(1)+' L'+G.x.toFixed(1)+' '+G.y.toFixed(1)+'"/>'+
-        '<circle class="fin" cx="'+bx+'" cy="'+G.ty+'" r="3.5"/><circle class="mus" cx="'+G.x.toFixed(1)+'" cy="'+G.y.toFixed(1)+'" r="3"/></g>';
-      G.el.className="gi-eti "+(izq?"izq":"der"); G.el.style.opacity=o; G.el.style.top=G.ty+"px";
+      var izq=G.lado==="i", bx=izq ? 12 : W-12, kx=G.x+(izq?-1:1)*Math.min(22, Math.abs(G.x-bx)/3);
+      /* al aparecer: primero el punto en el músculo, luego la línea crece hacia el borde y al final sale el nombre;
+         al irse, lo mismo al revés */
+      var e=suave(G.p), pm=Math.min(1, e*4), pl=Math.max(0, Math.min(1, (e-.12)/.6)), pt=Math.max(0, (e-.62)/.38);
+      if(e>0) h+='<g><path pathLength="1" stroke-dasharray="1" stroke-dashoffset="'+(1-pl).toFixed(3)+'" d="M'+G.x.toFixed(1)+' '+G.y.toFixed(1)+' L'+kx.toFixed(1)+' '+G.ty+' H'+bx+'"/>'+
+        (pt>0?'<circle class="fin" cx="'+bx+'" cy="'+G.ty+'" r="'+(3.5*pt).toFixed(2)+'"/>':'')+
+        '<circle class="mus" cx="'+G.x.toFixed(1)+'" cy="'+G.y.toFixed(1)+'" r="'+(3*pm).toFixed(2)+'"/></g>';
+      G.el.className="gi-eti "+(izq?"izq":"der"); G.el.style.opacity=pt.toFixed(2); G.el.style.top=G.ty+"px";
       G.el.style.left=izq ? "12px" : ""; G.el.style.right=izq ? "" : "12px";
+      G.el.style.transform="translate("+((izq?-1:1)*(1-pt)*8).toFixed(1)+"px, calc(-100% - 5px))";
     });
     svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.innerHTML=h;
   };
@@ -21776,8 +21793,7 @@ var CRECER2_CSS=[
 '.gi-lineas{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }',
 '.gi-lineas path{ fill:none; stroke:var(--gu-eti); stroke-width:1.5; stroke-linejoin:round; }',
 '.gi-lineas .fin{ fill:var(--gu-eti); } .gi-lineas .mus{ fill:var(--gu-eti); stroke:var(--bg); stroke-width:2; }',
-'.gi-lineas g{ transition:opacity .25s ease; }',
-'.gi-eti{ position:absolute; transform:translateY(calc(-100% - 5px)); font-size:11.5px; font-weight:700; line-height:1.15; color:var(--gu-eti); white-space:nowrap; transition:opacity .25s ease; }',
+'.gi-eti{ position:absolute; transform:translateY(calc(-100% - 5px)); font-size:11.5px; font-weight:700; line-height:1.15; color:var(--gu-eti); white-space:nowrap; }',
 '.gi-gira{ position:absolute; left:0; right:0; bottom:8px; text-align:center; font-size:12px; color:var(--t3); pointer-events:none; }',
 '.gi-et{ font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gu-tx2); margin-top:24px; }',
 '.gi-musc{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }',
