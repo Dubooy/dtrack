@@ -231,7 +231,7 @@ document.addEventListener("click",function(ev){
   }
   if(a==="toggle-theme"){
     if(typeof temaPicker==="function"){ temaPicker(el); return; }
-    var orden=["light","dark","sage","neo"].concat(temasDesbloqueados());
+    var orden=["light","dark","sage","neo","cielo","melocoton","lavanda","menta"].concat(temasDesbloqueados());
     var cur=curTheme(); if(cur==="system") cur=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
     var next=orden[(orden.indexOf(cur)+1)%orden.length];
     try{ localStorage.setItem(TKEY,next); }catch(e){}

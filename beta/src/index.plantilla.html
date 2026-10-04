@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PEAK.">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script>try{var _t=localStorage.getItem("nura-theme")||"system";if(_t==="system")_t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var _c=document.documentElement.classList;if(_t==="medianoche"||_t==="oro")_c.add("dark");if(_t!=="light")_c.add(_t);if(localStorage.getItem("dtrack-diseno")==="esencial")_c.add("esencial");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("nura-theme")||"system";if(_t==="system")_t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var _c=document.documentElement.classList;if(/^(medianoche|oro|esmeralda|leyenda|aurora)$/.test(_t))_c.add("dark");if(_t!=="light")_c.add(_t);if(localStorage.getItem("dtrack-diseno")==="esencial")_c.add("esencial");}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap">
@@ -72,6 +72,7 @@
 <!--#incluye js/40-estilo-orden.js-->
 <!--#incluye js/41-rutinas-estirar.js-->
 <!--#incluye js/42-salud-filas.js-->
+<!--#incluye js/43-alimentacion.js-->
 })();
 </script>
 <script>

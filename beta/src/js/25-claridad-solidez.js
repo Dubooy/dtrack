@@ -385,7 +385,6 @@ function duboyActiva(){
   Object.keys(DUBOY_FRASES).forEach(function(k){ duboyGuardado.frases[k]=TEXTOS.parte.frases[k]; TEXTOS.parte.frases[k]=DUBOY_FRASES[k]; });
   /* se cambia el contenido del array, no la variable: así todo lo que ya
      apuntaba a LVL_NAMES (o a TEXTOS.niveles, el mismo array) ve el cambio */
-  LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, DUBOY_NIVELES);
 }
 function duboyDesactiva(){
   if(!duboyOn) return;
@@ -394,7 +393,6 @@ function duboyDesactiva(){
     Object.keys(duboyGuardado.saludos).forEach(function(k){ TEXTOS.saludos[k]=duboyGuardado.saludos[k]; });
     Object.keys(duboyGuardado.anillo).forEach(function(k){ TEXTOS.anillo[k]=duboyGuardado.anillo[k]; });
     Object.keys(duboyGuardado.frases).forEach(function(k){ TEXTOS.parte.frases[k]=duboyGuardado.frases[k]; });
-    LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, duboyGuardado.niveles);
   }
   duboyGuardado=null;
 }

@@ -17,7 +17,7 @@
    Todo lo que lee el usuario está en este bloque: niveles, retos, logros,
    tutorial, frases del parte del día y saludos. Cambia solo lo que hay
    entre comillas y guarda. No quites comas ni corchetes.
-   · niveles  → tienen que ser 20, de peor a mejor
+   · niveles  → ya no se tocan: son los 40 de los rangos (Bronce I … Leyenda X)
    · logros   → cambia el nombre (n) y la explicación (d); el orden importa
    · retos    → puedes añadir o quitar los que quieras
    · tutorial → son 12 pasos; si quitas uno, quita la línea entera
@@ -81,7 +81,7 @@ var TEXTOS = {
     {n:"Cinco veces fingiendo, ya es personalidad", d:"Cinco días con todos los hábitos"},
     {n:"Cero pendientes, cero drama",           d:"Deja las tareas a cero teniendo diez hechas"},
     {n:"Superviviente",                         d:"Sobrevive a 10 exámenes"},
-    {n:"Sigma certificado",                     d:"Llega al nivel 13"},
+    {n:"Sigma certificado",                     d:"Llega al nivel 26"},
     {n:"Ya eres tú mismo",                      d:"Llega al último nivel"},
     {n:"Los tres, por una vez",                 d:"Completa los tres retos de un día"},
     {n:"Diez veces del tirón, ¿quién eres?",    d:"Diez días con los tres retos hechos"}

@@ -65,6 +65,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `40-estilo-orden.js` | Estilo ordenado: crema, tinta y un acento, una sola tarjeta (solo temas Claro y Oscuro) |
 | `41-rutinas-estirar.js` | Rutinas de estirar al final de Cuerpo: miniaturas, la rutina en orden y editable, y crear la tuya |
 | `42-salud-filas.js` | Salud del día: filas de agua, sueño y pantalla con color, frase, barra, «+» y animación de los iconos (el marcado está en html/pantallas.html) |
+| `43-alimentacion.js` | Alimentación en Cuerpo (debajo de Ejercicio): «He comido bien» (+10 XP), objetivo (definir, mantener, volumen) e ideas de desayuno, almuerzo y cena con macros |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),

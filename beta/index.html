@@ -13,7 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PEAK.">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<script>try{var _t=localStorage.getItem("nura-theme")||"system";if(_t==="system")_t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var _c=document.documentElement.classList;if(_t==="medianoche"||_t==="oro")_c.add("dark");if(_t!=="light")_c.add(_t);if(localStorage.getItem("dtrack-diseno")==="esencial")_c.add("esencial");}catch(e){}</script>
+<script>try{var _t=localStorage.getItem("nura-theme")||"system";if(_t==="system")_t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";var _c=document.documentElement.classList;if(/^(medianoche|oro|esmeralda|leyenda|aurora)$/.test(_t))_c.add("dark");if(_t!=="light")_c.add(_t);if(localStorage.getItem("dtrack-diseno")==="esencial")_c.add("esencial");}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;450;500;600&display=swap">
@@ -285,11 +285,60 @@ html.oro .view .glass.hero, html.oro .soc-reto{
   background:radial-gradient(120% 90% at 100% 0%, rgba(240,212,136,.45) 0%, transparent 60%),
     linear-gradient(155deg,#6b4f12 0%,#a47a22 55%,#c99a38 100%)!important; }
 .tema-bloq{ opacity:.55; }
+html.esmeralda{
+  --bg:#07140f; --bg-tint-a:rgba(52,201,138,.10); --bg-tint-b:rgba(20,120,90,.08);
+  --t1:#e4f5ec; --t2:#a9cdbb; --t3:#6f9483;
+  --accent:#34c98a; --accent-soft:rgba(52,201,138,.16); --accent-line:rgba(52,201,138,.36); --on-accent:#05130d;
+  --violet:#5fd6a8; --grad-2:#9be8c4; --gold:#e6c65a;
+  --glass-bg:rgba(200,255,228,.05); --glass-bg-hi:rgba(200,255,228,.09);
+  --fill:rgba(200,255,228,.07); --fill-hi:rgba(200,255,228,.12);
+  --hairline:rgba(200,255,228,.14); --hairline-2:rgba(200,255,228,.08);
+}
+html.esmeralda, html.esmeralda body{ background:#07140f; }
+html.esmeralda .view .glass.hero, html.esmeralda .soc-reto{
+  background:radial-gradient(120% 90% at 100% 0%, rgba(155,232,196,.40) 0%, transparent 60%),
+    linear-gradient(155deg,#0b4d36 0%,#128a5c 55%,#2fb97c 100%)!important; }
+html.leyenda{
+  --bg:#110a1b; --bg-tint-a:rgba(181,123,255,.12); --bg-tint-b:rgba(217,70,143,.08);
+  --t1:#f1e9ff; --t2:#c4b3de; --t3:#8a7aa3;
+  --accent:#b57bff; --accent-soft:rgba(181,123,255,.17); --accent-line:rgba(181,123,255,.38); --on-accent:#140a22;
+  --violet:#e07bd0; --grad-2:#ff7fb6; --gold:#f2c75c;
+  --glass-bg:rgba(230,210,255,.05); --glass-bg-hi:rgba(230,210,255,.09);
+  --fill:rgba(230,210,255,.07); --fill-hi:rgba(230,210,255,.12);
+  --hairline:rgba(230,210,255,.14); --hairline-2:rgba(230,210,255,.08);
+}
+html.leyenda, html.leyenda body{ background:#110a1b; }
+html.leyenda .view .glass.hero, html.leyenda .soc-reto{
+  background:radial-gradient(120% 90% at 100% 0%, rgba(255,127,182,.42) 0%, transparent 60%),
+    linear-gradient(155deg,#3b1670 0%,#6b2fb8 55%,#b3408f 100%)!important; }
+html.aurora{
+  --bg:#06121a; --bg-tint-a:rgba(94,224,200,.10); --bg-tint-b:rgba(130,110,255,.10);
+  --t1:#e6f6f8; --t2:#a8c8cf; --t3:#6d8e97;
+  --accent:#5ee0c8; --accent-soft:rgba(94,224,200,.16); --accent-line:rgba(94,224,200,.36); --on-accent:#04141a;
+  --violet:#9a8cff; --grad-2:#9a8cff; --gold:#f0d06a;
+  --glass-bg:rgba(200,245,255,.05); --glass-bg-hi:rgba(200,245,255,.09);
+  --fill:rgba(200,245,255,.07); --fill-hi:rgba(200,245,255,.12);
+  --hairline:rgba(200,245,255,.14); --hairline-2:rgba(200,245,255,.08);
+}
+html.aurora, html.aurora body{ background:#06121a; }
+html.aurora .view .glass.hero, html.aurora .soc-reto{
+  background:radial-gradient(110% 80% at 0% 0%, rgba(94,224,200,.45) 0%, transparent 55%),
+    radial-gradient(120% 90% at 100% 100%, rgba(154,140,255,.50) 0%, transparent 60%),
+    linear-gradient(155deg,#0a2a3a 0%,#123e52 55%,#2a3d7a 100%)!important; }
 
 /* ════════ colores de acento (nivel 4) ════════ */
 html.acento-azul{ --accent:#1f6fe0; --accent-soft:rgba(31,111,224,.11); --accent-line:rgba(31,111,224,.26); --grad-2:#1fb5d6; --on-accent:#fff; }
 html.acento-rosa{ --accent:#d6337f; --accent-soft:rgba(214,51,127,.11); --accent-line:rgba(214,51,127,.26); --grad-2:#f06a8a; --on-accent:#fff; }
 html.acento-naranja{ --accent:#e0661c; --accent-soft:rgba(224,102,28,.12); --accent-line:rgba(224,102,28,.28); --grad-2:#f0a02a; --on-accent:#fff; }
+html.acento-verde{ --accent:#16a34a; --accent-soft:rgba(22,163,74,.11); --accent-line:rgba(22,163,74,.26); --grad-2:#65c96a; --on-accent:#fff; }
+html.acento-turquesa{ --accent:#0d9fa0; --accent-soft:rgba(13,159,160,.11); --accent-line:rgba(13,159,160,.26); --grad-2:#3cc7c0; --on-accent:#fff; }
+html.acento-rojo{ --accent:#dc2c3c; --accent-soft:rgba(220,44,60,.11); --accent-line:rgba(220,44,60,.26); --grad-2:#f0643c; --on-accent:#fff; }
+html.acento-violeta{ --accent:#8b3fe0; --accent-soft:rgba(139,63,224,.11); --accent-line:rgba(139,63,224,.26); --grad-2:#c060e0; --on-accent:#fff; }
+html.dark.acento-verde{ --accent:#4ade80; --accent-soft:rgba(74,222,128,.16); --accent-line:rgba(74,222,128,.34); --grad-2:#a3e98a; --on-accent:#08170d; }
+html.dark.acento-turquesa{ --accent:#45d4cf; --accent-soft:rgba(69,212,207,.16); --accent-line:rgba(69,212,207,.34); --grad-2:#8ee8e0; --on-accent:#051616; }
+html.dark.acento-rojo{ --accent:#ff6b76; --accent-soft:rgba(255,107,118,.16); --accent-line:rgba(255,107,118,.34); --grad-2:#ffa07a; --on-accent:#220a0d; }
+html.dark.acento-violeta{ --accent:#b98cff; --accent-soft:rgba(185,140,255,.16); --accent-line:rgba(185,140,255,.34); --grad-2:#e89cf0; --on-accent:#160a22; }
+.acentos button.cerrado{ opacity:.42; }
 html.dark.acento-azul{ --accent:#6aa8ff; --accent-soft:rgba(106,168,255,.16); --accent-line:rgba(106,168,255,.34); --grad-2:#5fd3ee; --on-accent:#0c1422; }
 html.dark.acento-rosa{ --accent:#ff7ab8; --accent-soft:rgba(255,122,184,.16); --accent-line:rgba(255,122,184,.34); --grad-2:#ffa0b4; --on-accent:#220c16; }
 html.dark.acento-naranja{ --accent:#ffa25c; --accent-soft:rgba(255,162,92,.16); --accent-line:rgba(255,162,92,.34); --grad-2:#ffd06a; --on-accent:#221206; }
@@ -1461,7 +1510,7 @@ var I18N_FILAS=[
 ["Superviviente","Survivor","Survivant","Sopravvissuto"],
 ["Sobrevive a 10 exámenes","Survive 10 exams","Survis à 10 examens","Sopravvivi a 10 esami"],
 ["Sigma certificado","Certified sigma","Sigma certifié","Sigma certificato"],
-["Llega al nivel 13","Reach level 13","Atteins le niveau 13","Raggiungi il livello 13"],
+["Llega al nivel 26","Reach level 26","Atteins le niveau 26","Raggiungi il livello 26"],
 ["Ya eres tú mismo","You're finally yourself","Tu es enfin toi-même","Ora sei davvero te stesso"],
 ["Llega al último nivel","Reach the last level","Atteins le dernier niveau","Raggiungi l'ultimo livello"],
 ["El porcentaje acusón","The telltale percentage","Le pourcentage qui balance","La percentuale spiona"],
@@ -2320,6 +2369,10 @@ var I18N_FILAS=[
 ["hecho con Peak · hábitos, retos y tu Parte del día","made with Peak · habits, challenges and your daily check-in","fait avec Peak · habitudes, défis et ton bilan du jour","fatto con Peak · abitudini, sfide e il tuo resoconto"],
 ["Cómo quieres que te salude","How you'd like to be greeted","Comment tu veux être salué","Come vuoi essere salutato"],
 ["Arena", "Sand", "Sable", "Sabbia"],
+["Cielo", "Sky", "Ciel", "Cielo"],
+["Melocotón", "Peach", "Pêche", "Pesca"],
+["Lavanda", "Lavender", "Lavande", "Lavanda"],
+["Menta", "Mint", "Menthe", "Menta"],
 ["Porcelana", "Porcelain", "Porcelaine", "Porcellana"],
 ["Tema Arena", "Sand theme", "Thème Sable", "Tema Sabbia"],
 ["Tema Porcelana", "Porcelain theme", "Thème Porcelaine", "Tema Porcellana"],
@@ -2757,7 +2810,7 @@ var I18N_PATRONES=[
 ["nivel (\\d+)","level {1}","niveau {1}","livello {1}"],
 ["NV (\\d+)","LV {1}","NIV {1}","LIV {1}"],
 ["Rango (.+)","Rank {t1}","Rang {t1}","Rango {t1}"],
-["(Bronce|Plata|Oro|Diamante|Leyenda) ([IV]+)","{t1} {2}","{t1} {2}","{t1} {2}"],
+["(Bronce|Plata|Oro|Platino|Diamante|Esmeralda|Leyenda) ([IVX]+)","{t1} {2}","{t1} {2}","{t1} {2}"],
 ["Siguiente rango: (.+) en el nivel (\\d+)","Next rank: {t1} at level {2}","Rang suivant : {t1} au niveau {2}","Prossimo rango: {t1} al livello {2}"],
 ["Se desbloquea en el nivel (\\d+)","Unlocks at level {1}","Se débloque au niveau {1}","Si sblocca al livello {1}"],
 ["· se desbloquea en el nivel (\\d+)","· unlocks at level {1}","· se débloque au niveau {1}","· si sblocca al livello {1}"],
@@ -2882,7 +2935,7 @@ var I18N_PATRONES=[
    Todo lo que lee el usuario está en este bloque: niveles, retos, logros,
    tutorial, frases del parte del día y saludos. Cambia solo lo que hay
    entre comillas y guarda. No quites comas ni corchetes.
-   · niveles  → tienen que ser 20, de peor a mejor
+   · niveles  → ya no se tocan: son los 40 de los rangos (Bronce I … Leyenda X)
    · logros   → cambia el nombre (n) y la explicación (d); el orden importa
    · retos    → puedes añadir o quitar los que quieras
    · tutorial → son 12 pasos; si quitas uno, quita la línea entera
@@ -2946,7 +2999,7 @@ var TEXTOS = {
     {n:"Cinco veces fingiendo, ya es personalidad", d:"Cinco días con todos los hábitos"},
     {n:"Cero pendientes, cero drama",           d:"Deja las tareas a cero teniendo diez hechas"},
     {n:"Superviviente",                         d:"Sobrevive a 10 exámenes"},
-    {n:"Sigma certificado",                     d:"Llega al nivel 13"},
+    {n:"Sigma certificado",                     d:"Llega al nivel 26"},
     {n:"Ya eres tú mismo",                      d:"Llega al último nivel"},
     {n:"Los tres, por una vez",                 d:"Completa los tres retos de un día"},
     {n:"Diez veces del tirón, ¿quién eres?",    d:"Diez días con los tres retos hechos"}
@@ -3087,14 +3140,22 @@ var MEDALS=[
   {id:"m11",xp:90,f:function(s){ return s.perfect>=5 }},
   {id:"m12",xp:90,f:function(s){ return s.tasksDone>=10 && s.pending===0 }},
   {id:"m13",xp:90,f:function(s){ return s.examsPast>=10 }},
-  {id:"m14",xp:0,lvlGate:1,f:function(s){ return s.lvl>=13 }},
+  {id:"m14",xp:0,lvlGate:1,f:function(s){ return s.lvl>=26 }},
   {id:"m15",xp:0,lvlGate:1,f:function(s){ return s.lvl>=LVL_NAMES.length }},
   {id:"m16",xp:40,f:function(s){ return s.triples>=1 }},
   {id:"m17",xp:90,f:function(s){ return s.triples>=10 }}
 ];
 /* los nombres y las explicaciones salen de TEXTOS.logros, en el mismo orden */
 MEDALS.forEach(function(m,i){ var t=(TEXTOS.logros||[])[i]||{}; m.n=t.n||m.id; m.d=t.d||""; });
-var LVL_NAMES=TEXTOS.niveles;
+/* 40 niveles sin nombre, solo rangos: Bronce, Plata, Oro, Platino, Diamante y
+   Esmeralda tienen 5 niveles cada uno; Leyenda tiene 10 */
+var LVL_NAMES=(function(){
+  var R=[["Bronce",5],["Plata",5],["Oro",5],["Platino",5],["Diamante",5],["Esmeralda",5],["Leyenda",10]],
+      N=["I","II","III","IV","V","VI","VII","VIII","IX","X"], l=[];
+  R.forEach(function(x){ for(var i=0;i<x[1];i++) l.push(x[0]+" "+N[i]); });
+  return l;
+})();
+TEXTOS.niveles=LVL_NAMES;
 
 
 /* ════════ estado ════════ */
@@ -3227,17 +3288,19 @@ function avisoGuardado(){
 var TEMAS=[
   {k:"light", n:"Claro"}, {k:"dark", n:"Oscuro"}, {k:"system", n:"Sistema"},
   {k:"sage", n:"Jardín"}, {k:"neo", n:"Clásico"},
+  {k:"cielo", n:"Cielo"}, {k:"melocoton", n:"Melocotón"}, {k:"lavanda", n:"Lavanda"}, {k:"menta", n:"Menta"},
   {k:"arena", n:"Arena", nv:7}, {k:"medianoche", n:"Medianoche", nv:10},
-  {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16}
+  {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16},
+  {k:"esmeralda", n:"Esmeralda", nv:26}, {k:"leyenda", n:"Leyenda", nv:31}, {k:"aurora", n:"Aurora", nv:40}
 ];
-var TEMAS_OSCUROS=["dark","medianoche","oro"];
-var COLOR_TEMA={ light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
+var TEMAS_OSCUROS=["dark","medianoche","oro","esmeralda","leyenda","aurora"];
+var COLOR_TEMA={ cielo:"#eaf1fa", melocoton:"#fbeee6", lavanda:"#f0ecfa", menta:"#e8f5ef", light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b", esmeralda:"#07140f", leyenda:"#110a1b", aurora:"#06121a" };
 function applyTheme(mode){
   var root=document.documentElement;
   var real=mode;
   if(mode==="system") real=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-  root.classList.remove("dark","sage","neo","medianoche","oro","arena","porcelana");
-  if(real==="medianoche" || real==="oro") root.classList.add("dark");
+  root.classList.remove("dark","sage","neo","medianoche","oro","arena","porcelana","esmeralda","leyenda","aurora","cielo","melocoton","lavanda","menta");
+  if(real!=="dark" && TEMAS_OSCUROS.indexOf(real)>=0) root.classList.add("dark");
   if(real!=="light") root.classList.add(real);
   if(typeof aplicaAcento==="function") aplicaAcento();
   var mt=document.querySelector('meta[name="theme-color"]');
@@ -3248,6 +3311,10 @@ function applyTheme(mode){
 }
 /* cada tema tiene su icono en el botón de cambiar tema */
 var ICONOS_TEMA={
+  cielo:'<path d="M7 17.5h10.5a3.8 3.8 0 0 0 .4-7.6A5.5 5.5 0 0 0 7.4 9.2 4.2 4.2 0 0 0 7 17.5z"/>',
+  melocoton:'<circle cx="12" cy="13.5" r="7"/><path d="M12 6.5c0-2 1.2-3 3.2-3"/><path d="M12 7.5c-2-1.8-4.5-1.8-5.5-.5"/>',
+  lavanda:'<path d="M12 21V10"/><path d="M12 10c-1.6-1-1.6-3 0-4 1.6 1 1.6 3 0 4zM12 14c-2-.6-3-2.4-2-4 1.8.3 2.6 2 2 4zM12 14c2-.6 3-2.4 2-4-1.8.3-2.6 2-2 4zM12 18c-2-.6-3-2.4-2-4 1.8.3 2.6 2 2 4zM12 18c2-.6 3-2.4 2-4-1.8.3-2.6 2-2 4z"/>',
+  menta:'<path d="M12 20c-4-2-6-5.5-6-9.5C6 7 8.5 4 12 3.5c3.5.5 6 3.5 6 7 0 4-2 7.5-6 9.5z"/><path d="M12 20V8"/><path d="M12 12l-2.5-2M12 15l3-2.5"/>',
   light:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>',
   dark:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>',
   sage:'<path d="M20 4c0 8-5 13-11 13H5c0-8 5-13 11-13h4z"/><path d="M5 20c2-5 5-8 9-10"/>',
@@ -3255,7 +3322,10 @@ var ICONOS_TEMA={
   medianoche:'<path d="M17 15.5A7 7 0 0 1 8.5 7a7 7 0 1 0 8.5 8.5z"/><path d="M17.5 3.5v3M16 5h3M20.5 9.5v2M19.5 10.5h2"/>',
   oro:'<path d="M3.5 17.5 2.5 7.5l5.5 4 4-7 4 7 5.5-4-1 10z"/><path d="M4 20.5h16"/>',
   arena:'<path d="M2.5 17c3-3 6-3 9.5 0s6.5 3 9.5 0"/><path d="M2.5 21c3-3 6-3 9.5 0s6.5 3 9.5 0"/><circle cx="16" cy="7" r="3.2"/>',
-  porcelana:'<path d="M6 4h12l-1.2 4.5a6 6 0 0 1-9.6 0z"/><path d="M8 11.5c-.8 3.2 0 6.5 4 8.5 4-2 4.8-5.3 4-8.5"/><path d="M9 20.5h6"/>'
+  porcelana:'<path d="M6 4h12l-1.2 4.5a6 6 0 0 1-9.6 0z"/><path d="M8 11.5c-.8 3.2 0 6.5 4 8.5 4-2 4.8-5.3 4-8.5"/><path d="M9 20.5h6"/>',
+  esmeralda:'<path d="M7 3.5h10l4 5.5-9 11.5L3 9z"/><path d="M3 9h18M9.5 3.5 8 9l4 11.5L16 9l-1.5-5.5"/>',
+  leyenda:'<path d="M12 2.8l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.2 6.8 19l1-5.9-4.3-4.1 5.9-.8z"/>',
+  aurora:'<path d="M3 18c3-7 6-10 9-10s6 3 9 10"/><path d="M6 18c2-4.5 4-6.5 6-6.5s4 2 6 6.5"/><path d="M2.5 21h19"/>'
 };
 function pintaIconoTema(real){
   var ic=ICONOS_TEMA[real]||ICONOS_TEMA.light;
@@ -3269,10 +3339,11 @@ var PEAK_WM_VB="58 -6 3496 800", PEAK_WM_D="M494 34Q592 34 662.5 67Q733 100 770 
 var PEAK_MK_D="M450 0 0 900 600 900 525 648 538 607 634 900 680 900 561 534 577 481 714 900 760 900 497 94 594 288ZM594 288 794 900 840 900 727 554ZM900 900 824 748 874 900Z"; /* caja de 900 x 900 */
 function peakWM(fill){ return '<svg viewBox="'+PEAK_WM_VB+'" role="img" aria-label="Peak."><path d="'+PEAK_WM_D+'" fill="'+(fill||"currentColor")+'"/></svg>'; }
 /* el icono de la pestaña se repinta con el color del modo */
-var ICONO_TEMA={ light:{b:"#1c1b19",p:"#f5f0e6"}, dark:{b:"#f1ebdf",p:"#141311"},
+var ICONO_TEMA={ cielo:{b:"#2f7fd8",p:"#fff"}, melocoton:{b:"#e0664a",p:"#fff"}, lavanda:{b:"#7457d9",p:"#fff"}, menta:{b:"#15936c",p:"#fff"}, light:{b:"#1c1b19",p:"#f5f0e6"}, dark:{b:"#f1ebdf",p:"#141311"},
                  sage:{b:"#4f7d63",p:"#ffffff"}, neo:{b:"#2f4a7d",p:"#fbf7ec"},
                  medianoche:{b:"#8f8fff",p:"#000000"}, oro:{b:"#d9ae45",p:"#17130a"},
-                 arena:{b:"#b5562f",p:"#fbf6ee"}, porcelana:{b:"#1f4fd1",p:"#ffffff"} };
+                 arena:{b:"#b5562f",p:"#fbf6ee"}, porcelana:{b:"#1f4fd1",p:"#ffffff"},
+                 esmeralda:{b:"#34c98a",p:"#07140f"}, leyenda:{b:"#b57bff",p:"#110a1b"}, aurora:{b:"#5ee0c8",p:"#06121a"} };
 function pintarIcono(real){
   try{
     var c=ICONO_TEMA[real]||ICONO_TEMA.light, n=180;
@@ -3393,6 +3464,7 @@ function dayXP(d, tmap){
   return x;
 }
 function tripleDone(d){ var tc=todaysChallenges(d).length; return tc>0 && chOf(d).length>=tc; }
+var NV_XP_BASE=80, NV_XP_CRECE=1.1;
 function stats(){
   var s={ch:0,gym:0,sleep:0,lowScreen:0,perfect:0,tasksDone:0,pending:0,examsPast:0,streak:0,best:0,xp:0,lvl:1};
   Object.keys(S.chDone).forEach(function(k){ s.ch+=S.chDone[k].length; });
@@ -3413,7 +3485,7 @@ function stats(){
   Object.keys(seen).forEach(function(d){ s.xp += dayXP(d,tmap); if(tripleDone(d)) s.triples++; });
 
   var lv=1, need=150, acc=0;
-  s.lvl=1; s.lvlFloor=0; s.lvlNeed=150;
+  s.lvl=1; s.lvlFloor=0; s.lvlNeed=NV_XP_BASE;
 
   var d=today();
   if(!activeDay(d)) d=addDays(d,-1);
@@ -3428,9 +3500,9 @@ function stats(){
   if(typeof semanalXP==="function") s.xp+=semanalXP();
   if(typeof metasXP==="function") s.xp+=metasXP();   /* metas del mes */   /* retos de la semana */
   s.xp+=(S.xpPrueba||0)+(typeof grupoXP==="function"?grupoXP():0);              /* solo modo prueba */
-  lv=1; need=150; acc=0;
-  /* 20 niveles: a tope, unos cuatro meses hasta el último */
-  while(lv<LVL_NAMES.length && s.xp>=acc+need){ acc+=need; lv++; need=Math.round(need*1.215); }
+  lv=1; need=NV_XP_BASE; acc=0;
+  /* 40 niveles: el primero pide 80 XP y cada uno un 10 % más que el anterior */
+  while(lv<LVL_NAMES.length && s.xp>=acc+need){ acc+=need; lv++; need=Math.round(need*NV_XP_CRECE); }
   s.lvl=lv; s.lvlFloor=acc; s.lvlNeed=need;
   s.med=MEDALS.filter(function(m){ return m.f(s); }).length;
   return s;
@@ -5600,7 +5672,7 @@ document.addEventListener("click",function(ev){
   }
   if(a==="toggle-theme"){
     if(typeof temaPicker==="function"){ temaPicker(el); return; }
-    var orden=["light","dark","sage","neo"].concat(temasDesbloqueados());
+    var orden=["light","dark","sage","neo","cielo","melocoton","lavanda","menta"].concat(temasDesbloqueados());
     var cur=curTheme(); if(cur==="system") cur=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
     var next=orden[(orden.indexOf(cur)+1)%orden.length];
     try{ localStorage.setItem(TKEY,next); }catch(e){}
@@ -6905,6 +6977,7 @@ function pintaSocial(c){
    nada, se gasta solo y la racha sigue. Solo se gastan si tapan el hueco
    entero; si el hueco es más largo que lo que tienes, no se malgastan. */
 var COMODIN_CADA=3, COMODIN_MAX=2;
+function comodinMax(){ return (typeof nivelCache==="number" && nivelCache>=30) ? 3 : COMODIN_MAX; }
 function comodinEstado(){
   if(!S.comodin) S.comodin={ saldo:0, nivel:1, usados:{} };
   if(!S.comodin.usados) S.comodin.usados={};
@@ -6922,8 +6995,8 @@ function comodinGana(st){
     var viejo=c.nivel, primeraVez=!c.visto;
     c.nivel=st.lvl; c.visto=1;
     var antes=c.saldo;
-    if(ganados>0) c.saldo=Math.min(COMODIN_MAX, c.saldo+ganados);
-    if(c.saldo>antes) nuevos.push("un comodín de racha ("+c.saldo+"/"+COMODIN_MAX+")");
+    if(ganados>0) c.saldo=Math.min(comodinMax(), c.saldo+ganados);
+    if(c.saldo>antes) nuevos.push("un comodín de racha ("+c.saldo+"/"+comodinMax()+")");
     save();
     /* la primera vez que abres esta versión no se celebra: solo se ajusta */
     if(!primeraVez){ subidaProgramada=true; setTimeout(function(){ celebraNivel(st.lvl, viejo, nuevos); }, Math.max(450, xpLlegada-Date.now()+1000)); }
@@ -6934,7 +7007,7 @@ function comodinGana(st){
 function comodinGasta(){
   var c=comodinEstado(); if(c.saldo<=0) return;
   var hueco=[], d=addDays(today(),-1);
-  while(!activeDay(d) && hueco.length<=COMODIN_MAX){ hueco.push(d); d=addDays(d,-1); }
+  while(!activeDay(d) && hueco.length<=comodinMax()){ hueco.push(d); d=addDays(d,-1); }
   if(!hueco.length || hueco.length>c.saldo) return;
   if(!activeDay(d)) return;                         /* no había racha que salvar */
   hueco.forEach(function(x){ c.usados[x]=1; });
@@ -7184,7 +7257,8 @@ function abrirPerfil(u){
             '<p class="pf-pista">Toca tu nombre para cambiarlo</p>'
           : '<h1 class="display">'+esc(p.usuario)+'</h1>')+
         '<div class="pf-rango">'+emblemaRango(p.nivel,40)+'<div><b>'+esc(rangoNombre(p.nivel))+'</b><span>Nivel '+p.nivel+'</span></div></div>'+
-        '<p class="pf-titulo"><span class="pf-nv num">NV '+p.nivel+'</span>'+esc(p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))+'</p>'+
+        ((p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))!==rangoNombre(p.nivel)
+          ? '<p class="pf-titulo"><span class="pf-nv num">Título</span>'+esc(p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))+'</p>' : '')+
         (p.yo && p.nivel>=NV_TITULOS
           ? '<label class="pf-sel"><span>Tu título</span><select id="pf-titulo">'+
               LVL_NAMES.slice(0,p.nivel).map(function(n){ return '<option'+(n===tituloElegido(p.nivel)?' selected':'')+'>'+esc(n)+'</option>'; }).join("")+
@@ -7210,7 +7284,7 @@ function abrirPerfil(u){
         pfFila("Estudio total", horasTxt(p.estudioMin||0))+
         (p.estudioTop?pfFila("Lo que más estudia", p.estudioTop):"")+
         (p.meditaMin?pfFila("Meditación total", horasTxt(p.meditaMin)):"")+
-        (p.comodines!==null?pfFila("Comodines de racha"+ICON_COMODIN.replace("margin-left:.26em","margin-left:.3em;color:var(--cyan)"), p.comodines+" de "+COMODIN_MAX, true):"")+
+        (p.comodines!==null?pfFila("Comodines de racha"+ICON_COMODIN.replace("margin-left:.26em","margin-left:.3em;color:var(--cyan)"), p.comodines+" de "+comodinMax(), true):"")+
       '</div>'+
       (p.medallas.length
         ? '<div class="soc-sec"><h2 class="display">Logros</h2><span class="t3" style="font-size:12.5px">'+p.medallas.length+'</span></div>'+
@@ -7287,7 +7361,7 @@ function extrasAccion(a, el){
     save(); setTimeout(render,400); return true;
   }
   if(a==="x-acento"){
-    if(nivelCache<NV_COLORES){ avisoNube("Los colores se desbloquean en el nivel "+NV_COLORES+"."); return true; }
+    var nvC=acentoNivel(el.dataset.c||""); if(nivelCache<nvC){ avisoNube("Este color se desbloquea en el nivel "+nvC+"."); return true; }
     try{ el.dataset.c ? localStorage.setItem(ACKEY, el.dataset.c) : localStorage.removeItem(ACKEY); }catch(err){}
     aplicaAcento();
     var bs=document.querySelectorAll(".acentos button");
@@ -7466,6 +7540,9 @@ function pruebaAccion(a, el){
 /* ════════════════ lo que se desbloquea con el nivel ════════════════ */
 var NV_ARENA=7, NV_PORCELANA=13;
 var NV_COLORES=4, NV_REACC1=5, NV_EXTRA=7, NV_TITULOS=8, NV_MEDIANOCHE=10, NV_REACC2=11, NV_ORO=16, NV_REACC3=17;
+/* lo nuevo, del 21 al 40 */
+var NV_COLORES2=22, NV_REACC4=23, NV_REACC5=25, NV_ESMERALDA=26, NV_REACC6=28, NV_COLORES3=29, NV_COMODIN3=30,
+    NV_LEYENDA=31, NV_REACC7=34, NV_COLORES4=35, NV_REACC8=37, NV_AURORA=40;
 var DESBLOQUEOS=[
   {nv:3,  t:"Comodín de racha"},
   {nv:4,  t:"Colores de acento: azul, rosa y naranja"},
@@ -7482,7 +7559,26 @@ var DESBLOQUEOS=[
   {nv:15, t:"Comodín de racha"},
   {nv:16, t:"Tema Oro"},
   {nv:17, t:"Reacción 🐐"},
-  {nv:18, t:"Comodín de racha"}
+  {nv:18, t:"Comodín de racha"},
+  {nv:21, t:"Comodín de racha"},
+  {nv:22, t:"Colores de acento: verde y turquesa"},
+  {nv:23, t:"Reacciones 🤯 y 🫶"},
+  {nv:24, t:"Comodín de racha"},
+  {nv:25, t:"Reacción 🙌"},
+  {nv:26, t:"Tema Esmeralda"},
+  {nv:27, t:"Comodín de racha"},
+  {nv:28, t:"Reacciones 🚀 y 💎"},
+  {nv:29, t:"Color de acento: rojo"},
+  {nv:30, t:"Comodín de racha"},
+  {nv:30, t:"Guardar hasta 3 comodines"},
+  {nv:31, t:"Tema Leyenda"},
+  {nv:33, t:"Comodín de racha"},
+  {nv:34, t:"Reacción 🦁"},
+  {nv:35, t:"Color de acento: violeta"},
+  {nv:36, t:"Comodín de racha"},
+  {nv:37, t:"Reacción 🏆"},
+  {nv:39, t:"Comodín de racha"},
+  {nv:40, t:"Tema Aurora"}
 ];
 var nivelCache=1;
 function nivelRefresca(st){ nivelCache=(st||stats()).lvl; return nivelCache; }
@@ -7494,6 +7590,9 @@ function temasDesbloqueados(){
   if(nivelCache>=NV_MEDIANOCHE) t.push("medianoche");
   if(nivelCache>=NV_PORCELANA) t.push("porcelana");
   if(nivelCache>=NV_ORO) t.push("oro");
+  if(nivelCache>=NV_ESMERALDA) t.push("esmeralda");
+  if(nivelCache>=NV_LEYENDA) t.push("leyenda");
+  if(nivelCache>=NV_AURORA) t.push("aurora");
   return t;
 }
 function temaVigila(){
@@ -7509,15 +7608,20 @@ function temaVigila(){
 var ACKEY="dtrack-acento";
 var ACENTOS=[
   {k:"",        n:"Por defecto", c:"#1c1b19"},
-  {k:"azul",    n:"Azul",        c:"#1f6fe0"},
-  {k:"rosa",    n:"Rosa",        c:"#d6337f"},
-  {k:"naranja", n:"Naranja",     c:"#e0661c"}
+  {k:"azul",     n:"Azul",        c:"#1f6fe0", nv:4},
+  {k:"rosa",     n:"Rosa",        c:"#d6337f", nv:4},
+  {k:"naranja",  n:"Naranja",     c:"#e0661c", nv:4},
+  {k:"verde",    n:"Verde",       c:"#16a34a", nv:22},
+  {k:"turquesa", n:"Turquesa",    c:"#0d9fa0", nv:22},
+  {k:"rojo",     n:"Rojo",        c:"#dc2c3c", nv:29},
+  {k:"violeta",  n:"Violeta",     c:"#8b3fe0", nv:35}
 ];
+function acentoNivel(k){ for(var i=0;i<ACENTOS.length;i++) if(ACENTOS[i].k===k) return ACENTOS[i].nv||0; return 0; }
 function acentoActual(){ try{ return localStorage.getItem(ACKEY)||""; }catch(e){ return ""; } }
 function aplicaAcento(){
   var r=document.documentElement, k=acentoActual();
-  if(k && nivelCache<NV_COLORES && typeof S!=="undefined" && S) k="";   /* si bajas de nivel, vuelve al de siempre */
-  r.classList.remove("acento-azul","acento-rosa","acento-naranja");
+  if(k && nivelCache<acentoNivel(k) && typeof S!=="undefined" && S) k="";   /* si bajas de nivel, vuelve al de siempre */
+  r.classList.remove("acento-azul","acento-rosa","acento-naranja","acento-verde","acento-turquesa","acento-rojo","acento-violeta");
   if(k) r.classList.add("acento-"+k);
 }
 function selectorAcento(){
@@ -7525,9 +7629,9 @@ function selectorAcento(){
   return '<p class="eyebrow mb-2">Color'+(bloq?' <span style="letter-spacing:0;text-transform:none;font-weight:500">· se desbloquea en el nivel '+NV_COLORES+'</span>':'')+'</p>'+
     '<div class="acentos mb-6'+(bloq?' bloq':'')+'">'+
       ACENTOS.map(function(a){
-        var on=(a.k===cur) || (!a.k && !cur);
-        return '<button data-act="x-acento" data-c="'+a.k+'" class="'+(on?"on":"")+'" aria-label="'+a.n+'">'+
-          '<i style="background:'+a.c+'"></i><span>'+a.n+'</span></button>';
+        var on=(a.k===cur) || (!a.k && !cur), cerrado=(a.nv||0)>nivelCache;
+        return '<button data-act="x-acento" data-c="'+a.k+'" class="'+(on?"on":"")+(cerrado?" cerrado":"")+'" aria-label="'+a.n+'">'+
+          '<i style="background:'+a.c+'"></i><span>'+(cerrado?"Nv "+a.nv:a.n)+'</span></button>';
       }).join("")+
     '</div>';
 }
@@ -7538,6 +7642,11 @@ function emojisDisponibles(){
   if(nivelCache>=NV_REACC1) e=e.concat(["😂","💀"]);
   if(nivelCache>=NV_REACC2) e=e.concat(["🫡","👑"]);
   if(nivelCache>=NV_REACC3) e=e.concat(["🐐"]);
+  if(nivelCache>=NV_REACC4) e=e.concat(["🤯","🫶"]);
+  if(nivelCache>=NV_REACC5) e=e.concat(["🙌"]);
+  if(nivelCache>=NV_REACC6) e=e.concat(["🚀","💎"]);
+  if(nivelCache>=NV_REACC7) e=e.concat(["🦁"]);
+  if(nivelCache>=NV_REACC8) e=e.concat(["🏆"]);
   return e;
 }
 
@@ -7664,25 +7773,27 @@ var DESBLOQ_CSS=[
    El nivel se ve como un anillo que se llena con la XP, del color del rango.
    Cada vez que ganas XP, unas bolitas vuelan hasta el anillo (si estás en
    Retos) o hasta el icono de Retos de la barra, que enseña un anillo pequeño
-   llenándose. Debajo del anillo, el camino con los 20 niveles y lo que da cada uno. */
+   llenándose. Debajo del anillo, el camino con los 40 niveles y lo que da cada uno. */
 var RANGOS=[
-  { n:"Bronce",   desde:1,  hasta:4,  c:"#c9773a", d:"#9a5424" },
-  { n:"Plata",    desde:5,  hasta:9,  c:"#9aa7b4", d:"#6c7a88" },
-  { n:"Oro",      desde:10, hasta:14, c:"#e8b32c", d:"#c07f0c" },
-  { n:"Diamante", desde:15, hasta:17, c:"#3ea4e4", d:"#2560c8" },
-  { n:"Leyenda",  desde:18, hasta:20, c:"#9b5cf6", d:"#d9468f" }
+  { n:"Bronce",    desde:1,  hasta:5,  c:"#c9773a", d:"#9a5424" },
+  { n:"Plata",     desde:6,  hasta:10, c:"#9aa7b4", d:"#6c7a88" },
+  { n:"Oro",       desde:11, hasta:15, c:"#e8b32c", d:"#c07f0c" },
+  { n:"Platino",   desde:16, hasta:20, c:"#6fc2bd", d:"#3b8c93" },
+  { n:"Diamante",  desde:21, hasta:25, c:"#3ea4e4", d:"#2560c8" },
+  { n:"Esmeralda", desde:26, hasta:30, c:"#2fbf71", d:"#0f8a5a" },
+  { n:"Leyenda",   desde:31, hasta:40, c:"#9b5cf6", d:"#d9468f" }
 ];
 function rangoDe(n){
   for(var i=0;i<RANGOS.length;i++) if(n>=RANGOS[i].desde && n<=RANGOS[i].hasta) return RANGOS[i];
   return RANGOS[RANGOS.length-1];
 }
-var ROMANOS=["I","II","III","IV","V"];
+var ROMANOS=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 function rangoNombre(n){ var r=rangoDe(n); return r.n+" "+ROMANOS[n-r.desde]; }
 
 /* XP → nivel y progreso, con la misma curva que stats() */
 function nivelDeXP(xp){
-  var lv=1, need=150, acc=0;
-  while(lv<LVL_NAMES.length && xp>=acc+need){ acc+=need; lv++; need=Math.round(need*1.215); }
+  var lv=1, need=NV_XP_BASE, acc=0;
+  while(lv<LVL_NAMES.length && xp>=acc+need){ acc+=need; lv++; need=Math.round(need*NV_XP_CRECE); }
   var pct = lv>=LVL_NAMES.length ? 1 : Math.max(0, Math.min(1, (xp-acc)/need));
   return { lvl:lv, pct:pct, falta:Math.max(0, acc+need-xp) };
 }
@@ -7752,7 +7863,7 @@ function xpPreparar(){ if(xpMostrado==null) xpMostrado=stats().xp; xpLlegada=Mat
 
 function pintaTextosNivel(v){
   var nm=document.getElementById("lvl-name"); if(nm) nm.textContent=LVL_NAMES[v.lvl-1];
-  var ey=document.getElementById("lvl-rango"); if(ey) ey.textContent="Rango "+rangoNombre(v.lvl);
+  var ey=document.getElementById("lvl-rango"); if(ey) ey.textContent="Nivel "+v.lvl+" de "+LVL_NAMES.length;
   var nx=document.getElementById("lvl-next");
   if(nx) nx.textContent = v.lvl>=LVL_NAMES.length ? "Has llegado al final. Ya no hay nada por encima." : "Faltan "+v.falta+" XP para "+LVL_NAMES[v.lvl];
   var sig=document.getElementById("lvl-siguiente");
@@ -7858,9 +7969,11 @@ function xpAlcanza(){
   if(sube) setTimeout(function(){ comodinGana(stats()); }, 200);
 }
 
-/* ── el camino de los 20 niveles ── */
+/* ── el camino de los 40 niveles ── */
 var CAMINO_PREMIO={3:"+1 comodín",4:"Colores",5:"😂 💀",6:"+1 comodín",7:"Arena",8:"Títulos",9:"+1 comodín",
-  10:"Medianoche",11:"🫡 👑",12:"+1 comodín",13:"Porcelana",15:"+1 comodín",16:"Tema Oro",17:"🐐",18:"+1 comodín",20:"La cima"};
+  10:"Medianoche",11:"🫡 👑",12:"+1 comodín",13:"Porcelana",15:"+1 comodín",16:"Tema Oro",17:"🐐",18:"+1 comodín",
+  21:"+1 comodín",22:"Colores",23:"🤯 🫶",24:"+1 comodín",25:"🙌",26:"Esmeralda",27:"+1 comodín",28:"🚀 💎",29:"Rojo",
+  30:"3 comodines",31:"Tema Leyenda",33:"+1 comodín",34:"🦁",35:"Violeta",36:"+1 comodín",37:"🏆",39:"+1 comodín",40:"Aurora · la cima"};
 /* Todas las paradas tienen el mismo dibujo (fondo, pista, arco y número) y lo que
    cambia es la clase: futura, pasada (ok) o la tuya (yo). Así, al subir de nivel
    nada desaparece: el anillo se cierra, la parada se hace pequeña y se apaga un
@@ -7986,7 +8099,7 @@ function caminoAnima(){
 }
 function caminoInfo(n){
   var nombre=LVL_NAMES[n-1], d=DESBLOQUEOS.filter(function(u){ return u.nv===n; }).map(function(u){ return u.t; });
-  if(n===LVL_NAMES.length) d.push("el último título");
+  if(n===LVL_NAMES.length) d.push("la cima");
   avisoNube(d.length ? "Nivel "+n+" · "+nombre+". Desbloqueas: "+d.join(", ")+"." : "Nivel "+n+" · "+nombre+".");
 }
 
@@ -8001,7 +8114,7 @@ function celebraNivel(nuevo, viejo, lista){
   for(var i=0;i<12;i++){
     puntos+='<i style="--ang:'+(i*30+15)+'deg;--dist:'+(98+(i%2)*14)+'px;--ret:'+((i%3)*.03)+'s"></i>';
   }
-  var filas=[{ ey:"Título nuevo", t:tituloDe(nuevo) }].concat((lista||[]).map(function(t){ return { ey:"Desbloqueado", t:t }; }));
+  var filas=[{ ey:"Nivel nuevo", t:tituloDe(nuevo) }].concat((lista||[]).map(function(t){ return { ey:"Desbloqueado", t:t }; }));
   var sobran=0; if(filas.length>4){ sobran=filas.length-4; filas=filas.slice(0,4); }
   var icoTitulo='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.4 5 5.4.6-4 3.7 1.1 5.4L12 15.5l-4.9 2.7 1.1-5.4-4-3.7 5.4-.6z"/></svg>';
   var icoAbierto='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 6.8-1.2"/></svg>';
@@ -8237,7 +8350,7 @@ function abrirGrupo(){
         var yo=(m.usuario===GRUPO.yo), nv=yo?yoNv:(m.nivel||1);
         return '<div class="soc-fila" data-act="x-perfil" data-u="'+esc(m.usuario)+'" style="cursor:pointer">'+caraDe(m,40)+
           '<div class="soc-cuerpo"><div style="flex:1;min-width:0"><p class="soc-nombre">'+esc(m.usuario)+(yo?'<span class="t3" style="font-weight:500"> · tú</span>':'')+'</p>'+
-          '<p class="soc-sub">'+esc(rangoNombre(nv))+' · '+esc(yo?tituloElegido(nv):tituloDe(nv))+'</p></div>'+
+          '<p class="soc-sub">Nivel '+nv+' · '+esc(yo?tituloElegido(nv):tituloDe(nv))+'</p></div>'+
           emblemaRango(nv,28)+'</div></div>';
       }).join("")+'</div>'+
       '<div class="soc-sec"><h2 class="display">Objetivo del grupo</h2></div>'+
@@ -10395,10 +10508,13 @@ var PULIDO_CSS=[
 
 /* ── selector de tema: el botón del sol abre las muestras ── */
 var TEMA_MUESTRA={
+  cielo:["#eaf1fa","#ffffff","#2f7fd8"], melocoton:["#fbeee6","#fffaf6","#e0664a"],
+  lavanda:["#f0ecfa","#fcfaff","#7457d9"], menta:["#e8f5ef","#f8fdfb","#15936c"],
   light:["#f5f0e6","#fffcf6","#1c1b19"], dark:["#141311","#1e1c19","#f1ebdf"],
   sage:["#eef3ec","#ffffff","#4f7d63"],  neo:["#e6dcc6","#fbf6ea","#2f4a7d"],
   medianoche:["#000000","#161618","#8f8fff"], oro:["#12100b","#1f1b12","#d9ae45"],
-  arena:["#efe6d8","#fffcf7","#b5562f"], porcelana:["#f3f4f6","#ffffff","#1f4fd1"]
+  arena:["#efe6d8","#fffcf7","#b5562f"], porcelana:["#f3f4f6","#ffffff","#1f4fd1"],
+  esmeralda:["#07140f","#10251c","#34c98a"], leyenda:["#110a1b","#1f1430","#b57bff"], aurora:["#06121a","#0e2230","#5ee0c8"]
 };
 var TEMA_VISTO="dtrack-temas-visto";
 function temaVisto(){ try{ return !!localStorage.getItem(TEMA_VISTO); }catch(e){ return true; } }
@@ -10486,10 +10602,10 @@ function vitalVacios(){
 /* ── logros bloqueados: cuánto te falta ── */
 var MED_PROG={ m1:["ch",1], m2:["best",7], m3:["best",30], m4:["ch",50], m5:["ch",100], m6:["gym",20], m7:["gym",100],
   m8:["sleep",10], m9:["lowScreen",5], m10:["perfect",1], m11:["perfect",5], m12:["tasksDone",10], m13:["examsPast",10],
-  m14:["lvl",13], m15:["lvl",20], m16:["triples",1], m17:["triples",10] };
+  m14:["lvl",26], m15:["lvl",40], m16:["triples",1], m17:["triples",10] };
 function medProg(m, st){
   var p=MED_PROG[m.id]; if(!p || p[1]<=1) return "";
-  var v=Math.min(p[1], Math.max(0, +(st[p[0]]||0))), obj=p[0]==="lvl"?(p[1]===20?LVL_NAMES.length:p[1]):p[1];
+  var v=Math.min(p[1], Math.max(0, +(st[p[0]]||0))), obj=p[1];
   var u = p[0]==="lvl" ? "nivel "+v+" de "+obj : v+" de "+obj;
   return '<span class="md-prog"><span class="md-barra"><i style="width:'+Math.round(v/obj*100)+'%"></i></span><span class="num">'+u+'</span></span>';
 }
@@ -10620,7 +10736,10 @@ var RETOQUE_CSS=[
 '#ideal-list, #retos-checklist{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }',
 
 /* oscuro: las tarjetas se separan mejor del fondo */
-'html.dark:not(.medianoche):not(.oro){ --glass-bg:rgba(255,255,255,.07); }',
+'html.dark:not(.medianoche):not(.oro):not(.esmeralda):not(.leyenda):not(.aurora){ --glass-bg:rgba(255,255,255,.07); }',
+'html.dark.esmeralda .rg, html.dark.esmeralda .hg, html.dark.esmeralda .soc-reto, html.dark.esmeralda .rk, html.dark.esmeralda .hist-boton{ background:#11261c!important; }',
+'html.dark.leyenda .rg, html.dark.leyenda .hg, html.dark.leyenda .soc-reto, html.dark.leyenda .rk, html.dark.leyenda .hist-boton{ background:#1e1530!important; }',
+'html.dark.aurora .rg, html.dark.aurora .hg, html.dark.aurora .soc-reto, html.dark.aurora .rk, html.dark.aurora .hist-boton{ background:#0f2231!important; }',
 'html.dark .rg, html.dark .hg, html.dark .soc-reto, html.dark .rk, html.dark .hist-boton{ background:#29292c!important; box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)!important; }',
 'html.dark.medianoche .rg, html.dark.medianoche .hg, html.dark.medianoche .soc-reto, html.dark.medianoche .rk, html.dark.medianoche .hist-boton{ background:#141416!important; }',
 'html.dark.oro .rg, html.dark.oro .hg, html.dark.oro .soc-reto, html.dark.oro .rk, html.dark.oro .hist-boton{ background:#221d13!important; }'
@@ -12929,6 +13048,70 @@ document.addEventListener("keydown", function(ev){
 
 /* ════════════ estilos ════════════ */
 var DISENO_CSS=[
+/* ── Cielo: fondo claro y suave ── */
+'html.cielo{ color-scheme:light; --grad-2:#5fb4f0;',
+'  --bg:#eaf1fa; --bg-tint-a:rgba(120,170,235,.22); --bg-tint-b:rgba(170,205,245,.20);',
+'  --t1:#0f1c2e; --t2:#3d4f66; --t3:#62748c;',
+'  --accent:#2f7fd8; --accent-soft:rgba(47,127,216,.11); --accent-line:rgba(47,127,216,.28); --on-accent:#fff;',
+'  --good:#1d8a5e; --warn:#b06a14; --alert:#c9443a; --cyan:#1b8fb0; --violet:#6a5fd8; --gold:#a8791f;',
+'  --glass-bg:rgba(255,255,255,.86); --glass-bg-hi:#ffffff; --glass-edge:#fff; --glass-ring:rgba(255,255,255,.95);',
+'  --hairline:rgba(20,40,70,.12); --hairline-2:rgba(20,40,70,.07);',
+'  --fill:rgba(20,40,70,.06); --fill-hi:rgba(20,40,70,.11); --spec:rgba(255,255,255,.9);',
+'  --shadow-1:0 1px 2px rgba(20,40,70,.06), 0 8px 24px -12px rgba(20,40,70,.18);',
+'  --shadow-2:0 2px 6px rgba(20,40,70,.08), 0 22px 46px -18px rgba(20,40,70,.24); }',
+'html.cielo .barpill{ background:color-mix(in srgb,#f7fbff 84%,transparent); }',
+'html.cielo .field{ background:#f7fbff; box-shadow:inset 0 0 0 1px var(--hairline); }',
+'html.cielo .view .glass.importante, html.cielo .hy-estudio, html.cielo .hy-parte{ background:#f7fbff; box-shadow:0 0 0 1px var(--hairline-2), 0 10px 26px -18px rgba(20,40,70,.30); }',
+'html.cielo .hy-dial, html.cielo .hy-luna{ background:color-mix(in srgb,#f7fbff 70%,#eaf1fa); }',
+'html.cielo .view .glass.hero, html.cielo .soc-reto{ background:radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,#5fb4f0 55%,transparent) 0%, transparent 60%), linear-gradient(155deg,#1d5fb8 0%,#2f7fd8 60%,#5fb4f0 100%)!important; }',
+/* ── Melocotón: fondo claro y suave ── */
+'html.melocoton{ color-scheme:light; --grad-2:#f2a07b;',
+'  --bg:#fbeee6; --bg-tint-a:rgba(245,160,130,.22); --bg-tint-b:rgba(250,200,160,.20);',
+'  --t1:#2b1813; --t2:#5e4238; --t3:#86665a;',
+'  --accent:#e0664a; --accent-soft:rgba(224,102,74,.11); --accent-line:rgba(224,102,74,.28); --on-accent:#fff;',
+'  --good:#3f8a4e; --warn:#c07614; --alert:#c93a3a; --cyan:#2f8a8a; --violet:#a0588f; --gold:#b27c1d;',
+'  --glass-bg:rgba(255,255,255,.86); --glass-bg-hi:#ffffff; --glass-edge:#fff; --glass-ring:rgba(255,255,255,.95);',
+'  --hairline:rgba(90,45,30,.12); --hairline-2:rgba(90,45,30,.07);',
+'  --fill:rgba(90,45,30,.06); --fill-hi:rgba(90,45,30,.11); --spec:rgba(255,255,255,.9);',
+'  --shadow-1:0 1px 2px rgba(90,45,30,.06), 0 8px 24px -12px rgba(90,45,30,.18);',
+'  --shadow-2:0 2px 6px rgba(90,45,30,.08), 0 22px 46px -18px rgba(90,45,30,.24); }',
+'html.melocoton .barpill{ background:color-mix(in srgb,#fffaf6 84%,transparent); }',
+'html.melocoton .field{ background:#fffaf6; box-shadow:inset 0 0 0 1px var(--hairline); }',
+'html.melocoton .view .glass.importante, html.melocoton .hy-estudio, html.melocoton .hy-parte{ background:#fffaf6; box-shadow:0 0 0 1px var(--hairline-2), 0 10px 26px -18px rgba(90,45,30,.30); }',
+'html.melocoton .hy-dial, html.melocoton .hy-luna{ background:color-mix(in srgb,#fffaf6 70%,#fbeee6); }',
+'html.melocoton .view .glass.hero, html.melocoton .soc-reto{ background:radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,#f2a07b 55%,transparent) 0%, transparent 60%), linear-gradient(155deg,#c2493a 0%,#e0664a 60%,#f2a07b 100%)!important; }',
+/* ── Lavanda: fondo claro y suave ── */
+'html.lavanda{ color-scheme:light; --grad-2:#c08cf0;',
+'  --bg:#f0ecfa; --bg-tint-a:rgba(170,140,240,.22); --bg-tint-b:rgba(220,190,245,.20);',
+'  --t1:#1c1530; --t2:#4a4062; --t3:#6f6688;',
+'  --accent:#7457d9; --accent-soft:rgba(116,87,217,.11); --accent-line:rgba(116,87,217,.28); --on-accent:#fff;',
+'  --good:#2f8a5e; --warn:#b06a14; --alert:#c9443a; --cyan:#3a86b0; --violet:#b0508f; --gold:#a8791f;',
+'  --glass-bg:rgba(255,255,255,.86); --glass-bg-hi:#ffffff; --glass-edge:#fff; --glass-ring:rgba(255,255,255,.95);',
+'  --hairline:rgba(45,30,80,.12); --hairline-2:rgba(45,30,80,.07);',
+'  --fill:rgba(45,30,80,.06); --fill-hi:rgba(45,30,80,.11); --spec:rgba(255,255,255,.9);',
+'  --shadow-1:0 1px 2px rgba(45,30,80,.06), 0 8px 24px -12px rgba(45,30,80,.18);',
+'  --shadow-2:0 2px 6px rgba(45,30,80,.08), 0 22px 46px -18px rgba(45,30,80,.24); }',
+'html.lavanda .barpill{ background:color-mix(in srgb,#fcfaff 84%,transparent); }',
+'html.lavanda .field{ background:#fcfaff; box-shadow:inset 0 0 0 1px var(--hairline); }',
+'html.lavanda .view .glass.importante, html.lavanda .hy-estudio, html.lavanda .hy-parte{ background:#fcfaff; box-shadow:0 0 0 1px var(--hairline-2), 0 10px 26px -18px rgba(45,30,80,.30); }',
+'html.lavanda .hy-dial, html.lavanda .hy-luna{ background:color-mix(in srgb,#fcfaff 70%,#f0ecfa); }',
+'html.lavanda .view .glass.hero, html.lavanda .soc-reto{ background:radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,#c08cf0 55%,transparent) 0%, transparent 60%), linear-gradient(155deg,#4f36b0 0%,#7457d9 60%,#c08cf0 100%)!important; }',
+/* ── Menta: fondo claro y suave ── */
+'html.menta{ color-scheme:light; --grad-2:#5fcfa6;',
+'  --bg:#e8f5ef; --bg-tint-a:rgba(110,210,170,.22); --bg-tint-b:rgba(170,230,210,.20);',
+'  --t1:#0f241c; --t2:#3a5a4c; --t3:#5f7f71;',
+'  --accent:#15936c; --accent-soft:rgba(21,147,108,.11); --accent-line:rgba(21,147,108,.28); --on-accent:#fff;',
+'  --good:#1f8a4e; --warn:#b06a14; --alert:#c9443a; --cyan:#1b8fa0; --violet:#6a5fb8; --gold:#a8791f;',
+'  --glass-bg:rgba(255,255,255,.86); --glass-bg-hi:#ffffff; --glass-edge:#fff; --glass-ring:rgba(255,255,255,.95);',
+'  --hairline:rgba(20,60,45,.12); --hairline-2:rgba(20,60,45,.07);',
+'  --fill:rgba(20,60,45,.06); --fill-hi:rgba(20,60,45,.11); --spec:rgba(255,255,255,.9);',
+'  --shadow-1:0 1px 2px rgba(20,60,45,.06), 0 8px 24px -12px rgba(20,60,45,.18);',
+'  --shadow-2:0 2px 6px rgba(20,60,45,.08), 0 22px 46px -18px rgba(20,60,45,.24); }',
+'html.menta .barpill{ background:color-mix(in srgb,#f8fdfb 84%,transparent); }',
+'html.menta .field{ background:#f8fdfb; box-shadow:inset 0 0 0 1px var(--hairline); }',
+'html.menta .view .glass.importante, html.menta .hy-estudio, html.menta .hy-parte{ background:#f8fdfb; box-shadow:0 0 0 1px var(--hairline-2), 0 10px 26px -18px rgba(20,60,45,.30); }',
+'html.menta .hy-dial, html.menta .hy-luna{ background:color-mix(in srgb,#f8fdfb 70%,#e8f5ef); }',
+'html.menta .view .glass.hero, html.menta .soc-reto{ background:radial-gradient(120% 90% at 100% 0%, color-mix(in srgb,#5fcfa6 55%,transparent) 0%, transparent 60%), linear-gradient(155deg,#0c6b50 0%,#15936c 60%,#5fcfa6 100%)!important; }',
 /* ── Arena: arena cálida, tarjetas casi blancas, terracota ── */
 'html.arena{ color-scheme:light; --grad-2:#d98b4a;',
 '  --bg:#efe6d8; --bg-tint-a:rgba(214,150,100,.20); --bg-tint-b:rgba(205,175,125,.18);',
@@ -12985,10 +13168,10 @@ var DISENO_CSS=[
 'html.esencial:not(.dark):not(.sage):not(.neo):not(.arena):not(.porcelana){ --bg:#fafafa; --t1:#111113; --t2:#4d4d55; --t3:#707078;',
 '  --accent:#18181b; --accent-soft:rgba(24,24,27,.07); --accent-line:rgba(24,24,27,.2); --on-accent:#fff; --grad-2:#3f3f46; --violet:#6d5bd0;',
 '  --glass-bg:#fff; --glass-bg-hi:#fff; --hairline:rgba(17,17,19,.09); --hairline-2:rgba(17,17,19,.055); --fill:rgba(17,17,19,.04); --fill-hi:rgba(17,17,19,.075); }',
-'html.esencial.dark:not(.medianoche):not(.oro){ --bg:#0f0f11; --t1:#f4f4f5; --t2:#a1a1aa; --t3:#7b7b84;',
+'html.esencial.dark:not(.medianoche):not(.oro):not(.esmeralda):not(.leyenda):not(.aurora){ --bg:#0f0f11; --t1:#f4f4f5; --t2:#a1a1aa; --t3:#7b7b84;',
 '  --accent:#f4f4f5; --accent-soft:rgba(244,244,245,.1); --accent-line:rgba(244,244,245,.26); --on-accent:#111113; --grad-2:#d4d4d8; --violet:#a594f9;',
 '  --glass-bg:#18181b; --glass-bg-hi:#1f1f23; --hairline:rgba(255,255,255,.09); --hairline-2:rgba(255,255,255,.055); --fill:rgba(255,255,255,.05); --fill-hi:rgba(255,255,255,.09); }',
-'html.esencial[class*="acento-"]:not(.neo):not(.arena):not(.porcelana){ --grad-2:var(--accent); }',
+'html.esencial[class*="acento-"]:not(.neo):not(.arena):not(.porcelana):not(.cielo):not(.melocoton):not(.lavanda):not(.menta){ --grad-2:var(--accent); }',
 /* una sola letra, jerarquía por tamaño y peso */
 'html.esencial h1, html.esencial h2, html.esencial h3, html.esencial h4, html.esencial .display, html.esencial .hy-t, html.esencial .pt-t{ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; letter-spacing:-.025em; }',
 'html.esencial .eyebrow, html.esencial .pt-ey{ text-transform:none; letter-spacing:-.005em; font-size:13px; font-weight:600; color:var(--t2); }',
@@ -17129,7 +17312,6 @@ function duboyActiva(){
   Object.keys(DUBOY_FRASES).forEach(function(k){ duboyGuardado.frases[k]=TEXTOS.parte.frases[k]; TEXTOS.parte.frases[k]=DUBOY_FRASES[k]; });
   /* se cambia el contenido del array, no la variable: así todo lo que ya
      apuntaba a LVL_NAMES (o a TEXTOS.niveles, el mismo array) ve el cambio */
-  LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, DUBOY_NIVELES);
 }
 function duboyDesactiva(){
   if(!duboyOn) return;
@@ -17138,7 +17320,6 @@ function duboyDesactiva(){
     Object.keys(duboyGuardado.saludos).forEach(function(k){ TEXTOS.saludos[k]=duboyGuardado.saludos[k]; });
     Object.keys(duboyGuardado.anillo).forEach(function(k){ TEXTOS.anillo[k]=duboyGuardado.anillo[k]; });
     Object.keys(duboyGuardado.frases).forEach(function(k){ TEXTOS.parte.frases[k]=duboyGuardado.frases[k]; });
-    LVL_NAMES.length=0; Array.prototype.push.apply(LVL_NAMES, duboyGuardado.niveles);
   }
   duboyGuardado=null;
 }
@@ -22684,6 +22865,426 @@ function sfToca(k, cls){
 '@media (prefers-reduced-motion: reduce){ .sf-fila *{ animation:none!important; } }'
   ].join("\n"); document.head.appendChild(st);
 })();
+/* ════════════════════════════════════════════════════════════════
+   ALIMENTACIÓN (Vital, entre Ejercicio y Meditación)
+   · «He comido bien»: un toque al día, +10 XP.
+   · Ideas para tus comidas: desayuno, almuerzo y cena. La primera vez
+     que abres una, te pregunta el objetivo (definir, mantenerte o
+     volumen); se puede cambiar cuando quieras. Para cada objetivo hay
+     15 platos de cada comida, con el tiempo y la proteína aproximada.
+   · Se guarda en S.comeBien (días) y S.aliObjetivo.
+   ════════════════════════════════════════════════════════════════ */
+var ALI_XP=10;
+var ALI_OBJETIVOS=[
+  { k:"definir",  n:"Definir",     d:"Perder grasa sin perder músculo. Platos ligeros, con mucha verdura y proteína." },
+  { k:"mantener", n:"Mantenerme",  d:"Comer equilibrado y con energía para el día, sin contar nada." },
+  { k:"volumen",  n:"Volumen",     d:"Ganar músculo. Raciones más grandes, con más hidratos y proteína." }
+];
+var ALI_COMIDAS=[
+  { k:"desayuno", n:"Desayuno" },
+  { k:"almuerzo", n:"Almuerzo" },
+  { k:"cena",     n:"Cena" }
+];
+/* [plato, minutos, gramos de proteína aproximados] */
+/* [plato, minutos, proteína, hidratos, grasas] en gramos, aproximados, para una ración normal */
+var ALI_PLATOS={
+  definir:{
+    desayuno:[
+      ["Tortilla de claras con espinacas y pan integral",10,24,22,5],
+      ["Yogur griego natural con frutos rojos y unas nueces",5,17,14,14],
+      ["Tostada integral con pavo, tomate y aceite de oliva",5,19,24,8],
+      ["Avena cocida con leche desnatada, canela y manzana",10,14,52,5],
+      ["Revuelto de huevo con champiñones y tostada integral",10,19,22,14],
+      ["Queso fresco batido con fresas y semillas de chía",5,20,16,5],
+      ["Kéfir con frutos rojos y copos de avena",5,12,35,6],
+      ["Tortitas de avena y claras con fruta",15,22,45,5],
+      ["Pan integral con un poco de aguacate y huevo cocido",10,13,25,14],
+      ["Gofio con leche desnatada y una pieza de fruta",5,12,55,3],
+      ["Requesón con kiwi y unas almendras",5,16,15,10],
+      ["Tostada de centeno con salmón ahumado y queso fresco",5,20,20,9],
+      ["Dos huevos cocidos con tomate aliñado y fruta",10,13,20,10],
+      ["Skyr con mango y copos de avena",5,18,38,3],
+      ["Tortilla de claras y atún con pan integral",10,28,22,4]
+    ],
+    almuerzo:[
+      ["Pechuga de pollo a la plancha con ensalada y un poco de arroz integral",25,38,35,10],
+      ["Merluza al horno con patata y verduras",30,32,35,8],
+      ["Lentejas estofadas con verduras, sin chorizo",40,20,50,7],
+      ["Ensalada de garbanzos con atún, tomate, pepino y huevo",10,30,30,12],
+      ["Salmón a la plancha con brócoli y quinoa",20,32,30,18],
+      ["Pavo salteado con verduras al wok",20,34,15,9],
+      ["Garbanzos con espinacas",25,18,45,10],
+      ["Bol de arroz integral con pollo, maíz y aguacate",20,35,55,14],
+      ["Filete de ternera magra con pimientos asados",20,34,12,12],
+      ["Crema de calabacín y tortilla francesa",25,20,12,15],
+      ["Pasta integral con atún, tomate natural y albahaca",20,28,60,8],
+      ["Pescado a la plancha con unas papas arrugadas y mojo verde",30,30,35,12],
+      ["Ensalada de quinoa con pollo y verduras asadas",20,30,38,11],
+      ["Hamburguesa casera de pollo con ensalada",20,32,8,10],
+      ["Potaje de berros ligero, con millo y calabaza",45,15,45,8]
+    ],
+    cena:[
+      ["Tortilla de calabacín con ensalada",15,20,10,14],
+      ["Dorada al horno con verduras",25,30,12,12],
+      ["Crema de verduras y pechuga de pavo a la plancha",20,28,18,7],
+      ["Revuelto de gambas y espárragos trigueros",15,25,6,12],
+      ["Ensalada templada de pollo y espinacas",15,30,10,11],
+      ["Sepia a la plancha con ensalada",15,28,8,7],
+      ["Brochetas de pavo y verduras",20,30,12,8],
+      ["Calabacín relleno de carne picada magra",30,25,12,12],
+      ["Merluza en papillote con verduras",20,30,10,6],
+      ["Tofu salteado con verduras",15,20,12,12],
+      ["Salpicón de marisco",15,22,8,9],
+      ["Huevos al plato con tomate y espinacas",15,18,10,15],
+      ["Wrap integral de pollo y verduras",10,28,32,9],
+      ["Ensalada de atún, huevo y aguacate",10,28,8,20],
+      ["Pescado blanco con puré de coliflor",25,28,12,9]
+    ]
+  },
+  mantener:{
+    desayuno:[
+      ["Tostadas con tomate, aceite de oliva y jamón serrano",5,15,40,14],
+      ["Bol de yogur con granola y fruta",5,12,50,10],
+      ["Avena con leche, plátano y crema de cacahuete",10,15,60,14],
+      ["Huevos revueltos con tostada y zumo de naranja",10,16,40,14],
+      ["Tortitas de plátano y huevo con un poco de miel",15,14,45,10],
+      ["Gofio amasado con leche y plátano",5,12,65,6],
+      ["Bocadillo pequeño de tortilla francesa",10,16,40,13],
+      ["Tostada con aguacate y huevo poché",10,14,28,16],
+      ["Bol de batido de frutos rojos, plátano y avena",10,10,55,6],
+      ["Pan con queso fresco, tomate y orégano",5,14,35,8],
+      ["Muesli con leche y manzana",5,12,60,8],
+      ["Sándwich de pavo y queso con una pieza de fruta",5,20,45,10],
+      ["Kéfir con kiwi y copos de avena",5,12,40,7],
+      ["Tostada de centeno con hummus y huevo",5,14,32,13],
+      ["Crepes de avena con fresas",15,14,42,8]
+    ],
+    almuerzo:[
+      ["Paella de pollo y verduras",45,30,75,15],
+      ["Pasta con boloñesa casera",30,30,75,16],
+      ["Lentejas con arroz",40,20,70,8],
+      ["Pollo al horno con patatas y ensalada",45,35,45,18],
+      ["Potaje de garbanzos con bacalao",40,28,50,12],
+      ["Salmón al horno con patata y espárragos",30,32,40,20],
+      ["Arroz a la cubana con huevo",25,16,80,18],
+      ["Fajitas de pollo con pimientos",25,32,50,14],
+      ["Ropa vieja canaria",40,30,40,16],
+      ["Albóndigas en salsa con arroz",40,28,60,20],
+      ["Ensalada de pasta con atún y huevo",20,26,55,14],
+      ["Puchero de verduras con garbanzos",60,20,60,12],
+      ["Pescado a la plancha con papas arrugadas y mojo",30,30,45,16],
+      ["Macarrones con pollo y tomate",25,30,70,12],
+      ["Arroz con pollo al curry suave",30,30,70,14]
+    ],
+    cena:[
+      ["Tortilla de patatas con ensalada",30,18,30,20],
+      ["Sándwich mixto con crema de verduras",15,20,40,16],
+      ["Pizza casera integral de verduras y jamón",30,25,60,16],
+      ["Pescado al horno con verduras",25,28,15,12],
+      ["Quesadillas de pollo y queso",15,30,40,18],
+      ["Revuelto de setas con pan",15,18,30,16],
+      ["Ensalada César casera",15,28,20,20],
+      ["Hamburguesa casera con ensalada",20,30,10,22],
+      ["Crema de calabaza con huevo duro y picatostes",25,14,35,12],
+      ["Burrito de alubias, arroz y queso",15,20,65,14],
+      ["Salmón con arroz y verduras",20,30,50,18],
+      ["Pisto con huevo",30,14,20,16],
+      ["Pollo a la plancha con patatas asadas",30,32,40,12],
+      ["Tostas de atún, pimiento asado y huevo",10,24,35,12],
+      ["Wok de fideos con verduras y pollo",20,28,60,12]
+    ]
+  },
+  volumen:{
+    desayuno:[
+      ["Avena con leche entera, plátano, crema de cacahuete y miel",10,22,95,24],
+      ["Tortitas de avena y huevo con fruta y miel",15,25,85,15],
+      ["Bocadillo de tortilla con jamón",10,28,60,22],
+      ["Tres huevos revueltos con tostadas y aguacate",10,24,45,30],
+      ["Batido de leche, plátano, avena y cacao",5,20,80,12],
+      ["Gofio con leche, plátano y almendras",5,18,80,16],
+      ["Yogur griego con granola, miel y nueces",5,20,60,22],
+      ["Tostadas con aceite, tomate, jamón y queso",5,26,55,22],
+      ["Sándwich de pollo, queso y aguacate",10,32,45,22],
+      ["Porridge de avena con dátiles y crema de almendras",10,18,85,18],
+      ["Pan integral con crema de cacahuete, plátano y un vaso de leche",5,20,70,20],
+      ["Burrito de desayuno: huevo, queso y frijoles",15,30,55,22],
+      ["Crepes rellenos de queso fresco y fruta",15,22,60,14],
+      ["Muesli con leche entera, frutos secos y fruta",5,18,75,20],
+      ["Torrija de pan integral con fruta y yogur",15,20,70,14]
+    ],
+    almuerzo:[
+      ["Arroz con pollo y verduras, ración grande",30,45,100,15],
+      ["Pasta boloñesa con queso",30,40,100,22],
+      ["Lentejas con arroz y huevo",40,30,85,14],
+      ["Ternera con patatas y pimientos",35,42,60,20],
+      ["Poke de salmón con arroz, aguacate y edamame",20,38,80,24],
+      ["Pollo al curry con garbanzos y arroz",30,42,95,18],
+      ["Cocido de garbanzos con carne",90,40,70,28],
+      ["Paella mixta",50,38,95,18],
+      ["Macarrones gratinados con carne y tomate",35,40,95,24],
+      ["Bol de arroz, frijoles, pollo, maíz y aguacate",25,45,100,20],
+      ["Ropa vieja con papas",45,38,65,20],
+      ["Lasaña de carne",60,35,60,30],
+      ["Hamburguesa casera con pan y patatas al horno",30,40,85,28],
+      ["Fideuá de pescado",40,30,90,18],
+      ["Pollo al horno con boniato",45,40,70,14]
+    ],
+    cena:[
+      ["Tortilla de patatas con pan",30,25,75,28],
+      ["Pizza casera de pollo",35,40,85,22],
+      ["Wrap de pollo, arroz y queso",15,40,75,18],
+      ["Salmón con quinoa y aguacate",20,36,55,30],
+      ["Revuelto de huevos con patatas y jamón",20,30,45,28],
+      ["Pasta al pesto con pollo y nueces",20,38,85,28],
+      ["Quesadillas de carne picada y frijoles",20,38,65,26],
+      ["Hamburguesa de ternera con boniato asado",30,38,60,24],
+      ["Arroz tres delicias casero con huevo y pollo",25,32,90,16],
+      ["Bocadillo de lomo con queso y pimientos",15,36,65,20],
+      ["Tacos de pescado con guacamole",25,30,60,22],
+      ["Crema de legumbres con huevo y pan",25,26,70,14],
+      ["Fajitas de ternera",25,38,65,20],
+      ["Patatas rellenas de atún y queso",40,32,70,18],
+      ["Pollo teriyaki con arroz",25,38,90,12]
+    ]
+  }
+};
+
+/* kcal a partir de los macros (4 · 4 · 9), redondeadas a 5 */
+function aliKcal(p){ return Math.round((p[2]*4+p[3]*4+p[4]*9)/5)*5; }
+function aliBien(d){ return !!(S.comeBien && S.comeBien[d]); }
+function aliObjetivo(){ var o=S.aliObjetivo; return (o==="definir"||o==="mantener"||o==="volumen") ? o : ""; }
+function aliObjNombre(o){ for(var i=0;i<ALI_OBJETIVOS.length;i++) if(ALI_OBJETIVOS[i].k===o) return ALI_OBJETIVOS[i].n; return ""; }
+function aliComidaNombre(m){ for(var i=0;i<ALI_COMIDAS.length;i++) if(ALI_COMIDAS[i].k===m) return ALI_COMIDAS[i].n; return ""; }
+/* la idea del día: cambia cada día, la misma todo el día */
+function aliIdeaHoy(o, m){
+  var l=ALI_PLATOS[o][m], d=today(), h=m.length*7+o.length;
+  for(var i=0;i<d.length;i++) h=(h*31+d.charCodeAt(i))>>>0;
+  return h % l.length;
+}
+
+/* +10 XP el día que has comido bien */
+var _aliDayXP=dayXP;
+dayXP=function(d, tmap){ return _aliDayXP(d, tmap)+(aliBien(d) ? ALI_XP : 0); };
+
+var ALI_ICO={
+  desayuno:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10h12v4.5a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M16.5 11.5h1.2a2.3 2.3 0 0 1 0 4.6h-1.6"/><path d="M8.5 3.5c-.8 1 .8 2-.1 3.2M12.5 3.5c-.8 1 .8 2-.1 3.2"/></svg>',
+  almuerzo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12.5" r="6.2"/><circle cx="12" cy="12.5" r="3.2"/><path d="M3 4v5.5M4.8 4v5.5M3 7h1.8M3.9 9.5v11"/><path d="M21 4c-1.6.8-2.2 2.7-2.2 5.2V12H21M21 4v16.5"/></svg>',
+  cena:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 14.2A7.8 7.8 0 0 1 9.8 4.5a7.8 7.8 0 1 0 9.7 9.7z"/><path d="M16.5 3.5v2.6M15.2 4.8h2.6"/></svg>',
+  hoja:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-14 0 10-6 15-14 15"/><path d="M5 19c3-4 6-6.5 10-8.5"/></svg>',
+  lapiz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 19.5l1-4L15.8 5.2a2 2 0 0 1 2.9 0l.1.1a2 2 0 0 1 0 2.9L8.5 18.5z"/></svg>',
+  reloj:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/></svg>',
+  flecha:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  definir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.5 3.4 5.5 6.5 5.5 9.6a5.5 5.5 0 0 1-11 0c0-3.1 2-6.2 5.5-9.6z"/><path d="M9.5 14.5a2.6 2.6 0 0 0 2.5 2"/></svg>',
+  mantener:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M5 20h14"/><path d="M4.5 8h15"/><path d="M4.5 8 2.5 13a2.3 2.3 0 0 0 4 0zM19.5 8l-2 5a2.3 2.3 0 0 0 4 0z"/></svg>',
+  volumen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 9.5v5M6.5 7v10M17.5 7v10M20.5 9.5v5M6.5 12h11"/></svg>'
+};
+
+/* ── la tarjeta ── */
+function aliTarjetaHTML(){
+  var t=curDay(), esHoy=(t===today()), bien=aliBien(t), o=aliObjetivo();
+  var semana=0, dias="", l=lunesDe(today());
+  for(var i=0;i<7;i++){
+    var d=addDays(l,i), si=aliBien(d); if(si) semana++;
+    dias+='<span class="ali-dia'+(si?" si":"")+(d===today()?" hoy":"")+(d>today()?" fut":"")+'"><i></i><small>'+INI[new Date(d+"T00:00:00").getDay()]+'</small></span>';
+  }
+  var tiles=ALI_COMIDAS.map(function(c){
+    var sub = o ? '<small class="ali-t-hoy">'+esc(ALI_PLATOS[o][c.k][aliIdeaHoy(o,c.k)][0])+'</small>'
+                : '<small>15 ideas</small>';
+    return '<button class="ali-tile ali-'+c.k+'" data-act="x-ali-comida" data-m="'+c.k+'">'+
+      '<span class="ali-t-ic">'+ALI_ICO[c.k]+'</span>'+
+      '<b>'+c.n+'</b>'+sub+'</button>';
+  }).join("");
+  return '<div class="flex items-start justify-between mb-6">'+
+      '<div><h2 class="display text-[17px] font-bold">Alimentación</h2>'+
+        '<p class="text-[12.5px] t3 mt-0.5">'+(esHoy?"¿Has comido bien hoy?":"¿Comiste bien ese día?")+
+        ' <span class="chip ml-1" style="background:color-mix(in srgb,var(--good) 15%,transparent);color:var(--good)">+'+ALI_XP+' XP</span></p></div>'+
+      '<div class="text-right"><div class="display text-[30px] font-extrabold num leading-none">'+semana+'<span class="ali-de">/7</span></div>'+
+        '<div class="text-[11px] t3 mt-1">esta semana</div></div>'+
+    '</div>'+
+    '<button id="ali-btn" class="ali-btn'+(bien?" si":"")+'" data-act="x-ali-bien" data-day="'+t+'">'+
+      (bien ? '<span class="display">'+(esHoy?"Hoy has comido bien":"Ese día comiste bien")+
+                '<svg class="ali-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>'
+            : '<span class="display"><span class="ali-btn-ic">'+ALI_ICO.hoja+'</span>'+(esHoy?"He comido bien":"Ese día comí bien")+'</span>')+
+    '</button>'+
+    '<div class="ali-semana">'+dias+'</div>'+
+    '<div class="ali-sep"></div>'+
+    '<div class="ali-cab"><span class="eyebrow">Ideas para tus comidas</span>'+
+      '<button class="ali-obj'+(o?"":" vacio")+'" data-act="x-ali-objetivo">'+
+        (o ? '<span class="ali-obj-ic">'+ALI_ICO[o]+'</span>'+aliObjNombre(o)+'<span class="ali-obj-ed">'+ALI_ICO.lapiz+'</span>'
+           : 'Elegir objetivo')+'</button></div>'+
+    '<div class="ali-tiles">'+tiles+'</div>'+
+    (o ? '<p class="ali-pie">Debajo de cada comida, la idea de hoy. Toca para ver las 15.</p>' : '');
+}
+function aliPintaTarjeta(){
+  var gb=document.getElementById("gym-btn"); if(!gb) return;
+  var gym=gb.closest(".glass"); if(!gym || !gym.parentNode) return;
+  var c=document.getElementById("ali-card");
+  if(!c){ c=document.createElement("div"); c.id="ali-card"; c.className="glass rounded-[24px] pad"; }
+  if(gym.nextSibling!==c) gym.parentNode.insertBefore(c, gym.nextSibling);
+  if(c.dataset.anima==="1") return;
+  c.innerHTML=aliTarjetaHTML();
+}
+
+/* ── el objetivo ── */
+var aliLuego="";
+function aliSheetObjetivo(luego){
+  aliLuego=luego||"";
+  var o=aliObjetivo();
+  openSheet('<div class="flex items-start justify-between mb-2"><h3 class="display text-[20px] font-bold">¿Cuál es tu objetivo?</h3>'+closeBtn()+'</div>'+
+    '<p class="text-[12.5px] t3 mb-4">Con esto te propongo platos que encajen contigo. Puedes cambiarlo cuando quieras.</p>'+
+    '<div class="ali-objs">'+ALI_OBJETIVOS.map(function(x){
+      return '<button class="ali-o ali-o-'+x.k+(o===x.k?" on":"")+'" data-act="x-ali-obj-elige" data-o="'+x.k+'">'+
+        '<span class="ali-o-ic">'+ALI_ICO[x.k]+'</span>'+
+        '<span class="ali-o-t"><b>'+x.n+'</b><small>'+x.d+'</small></span>'+
+        '<span class="ali-o-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg></span>'+
+      '</button>';
+    }).join("")+'</div>');
+}
+
+/* ── las ideas de una comida ── */
+var aliVer="desayuno";
+function aliSheetIdeas(m){
+  aliVer=m||aliVer;
+  var o=aliObjetivo(); if(!o){ aliSheetObjetivo(aliVer); return; }
+  var l=ALI_PLATOS[o][aliVer], hoy=aliIdeaHoy(o, aliVer);
+  var orden=[hoy].concat(l.map(function(x,i){ return i; }).filter(function(i){ return i!==hoy; }));
+  var tarjetas=orden.map(function(i, k){
+    var p=l[i];
+    return '<div class="ali-plato'+(k===0?" hoy":"")+'">'+
+      (k===0 ? '<span class="ali-hoy-et">Idea de hoy</span>' : '')+
+      '<b>'+esc(p[0])+'</b>'+
+      '<span class="ali-meta"><span>'+ALI_ICO.reloj+p[1]+' min</span></span>'+
+      '<span class="ali-macros num">'+
+        '<span class="m-kcal"><b>'+aliKcal(p)+'</b><small>kcal</small></span>'+
+        '<span class="m-prot"><b>'+p[2]+' g</b><small>Proteína</small></span>'+
+        '<span class="m-hid"><b>'+p[3]+' g</b><small>Hidratos</small></span>'+
+        '<span class="m-gra"><b>'+p[4]+' g</b><small>Grasas</small></span>'+
+      '</span>'+
+    '</div>';
+  }).join("");
+  openSheet('<div class="flex items-start justify-between mb-3"><h3 class="display text-[20px] font-bold">Ideas para '+(aliVer==="desayuno"?"el desayuno":aliVer==="almuerzo"?"el almuerzo":"la cena")+'</h3>'+closeBtn()+'</div>'+
+    '<div class="ali-tabs" role="tablist">'+ALI_COMIDAS.map(function(c){
+      return '<button role="tab" aria-selected="'+(c.k===aliVer)+'" class="'+(c.k===aliVer?"on":"")+'" data-act="x-ali-tab" data-m="'+c.k+'">'+ALI_ICO[c.k]+c.n+'</button>'; }).join("")+'</div>'+
+    '<p class="eyebrow mt-4 mb-2">Tu objetivo</p>'+
+    '<div class="ali-seg">'+ALI_OBJETIVOS.map(function(x){
+      return '<button class="'+(x.k===o?"on":"")+'" data-act="x-ali-obj-cambia" data-o="'+x.k+'">'+x.n+'</button>'; }).join("")+'</div>'+
+    '<div class="ali-lista">'+tarjetas+'</div>'+
+    '<p class="ali-nota">Orientativo: los valores son aproximados para una ración normal y cambian con la cantidad. Si tienes dudas sobre qué te conviene, pregunta a un profesional de la nutrición.</p>');
+  var sb=document.getElementById("sheet-body"); if(sb) sb.scrollTop=0;
+}
+
+/* ── marcar que has comido bien ── */
+function aliMarca(el){
+  var d=(el && el.dataset.day)||curDay();
+  if(!S.comeBien) S.comeBien={};
+  var on=!S.comeBien[d];
+  if(typeof xpPreparar==="function" && on) xpPreparar();
+  if(on){ S.comeBien[d]=1; if(!S.meals[d]) S.meals[d]={}; } else delete S.comeBien[d];
+  save(); render();
+  var b=document.getElementById("ali-btn"); if(!b) return;
+  if(!on){ sonido("des"); return; }
+  b.classList.add("ali-sello");
+  sonido("pop"); try{ if(navigator.vibrate) navigator.vibrate(16); }catch(e){}
+  if(typeof celebraEn==="function") celebraEn(b, "+"+ALI_XP+" XP");
+  var r=b.getBoundingClientRect();
+  if(typeof xpVuela==="function") xpVuela(r.left+r.width/2, r.top+r.height/2, ALI_XP);
+}
+
+function aliAccion(a, el){
+  if(a.indexOf("x-ali-")!==0) return false;
+  if(a==="x-ali-bien"){ aliMarca(el); return true; }
+  if(a==="x-ali-objetivo"){ aliSheetObjetivo(""); return true; }
+  if(a==="x-ali-comida"){ var m=el.dataset.m; if(!aliObjetivo()) aliSheetObjetivo(m); else aliSheetIdeas(m); sonido("tick"); return true; }
+  if(a==="x-ali-obj-elige"){
+    S.aliObjetivo=el.dataset.o; save(); sonido("pop");
+    if(aliLuego){ var m2=aliLuego; aliLuego=""; aliSheetIdeas(m2); } else closeSheet();
+    render(); return true;
+  }
+  if(a==="x-ali-obj-cambia"){ S.aliObjetivo=el.dataset.o; save(); sonido("tick"); aliSheetIdeas(aliVer); render(); return true; }
+  if(a==="x-ali-tab"){ sonido("tick"); aliSheetIdeas(el.dataset.m); return true; }
+  return false;
+}
+
+var ALI_CSS=[
+'#ali-card .ali-de{ font-size:17px; color:var(--t3); font-weight:700; margin-left:1px; }',
+'.ali-btn{ position:relative; width:100%; border-radius:18px; padding:20px 16px; display:flex; justify-content:center; align-items:center;',
+'  background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline); color:var(--t2); transition:background .4s var(--spring), box-shadow .4s var(--spring), transform .35s var(--spring); }',
+'.ali-btn:active{ transform:scale(.965); }',
+'.ali-btn > span{ display:inline-flex; align-items:center; gap:9px; font-size:19px; font-weight:700; }',
+'.ali-btn-ic{ width:22px; height:22px; display:grid; place-items:center; color:var(--good); } .ali-btn-ic svg{ width:21px; height:21px; }',
+'.ali-btn.si{ color:var(--on-accent); box-shadow:0 10px 26px -10px color-mix(in srgb,var(--good) 60%,transparent);',
+'  background:linear-gradient(145deg, color-mix(in srgb,var(--good) 88%,var(--gold)), color-mix(in srgb,var(--good) 58%,var(--gold))); }',
+'.ali-btn.si > span{ color:#fff; }',
+'.ali-check{ width:22px; height:22px; } .ali-check path{ stroke-dasharray:24; stroke-dashoffset:0; }',
+'.ali-btn.ali-sello{ animation:gymSello .62s cubic-bezier(.3,1.5,.5,1); } .ali-btn.ali-sello .ali-check path{ animation:gymTraza .45s ease-out .18s both; }',
+'.ali-semana{ display:flex; gap:6px; margin-top:14px; }',
+'.ali-dia{ flex:1; display:flex; flex-direction:column; align-items:center; gap:5px; }',
+'.ali-dia i{ display:block; width:100%; height:6px; border-radius:99px; background:var(--fill-hi); transition:background .4s var(--ease); }',
+'.ali-dia.si i{ background:color-mix(in srgb,var(--good) 80%,var(--gold)); }',
+'.ali-dia.fut i{ opacity:.5; }',
+'.ali-dia small{ font-size:10.5px; color:var(--t3); } .ali-dia.hoy small{ color:var(--t1); font-weight:700; }',
+'.ali-sep{ height:1px; background:var(--hairline-2); margin:22px -4px 18px; }',
+'.ali-cab{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }',
+'.ali-obj{ display:inline-flex; align-items:center; gap:6px; padding:6px 8px 6px 7px; border-radius:99px; font-size:12.5px; font-weight:700;',
+'  background:var(--accent-soft); color:var(--accent); flex:0 0 auto; }',
+'.ali-obj.vacio{ padding:6px 12px; }',
+'.ali-obj-ic{ width:18px; height:18px; display:grid; place-items:center; } .ali-obj-ic svg{ width:16px; height:16px; }',
+'.ali-obj-ed{ width:18px; height:18px; display:grid; place-items:center; opacity:.7; } .ali-obj-ed svg{ width:12px; height:12px; }',
+'.ali-tiles{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }',
+'.ali-tile{ --tc:var(--accent); min-width:0; display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; padding:12px 11px 13px;',
+'  border-radius:18px; background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline-2); transition:transform .3s var(--spring), box-shadow .3s var(--ease); }',
+'.ali-tile:active{ transform:scale(.96); }',
+'.ali-tile:hover{ box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tc) 40%,transparent); }',
+'.ali-desayuno{ --tc:var(--gold); } .ali-almuerzo{ --tc:var(--good); } .ali-cena{ --tc:var(--violet); }',
+'.ali-t-ic{ width:34px; height:34px; border-radius:11px; display:grid; place-items:center; margin-bottom:8px;',
+'  background:color-mix(in srgb,var(--tc) 16%,transparent); color:var(--tc); } .ali-t-ic svg{ width:20px; height:20px; }',
+'.ali-tile b{ font-size:14px; font-weight:700; color:var(--t1); }',
+'.ali-tile small{ font-size:11.5px; line-height:1.35; color:var(--t3); }',
+'.ali-t-hoy{ display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; overflow-wrap:anywhere; }',
+'.ali-pie{ margin-top:10px; font-size:11.5px; color:var(--t3); }',
+/* hoja del objetivo */
+'.ali-objs{ display:flex; flex-direction:column; gap:8px; }',
+'.ali-o{ --oc:var(--accent); display:flex; align-items:center; gap:13px; width:100%; text-align:left; padding:14px; border-radius:18px;',
+'  background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline-2); transition:box-shadow .3s var(--ease), transform .3s var(--spring); }',
+'.ali-o:active{ transform:scale(.98); }',
+'.ali-o-definir{ --oc:var(--cyan); } .ali-o-mantener{ --oc:var(--good); } .ali-o-volumen{ --oc:var(--warn); }',
+'.ali-o-ic{ width:42px; height:42px; border-radius:14px; flex:0 0 auto; display:grid; place-items:center; background:color-mix(in srgb,var(--oc) 16%,transparent); color:var(--oc); }',
+'.ali-o-ic svg{ width:23px; height:23px; }',
+'.ali-o-t{ flex:1; min-width:0; } .ali-o-t b{ display:block; font-size:16px; } .ali-o-t small{ display:block; font-size:12.5px; line-height:1.4; color:var(--t3); margin-top:2px; }',
+'.ali-o-ok{ width:24px; height:24px; border-radius:99px; flex:0 0 auto; display:grid; place-items:center; box-shadow:inset 0 0 0 1.5px var(--hairline); color:transparent; }',
+'.ali-o-ok svg{ width:14px; height:14px; }',
+'.ali-o.on{ box-shadow:inset 0 0 0 2px var(--oc); } .ali-o.on .ali-o-ok{ background:var(--oc); box-shadow:none; color:#fff; }',
+/* hoja de ideas */
+'.ali-tabs{ display:grid; grid-template-columns:repeat(3,1fr); gap:4px; padding:4px; border-radius:16px; background:var(--fill); }',
+'.ali-tabs button{ display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 4px; border-radius:12px; font-size:13.5px; font-weight:700; color:var(--t2); transition:all .25s var(--ease); }',
+'.ali-tabs button svg{ width:17px; height:17px; flex:0 0 auto; }',
+'.ali-tabs button.on{ background:var(--glass-bg-hi); color:var(--t1); box-shadow:0 1px 3px rgba(0,0,0,.08), inset 0 0 0 1px var(--hairline); }',
+'html.dark .ali-tabs button.on{ background:var(--fill-hi); }',
+'.ali-seg{ display:flex; flex-wrap:wrap; gap:6px; }',
+'.ali-seg button{ padding:8px 14px; border-radius:99px; font-size:13px; font-weight:700; background:var(--fill); color:var(--t2); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
+'.ali-seg button.on{ background:var(--accent); color:var(--on-accent); box-shadow:none; }',
+'.ali-lista{ display:flex; flex-direction:column; gap:8px; margin-top:16px; }',
+'.ali-plato{ position:relative; padding:13px 14px; border-radius:16px; background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
+'.ali-plato b{ display:block; font-size:14.5px; font-weight:650; line-height:1.35; color:var(--t1); }',
+'.ali-meta{ display:flex; flex-wrap:wrap; gap:6px 12px; margin-top:7px; font-size:12px; color:var(--t3); }',
+'.ali-meta > span{ display:inline-flex; align-items:center; gap:4px; } .ali-meta svg{ width:13px; height:13px; }',
+'.ali-macros{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-top:10px; }',
+'.ali-macros > span{ display:flex; flex-direction:column; align-items:center; gap:1px; padding:7px 4px 6px; border-radius:11px;',
+'  background:color-mix(in srgb,var(--mc) 11%,transparent); }',
+'.ali-macros b{ font-size:13.5px; font-weight:800; color:var(--mc); letter-spacing:-.01em; white-space:nowrap; }',
+'.ali-macros small{ font-size:10px; font-weight:600; color:var(--t3); }',
+'.m-kcal{ --mc:var(--accent); } .m-prot{ --mc:var(--good); } .m-hid{ --mc:var(--gold); } .m-gra{ --mc:var(--violet); }',
+'.ali-plato.hoy{ background:color-mix(in srgb,var(--accent) 9%,var(--glass-bg)); box-shadow:inset 0 0 0 1.5px var(--accent-line); padding-top:12px; }',
+'.ali-hoy-et{ display:inline-block; margin-bottom:6px; font-size:10.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--accent); }',
+'.ali-nota{ margin-top:14px; font-size:11.5px; line-height:1.5; color:var(--t3); }',
+'@media (prefers-reduced-motion:reduce){ .ali-btn.ali-sello, .ali-btn.ali-sello .ali-check path{ animation:none; } }'
+].join("\n");
+
+var _aliGA=grupoAccion;
+grupoAccion=function(a, el){ if(aliAccion(a, el)) return true; return _aliGA.apply(this, arguments); };
+var _aliTR=grupoTrasRender;
+grupoTrasRender=function(){ var r=_aliTR.apply(this, arguments); if(view==="vital") aliPintaTarjeta(); return r; };
+(function(){ var st=document.createElement("style"); st.id="ali-css"; st.textContent=ALI_CSS; document.head.appendChild(st); })();
 })();
 </script>
 <script>

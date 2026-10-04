@@ -78,14 +78,22 @@ var MEDALS=[
   {id:"m11",xp:90,f:function(s){ return s.perfect>=5 }},
   {id:"m12",xp:90,f:function(s){ return s.tasksDone>=10 && s.pending===0 }},
   {id:"m13",xp:90,f:function(s){ return s.examsPast>=10 }},
-  {id:"m14",xp:0,lvlGate:1,f:function(s){ return s.lvl>=13 }},
+  {id:"m14",xp:0,lvlGate:1,f:function(s){ return s.lvl>=26 }},
   {id:"m15",xp:0,lvlGate:1,f:function(s){ return s.lvl>=LVL_NAMES.length }},
   {id:"m16",xp:40,f:function(s){ return s.triples>=1 }},
   {id:"m17",xp:90,f:function(s){ return s.triples>=10 }}
 ];
 /* los nombres y las explicaciones salen de TEXTOS.logros, en el mismo orden */
 MEDALS.forEach(function(m,i){ var t=(TEXTOS.logros||[])[i]||{}; m.n=t.n||m.id; m.d=t.d||""; });
-var LVL_NAMES=TEXTOS.niveles;
+/* 40 niveles sin nombre, solo rangos: Bronce, Plata, Oro, Platino, Diamante y
+   Esmeralda tienen 5 niveles cada uno; Leyenda tiene 10 */
+var LVL_NAMES=(function(){
+  var R=[["Bronce",5],["Plata",5],["Oro",5],["Platino",5],["Diamante",5],["Esmeralda",5],["Leyenda",10]],
+      N=["I","II","III","IV","V","VI","VII","VIII","IX","X"], l=[];
+  R.forEach(function(x){ for(var i=0;i<x[1];i++) l.push(x[0]+" "+N[i]); });
+  return l;
+})();
+TEXTOS.niveles=LVL_NAMES;
 
 
 /* ════════ estado ════════ */
@@ -218,17 +226,19 @@ function avisoGuardado(){
 var TEMAS=[
   {k:"light", n:"Claro"}, {k:"dark", n:"Oscuro"}, {k:"system", n:"Sistema"},
   {k:"sage", n:"Jardín"}, {k:"neo", n:"Clásico"},
+  {k:"cielo", n:"Cielo"}, {k:"melocoton", n:"Melocotón"}, {k:"lavanda", n:"Lavanda"}, {k:"menta", n:"Menta"},
   {k:"arena", n:"Arena", nv:7}, {k:"medianoche", n:"Medianoche", nv:10},
-  {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16}
+  {k:"porcelana", n:"Porcelana", nv:13}, {k:"oro", n:"Oro", nv:16},
+  {k:"esmeralda", n:"Esmeralda", nv:26}, {k:"leyenda", n:"Leyenda", nv:31}, {k:"aurora", n:"Aurora", nv:40}
 ];
-var TEMAS_OSCUROS=["dark","medianoche","oro"];
-var COLOR_TEMA={ light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b" };
+var TEMAS_OSCUROS=["dark","medianoche","oro","esmeralda","leyenda","aurora"];
+var COLOR_TEMA={ cielo:"#eaf1fa", melocoton:"#fbeee6", lavanda:"#f0ecfa", menta:"#e8f5ef", light:"#f5f0e6", dark:"#181715", sage:"#eef3ec", neo:"#ece4d3", arena:"#efe6d8", porcelana:"#ffffff", medianoche:"#000000", oro:"#12100b", esmeralda:"#07140f", leyenda:"#110a1b", aurora:"#06121a" };
 function applyTheme(mode){
   var root=document.documentElement;
   var real=mode;
   if(mode==="system") real=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-  root.classList.remove("dark","sage","neo","medianoche","oro","arena","porcelana");
-  if(real==="medianoche" || real==="oro") root.classList.add("dark");
+  root.classList.remove("dark","sage","neo","medianoche","oro","arena","porcelana","esmeralda","leyenda","aurora","cielo","melocoton","lavanda","menta");
+  if(real!=="dark" && TEMAS_OSCUROS.indexOf(real)>=0) root.classList.add("dark");
   if(real!=="light") root.classList.add(real);
   if(typeof aplicaAcento==="function") aplicaAcento();
   var mt=document.querySelector('meta[name="theme-color"]');
@@ -239,6 +249,10 @@ function applyTheme(mode){
 }
 /* cada tema tiene su icono en el botón de cambiar tema */
 var ICONOS_TEMA={
+  cielo:'<path d="M7 17.5h10.5a3.8 3.8 0 0 0 .4-7.6A5.5 5.5 0 0 0 7.4 9.2 4.2 4.2 0 0 0 7 17.5z"/>',
+  melocoton:'<circle cx="12" cy="13.5" r="7"/><path d="M12 6.5c0-2 1.2-3 3.2-3"/><path d="M12 7.5c-2-1.8-4.5-1.8-5.5-.5"/>',
+  lavanda:'<path d="M12 21V10"/><path d="M12 10c-1.6-1-1.6-3 0-4 1.6 1 1.6 3 0 4zM12 14c-2-.6-3-2.4-2-4 1.8.3 2.6 2 2 4zM12 14c2-.6 3-2.4 2-4-1.8.3-2.6 2-2 4zM12 18c-2-.6-3-2.4-2-4 1.8.3 2.6 2 2 4zM12 18c2-.6 3-2.4 2-4-1.8.3-2.6 2-2 4z"/>',
+  menta:'<path d="M12 20c-4-2-6-5.5-6-9.5C6 7 8.5 4 12 3.5c3.5.5 6 3.5 6 7 0 4-2 7.5-6 9.5z"/><path d="M12 20V8"/><path d="M12 12l-2.5-2M12 15l3-2.5"/>',
   light:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/>',
   dark:'<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>',
   sage:'<path d="M20 4c0 8-5 13-11 13H5c0-8 5-13 11-13h4z"/><path d="M5 20c2-5 5-8 9-10"/>',
@@ -246,7 +260,10 @@ var ICONOS_TEMA={
   medianoche:'<path d="M17 15.5A7 7 0 0 1 8.5 7a7 7 0 1 0 8.5 8.5z"/><path d="M17.5 3.5v3M16 5h3M20.5 9.5v2M19.5 10.5h2"/>',
   oro:'<path d="M3.5 17.5 2.5 7.5l5.5 4 4-7 4 7 5.5-4-1 10z"/><path d="M4 20.5h16"/>',
   arena:'<path d="M2.5 17c3-3 6-3 9.5 0s6.5 3 9.5 0"/><path d="M2.5 21c3-3 6-3 9.5 0s6.5 3 9.5 0"/><circle cx="16" cy="7" r="3.2"/>',
-  porcelana:'<path d="M6 4h12l-1.2 4.5a6 6 0 0 1-9.6 0z"/><path d="M8 11.5c-.8 3.2 0 6.5 4 8.5 4-2 4.8-5.3 4-8.5"/><path d="M9 20.5h6"/>'
+  porcelana:'<path d="M6 4h12l-1.2 4.5a6 6 0 0 1-9.6 0z"/><path d="M8 11.5c-.8 3.2 0 6.5 4 8.5 4-2 4.8-5.3 4-8.5"/><path d="M9 20.5h6"/>',
+  esmeralda:'<path d="M7 3.5h10l4 5.5-9 11.5L3 9z"/><path d="M3 9h18M9.5 3.5 8 9l4 11.5L16 9l-1.5-5.5"/>',
+  leyenda:'<path d="M12 2.8l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.2 6.8 19l1-5.9-4.3-4.1 5.9-.8z"/>',
+  aurora:'<path d="M3 18c3-7 6-10 9-10s6 3 9 10"/><path d="M6 18c2-4.5 4-6.5 6-6.5s4 2 6 6.5"/><path d="M2.5 21h19"/>'
 };
 function pintaIconoTema(real){
   var ic=ICONOS_TEMA[real]||ICONOS_TEMA.light;
@@ -260,10 +277,11 @@ var PEAK_WM_VB="58 -6 3496 800", PEAK_WM_D="M494 34Q592 34 662.5 67Q733 100 770 
 var PEAK_MK_D="M450 0 0 900 600 900 525 648 538 607 634 900 680 900 561 534 577 481 714 900 760 900 497 94 594 288ZM594 288 794 900 840 900 727 554ZM900 900 824 748 874 900Z"; /* caja de 900 x 900 */
 function peakWM(fill){ return '<svg viewBox="'+PEAK_WM_VB+'" role="img" aria-label="Peak."><path d="'+PEAK_WM_D+'" fill="'+(fill||"currentColor")+'"/></svg>'; }
 /* el icono de la pestaña se repinta con el color del modo */
-var ICONO_TEMA={ light:{b:"#1c1b19",p:"#f5f0e6"}, dark:{b:"#f1ebdf",p:"#141311"},
+var ICONO_TEMA={ cielo:{b:"#2f7fd8",p:"#fff"}, melocoton:{b:"#e0664a",p:"#fff"}, lavanda:{b:"#7457d9",p:"#fff"}, menta:{b:"#15936c",p:"#fff"}, light:{b:"#1c1b19",p:"#f5f0e6"}, dark:{b:"#f1ebdf",p:"#141311"},
                  sage:{b:"#4f7d63",p:"#ffffff"}, neo:{b:"#2f4a7d",p:"#fbf7ec"},
                  medianoche:{b:"#8f8fff",p:"#000000"}, oro:{b:"#d9ae45",p:"#17130a"},
-                 arena:{b:"#b5562f",p:"#fbf6ee"}, porcelana:{b:"#1f4fd1",p:"#ffffff"} };
+                 arena:{b:"#b5562f",p:"#fbf6ee"}, porcelana:{b:"#1f4fd1",p:"#ffffff"},
+                 esmeralda:{b:"#34c98a",p:"#07140f"}, leyenda:{b:"#b57bff",p:"#110a1b"}, aurora:{b:"#5ee0c8",p:"#06121a"} };
 function pintarIcono(real){
   try{
     var c=ICONO_TEMA[real]||ICONO_TEMA.light, n=180;
@@ -384,6 +402,7 @@ function dayXP(d, tmap){
   return x;
 }
 function tripleDone(d){ var tc=todaysChallenges(d).length; return tc>0 && chOf(d).length>=tc; }
+var NV_XP_BASE=80, NV_XP_CRECE=1.1;
 function stats(){
   var s={ch:0,gym:0,sleep:0,lowScreen:0,perfect:0,tasksDone:0,pending:0,examsPast:0,streak:0,best:0,xp:0,lvl:1};
   Object.keys(S.chDone).forEach(function(k){ s.ch+=S.chDone[k].length; });
@@ -404,7 +423,7 @@ function stats(){
   Object.keys(seen).forEach(function(d){ s.xp += dayXP(d,tmap); if(tripleDone(d)) s.triples++; });
 
   var lv=1, need=150, acc=0;
-  s.lvl=1; s.lvlFloor=0; s.lvlNeed=150;
+  s.lvl=1; s.lvlFloor=0; s.lvlNeed=NV_XP_BASE;
 
   var d=today();
   if(!activeDay(d)) d=addDays(d,-1);
@@ -419,9 +438,9 @@ function stats(){
   if(typeof semanalXP==="function") s.xp+=semanalXP();
   if(typeof metasXP==="function") s.xp+=metasXP();   /* metas del mes */   /* retos de la semana */
   s.xp+=(S.xpPrueba||0)+(typeof grupoXP==="function"?grupoXP():0);              /* solo modo prueba */
-  lv=1; need=150; acc=0;
-  /* 20 niveles: a tope, unos cuatro meses hasta el último */
-  while(lv<LVL_NAMES.length && s.xp>=acc+need){ acc+=need; lv++; need=Math.round(need*1.215); }
+  lv=1; need=NV_XP_BASE; acc=0;
+  /* 40 niveles: el primero pide 80 XP y cada uno un 10 % más que el anterior */
+  while(lv<LVL_NAMES.length && s.xp>=acc+need){ acc+=need; lv++; need=Math.round(need*NV_XP_CRECE); }
   s.lvl=lv; s.lvlFloor=acc; s.lvlNeed=need;
   s.med=MEDALS.filter(function(m){ return m.f(s); }).length;
   return s;
