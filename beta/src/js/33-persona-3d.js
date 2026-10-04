@@ -816,17 +816,19 @@ function mqRenderer(T, lienzo){
 
 /* miniaturas: un solo renderer fuera de pantalla hace una foto de la postura B */
 var MQ_FOTOS={}, MQ_FOTO_R=null, MQ_COLA=Promise.resolve();
-function maniquiFoto(k){
-  var color=mqColor("var(--accent)"), clave=k+"|"+color+"|"+mqColor("var(--on-accent, #fff)")+"|"+document.documentElement.classList.contains("dark")+"|"+(window.devicePixelRatio||1);
+function maniquiFoto(k, tam){
+  tam=tam||220;
+  var color=mqColor("var(--accent)"), clave=k+"|"+tam+"|"+color+"|"+mqColor("var(--on-accent, #fff)")+"|"+document.documentElement.classList.contains("dark")+"|"+(window.devicePixelRatio||1);
   if(MQ_FOTOS[clave]) return Promise.resolve(MQ_FOTOS[clave]);
   /* de una en una, que el renderer es compartido */
   var p=MQ_COLA.then(function(){ return maniquiCarga(); }).then(function(T){
     if(MQ_FOTOS[clave]) return MQ_FOTOS[clave];
-    if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); MQ_FOTO_R.setSize(220,220,false); }
+    if(!MQ_FOTO_R){ var cv=document.createElement("canvas"); cv.dataset.foto="1"; MQ_FOTO_R=mqRenderer(T, cv); }
     /* a la densidad de la pantalla, para que en el móvil no se vea borrosa */
-    var dpr=Math.min(3, window.devicePixelRatio||1); if(MQ_FOTO_R.getPixelRatio()!==dpr){ MQ_FOTO_R.setPixelRatio(dpr); MQ_FOTO_R.setSize(220,220,false); }
+    var dpr=Math.min(3, window.devicePixelRatio||1); if(MQ_FOTO_R.getPixelRatio()!==dpr) MQ_FOTO_R.setPixelRatio(dpr);
+    if(MQ_FOTO_R._tam!==tam){ MQ_FOTO_R._tam=tam; MQ_FOTO_R.setSize(tam,tam,false); }
     return mqEscena(T, k, color).then(function(E){
-      mqPon(E.M, E.F.B, T); mqCamara(E, E.az, 220);
+      mqPon(E.M, E.F.B, T); mqCamara(E, E.az, tam);
       MQ_FOTO_R.render(E.esc, E.cam);
       return (MQ_FOTOS[clave]=MQ_FOTO_R.domElement.toDataURL("image/png"));
     });
@@ -838,7 +840,7 @@ function maniquiFoto(k){
 function maniquiFotos(dentro){
   if(!dentro) return;
   Array.prototype.forEach.call(dentro.querySelectorAll("img[data-mq]:not([src])"), function(im){
-    maniquiFoto(im.dataset.mq).then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
+    maniquiFoto(im.dataset.mq, +im.dataset.mqt||0).then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
   });
 }
 /* la escena animada del modo guiado */

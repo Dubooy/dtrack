@@ -205,14 +205,14 @@ function guiaInfo(){
   var mus=(p.m||"").split(/,\s*|\s+y\s+/).map(function(x){ return x.trim(); }).filter(Boolean);
   c.innerHTML='<div class="gi-fondo" data-act="x-gu-info-cierra"></div><div class="gi-hoja"><span class="gi-asa"></span>'+
     '<div class="gi-cuerpo"><h2>'+esc(p.t)+'</h2>'+
-      '<div class="gi-escena"><canvas class="gi-3d"></canvas><p class="gi-gira">Arrastra para girarlo</p></div>'+
+      '<div class="gi-escena"><canvas class="gi-3d"></canvas><div class="gi-capa"></div><p class="gi-gira">Arrastra para girarlo</p></div>'+
       (mus.length?'<p class="gi-et">Zona principal</p><div class="gi-musc">'+mus.map(function(m){ return '<span><i></i>'+esc(m.charAt(0).toUpperCase()+m.slice(1))+'</span>'; }).join("")+'</div>':'')+
       '<p class="gi-et">Instrucciones</p><p class="gi-txt">'+esc(p.d)+'</p>'+
       '<a class="gi-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
     '<div class="gi-pie"><button data-act="x-gu-info-cierra">Cerrar</button></div></div>';
   document.body.appendChild(c);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ c.classList.add("ve"); }); });
-  GUIA.infoVivo=maniquiMusculos(c.querySelector(".gi-3d"), muscZonas(p.m));
+  GUIA.infoVivo=maniquiMusculos(c.querySelector(".gi-3d"), muscZonas(p.m), muscClaves(p.m), c.querySelector(".gi-capa"));
 }
 function guiaInfoCierra(sinSeguir){
   var c=document.getElementById("gu-info"); if(!c) return;
@@ -265,42 +265,116 @@ var MUSC_CLAVES=[
   [/cu[aá]driceps/, ["cuadriceps"]], [/isquio/, ["isquios"]], [/gemelo/, ["gemelos"]], [/s[oó]leo/, ["soleo"]],
   [/aquiles|tobillo/, ["tobillo"]], [/cadera(?! )|cadera$|, cadera/, ["psoas","gluteoMed"]]
 ];
-function muscZonas(m){
+function muscClaves(m){
   var t=String(m||"").toLowerCase(), z=[];
   MUSC_CLAVES.forEach(function(c){ if(c[0].test(t)) c[1].forEach(function(k){ if(z.indexOf(k)<0) z.push(k); }); });
-  var out=[]; z.forEach(function(k){ (MUSC_ZONAS[k]||[]).forEach(function(e){ out.push(e); }); });
+  return z;
+}
+function muscZonas(m){
+  var out=[]; muscClaves(m).forEach(function(k){ (MUSC_ZONAS[k]||[]).forEach(function(e){ out.push(e); }); });
   return out;
 }
+/* el nombre corto de cada zona, para las etiquetas de la ficha */
+var MUSC_NOMBRE={ cuello:"Cuello", cuelloF:"Cuello", trapecio:"Trapecio", deltA:"Deltoides", deltP:"Deltoides", infra:"Infraespinoso",
+  triceps:"Tríceps", pectoral:"Pectoral", dorsal:"Dorsal", romboides:"Romboides", toracica:"Columna torácica", erectores:"Erectores",
+  lumbares:"Lumbares", abdomen:"Abdomen", oblicuos:"Oblicuos", gluteo:"Glúteo", gluteoMed:"Glúteo medio", psoas:"Psoas",
+  cuadriceps:"Cuádriceps", rectoFem:"Recto femoral", aductores:"Aductores", isquios:"Isquios", gemelos:"Gemelos", soleo:"Sóleo", tobillo:"Aquiles" };
 var MUSC_MAX=24;
 /* añade al material de la persona las zonas marcadas, del color de acento */
 function mqMusculos(T, mat, zonas, color){
   /* los vec4 van seguidos en un Float32Array: centro + cara, y radios */
   var c=new Float32Array(MUSC_MAX*4), rr=new Float32Array(MUSC_MAX*4).fill(1);
   for(var i=0;i<MUSC_MAX && i<zonas.length;i++){ var e=zonas[i]; c.set([e[0][0],e[0][1],e[0][2],e[2]], i*4); rr.set([e[1][0],e[1][1],e[1][2],0], i*4); }
-  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) } };
+  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) }, mPx:{ value:8*(window.devicePixelRatio||1) }, mAncho:{ value:.46 } };
   var antes=mat.onBeforeCompile;
   mat.onBeforeCompile=function(sh, r){
     if(antes) antes.call(this, sh, r);
     for(var k in u) sh.uniforms[k]=u[k];
-    sh.fragmentShader="uniform vec4 mZ["+MUSC_MAX+"]; uniform vec4 mR["+MUSC_MAX+"]; uniform int mN; uniform vec3 mCol;\n"+
+    sh.fragmentShader="uniform vec4 mZ["+MUSC_MAX+"]; uniform vec4 mR["+MUSC_MAX+"]; uniform int mN; uniform vec3 mCol; uniform float mPx, mAncho;\n"+
       sh.fragmentShader.replace("#include <roughnessmap_fragment>", [
         "  float mq_m = 0.;",
         "  for(int i = 0; i < "+MUSC_MAX+"; i++){",
         "    if(i >= mN) break;",
         "    vec3 q = (vec3(abs(r.x), r.y, r.z) - mZ[i].xyz) / mR[i].xyz;",
-        "    float a = 1. - smoothstep(.86, 1., length(q));",
+        "    float a = 1. - smoothstep(.94, 1., length(q));",
         "    if(mZ[i].w > .5) a *= smoothstep(-.15, .2, n.z);",
         "    if(mZ[i].w < -.5) a *= smoothstep(-.15, .2, -n.z);",
         "    mq_m = max(mq_m, a);",
         "  }",
-        "  diffuseColor.rgb = mix(diffuseColor.rgb, mCol, mq_m * .88);",
         "#include <roughnessmap_fragment>"].join("\n"));
+    /* al final de todo: rayas como las del logo, más gruesas y separadas que las de la sombra */
+    sh.fragmentShader=sh.fragmentShader.replace(/\}\s*$/, [
+        "  float mq_s = step(1. - mAncho, fract((gl_FragCoord.x - gl_FragCoord.y) / mPx));",
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol, mq_s * mq_m);",
+        "}"].join("\n"));
   };
   mat.customProgramCacheKey=function(){ return "mq-ropa-musc"; };
   mat.needsUpdate=true;
 }
+/* las etiquetas: de cada músculo sale una línea recta hacia un lado, acaba en un punto y lleva su nombre.
+   Siguen al músculo al girar la persona; el de cada pareja que se ve es el más cercano, y los que
+   quedan detrás se apagan. */
+function muscEtiquetas(T, M, claves, capa){
+  var g=M.malla.geometry, pos=g.attributes.position, nor=g.attributes.normal, n=pos.count, v=new T.Vector3();
+  var grupos=[], vistos={};
+  claves.forEach(function(k){
+    var nom=MUSC_NOMBRE[k]; if(!nom || vistos[nom] || !MUSC_ZONAS[k]) return; vistos[nom]=1;
+    var e=MUSC_ZONAS[k][0], c=e[0], rr=e[1], lados=[[],[]];
+    for(var i=0;i<n;i++){
+      var x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
+      var qx=(Math.abs(x)-c[0])/rr[0], qy=(y-c[1])/rr[1], qz=(z-c[2])/rr[2];
+      if(qx*qx+qy*qy+qz*qz>1) continue;
+      if(e[2]>.5 && nor.getZ(i)<.1) continue; if(e[2]<-.5 && nor.getZ(i)>-.1) continue;
+      lados[x<0?1:0].push(i);
+    }
+    lados=lados.map(function(L){ var paso=Math.max(1, Math.ceil(L.length/40)); return L.filter(function(_,j){ return j%paso===0; }); }).filter(function(L){ return L.length; });
+    if(!lados.length) return;
+    var d=document.createElement("b"); d.className="gi-eti"; d.textContent=nom; capa.appendChild(d);
+    grupos.push({ lados:lados, cara:e[2], el:d });
+  });
+  var svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","gi-lineas"); capa.insertBefore(svg, capa.firstChild);
+  var p=new T.Vector3(), w=new T.Vector3(), cen=new T.Vector3(), haciaCam=new T.Vector3();
+  var vistaAtras=0; grupos.forEach(function(G){ vistaAtras+=G.cara; });
+  var fn=function(cam, W, H){
+    M.malla.updateMatrixWorld();
+    M.caja.getCenter(cen);
+    var cc=cen.clone().project(cam), cx=(cc.x+1)/2*W;
+    var filas={ i:[], d:[] };
+    grupos.forEach(function(G){
+      /* de cada lado, el punto medio del músculo ya colocado; se queda el más cercano a la cámara */
+      var mejor=null, dm=1e9;
+      G.lados.forEach(function(L){
+        w.set(0,0,0); L.forEach(function(i){ M.malla.getVertexPosition(i, v); w.add(v); }); w.multiplyScalar(1/L.length); M.malla.localToWorld(w);
+        var dd=w.distanceTo(cam.position); if(dd<dm){ dm=dd; mejor=w.clone(); }
+      });
+      haciaCam.copy(cam.position).sub(cen); haciaCam.y=0; haciaCam.normalize();
+      var frente=G.cara ? G.cara*haciaCam.z : 1;
+      p.copy(mejor).project(cam);
+      var x=(p.x+1)/2*W, y=(1-p.y)/2*H, lado=x<cx ? "i" : "d";
+      G.x=x; G.y=y; G.op=G.cara ? Math.max(0, Math.min(1, (frente+.15)/.35)) : 1;
+      filas[lado].push(G); G.lado=lado;
+    });
+    /* que no se pisen: de arriba abajo, con un hueco mínimo */
+    ["i","d"].forEach(function(k){
+      var F=filas[k].sort(function(a,b){ return a.y-b.y; }), ult=-1e9;
+      F.forEach(function(G){ G.ty=Math.max(G.y, ult+30); ult=G.ty; });
+    });
+    /* la línea: del borde, recta, hasta cerca del músculo y, si la etiqueta se ha apartado, un quiebro corto hasta él */
+    var h="";
+    grupos.forEach(function(G){
+      var izq=G.lado==="i", bx=izq ? 12 : W-12, kx=G.x+(izq?-1:1)*Math.min(22, Math.abs(G.x-bx)/3), o=G.op.toFixed(2);
+      h+='<g opacity="'+o+'"><path d="M'+bx+' '+G.ty+' H'+kx.toFixed(1)+' L'+G.x.toFixed(1)+' '+G.y.toFixed(1)+'"/>'+
+        '<circle class="fin" cx="'+bx+'" cy="'+G.ty+'" r="3.5"/><circle class="mus" cx="'+G.x.toFixed(1)+'" cy="'+G.y.toFixed(1)+'" r="3"/></g>';
+      G.el.className="gi-eti "+(izq?"izq":"der"); G.el.style.opacity=o; G.el.style.top=G.ty+"px";
+      G.el.style.left=izq ? "12px" : ""; G.el.style.right=izq ? "" : "12px";
+    });
+    svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.innerHTML=h;
+  };
+  fn.atras=vistaAtras<0;
+  return fn;
+}
 /* la persona de pie, quieta y sin fondo, girando despacio; se puede girar con el dedo */
-function maniquiMusculos(lienzo, zonas){
+function maniquiMusculos(lienzo, zonas, claves, capa){
   var vivo={ para:function(){ vivo.fin=true; } };
   maniquiCarga().then(function(T){
     if(vivo.fin) return;
@@ -310,7 +384,7 @@ function maniquiMusculos(lienzo, zonas){
       /* la camiseta, gris: así lo marcado (del color de acento) se ve también en el pecho */
       var oscuro=document.documentElement.classList.contains("dark");
       if(M.ropa){ M.ropa.camiseta.value.set(oscuro ? "#4a463f" : "#d9d1c3"); M.ropa.logoC.value.set(oscuro ? "#8a8378" : "#f5f0e6"); }
-      mqMusculos(T, M.malla.material, zonas, acento);
+      mqMusculos(T, M.malla.material, zonas, oscuro ? "#f3efe6" : acento);
       var esc=new T.Scene();
       esc.add(new T.HemisphereLight(0xffffff, 0xffffff, Math.PI));
       var sol=new T.DirectionalLight(0xffffff, .8); sol.position.set(1.54,2.25,2.2); esc.add(sol); esc.add(sol.target);
@@ -322,7 +396,8 @@ function maniquiMusculos(lienzo, zonas){
       var r=mqRenderer(T, lienzo);
       function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(3, window.devicePixelRatio||1)); r.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); }
       tam();
-      var az=20, tocando=null, vel=.012, antes=performance.now();
+      var et=capa && claves && claves.length ? muscEtiquetas(T, M, claves, capa) : null;
+      var az=et && et.atras ? 200 : 20, tocando=null, vel=.012, antes=performance.now();
       lienzo.addEventListener("pointerdown", function(e){ tocando={ x:e.clientX, az:az }; try{ lienzo.setPointerCapture(e.pointerId); }catch(er){} });
       lienzo.addEventListener("pointermove", function(e){ if(tocando) az=tocando.az+(e.clientX-tocando.x)*.6; });
       function suelta(){ tocando=null; }
@@ -335,6 +410,7 @@ function maniquiMusculos(lienzo, zonas){
         if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
         mqCamara(E, az, lienzo.clientHeight);
         r.render(esc, cam);
+        if(et) et(cam, lienzo.clientWidth, lienzo.clientHeight);
         requestAnimationFrame(cuadro);
       }
       requestAnimationFrame(cuadro);
@@ -400,8 +476,15 @@ var CRECER2_CSS=[
 '.gi-asa{ display:block; width:40px; height:5px; border-radius:99px; background:var(--gu-fill); margin:10px auto 0; flex:0 0 auto; }',
 '.gi-cuerpo{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 22px 10px; width:100%; max-width:520px; margin:0 auto; }',
 '.gi-cuerpo h2{ font-size:26px; font-weight:700; letter-spacing:-.03em; line-height:1.12; text-wrap:balance; }',
-'.gi-escena{ position:relative; height:min(40vh,340px); margin-top:14px; border-radius:20px; overflow:hidden; background:var(--bg); touch-action:pan-y; cursor:grab; }',
+'.gi-escena{ --gu-eti:var(--t1); position:relative; height:min(40vh,340px); margin-top:14px; border-radius:20px; overflow:hidden; background:var(--bg); touch-action:pan-y; cursor:grab; }',
 '.gi-3d{ position:absolute; inset:0; width:100%; height:100%; display:block; } .gi-escena.sin-3d{ display:none; }',
+'.gi-capa{ position:absolute; inset:0; pointer-events:none; }',
+/* las etiquetas: línea recta del músculo al borde, un punto al final y el nombre encima */
+'.gi-lineas{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }',
+'.gi-lineas path{ fill:none; stroke:var(--gu-eti); stroke-width:1.5; stroke-linejoin:round; }',
+'.gi-lineas .fin{ fill:var(--gu-eti); } .gi-lineas .mus{ fill:var(--gu-eti); stroke:var(--bg); stroke-width:2; }',
+'.gi-lineas g{ transition:opacity .25s ease; }',
+'.gi-eti{ position:absolute; transform:translateY(calc(-100% - 5px)); font-size:11.5px; font-weight:700; line-height:1.15; color:var(--gu-eti); white-space:nowrap; transition:opacity .25s ease; }',
 '.gi-gira{ position:absolute; left:0; right:0; bottom:8px; text-align:center; font-size:12px; color:var(--t3); pointer-events:none; }',
 '.gi-et{ font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gu-tx2); margin-top:24px; }',
 '.gi-musc{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }',

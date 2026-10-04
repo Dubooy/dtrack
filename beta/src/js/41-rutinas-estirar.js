@@ -10,7 +10,7 @@
    S.estiraPropias (las tuyas).
    ════════════════════════════════════════════════════════════════ */
 var RT_CORTO={ superior:"Cuello y hombros", tronco:"Espalda", cadera:"Cadera", muslos:"Piernas", gemelos:"Gemelos", completo:"Cuerpo entero" };
-var RT_PORTADA={ superior:"cuello", tronco:"gato", cadera:"paloma", muslos:"cuadriceps", gemelos:"gemelos", completo:"mundo" };
+var RT_PORTADA={ superior:"cuello", tronco:"camello", cadera:"paloma", muslos:"cuadriceps", gemelos:"gemelos", completo:"mundo" };
 var RT_PASO_S=15, RT_MIN_S=15, RT_MAX_S=180;
 var rtEditando=false, rtNueva=null;
 
@@ -57,10 +57,45 @@ function rtCambia(k, j, que){
 }
 
 /* ── la miniatura ── */
+/* la persona, muy cerca como en YouTube aunque se corte: se mide dónde está en la foto
+   y se agranda hasta casi llenar el alto (de pie se cortan las piernas, no la cabeza) */
+var RT_CAJAS={};
+function rtCaja(src){
+  if(RT_CAJAS[src]) return RT_CAJAS[src];
+  return (RT_CAJAS[src]=new Promise(function(ok){
+    var im=new Image(); im.onload=function(){
+      var n=120, c=document.createElement("canvas"); c.width=c.height=n; var x=c.getContext("2d"); x.drawImage(im,0,0,n,n);
+      var d=x.getImageData(0,0,n,n).data, x0=n, y0=n, x1=-1, y1=-1;
+      for(var j=0;j<n;j++) for(var i=0;i<n;i++) if(d[(j*n+i)*4+3]>170){ if(i<x0)x0=i; if(i>x1)x1=i; if(j<y0)y0=j; if(j>y1)y1=j; }
+      ok(x1<0 ? null : { x:x0/n, y:y0/n, w:(x1-x0+1)/n, h:(y1-y0+1)/n });
+    }; im.onerror=function(){ ok(null); }; im.src=src;
+  }));
+}
+function rtEncuadra(img){
+  var m=img.parentNode; if(!m || !img.src) return;
+  rtCaja(img.src).then(function(b){
+    if(!b) return;
+    var W=m.clientWidth||320, H=m.clientHeight||W*9/16;
+    var alta=b.h/b.w>1.5, D=alta ? Math.min(1.75*H/b.h, .5*W/b.w) : Math.min(1.2*H/b.h, .7*W/b.w), fh=b.h*D;
+    var left=.67*W-(b.x+b.w/2)*D, top=fh>H*.95 ? .05*H-b.y*D : H+.04*fh-fh-b.y*D;
+    img.style.width=(D/W*100)+"%"; img.style.left=(left/W*100)+"%"; img.style.top=(top/H*100)+"%";
+    img.classList.add("ok");
+  });
+}
+function rtFotos(el){
+  if(!el) return;
+  Array.prototype.forEach.call(el.querySelectorAll(".rt-mini img[data-mq]"), function(im){
+    if(im._rt) return; im._rt=1;
+    if(im.complete && im.src) rtEncuadra(im); else im.addEventListener("load", function(){ rtEncuadra(im); });
+  });
+  maniquiFotos(el);
+}
 function rtMiniatura(r, grande){
   var corto=r.propia ? r.t : (RT_CORTO[r.k] || r.t), pose=r.propia ? (r.pasos[0] && r.pasos[0].f) : (RT_PORTADA[r.k] || r.pasos[0].f);
-  return '<span class="rt-mini'+(grande?' rt-mini-g':'')+'"><i class="rt-rayas"></i>'+(pose?'<img data-mq="'+pose+'" alt="">':'')+
-    '<b class="rt-gran">'+esc(corto)+'</b><span class="rt-min num">'+rtMin(r)+' min</span></span>';
+  var largo=Math.max.apply(null, String(corto).split(/\s+/).map(function(w){ return w.length; }));
+  return '<span class="rt-mini'+(grande?' rt-mini-g':'')+'"><i class="rt-rayas"></i>'+
+    (pose?'<img data-mq="'+pose+'" data-mqt="360" alt="">':'')+
+    '<b class="rt-gran" style="--l:'+Math.max(7,largo)+'">'+esc(corto)+'</b><span class="rt-min num">'+rtMin(r)+' min</span></span>';
 }
 function rtPinta(){
   var v=document.getElementById("v-vital"); if(!v || typeof ESTIRA_RUTINAS==="undefined") return;
@@ -72,9 +107,9 @@ function rtPinta(){
       return '<button class="rt-card" data-act="x-rt-abre" data-k="'+esc(r.k)+'" aria-label="'+esc(r.t)+'">'+rtMiniatura(r)+
         '<span class="rt-pie"><b>'+esc(r.t)+'</b><small>'+r.pasos.length+' estiramientos · '+esc(r.sub)+'</small></span></button>';
     }).join("")+
-    '<button class="rt-card rt-nueva" data-act="x-rt-nueva"><span class="rt-mini"><i class="rt-rayas"></i><b class="rt-gran">Tu rutina</b><span class="rt-mas">+</span></span>'+
+    '<button class="rt-card rt-nueva" data-act="x-rt-nueva"><span class="rt-mini"><i class="rt-rayas"></i><b class="rt-gran" style="--l:7">Tu rutina</b><span class="rt-mas">+</span></span>'+
       '<span class="rt-pie"><b>Crea la tuya</b><small>Elige entre los 30 estiramientos</small></span></button></div>';
-  if(el._h!==h){ el._h=h; el.innerHTML=h; maniquiFotos(el); }
+  if(el._h!==h){ el._h=h; el.innerHTML=h; rtFotos(el); }
 }
 
 /* ── la rutina en orden ── */
@@ -101,7 +136,7 @@ function rtHoja(k){
     (ed && r.propia ? '<button class="rt-otro rt-borra" data-act="x-rt-borra" data-k="'+esc(k)+'">Borrar esta rutina</button>' : '')+
     '<div class="rt-empieza"><button class="btn btn-primary w-full !py-3.5" data-act="x-cr-empieza" data-k="'+esc(k)+'"'+(n?'':' disabled')+'>Empezar</button></div></div>';
   openSheet(h);
-  maniquiFotos(document.getElementById("sheet-body"));
+  rtFotos(document.getElementById("sheet-body"));
 }
 var RT_ICO_SUBE='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>';
 var RT_ICO_BAJA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
@@ -148,6 +183,13 @@ function rtAccion(a, el){
 (function(){
   var antes=crecerAccion;
   crecerAccion=function(a, el){ return rtAccion(a, el) || antes(a, el); };
+  /* en las hojas largas de estirar y de libros, la fila de arriba con la X se queda fija al bajar */
+  var abreHoja=openSheet;
+  openSheet=function(h){
+    abreHoja(h);
+    var sb=document.getElementById("sheet-body"), cab=sb && sb.firstElementChild; if(cab && cab.classList.contains("rt-hoja")) cab=cab.firstElementChild;
+    if(cab && sb.querySelector('.rt-hoja, [data-act^="x-lb"], [class^="lb-"], [class*=" lb-"]') && cab.querySelector('[data-act="close-sheet"]')) cab.classList.add("hoja-fija");
+  };
   crecerTrasRender=function(){ pintaCrecer(); if(view==="vital") rtPinta(); };
   /* la letra del logo para los títulos de las miniaturas */
   if(!document.querySelector('link[href*="family=Unbounded"]')){ var fu=document.createElement("link"); fu.rel="stylesheet";
@@ -162,18 +204,23 @@ function rtAccion(a, el){
 /* las rayas de la montaña del logo, en diagonal detrás de la persona */
 '.rt-rayas{ position:absolute; inset:0 0 0 42%; background:repeating-linear-gradient(118deg, color-mix(in srgb, var(--t1) 20%, transparent) 0 1.6px, transparent 1.6px 7px);',
 '  clip-path:polygon(28% 0, 100% 0, 100% 100%, 0 100%); }',
-'.rt-mini img{ position:absolute; right:-2%; top:4%; width:60%; height:96%; object-fit:contain; opacity:0; transition:opacity .45s ease; }',
-'.rt-mini img.ve{ opacity:1; }',
-'.rt-gran{ position:absolute; left:14px; top:14px; width:52%; font-family:Unbounded, "Plus Jakarta Sans", sans-serif; font-weight:800; text-transform:uppercase;',
-'  font-size:clamp(17px, 5.6vw, 22px); line-height:1.02; letter-spacing:-.035em; color:var(--t1); text-wrap:balance; overflow-wrap:anywhere; }',
-'.rt-min{ position:absolute; left:14px; bottom:12px; font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; background:var(--t1); color:var(--bg); }',
+'.rt-mini img{ position:absolute; aspect-ratio:1; width:auto; max-width:none; opacity:0; transition:opacity .45s ease; }',
+'.rt-mini img.ve.ok{ opacity:1; }',
+/* la letra se ajusta al ancho de la miniatura y a la palabra más larga, para que ninguna se parta */
+'.rt-mini{ container-type:inline-size; }',
+'.rt-gran{ position:absolute; z-index:1; left:5%; top:7%; width:56%; font-family:Unbounded, "Plus Jakarta Sans", sans-serif; font-weight:800; text-transform:uppercase;',
+'  font-size:min(8.4cqw, calc(52cqw / var(--l) * 1.12)); line-height:1.02; letter-spacing:-.035em; color:var(--t1); text-wrap:balance;',
+'  text-shadow:0 0 1px var(--bg), 0 0 6px color-mix(in srgb, var(--bg) 80%, transparent), 0 0 14px color-mix(in srgb, var(--bg) 60%, transparent); }',
+'.rt-min{ position:absolute; z-index:1; left:14px; bottom:12px; font-size:12px; font-weight:700; padding:4px 10px; border-radius:99px; background:var(--t1); color:var(--bg); }',
 '.rt-mas{ position:absolute; right:22%; top:50%; transform:translate(50%,-50%); width:54px; height:54px; border-radius:99px; display:grid; place-items:center;',
 '  font-size:30px; font-weight:300; line-height:1; background:var(--t1); color:var(--bg); }',
 '.rt-pie{ display:block; padding:10px 4px 0; }',
 '.rt-pie b{ display:block; font-size:15px; font-weight:700; letter-spacing:-.015em; line-height:1.25; color:var(--t1); }',
 '.rt-pie small{ display:block; font-size:12.5px; color:var(--t3); margin-top:2px; }',
 /* la hoja de la rutina */
-'.rt-mini-g{ border-radius:20px; } .rt-mini-g .rt-gran{ font-size:clamp(20px, 7vw, 28px); left:18px; top:18px; } .rt-mini-g .rt-min{ left:18px; bottom:16px; }',
+'.hoja-fija{ position:sticky; top:-24px; z-index:8; margin:-24px -24px 12px !important; padding:24px 24px 10px;',
+'  background:var(--bg); box-shadow:0 -40px 0 var(--bg), 0 1px 0 var(--hairline-2); }',
+'.rt-mini-g{ border-radius:20px; } .rt-mini-g .rt-gran{ left:5.5%; top:8%; } .rt-mini-g .rt-min{ left:18px; bottom:16px; }',
 '.rt-cab{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin:16px 0 6px; }',
 '.rt-cab h3, .rt-h3{ font-family:Unbounded, "Plus Jakarta Sans", sans-serif; font-size:19px; font-weight:800; letter-spacing:-.035em; line-height:1.15; }',
 '.rt-cab p{ font-size:13px; color:var(--t3); margin-top:4px; }',
