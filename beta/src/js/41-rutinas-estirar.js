@@ -77,7 +77,7 @@ function rtEncuadra(img){
     if(!b) return;
     var W=m.clientWidth||320, H=m.clientHeight||W*9/16;
     var alta=b.h/b.w>1.5, D=alta ? Math.min(1.75*H/b.h, .5*W/b.w) : Math.min(1.2*H/b.h, .7*W/b.w), fh=b.h*D;
-    var left=(img.dataset.mq==="cuadriceps" ? .67 : .74)*W-(b.x+b.w/2)*D, top=fh>H*.95 ? .05*H-b.y*D : H+.04*fh-fh-b.y*D;
+    var left=(img.dataset.mq==="cuadriceps" ? .67 : .82)*W-(b.x+b.w/2)*D, top=fh>H*.95 ? .05*H-b.y*D : H+.04*fh-fh-b.y*D;
     img.style.width=(D/W*100)+"%"; img.style.left=(left/W*100)+"%"; img.style.top=(top/H*100)+"%";
     img.classList.add("ok");
   });
