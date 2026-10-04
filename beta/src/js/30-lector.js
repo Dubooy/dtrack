@@ -11,7 +11,8 @@
      S.lectura.libros[id]  += { cfi, max, total }
    epub.js (BSD-2) y JSZip (MIT) van en vendor/ y se cargan al abrir el lector. */
 var LB_TEMA_TUYO={ k:"tuyo", t:"Tu libro", c:"#5b5bd6", pal:[["#2b2a33","#f7f3ea","#9b8cff"],["#f2ede4","#1c1c1e","#5b5bd6"],["#1e2a3a","#f1ede4","#7fc8a9"],["#fde7d8","#3a2330","#e2725b"]] };
-var LC={ book:null, rend:null, id:null, total:0, pag:0, tam:+(localStorage.getItem("peak-lector-tam")||100), fondo:localStorage.getItem("peak-lector-fondo")||"", cargando:false };
+var LC={ book:null, rend:null, id:null, total:0, pag:0, tam:+(localStorage.getItem("peak-lector-tam")||100), fondo:localStorage.getItem("peak-lector-fondo")||"", cargando:false,
+  modo:localStorage.getItem("peak-lector-modo")||"paginas", flechas:localStorage.getItem("peak-lector-flechas")!=="no" };
 
 /* ── guardar archivos en el dispositivo ── */
 function lcDB(){
@@ -109,7 +110,9 @@ function lcAbre(id){
       '<button class="lc-bt" data-act="x-lb-lindice" aria-label="Índice"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></svg></button>'+
       '<button class="lc-bt lc-aa" data-act="x-lb-lajustes" aria-label="Letra y fondo">Aa</button></div>'+
     '<div class="lc-panel" id="lc-panel" hidden></div>'+
-    '<div class="lc-zona"><div id="lc-libro"></div>'+
+    '<div class="lc-zona'+(LC.modo==="bajar"?" bajar":"")+(LC.flechas?" flechas":"")+'"><div id="lc-libro"></div>'+
+      '<button class="lc-fl izq" data-act="x-lb-lprev" aria-label="Página anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>'+
+      '<button class="lc-fl der" data-act="x-lb-lnext" aria-label="Página siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>'+
       '<button class="lc-lado izq" data-act="x-lb-lprev" aria-label="Página anterior"></button><button class="lc-lado der" data-act="x-lb-lnext" aria-label="Página siguiente"></button>'+
       '<div class="lc-carga" id="lc-carga"><span class="lc-spin"></span><p>Abriendo el libro…</p></div></div>'+
     '<div class="lc-abajo"><div class="lc-barra"><i id="lc-barra" style="width:0"></i></div><p id="lc-pag" class="num">&nbsp;</p></div>';
@@ -128,7 +131,10 @@ function lcAbre(id){
         .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,"").replace(/(href|src)\s*=\s*(["'])\s*javascript:[^"']*\2/gi,'$1="#"');
     });
     var el=document.getElementById("lc-libro");
-    LC.rend=LC.book.renderTo(el, { width:"100%", height:"100%", flow:"paginated", spread:"none", allowScriptedContent:true });
+    /* dos formas de leer: pasando páginas o bajando con el dedo, todo seguido */
+    LC.rend=LC.book.renderTo(el, LC.modo==="bajar"
+      ? { width:"100%", height:"100%", flow:"scrolled", manager:"continuous", allowScriptedContent:true }
+      : { width:"100%", height:"100%", flow:"paginated", spread:"none", allowScriptedContent:true });
     lcTema();
     LC.rend.hooks.content.register(lcGestos);
     LC.rend.on("relocated", lcMovido);
@@ -191,7 +197,7 @@ function lcGestos(contents){
   d.addEventListener("touchstart", function(e){ var t=e.changedTouches[0]; x0=t.screenX; y0=t.screenY; t0=Date.now(); }, { passive:true });
   d.addEventListener("touchend", function(e){
     if(x0==null) return; var t=e.changedTouches[0], dx=t.screenX-x0, dy=t.screenY-y0; x0=null;
-    if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.3 && Date.now()-t0<800){ if(dx<0) lcPasa(1); else lcPasa(-1); }
+    if(LC.modo!=="bajar" && Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy)*1.3 && Date.now()-t0<800){ if(dx<0) lcPasa(1); else lcPasa(-1); }
   }, { passive:true });
   /* un toque en el centro enseña u oculta las barras; en los bordes pasa página */
   d.addEventListener("click", function(e){
@@ -199,7 +205,7 @@ function lcGestos(contents){
     var fr=d.defaultView && d.defaultView.frameElement, caja=document.getElementById("lc-libro");
     if(!fr || !caja) return;
     var rc=caja.getBoundingClientRect(), w=rc.width, x=fr.getBoundingClientRect().left+e.clientX-rc.left;
-    if(x<w*0.28) lcPasa(-1); else if(x>w*0.72) lcPasa(1);
+    if(LC.modo!=="bajar" && x<w*0.28) lcPasa(-1); else if(LC.modo!=="bajar" && x>w*0.72) lcPasa(1);
     else { var c=document.getElementById("lc-capa"); if(c) c.classList.toggle("limpio"); lcPanel(null); }
   });
 }
@@ -210,7 +216,13 @@ function lcTeclas(e){
   else if(e.key==="Escape") lcCierra();
 }
 function lcPasa(dir){
-  if(!LC.rend) return; if(dir>0) LC.rend.next(); else LC.rend.prev();
+  if(!LC.rend) return;
+  var pr=dir>0 ? LC.rend.next() : LC.rend.prev();
+  /* la página nueva entra deslizándose desde el lado hacia el que pasas */
+  if(LC.modo!=="bajar") Promise.resolve(pr).then(function(){
+    var el=document.getElementById("lc-libro"); if(!el) return;
+    el.classList.remove("pasa-d","pasa-i"); void el.offsetWidth; el.classList.add(dir>0?"pasa-d":"pasa-i");
+  });
   /* al pasar página las barras se apartan; un toque en el centro las vuelve a traer */
   var c=document.getElementById("lc-capa"); if(c && !document.getElementById("lc-panel").dataset.t) c.classList.add("limpio");
 }
@@ -270,7 +282,11 @@ function lcPanel(tipo){
     var col=lcColores();
     p.innerHTML='<p class="lc-p-t">Tamaño de letra</p><div class="lc-fila"><button data-act="x-lb-ltam" data-n="-10" aria-label="Letra más pequeña">A−</button><span class="num">'+LC.tam+' %</span><button data-act="x-lb-ltam" data-n="10" aria-label="Letra más grande">A+</button></div>'+
       '<p class="lc-p-t">Fondo</p><div class="lc-fila lc-fondos">'+[["papel","Papel"],["blanco","Blanco"],["noche","Noche"]].map(function(f){
-        return '<button data-act="x-lb-lfondo" data-f="'+f[0]+'" class="fo-'+f[0]+(col.f===f[0]?" on":"")+'">'+f[1]+'</button>'; }).join("")+'</div>';
+        return '<button data-act="x-lb-lfondo" data-f="'+f[0]+'" class="fo-'+f[0]+(col.f===f[0]?" on":"")+'">'+f[1]+'</button>'; }).join("")+'</div>'+
+      '<p class="lc-p-t">Cómo leer</p><div class="lc-fila lc-fondos">'+[["paginas","Pasar páginas"],["bajar","Bajando"]].map(function(m){
+        return '<button data-act="x-lb-lmodo" data-m="'+m[0]+'" class="'+(LC.modo===m[0]?"on":"")+'">'+m[1]+'</button>'; }).join("")+'</div>'+
+      (LC.modo==="bajar" ? '' : '<p class="lc-p-t">Flechas</p><div class="lc-fila lc-fondos">'+[[1,"Con flechas"],[0,"Sin flechas"]].map(function(m){
+        return '<button data-act="x-lb-lflechas" data-v="'+m[0]+'" class="'+((LC.flechas?1:0)===m[0]?"on":"")+'">'+m[1]+'</button>'; }).join("")+'</div>');
   } else {
     var items=[]; (function aplana(l, n){ (l||[]).forEach(function(it){ items.push({ h:it.href, t:(it.label||"").trim(), n:n }); aplana(it.subitems, n+1); }); })(LC.toc, 0);
     p.innerHTML='<p class="lc-p-t">Índice</p><div class="lc-indice">'+(items.length?items.map(function(it){
@@ -304,6 +320,10 @@ lecturaAccion=function(a, el){
   if(a==="x-lb-lajustes"){ lcPanel("ajustes"); return true; }
   if(a==="x-lb-lindice"){ lcPanel("indice"); return true; }
   if(a==="x-lb-ltam"){ LC.tam=Math.max(70, Math.min(200, LC.tam+(+el.dataset.n))); try{ localStorage.setItem("peak-lector-tam", LC.tam); }catch(e){} lcTema(); lcPanel(null); lcPanel("ajustes"); return true; }
+  if(a==="x-lb-lmodo"){ if(LC.modo===el.dataset.m) return true; LC.modo=el.dataset.m; try{ localStorage.setItem("peak-lector-modo", LC.modo); }catch(e){}
+    var lid=LC.id; lcCierra(); setTimeout(function(){ lcAbre(lid); setTimeout(function(){ lcPanel("ajustes"); }, 400); }, 260); return true; }
+  if(a==="x-lb-lflechas"){ LC.flechas=el.dataset.v==="1"; try{ localStorage.setItem("peak-lector-flechas", LC.flechas?"si":"no"); }catch(e){}
+    var z=document.querySelector("#lc-capa .lc-zona"); if(z) z.classList.toggle("flechas", LC.flechas); setTimeout(function(){ try{ if(LC.rend) LC.rend.resize(); }catch(e){} }, 60); lcPanel(null); lcPanel("ajustes"); return true; }
   if(a==="x-lb-lfondo"){ LC.fondo=el.dataset.f; try{ localStorage.setItem("peak-lector-fondo", LC.fondo); }catch(e){} lcTema(); lcPanel(null); lcPanel("ajustes"); return true; }
   if(a==="x-lb-lir"){ if(LC.rend) LC.rend.display(el.dataset.h); lcPanel(null); return true; }
   if(a==="x-lb-lfin"){ lcCierra(); lbTermina(id); render(); var n=lbLeidos().length; avisoNube("¡Libro terminado! Ya "+(n===1?"llevas uno":"van "+n)+".");
@@ -336,6 +356,16 @@ var LECTOR_CSS=[
 '.lc-barra i{ display:block; height:100%; background:currentColor; opacity:.55; transition:width .3s; }',
 '#lc-pag{ text-align:center; font-size:11.5px; opacity:.6; margin-top:7px; }',
 '#lc-capa.limpio .lc-arriba, #lc-capa.limpio .lc-abajo{ opacity:0; pointer-events:none; }',
+'.lc-fl{ display:none; position:absolute; bottom:10px; z-index:3; width:44px; height:44px; border-radius:99px; place-items:center; color:inherit;',
+'  background:color-mix(in srgb, var(--lc-bg) 80%, var(--lc-tx) 8%); box-shadow:0 0 0 1px color-mix(in srgb, currentColor 12%, transparent), 0 6px 16px -8px rgba(0,0,0,.35); opacity:.85; }',
+'.lc-fl svg{ width:20px; height:20px; } .lc-fl:active{ transform:scale(.92); } .lc-fl.izq{ left:14px; } .lc-fl.der{ right:14px; }',
+'.lc-zona.flechas:not(.bajar) .lc-fl{ display:grid; }',
+'.lc-zona.bajar .lc-lado{ display:none; } .lc-zona.bajar #lc-libro{ inset:0 22px; }',
+'.lc-zona.flechas:not(.bajar) #lc-libro{ bottom:58px; }',
+'#lc-libro.pasa-d{ animation:lcPasaD .34s cubic-bezier(.2,.8,.2,1); } #lc-libro.pasa-i{ animation:lcPasaI .34s cubic-bezier(.2,.8,.2,1); }',
+'@keyframes lcPasaD{ from{ transform:translateX(34px); opacity:.15; } to{ transform:none; opacity:1; } }',
+'@keyframes lcPasaI{ from{ transform:translateX(-34px); opacity:.15; } to{ transform:none; opacity:1; } }',
+'@media (prefers-reduced-motion:reduce){ #lc-libro.pasa-d, #lc-libro.pasa-i{ animation:none; } }',
 '.lc-panel{ position:absolute; top:calc(env(safe-area-inset-top) + 56px); right:10px; left:10px; max-width:360px; margin-left:auto; z-index:3; border-radius:18px; padding:14px 16px 16px;',
 '  background:var(--lc-bg); color:var(--lc-tx); box-shadow:0 1px 0 color-mix(in srgb, currentColor 10%, transparent) inset, 0 18px 50px -12px rgba(0,0,0,.45); border:1px solid color-mix(in srgb, currentColor 14%, transparent); }',
 '.lc-p-t{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; opacity:.55; margin:4px 0 8px; }',

@@ -494,7 +494,7 @@ function lbAhoraPanel(){
   return '<div class="lb-ahora"><p class="lb-ahora-t">¿Qué leer ahora?</p>'+
     '<div class="lb-chips lb-ahora-c">'+LB_AHORA.map(function(x){ return '<button data-act="x-lb-ahora" data-k="'+x[0]+'" class="'+(x[0]===lbAhoraK?"on":"")+'" style="--c:var(--t1)">'+x[1]+'</button>'; }).join("")+'</div>'+
     '<div class="lb-ahora-f">'+bs.map(function(b){
-      return '<button data-act="'+(b.d?"x-lb-lee":"x-lb-libro")+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+(b.d?"Léelo ya, gratis":esc(lbTema(b.k).t))+'</small></button>'; }).join("")+'</div></div>';
+      return '<button data-act="'+(b.d?"x-lb-lee":"x-lb-libro")+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+(b.d?"Léelo ya, gratis":esc(lbTema(b.k).t))+'</small></button>'; }).join("")+'</div><button class="lb-ahora-enc" data-act="x-lb-enc"><span>✨</span><span><b>'+(lbSt().enc&&lbSt().enc.r?"Repetir la encuesta":"¿Ninguno? Haz la encuesta")+'</b><small>Cinco preguntas y te digo tu libro perfecto.</small></span>'+ico("flecha")+'</button></div>';
 }
 /* la X de cerrar va siempre arriba a la derecha, también al bajar por la hoja */
 function lbX(){ return '<div class="lb-x">'+closeBtn()+'</div>'; }

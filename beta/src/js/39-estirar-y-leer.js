@@ -75,6 +75,9 @@
 '.lb-ahora-f > button > small{ display:block; font-size:11px; color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
 '.lb-x{ position:sticky; top:0; height:0; z-index:6; display:flex; justify-content:flex-end; pointer-events:none; }',
 '.lb-x .icon-btn{ pointer-events:auto; box-shadow:0 4px 14px -6px rgba(0,0,0,.35); background:var(--bg); }',
+'.lb-ahora-enc{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; margin-top:14px; padding:11px 12px; border-radius:14px; background:var(--bg); }',
+'.lb-ahora-enc > span:first-child{ font-size:18px; } .lb-ahora-enc > span:nth-child(2){ flex:1; min-width:0; } .lb-ahora-enc b{ display:block; font-size:13.5px; font-weight:750; } .lb-ahora-enc small{ display:block; font-size:11.5px; color:var(--t3); margin-top:1px; }',
+'.lb-ahora-enc .ic{ width:15px; height:15px; color:var(--t3); }',
 /* mini barra de progreso y «Leído» bajo la portada */
 '.tq-barra.tq-mini{ height:3px; margin-top:8px; }',
 '.tq-hecho{ display:inline-block; margin-top:7px; font-size:10.5px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }',
