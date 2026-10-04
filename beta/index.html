@@ -20334,7 +20334,8 @@ function mqNormalesBorde(T, geo){
 /* colores de la paleta crema y tinta: el pantalón, un gris cálido que se separa de la camiseta en los dos modos */
 /* el estilo: dibujo plano (2D) en vez de 3D realista. Colores lisos, la piel de un solo tono, contorno fino de tinta
    y la sombra rayada en diagonal, como la cara en sombra de la montaña del logo (elegido por Carlos el 4/10/2026) */
-var MQ_ESTILO={ plano:true, piel:"#eebf97", rayaPx:7, borde:2 };
+/* rayaPx: cada cuántos píxeles CSS hay una raya; rayaAncho: qué parte de ese hueco es raya; sombra/raya: cuánto oscurecen (1 = nada) */
+var MQ_ESTILO={ plano:true, piel:"#eebf97", rayaPx:3, rayaAncho:.5, sombra:.9, raya:.72, borde:2 };
 var MQ_ROPA={ pantalon:"#57524b", pantalonOsc:"#3a3631", zapas:"#f5f0e6", suela:"#1c1b19", ribete:"#141311", conRibete:false };
 /* el logo: la montaña del icono de la app (PEAK_MK_D, caja de 900 × 900) dibujada una vez en una
    textura; el shader la lee como máscara (1 = montaña, 0 = tela) */
@@ -20359,7 +20360,7 @@ function mqRopa(T, mat, color){
   var oscuro=document.documentElement.classList.contains("dark"), acento=color||"#4f46e5";
   /* un acento casi negro (la tinta) dejaba la camiseta como una mancha plana: se aclara lo justo para que se vean el volumen y los pliegues */
   var cam=new T.Color(acento), hsl={}; cam.getHSL(hsl, "srgb"); if(hsl.l<.25) cam.setHSL(hsl.h, hsl.s, .25, "srgb");
-  var u={ plano:{ value:MQ_ESTILO.plano?1:0 }, piel2d:{ value:new T.Color(MQ_ESTILO.piel) }, rayaPx:{ value:MQ_ESTILO.rayaPx*(window.devicePixelRatio||1) }, camiseta:{ value:cam }, logoC:{ value:new T.Color(mqColor("var(--on-accent, #ffffff)")) },
+  var u={ plano:{ value:MQ_ESTILO.plano?1:0 }, piel2d:{ value:new T.Color(MQ_ESTILO.piel) }, rayaPx:{ value:MQ_ESTILO.rayaPx*(window.devicePixelRatio||1) }, rayaAncho:{ value:MQ_ESTILO.rayaAncho }, sombraF:{ value:MQ_ESTILO.sombra }, rayaF:{ value:MQ_ESTILO.raya }, camiseta:{ value:cam }, logoC:{ value:new T.Color(mqColor("var(--on-accent, #ffffff)")) },
           pantalon:{ value:new T.Color(oscuro ? MQ_ROPA.pantalonOsc : MQ_ROPA.pantalon) }, logoP:{ value:new T.Color(MQ_ROPA.zapas) },
           zapas:{ value:new T.Color(MQ_ROPA.zapas) }, logoZ:{ value:new T.Color(MQ_ROPA.suela) }, logoTex:{ value:mqLogoTex(mat.map) },
           suela:{ value:new T.Color(MQ_ROPA.suela) }, ribete:{ value:new T.Color(MQ_ROPA.ribete) }, conRib:{ value:MQ_ROPA.conRibete?1:0 }, espejo:{ value:1 } };
@@ -20367,7 +20368,7 @@ function mqRopa(T, mat, color){
   mat.onBeforeCompile=function(sh){
     for(var k in u) sh.uniforms[k]=u[k];
     sh.vertexShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\n"+sh.vertexShader.replace("#include <begin_vertex>", "#include <begin_vertex>\n  vReposo = position; vReposoN = normal;");
-    sh.fragmentShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\nuniform vec3 camiseta, logoC, pantalon, logoP, zapas, logoZ, suela, ribete;\nuniform float conRib, espejo, plano, rayaPx;\nuniform vec3 piel2d;\n"+
+    sh.fragmentShader="varying vec3 vReposo;\nvarying vec3 vReposoN;\nuniform vec3 camiseta, logoC, pantalon, logoP, zapas, logoZ, suela, ribete;\nuniform float conRib, espejo, plano, rayaPx, rayaAncho, sombraF, rayaF;\nuniform vec3 piel2d;\n"+
       "float mqBorde(float d){ return smoothstep(-1.0, 1.0, d/max(fwidth(d), 1e-5)); }\n"+MQ_LOGO_GLSL+"\n"+
       sh.fragmentShader.replace("#include <map_fragment>", [
         "#include <map_fragment>",
@@ -20408,8 +20409,8 @@ function mqRopa(T, mat, color){
         "    vec3 b = diffuseColor.rgb; float lb = dot(b, vec3(.2126, .7152, .0722));",
         "    float lum = dot(outgoingLight, vec3(.2126, .7152, .0722)) / max(lb, .004);",
         "    float sb = 1.0 - smoothstep(.70, .82, lum);",
-        "    float st = step(.62, fract((gl_FragCoord.x - gl_FragCoord.y) / rayaPx));",
-        "    vec3 c = mix(b, b * .74, sb); c = mix(c, b * .5, sb * st);",
+        "    float st = step(1.0 - rayaAncho, fract((gl_FragCoord.x - gl_FragCoord.y) / rayaPx));",
+        "    vec3 c = mix(b, b * sombraF, sb); c = mix(c, b * rayaF, sb * st);",
         "    gl_FragColor.rgb = c;",
         "  }"
       ].join("\n"));
