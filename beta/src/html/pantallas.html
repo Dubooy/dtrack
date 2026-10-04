@@ -277,51 +277,38 @@
           </div>
 
           <div class="lg:col-span-5 flex flex-col gap-4 lg:gap-5 min-w-0">
-            <div class="glass rounded-[24px] pad">
+            <div class="pad sf-caja">
               <h2 class="display text-[17px] font-bold mb-1">Salud del día</h2>
-              <p class="text-[12.5px] t3 mb-6">Agua, descanso y pantallas</p>
-
-              <div class="mb-5">
-                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
-                    <span class="text-[13.5px] font-medium">Agua</span>
-                    <span class="text-[12.5px] t3" id="water-lab">un toque al día</span>
-                  </div>
-                <div class="flex items-center gap-3.5">
-                  <canvas class="medidor" id="mg-agua" width="64" height="64" aria-hidden="true"></canvas>
-                  <div class="flex-1 min-w-0 flex items-center gap-2">
-                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="water-val" data-act="x-agua" data-k="water" role="button" aria-label="Escribir el valor">0 / 8</div>
-                  </div>
+              <p class="text-[12.5px] t3 mb-4">Agua, sueño y pantalla</p>
+              <div class="sf-fila glass" data-k="water" data-act="x-valor" role="button" aria-label="Apuntar agua">
+                <span class="sf-hecho">¡Hecho!</span>
+                <div class="sf-ic" id="mg-agua" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-gota" d="M12 3c3.5 4.2 6 7.6 6 10.8A6 6 0 0 1 6 13.8C6 10.6 8.5 7.2 12 3z"/><path class="sf-brillo" d="M9.3 14.4a2.8 2.8 0 0 0 2.5 2.5"/></svg><i class="sf-onda"></i></div>
+                <div class="sf-mid">
+                  <div class="sf-top"><b>Agua</b><span class="sf-num num" id="water-val">—</span></div>
+                  <p class="sf-msg" id="water-lab">Empieza con un vaso</p>
+                  <div class="sf-barra"><u></u></div>
                 </div>
+                <button class="sf-mas" data-act="x-sf-vaso" data-k="water" aria-label="Añadir">+</button>
               </div>
-
-              <div class="mb-5">
-                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
-                    <span class="text-[13.5px] font-medium">Descanso</span>
-                    <span class="text-[12.5px] t3" id="sleep-lab">sin registrar</span>
-                  </div>
-                <div class="flex items-center gap-3.5">
-                  <canvas class="medidor" id="mg-sueno" width="64" height="64" aria-hidden="true"></canvas>
-                  <div class="flex-1 min-w-0 flex items-center gap-2">
-                    <button class="soft w-11 h-11 text-[17px]" data-act="sleep" data-d="-1" id="sleep-minus">−</button>
-                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="sleep-val" data-act="x-valor" data-k="sleep" role="button" aria-label="Escribir el valor">0,0 h</div>
-                    <button class="soft w-11 h-11 text-[17px]" data-act="sleep" data-d="1" id="sleep-plus">+</button>
-                  </div>
+              <div class="sf-fila glass" data-k="sleep" data-act="x-valor" role="button" aria-label="Apuntar sueño">
+                <span class="sf-hecho">¡Hecho!</span>
+                <div class="sf-ic" id="mg-sueno" aria-hidden="true"><svg viewBox="0 0 24 24"><path class="sf-luna" d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></svg><em class="sf-z">z</em><em class="sf-z sf-z2">z</em></div>
+                <div class="sf-mid">
+                  <div class="sf-top"><b>Sueño</b><span class="sf-num num" id="sleep-val">—</span></div>
+                  <p class="sf-msg" id="sleep-lab">¿Cuánto dormiste anoche?</p>
+                  <div class="sf-barra"><u></u></div>
                 </div>
+                <button class="sf-mas" data-act="x-valor" data-k="sleep" aria-label="Añadir">+</button>
               </div>
-
-              <div class="">
-                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
-                    <span class="text-[13.5px] font-medium">Pantalla</span>
-                    <span class="text-[12.5px] t3" id="screen-lab">sin registrar</span>
-                  </div>
-                <div class="flex items-center gap-3.5">
-                  <canvas class="medidor" id="mg-pantalla" width="64" height="64" aria-hidden="true"></canvas>
-                  <div class="flex-1 min-w-0 flex items-center gap-2">
-                    <button class="soft w-11 h-11 text-[17px]" data-act="screen" data-d="-1" id="screen-minus">−</button>
-                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="screen-val" data-act="x-valor" data-k="screen" role="button" aria-label="Escribir el valor">0,0 h</div>
-                    <button class="soft w-11 h-11 text-[17px]" data-act="screen" data-d="1" id="screen-plus">+</button>
-                  </div>
+              <div class="sf-fila glass" data-k="screen" data-act="x-valor" role="button" aria-label="Apuntar pantalla">
+                <span class="sf-hecho">¡Hecho!</span>
+                <div class="sf-ic" id="mg-pantalla" aria-hidden="true"><svg viewBox="0 0 24 24"><g class="sf-movil"><rect x="6.5" y="2.8" width="11" height="18.4" rx="2.6"/><path d="M10.5 18h3"/></g></svg></div>
+                <div class="sf-mid">
+                  <div class="sf-top"><b>Pantalla</b><span class="sf-num num" id="screen-val">—</span></div>
+                  <p class="sf-msg" id="screen-lab">Toca + para apuntarla</p>
+                  <div class="sf-barra"><u></u></div>
                 </div>
+                <button class="sf-mas" data-act="x-valor" data-k="screen" aria-label="Añadir">+</button>
               </div>
             </div>
             <div class="glass rounded-[24px] pad">
