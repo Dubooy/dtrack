@@ -205,14 +205,18 @@ function guiaInfo(){
   var mus=(p.m||"").split(/,\s*|\s+y\s+/).map(function(x){ return x.trim(); }).filter(Boolean);
   c.innerHTML='<div class="gi-fondo" data-act="x-gu-info-cierra"></div><div class="gi-hoja"><span class="gi-asa"></span>'+
     '<div class="gi-cuerpo"><h2>'+esc(p.t)+'</h2>'+
-      '<div class="gi-escena"><canvas class="gi-3d"></canvas><div class="gi-capa"></div><p class="gi-gira">Arrastra para girarlo</p></div>'+
+      '<div class="gi-escena">'+[["del","Delante"],["det","Detrás"]].map(function(x){
+        return '<div class="gi-vista gi-'+x[0]+'"><canvas class="gi-3d"></canvas><div class="gi-capa"></div><p class="gi-gira">'+x[1]+'</p></div>'; }).join("")+'</div>'+
       (mus.length?'<p class="gi-et">Zona principal</p><div class="gi-musc">'+mus.map(function(m){ return '<span><i></i>'+esc(m.charAt(0).toUpperCase()+m.slice(1))+'</span>'; }).join("")+'</div>':'')+
       '<p class="gi-et">Instrucciones</p><p class="gi-txt">'+esc(p.d)+'</p>'+
       '<a class="gi-video" href="'+estiraVideo(p.v)+'" target="_blank" rel="noopener noreferrer">'+ico("video")+'Ver en vídeo</a></div>'+
     '<div class="gi-pie"><button data-act="x-gu-info-cierra">Cerrar</button></div></div>';
   document.body.appendChild(c);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ c.classList.add("ve"); }); });
-  GUIA.infoVivo=maniquiMusculos(c.querySelector(".gi-3d"), muscZonas(p.m), muscClaves(p.m), c.querySelector(".gi-capa"));
+  var zs=muscZonas(p.m), ks=muscClaves(p.m), vd=c.querySelector(".gi-del"), vt=c.querySelector(".gi-det");
+  var a1=maniquiMusculos(vd.querySelector(".gi-3d"), zs, ks, vd.querySelector(".gi-capa"), 1);
+  var a2=maniquiMusculos(vt.querySelector(".gi-3d"), zs, ks, vt.querySelector(".gi-capa"), -1);
+  GUIA.infoVivo={ para:function(){ a1.para(); a2.para(); } };
 }
 function guiaInfoCierra(sinSeguir){
   var c=document.getElementById("gu-info"); if(!c) return;
@@ -276,7 +280,7 @@ function muscZonas(m){
 }
 /* el nombre corto de cada zona, para las etiquetas de la ficha */
 var MUSC_NOMBRE={ cuello:"Cuello", cuelloF:"Cuello", trapecio:"Trapecio", deltA:"Deltoides", deltP:"Deltoides", infra:"Infraespinoso",
-  triceps:"Tríceps", pectoral:"Pectoral", dorsal:"Dorsal", romboides:"Romboides", toracica:"Columna torácica", erectores:"Erectores",
+  triceps:"Tríceps", pectoral:"Pectoral", dorsal:"Dorsal", romboides:"Romboides", toracica:"Espalda alta", erectores:"Erectores",
   lumbares:"Lumbares", abdomen:"Abdomen", oblicuos:"Oblicuos", gluteo:"Glúteo", gluteoMed:"Glúteo medio", psoas:"Psoas",
   cuadriceps:"Cuádriceps", rectoFem:"Recto femoral", aductores:"Aductores", isquios:"Isquios", gemelos:"Gemelos", soleo:"Sóleo", tobillo:"Aquiles" };
 var MUSC_MAX=24;
@@ -285,7 +289,7 @@ function mqMusculos(T, mat, zonas, color){
   /* los vec4 van seguidos en un Float32Array: centro + cara, y radios */
   var c=new Float32Array(MUSC_MAX*4), rr=new Float32Array(MUSC_MAX*4).fill(1);
   for(var i=0;i<MUSC_MAX && i<zonas.length;i++){ var e=zonas[i]; c.set([e[0][0],e[0][1],e[0][2],e[2]], i*4); rr.set([e[1][0],e[1][1],e[1][2],0], i*4); }
-  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) }, mPx:{ value:.026 }, mAncho:{ value:.45 } };
+  var u={ mZ:{ value:c }, mR:{ value:rr }, mN:{ value:Math.min(MUSC_MAX, zonas.length) }, mCol:{ value:new T.Color(color) }, mPx:{ value:3.4*(window.devicePixelRatio||1) }, mAncho:{ value:.5 } };
   var antes=mat.onBeforeCompile;
   mat.onBeforeCompile=function(sh, r){
     if(antes) antes.call(this, sh, r);
@@ -296,22 +300,23 @@ function mqMusculos(T, mat, zonas, color){
         "  for(int i = 0; i < "+MUSC_MAX+"; i++){",
         "    if(i >= mN) break;",
         "    vec3 q = (vec3(abs(r.x), r.y, r.z) - mZ[i].xyz) / mR[i].xyz;",
-        "    float a = 1. - smoothstep(.94, 1., length(q));",
+        "    float a = 1. - smoothstep(.9, 1., length(q));",
         "    if(mZ[i].w > .5) a *= smoothstep(-.15, .2, n.z);",
         "    if(mZ[i].w < -.5) a *= smoothstep(-.15, .2, -n.z);",
         "    float lq = length(q), cara = 1.;",
         "    if(mZ[i].w > .5) cara = smoothstep(-.15, .2, n.z);",
         "    if(mZ[i].w < -.5) cara = smoothstep(-.15, .2, -n.z);",
         "    mq_m = max(mq_m, a);",
-        "    mq_o = max(mq_o, cara * smoothstep(.9, .935, lq) * (1. - smoothstep(.975, 1., lq)));",
         "  }",
         /* rayas pegadas al cuerpo (en sus coordenadas, no en la pantalla): se tuercen con la perspectiva al girar */
-        "  float mq_t = (r.y + r.x * .85) / mPx, mq_f = fract(mq_t), mq_e = fwidth(mq_t) * 1.2;",
-        "  float mq_s = smoothstep(1. - mAncho - mq_e, 1. - mAncho, mq_f) * (1. - smoothstep(1. - mq_e, 1., mq_f));",
+
         "#include <roughnessmap_fragment>"].join("\n"));
     /* al final de todo: rayas como las del logo, más gruesas y separadas que las de la sombra */
     sh.fragmentShader=sh.fragmentShader.replace(/\}\s*$/, [
-        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol, max(mq_s * mq_m, mq_o));",
+        /* relleno verde y, encima, rayas finas del mismo verde más oscuro, como la sombra de la persona */
+        "  float mq_s = step(1. - mAncho, fract((gl_FragCoord.x - gl_FragCoord.y) / mPx));",
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol, mq_m * .9);",
+        "  gl_FragColor.rgb = mix(gl_FragColor.rgb, mCol * .62, mq_s * mq_m * .7);",
         "}"].join("\n"));
   };
   mat.customProgramCacheKey=function(){ return "mq-ropa-musc"; };
@@ -320,12 +325,16 @@ function mqMusculos(T, mat, zonas, color){
 /* las etiquetas: de cada músculo sale una línea recta hacia un lado, acaba en un punto y lleva su nombre.
    Siguen al músculo al girar la persona; el de cada pareja que se ve es el más cercano, y los que
    quedan detrás se apagan. */
-function muscEtiquetas(T, M, claves, capa){
+function muscEtiquetas(T, M, claves, capa, vista){
   var g=M.malla.geometry, pos=g.attributes.position, nor=g.attributes.normal, n=pos.count, v=new T.Vector3();
   var grupos=[], vistos={};
   claves.forEach(function(k){
-    var nom=MUSC_NOMBRE[k]; if(!nom || vistos[nom] || !MUSC_ZONAS[k]) return; vistos[nom]=1;
-    var e=MUSC_ZONAS[k][0], c=e[0], rr=e[1], lados=[[],[]];
+    var nom=MUSC_NOMBRE[k]; if(!nom || vistos[nom] || !MUSC_ZONAS[k]) return;
+    var e=MUSC_ZONAS[k][0];
+    /* en cada vista, solo lo que se ve desde ahí (lo de los dos lados, en la de delante) */
+    if(vista && (vista>0 ? e[2]<0 : e[2]>=0)) return;
+    vistos[nom]=1;
+    var c=e[0], rr=e[1], lados=[[],[]];
     for(var i=0;i<n;i++){
       var x=pos.getX(i), y=pos.getY(i), z=pos.getZ(i);
       var qx=(Math.abs(x)-c[0])/rr[0], qy=(y-c[1])/rr[1], qz=(z-c[2])/rr[2];
@@ -336,7 +345,7 @@ function muscEtiquetas(T, M, claves, capa){
     lados=lados.map(function(L){ var paso=Math.max(1, Math.ceil(L.length/40)); return L.filter(function(_,j){ return j%paso===0; }); }).filter(function(L){ return L.length; });
     if(!lados.length) return;
     var d=document.createElement("b"); d.className="gi-eti"; d.textContent=nom; capa.appendChild(d);
-    grupos.push({ lados:lados, cara:e[2], el:d });
+    grupos.push({ lados:lados, cara:e[2], el:d, p:vista ? -.35*grupos.length-.15 : 0 });
   });
   var svg=document.createElementNS("http://www.w3.org/2000/svg","svg"); svg.setAttribute("class","gi-lineas"); capa.insertBefore(svg, capa.firstChild);
   var p=new T.Vector3(), w=new T.Vector3(), cen=new T.Vector3(), haciaCam=new T.Vector3();
@@ -359,17 +368,16 @@ function muscEtiquetas(T, M, claves, capa){
       haciaCam.copy(cam.position).sub(cen); haciaCam.y=0; haciaCam.normalize();
       var frente=G.cara ? G.cara*haciaCam.z : 1;
       p.copy(mejor).project(cam);
-      var x=(p.x+1)/2*W, y=(1-p.y)/2*H, lado=x<cx ? "i" : "d";
+      var x=(p.x+1)/2*W, y=(1-p.y)/2*H, lado=vista ? (vista>0 ? "i" : "d") : (x<cx ? "i" : "d");
       G.x=x; G.y=y;
       /* se ve o no (con un margen para que no parpadee en el límite) y la animación va hacia ahí */
-      if(G.cara){ if(frente>.12) G.ve=true; else if(frente<-.02) G.ve=false; } else G.ve=true;
-      G.p=G.p||0; G.p=G.ve ? Math.min(1, G.p+dt/420) : Math.max(0, G.p-dt/300);
+      if(vista) G.ve=true; else if(G.cara){ if(frente>.12) G.ve=true; else if(frente<-.02) G.ve=false; } else G.ve=true; G.p=G.ve ? Math.min(1, G.p+dt/420) : Math.max(0, G.p-dt/300);
       filas[lado].push(G); G.lado=lado;
     });
     /* que no se pisen: de arriba abajo, con un hueco mínimo */
     ["i","d"].forEach(function(k){
       var F=filas[k].sort(function(a,b){ return a.y-b.y; }), ult=-1e9;
-      F.forEach(function(G){ G.ty=Math.max(G.y, ult+30); ult=G.ty; });
+      F.forEach(function(G){ G.ty=Math.max(G.y, ult+(vista?40:30)); ult=G.ty; });
     });
     /* la línea: del borde, recta, hasta cerca del músculo y, si la etiqueta se ha apartado, un quiebro corto hasta él */
     var h="";
@@ -377,7 +385,7 @@ function muscEtiquetas(T, M, claves, capa){
       var izq=G.lado==="i", bx=izq ? 12 : W-12, kx=G.x+(izq?-1:1)*Math.min(22, Math.abs(G.x-bx)/3);
       /* al aparecer: primero el punto en el músculo, luego la línea crece hacia el borde y al final sale el nombre;
          al irse, lo mismo al revés */
-      var e=suave(G.p), pm=Math.min(1, e*4), pl=Math.max(0, Math.min(1, (e-.12)/.6)), pt=Math.max(0, (e-.62)/.38);
+      var e=suave(Math.max(0, G.p)), pm=Math.min(1, e*4), pl=Math.max(0, Math.min(1, (e-.12)/.6)), pt=Math.max(0, (e-.62)/.38);
       if(e>0) h+='<g><path pathLength="1" stroke-dasharray="1" stroke-dashoffset="'+(1-pl).toFixed(3)+'" d="M'+G.x.toFixed(1)+' '+G.y.toFixed(1)+' L'+kx.toFixed(1)+' '+G.ty+' H'+bx+'"/>'+
         (pt>0?'<circle class="fin" cx="'+bx+'" cy="'+G.ty+'" r="'+(3.5*pt).toFixed(2)+'"/>':'')+
         '<circle class="mus" cx="'+G.x.toFixed(1)+'" cy="'+G.y.toFixed(1)+'" r="'+(3*pm).toFixed(2)+'"/></g>';
@@ -391,7 +399,7 @@ function muscEtiquetas(T, M, claves, capa){
   return fn;
 }
 /* la persona de pie, quieta y sin fondo, girando despacio; se puede girar con el dedo */
-function maniquiMusculos(lienzo, zonas, claves, capa){
+function maniquiMusculos(lienzo, zonas, claves, capa, vista){
   var vivo={ para:function(){ vivo.fin=true; } };
   maniquiCarga().then(function(T){
     if(vivo.fin) return;
@@ -401,7 +409,7 @@ function maniquiMusculos(lienzo, zonas, claves, capa){
       /* la camiseta, gris: así lo marcado (del color de acento) se ve también en el pecho */
       var oscuro=document.documentElement.classList.contains("dark");
       if(M.ropa){ M.ropa.camiseta.value.set(oscuro ? "#4a463f" : "#d9d1c3"); M.ropa.logoC.value.set(oscuro ? "#8a8378" : "#f5f0e6"); }
-      mqMusculos(T, M.malla.material, zonas, oscuro ? "#f3efe6" : acento);
+      mqMusculos(T, M.malla.material, zonas, oscuro ? "#2fbf98" : "#0E8A6E");
       var esc=new T.Scene();
       esc.add(new T.HemisphereLight(0xffffff, 0xffffff, Math.PI));
       var sol=new T.DirectionalLight(0xffffff, .8); sol.position.set(1.54,2.25,2.2); esc.add(sol); esc.add(sol.target);
@@ -411,11 +419,13 @@ function maniquiMusculos(lienzo, zonas, claves, capa){
       var cam=new T.PerspectiveCamera(26, 1, .05, 30);
       var E={ esc:esc, cam:cam, M:M, cen:cen, dist:(tamv.y*.56+.04)/Math.sin(13*MQ_R), el:6 };
       var r=mqRenderer(T, lienzo);
-      function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(3, window.devicePixelRatio||1)); r.setSize(w,h,false); cam.aspect=w/h; cam.updateProjectionMatrix(); }
+      function tam(){ var w=lienzo.clientWidth||300, h=lienzo.clientHeight||300; r.setPixelRatio(Math.min(3, window.devicePixelRatio||1)); r.setSize(w,h,false); cam.aspect=w/h;
+        /* con vista fija, la persona se aparta hacia dentro para dejar sitio a las etiquetas */
+        if(vista) cam.setViewOffset(w, h, (vista>0 ? -.22 : .22)*w, 0, w, h); cam.updateProjectionMatrix(); }
       tam();
-      var et=capa && claves && claves.length ? muscEtiquetas(T, M, claves, capa) : null;
-      var az=et && et.atras ? 200 : 20, tocando=null, vel=.012, antes=performance.now();
-      lienzo.addEventListener("pointerdown", function(e){ tocando={ x:e.clientX, az:az }; try{ lienzo.setPointerCapture(e.pointerId); }catch(er){} });
+      var et=capa && claves && claves.length ? muscEtiquetas(T, M, claves, capa, vista) : null;
+      var az=vista ? (vista>0 ? 0 : 180) : et && et.atras ? 200 : 20, tocando=null, vel=.012, antes=performance.now();
+      if(!vista) lienzo.addEventListener("pointerdown", function(e){ tocando={ x:e.clientX, az:az }; try{ lienzo.setPointerCapture(e.pointerId); }catch(er){} });
       lienzo.addEventListener("pointermove", function(e){ if(tocando) az=tocando.az+(e.clientX-tocando.x)*.6; });
       function suelta(){ tocando=null; }
       lienzo.addEventListener("pointerup", suelta); lienzo.addEventListener("pointercancel", suelta);
@@ -423,7 +433,7 @@ function maniquiMusculos(lienzo, zonas, claves, capa){
       function cuadro(ahora){
         if(vivo.fin){ r.dispose(); try{ r.forceContextLoss(); }catch(e){} return; }
         var dt=Math.min(50, ahora-antes); antes=ahora;
-        if(!tocando && !quieto) az+=dt*vel;
+        if(!tocando && !quieto && !vista) az+=dt*vel;
         if(lienzo.clientWidth && Math.abs(lienzo.clientWidth-lienzo.width/r.getPixelRatio())>2) tam();
         mqCamara(E, az, lienzo.clientHeight);
         r.render(esc, cam);
@@ -493,15 +503,16 @@ var CRECER2_CSS=[
 '.gi-asa{ display:block; width:40px; height:5px; border-radius:99px; background:var(--gu-fill); margin:10px auto 0; flex:0 0 auto; }',
 '.gi-cuerpo{ flex:1 1 auto; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px 22px 10px; width:100%; max-width:520px; margin:0 auto; }',
 '.gi-cuerpo h2{ font-size:26px; font-weight:700; letter-spacing:-.03em; line-height:1.12; text-wrap:balance; }',
-'.gi-escena{ --gu-eti:var(--t1); position:relative; height:min(40vh,340px); margin-top:14px; border-radius:20px; overflow:hidden; background:var(--bg); touch-action:pan-y; cursor:grab; }',
+'.gi-escena{ --gu-eti:var(--t1); position:relative; height:min(40vh,340px); margin-top:14px; border-radius:20px; overflow:hidden; background:var(--bg); display:grid; grid-template-columns:1fr 1fr; }',
+'.gi-vista{ position:relative; overflow:hidden; } .gi-vista + .gi-vista{ box-shadow:inset 1px 0 0 var(--hairline-2); }',
 '.gi-3d{ position:absolute; inset:0; width:100%; height:100%; display:block; } .gi-escena.sin-3d{ display:none; }',
 '.gi-capa{ position:absolute; inset:0; pointer-events:none; }',
 /* las etiquetas: línea recta del músculo al borde, un punto al final y el nombre encima */
 '.gi-lineas{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }',
 '.gi-lineas path{ fill:none; stroke:var(--gu-eti); stroke-width:1.5; stroke-linejoin:round; }',
 '.gi-lineas .fin{ fill:var(--gu-eti); } .gi-lineas .mus{ fill:var(--gu-eti); stroke:var(--bg); stroke-width:2; }',
-'.gi-eti{ position:absolute; transform:translateY(calc(-100% - 5px)); font-size:11.5px; font-weight:700; line-height:1.15; color:var(--gu-eti); white-space:nowrap; }',
-'.gi-gira{ position:absolute; left:0; right:0; bottom:8px; text-align:center; font-size:12px; color:var(--t3); pointer-events:none; }',
+'.gi-eti{ position:absolute; transform:translateY(calc(-100% - 5px)); font-size:10.5px; font-weight:700; line-height:1.15; color:var(--gu-eti); max-width:52%; text-wrap:balance; }',
+'.gi-gira{ position:absolute; left:0; right:0; bottom:8px; text-align:center; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); pointer-events:none; }',
 '.gi-et{ font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--gu-tx2); margin-top:24px; }',
 '.gi-musc{ display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }',
 '.gi-musc span{ display:inline-flex; align-items:center; gap:8px; padding:9px 14px; border-radius:99px; background:var(--gu-fill); font-size:14.5px; font-weight:600; }',
