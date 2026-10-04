@@ -9,6 +9,9 @@
 ICO_B.libro=ICO_B.libro||ICO_B.estudiar;
 
 var LB_TEMAS=[
+  { k:"nov", t:"Novela", c:"#b5452f", pal:[["#f4ece0","#2a1f1a","#b5452f"],["#2d2a3e","#f5efe6","#e89f71"],["#b5452f","#fff6ec","#f2c14e"],["#e9e3d6","#1f2b3a","#3f6e8c"]] },
+  { k:"fan", t:"Fantasía y ciencia ficción", c:"#4b4fc4", pal:[["#141a33","#e9ecff","#8f9bff"],["#e7e4f7","#1d1a3a","#5b4fd6"],["#2e1f4f","#f6f0ff","#f2b84e"],["#0f2f2e","#e6f5f0","#55c2a2"]] },
+  { k:"int", t:"Misterio y suspense", c:"#2f3a44", pal:[["#16191c","#f0ece4","#c8362d"],["#e9e4da","#16191c","#8a1f1a"],["#2f3a44","#f3efe7","#e0b84f"],["#5a1a1a","#f7efe6","#f0d9a0"]] },
   { k:"eco", t:"Economía y dinero", c:"#1f8a5b", pal:[["#10382b","#f3ead3","#d9a441"],["#ece3cc","#173a2b","#b5452f"],["#1f6f55","#fff8e7","#f2c14e"],["#f6f1e6","#0f3d2e","#2f8f6a"]] },
   { k:"neg", t:"Negocio", c:"#d9822b", pal:[["#1c1c1e","#f5f5f0","#ff7a1a"],["#ff6b2c","#fff","#1c1c1e"],["#f2ede4","#1c1c1e","#ff6b2c"],["#23395b","#fdf6e9","#f5a623"]] },
   { k:"pol", t:"Política y sociedad", c:"#c0392b", pal:[["#b3261e","#fff5ec","#1a1a1a"],["#1a1a1a","#f4efe6","#d63a2f"],["#efe7da","#241c1a","#b3261e"],["#3b3f4a","#f7f2e8","#e0b84f"]] },
@@ -187,15 +190,88 @@ var LB=[
     i:["El origen del modernismo.","Textos cortos para leer a ratos.","Lenguaje para disfrutar despacio."] },
   { id:"tonicos-voluntad", k:"cla", d:1, t:"Reglas y consejos sobre investigación científica", a:"Santiago Ramón y Cajal", y:1897, n:237, e:["practico","ciencia"], l:2, o:["foco","inspirar"],
     p:"El Nobel español explica cómo se trabaja de verdad: constancia, curiosidad y voluntad. Vale para cualquier proyecto.",
-    i:["El talento importa menos que la constancia.","Los obstáculos se vencen con método.","Consejos de hace un siglo que siguen siendo oro."] }
+    i:["El talento importa menos que la constancia.","Los obstáculos se vencen con método.","Consejos de hace un siglo que siguen siendo oro."] },
+
+  /* ── novelas: para engancharse con una historia ── */
+  { id:"cien-anos", k:"nov", t:"Cien años de soledad", a:"Gabriel García Márquez", y:1967, n:496, e:["novela"], l:2, o:["inspirar","gente"],
+    p:"Siete generaciones de los Buendía en Macondo, un pueblo donde lo increíble pasa como si nada.",
+    i:["Entiendes por qué tanta gente la llama la mejor novela en español.","Una familia que repite sus errores generación tras generación.","Frases que vas a querer subrayar."] },
+  { id:"sombra-viento", k:"nov", t:"La sombra del viento", a:"Carlos Ruiz Zafón", y:2001, n:576, e:["novela"], l:1, o:["inspirar"],
+    p:"Barcelona, 1945: un chaval encuentra un libro olvidado y descubre que alguien está quemando todos los ejemplares.",
+    i:["Misterio, amor y una Barcelona oscura que engancha.","Se lee con prisa por saber qué pasa.","Un homenaje a los libros y a quien los lee."] },
+  { id:"principito", k:"nov", t:"El principito", a:"Antoine de Saint-Exupéry", y:1943, n:96, e:["novela","ideas"], l:1, o:["calma","gente"],
+    p:"Un aviador perdido en el desierto y un niño que viene de otro planeta. Se lee en una tarde y se queda contigo años.",
+    i:["Lo esencial es invisible a los ojos.","Cómo se ve el mundo de los mayores desde fuera.","Corto, pero dice algo distinto a cada edad."] },
+  { id:"alquimista", k:"nov", t:"El alquimista", a:"Paulo Coelho", y:1988, n:192, e:["novela","ideas"], l:1, o:["inspirar"],
+    p:"Un pastor andaluz cruza el desierto detrás de un sueño. Una fábula corta sobre perseguir lo tuyo.",
+    i:["Cuando quieres algo, hay que ponerse en camino.","El miedo a fallar pesa más que fallar.","Se lee de un tirón."] },
+  { id:"guardian-centeno", k:"nov", t:"El guardián entre el centeno", a:"J. D. Salinger", y:1951, n:256, e:["novela"], l:1, o:["gente"],
+    p:"Holden, 16 años y expulsado del instituto, pasa tres días dando vueltas por Nueva York y te lo cuenta todo a su manera.",
+    i:["La voz adolescente más imitada de la literatura.","Sentirse fuera de lugar, contado sin filtros.","Corto y muy directo."] },
+  { id:"matar-ruisenor", k:"nov", t:"Matar a un ruiseñor", a:"Harper Lee", y:1960, n:384, e:["novela"], l:1, o:["gente","entender"],
+    p:"En un pueblo de Alabama, una niña ve a su padre defender a un hombre negro acusado de algo que no ha hecho.",
+    i:["Ponerse en la piel del otro antes de juzgar.","El valor de hacer lo correcto aunque pierdas.","Una de esas historias que no se olvidan."] },
+  { id:"nada-laforet", k:"nov", t:"Nada", a:"Carmen Laforet", y:1945, n:288, e:["novela"], l:2, o:["gente"],
+    p:"Andrea llega a Barcelona para estudiar y acaba en un piso lleno de gente rota. Ganó el primer Premio Nadal.",
+    i:["La posguerra contada desde dentro de una casa.","Una chica de 18 años buscando su sitio.","Escrita por una autora de 23 años."] },
+  { id:"curioso-incidente", k:"nov", t:"El curioso incidente del perro a medianoche", a:"Mark Haddon", y:2003, n:272, e:["novela"], l:1, o:["gente"],
+    p:"Christopher, de 15 años, decide averiguar quién ha matado al perro de la vecina. Lo cuenta él, con su forma única de ver el mundo.",
+    i:["Ver el mundo con los ojos de alguien muy distinto a ti.","Un misterio pequeño que destapa uno grande.","Divertido y emocionante a la vez."] },
+
+  /* ── fantasía y ciencia ficción ── */
+  { id:"hobbit", k:"fan", t:"El hobbit", a:"J. R. R. Tolkien", y:1937, n:320, e:["novela"], l:1, o:["inspirar"],
+    p:"Bilbo Bolsón solo quería su té y su sillón, y acaba en una aventura con trece enanos y un dragón.",
+    i:["La puerta de entrada a la Tierra Media.","Ser valiente sin parecerlo.","Aventura pura, de las de antes."] },
+  { id:"harry-potter-1", k:"fan", t:"Harry Potter y la piedra filosofal", a:"J. K. Rowling", y:1997, n:256, e:["novela"], l:1, o:["inspirar"],
+    p:"Un niño que vive en un armario bajo la escalera descubre, al cumplir once años, que es mago.",
+    i:["Se lee solo, tengas la edad que tengas.","Amistad, valor y un colegio que todos quisimos.","Es el primero de siete: cuidado, engancha."] },
+  { id:"nombre-viento", k:"fan", t:"El nombre del viento", a:"Patrick Rothfuss", y:2007, n:880, e:["novela"], l:2, o:["inspirar"],
+    p:"Kvothe, hoy un posadero que se esconde, cuenta en tres días cómo llegó a ser una leyenda.",
+    i:["Magia que funciona con reglas, casi como una ciencia.","Una vida contada desde la infancia.","Largo, pero se pasa volando."] },
+  { id:"dune", k:"fan", t:"Dune", a:"Frank Herbert", y:1965, n:784, e:["novela","ideas"], l:3, o:["entender"],
+    p:"Un planeta desierto, la sustancia más valiosa del universo y un chaval que hereda una guerra.",
+    i:["Política, religión y ecología en un solo mundo.","Por qué el poder cambia a quien lo tiene.","La base de media ciencia ficción moderna."] },
+  { id:"fahrenheit-451", k:"fan", t:"Fahrenheit 451", a:"Ray Bradbury", y:1953, n:192, e:["novela","ideas"], l:1, o:["entender"],
+    p:"En el futuro los bomberos no apagan fuegos: queman libros. Montag es uno de ellos, hasta que empieza a leer.",
+    i:["Lo que pasa cuando nadie quiere pensar.","Pantallas por todas partes, escrito en 1953.","Corto y muy fácil de leer."] },
+  { id:"hail-mary", k:"fan", t:"Proyecto Hail Mary", a:"Andy Weir", y:2021, n:496, e:["novela","ciencia"], l:1, o:["inspirar"],
+    p:"Un profesor de ciencias despierta solo en una nave, sin memoria, a años luz de casa. Y tiene que salvar la Tierra.",
+    i:["Resolver problemas con ciencia de verdad.","Humor en la peor situación posible.","Del autor de El marciano."] },
+  { id:"juegos-hambre", k:"fan", t:"Los juegos del hambre", a:"Suzanne Collins", y:2008, n:400, e:["novela"], l:1, o:["entender"],
+    p:"Katniss se presenta voluntaria a un concurso televisado del que solo sale uno con vida.",
+    i:["Un reality show llevado al extremo.","Sobrevivir sin dejar de ser tú.","Capítulos que acaban siempre en lo mejor."] },
+  { id:"ready-player-one", k:"fan", t:"Ready Player One", a:"Ernest Cline", y:2011, n:480, e:["novela"], l:1, o:["inspirar"],
+    p:"Año 2045: todo el mundo vive conectado a OASIS, y su creador ha escondido dentro una fortuna para quien resuelva su juego.",
+    i:["Videojuegos, cine y música de los 80 por todas partes.","Una búsqueda del tesoro a escala mundial.","Para leer con el mismo ritmo que una partida."] },
+
+  /* ── misterio y suspense ── */
+  { id:"orient-express", k:"int", t:"Asesinato en el Orient Express", a:"Agatha Christie", y:1934, n:256, e:["novela"], l:1, o:["decidir"],
+    p:"Un tren atrapado por la nieve, un pasajero apuñalado y doce sospechosos. Hércules Poirot tiene hasta que despejen la vía.",
+    i:["Pensar como un detective.","Uno de los finales más famosos de la novela negra.","Corto y perfecto para empezar."] },
+  { id:"no-quedo-ninguno", k:"int", t:"Y no quedó ninguno", a:"Agatha Christie", y:1939, n:256, e:["novela"], l:1, o:["decidir"],
+    p:"Diez desconocidos invitados a una isla. Uno a uno van muriendo, como en una canción infantil.",
+    i:["La novela de misterio más vendida de la historia.","Sospecharás de todos, uno detrás de otro.","Imposible dejarlo a medias."] },
+  { id:"codigo-da-vinci", k:"int", t:"El código Da Vinci", a:"Dan Brown", y:2003, n:560, e:["novela"], l:1, o:["entender"],
+    p:"Un asesinato en el Louvre y un rastro de símbolos que lleva a un secreto guardado durante siglos.",
+    i:["Arte, enigmas y persecuciones por Europa.","Capítulos cortísimos que piden uno más.","Ideal para quien cree que leer aburre."] },
+  { id:"reina-roja", k:"int", t:"Reina Roja", a:"Juan Gómez-Jurado", y:2018, n:568, e:["novela"], l:1, o:["decidir"],
+    p:"Antonia Scott, la mente más brillante de un proyecto secreto, y un inspector que no encaja en ningún sitio. Thriller español que no te suelta.",
+    i:["Ritmo de serie: siempre pasa algo.","Madrid como escenario de un thriller.","Primera de una saga que ha arrasado."] },
+  { id:"paciente-silenciosa", k:"int", t:"La paciente silenciosa", a:"Alex Michaelides", y:2019, n:384, e:["novela"], l:1, o:["gente"],
+    p:"Una pintora dispara cinco veces a su marido y no vuelve a decir una palabra. Su psicoterapeuta quiere saber por qué.",
+    i:["Suspense psicológico de los que juegan contigo.","Un giro final que no ves venir.","Se lee en pocos días."] },
+  { id:"crimen-castigo", k:"int", t:"Crimen y castigo", a:"Fiódor Dostoievski", y:1866, n:672, e:["novela","ideas"], l:3, o:["entender","gente"],
+    p:"Un estudiante pobre mata a una prestamista convencido de que tiene derecho, y la culpa empieza a devorarle.",
+    i:["Meterte en la cabeza de alguien que ha cruzado la línea.","¿El fin justifica los medios?","Un clásico que se lee como un thriller."] }
 ];
 /* para quien no ha hecho la encuesta: una recomendación distinta cada semana */
-var LB_SEMANA=["habitos-atomicos","psico-dinero","nunca-te-pares","rebelion-granja","factfulness","hombre-sentido","freakonomics","sobre-tirania","ikigai","casi-todo","mindset","babilonia"];
+var LB_SEMANA=["sombra-viento","habitos-atomicos","hobbit","orient-express","psico-dinero","principito","hail-mary","rebelion-granja","reina-roja","hombre-sentido","harry-potter-1","factfulness","curioso-incidente","nunca-te-pares","fahrenheit-451","paciente-silenciosa","ikigai","cien-anos","casi-todo","juegos-hambre","mindset"];
 
 var LB_ENC=[
   { k:"tema", q:"¿Qué te apetece entender o mejorar ahora?", ops:[
     ["eco","💶","El dinero y la economía"],["neg","🚀","Crear algo: negocio y emprender"],["pol","🏛️","El poder, la política y la sociedad"],
-    ["des","🌱","A mí: hábitos, cabeza y calma"],["cie","🔭","Cómo hemos llegado hasta aquí"],["todo","✨","Sorpréndeme"] ]},
+    ["des","🌱","A mí: hábitos, cabeza y calma"],["cie","🔭","Cómo hemos llegado hasta aquí"],
+    ["nov","🎭","Una buena historia"],["fan","🐉","Otros mundos: fantasía y ciencia ficción"],["int","🔎","Misterio que no me suelte"],["todo","✨","Sorpréndeme"] ]},
   { k:"estilo", q:"¿Qué tipo de libro te engancha?", ops:[
     ["historia","📖","Historias reales y biografías"],["practico","🛠️","Consejos que pueda usar mañana"],["ideas","💡","Ideas que me cambien la cabeza"],
     ["novela","🎭","Novelas y fábulas"],["ciencia","🔬","Datos, experimentos y ciencia"] ]},
@@ -371,9 +447,9 @@ function lbSheetBiblio(t){
   lbTab=t||lbTab||"para";
   var L=lbSt(), e=L.enc, leidos=lbLeidos(), act=lbActual();
   var tabs=[["para","Para ti"]].concat(LB_TEMAS.map(function(T){ return [T.k, T.t]; })).concat([["mis","Mis libros"]]);
-  var h='<div class="flex items-start justify-between mb-1"><div><p class="eyebrow mb-1.5">Hábitos · Lectura</p><h3 class="display text-[20px] font-bold">Biblioteca</h3></div>'+closeBtn()+'</div>'+
-    '<p class="text-[12.5px] t3 mb-4">'+LB.length+' libros de verdad para crecer'+(leidos.length?' · has leído '+leidos.length:'')+'.</p>'+
-    '<button class="lb-enc-ban" data-act="x-lb-enc"><span class="lb-enc-ico">✨</span><span><b>'+(e&&e.r?"Repetir la encuesta":"Encuentra tu libro perfecto")+'</b><small>'+(e&&e.r?"Si ha cambiado lo que te apetece, vuelve a hacerla.":"Cinco preguntas rápidas y te digo cuál leer.")+'</small></span>'+ico("flecha")+'</button>'+
+  var h='<div class="flex items-start justify-between mb-1"><div><p class="eyebrow mb-1.5">Mente · Leer</p><h3 class="display text-[20px] font-bold">Biblioteca</h3></div>'+closeBtn()+'</div>'+
+    '<p class="text-[12.5px] t3 mb-4">'+LB.length+' libros: novelas, fantasía, misterio, clásicos gratis y para crecer'+(leidos.length?' · has leído '+leidos.length:'')+'.</p>'+
+    lbAhoraPanel()+
     '<div class="lb-chips">'+tabs.map(function(x){ var T=lbTema(x[0]), c=(x[0]==="para"||x[0]==="mis")?"var(--accent)":T.c;
       return '<button data-act="x-lb-biblio" data-t="'+x[0]+'" class="'+(x[0]===lbTab?"on":"")+'" style="--c:'+c+'">'+esc(x[1])+'</button>'; }).join("")+'</div>';
   if(lbTab==="para"){
@@ -397,6 +473,28 @@ function lbSheetBiblio(t){
   h+='<p class="lb-nota">Las páginas son aproximadas y cambian según la edición. Puedes ajustarlas en cada libro.</p>';
   openSheet(h);
   lbArriba();
+}
+/* «¿Qué leer ahora?»: eliges cómo te apetece y salen tres, sin encuestas */
+var LB_AHORA=[["enganche","Que enganche"],["corto","Algo corto"],["aprender","Aprender algo"],["gratis","Gratis, aquí"],["sorpresa","Sorpréndeme"]];
+var lbAhoraK="enganche";
+function lbAhora(k){
+  var hist={nov:1,fan:1,int:1};
+  var ok=LB.filter(function(b){ if(!lbDisponible(b.id)) return false;
+    if(k==="enganche") return b.e.indexOf("novela")>=0 && b.l<=2 && b.k!=="cla";
+    if(k==="corto") return b.n<=260;
+    if(k==="aprender") return !hist[b.k] && b.k!=="cla";
+    if(k==="gratis") return !!b.d;
+    return true; });
+  /* cambia cada día, pero no a cada toque */
+  var dia=Math.floor(Date.now()/864e5);
+  return ok.map(function(b){ return [lbHash(b.id+"|"+dia+"|"+k), b]; }).sort(function(x,y){ return x[0]-y[0]; }).slice(0,3).map(function(x){ return x[1]; });
+}
+function lbAhoraPanel(){
+  var bs=lbAhora(lbAhoraK);
+  return '<div class="lb-ahora"><p class="lb-ahora-t">¿Qué leer ahora?</p>'+
+    '<div class="lb-chips lb-ahora-c">'+LB_AHORA.map(function(x){ return '<button data-act="x-lb-ahora" data-k="'+x[0]+'" class="'+(x[0]===lbAhoraK?"on":"")+'" style="--c:var(--t1)">'+x[1]+'</button>'; }).join("")+'</div>'+
+    '<div class="lb-ahora-f">'+bs.map(function(b){
+      return '<button data-act="'+(b.d?"x-lb-lee":"x-lb-libro")+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+(b.d?"Léelo ya, gratis":esc(lbTema(b.k).t))+'</small></button>'; }).join("")+'</div></div>';
 }
 function lbArriba(){ var sc=document.querySelector("#sheet .sheet-card"); if(sc) sc.scrollTop=0; }
 
@@ -525,6 +623,7 @@ function lecturaAccion(a, el){
   var id=el.dataset.id;
   if(a==="x-lb-biblio"){ sonido("tick"); lbSheetBiblio(el.dataset.t); return true; }
   if(a==="x-lb-libro"){ lbSheetLibro(id); return true; }
+  if(a==="x-lb-ahora"){ lbAhoraK=el.dataset.k; sonido("tick"); var sc=document.querySelector("#sheet .sheet-card"), y=sc?sc.scrollTop:0; lbSheetBiblio(lbTab); if(sc) document.querySelector("#sheet .sheet-card").scrollTop=y; return true; }
   if(a==="x-lb-ritmo"){
     lbRitmoSel={ id:id, n:+el.dataset.n };
     var x=lbHabActivo(id);

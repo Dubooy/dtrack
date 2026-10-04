@@ -20,11 +20,14 @@ function lcDB(){
     var r=indexedDB.open("peak-libros", 1);
     r.onupgradeneeded=function(){ var db=r.result; if(!db.objectStoreNames.contains("f")) db.createObjectStore("f"); if(!db.objectStoreNames.contains("loc")) db.createObjectStore("loc"); };
     r.onsuccess=function(){ ok(r.result); }; r.onerror=function(){ lcDB.p=null; ko(r.error); };
+    /* en algunos iPhone la base de datos no contesta nunca: a los 2 s se sigue sin ella */
+    setTimeout(function(){ ko(new Error("idb")); }, 2000);
   });
+  lcDB.p.catch(function(){ lcDB.p=null; });
   return lcDB.p;
 }
-function lcLee(tabla, k){ return lcDB().then(function(db){ return new Promise(function(ok){ var q=db.transaction(tabla).objectStore(tabla).get(k); q.onsuccess=function(){ ok(q.result||null); }; q.onerror=function(){ ok(null); }; }); }).catch(function(){ return null; }); }
-function lcPon(tabla, k, v){ return lcDB().then(function(db){ return new Promise(function(ok){ var t=db.transaction(tabla, "readwrite"); if(v==null) t.objectStore(tabla).delete(k); else t.objectStore(tabla).put(v, k); t.oncomplete=function(){ ok(true); }; t.onerror=function(){ ok(false); }; }); }).catch(function(){ return false; }); }
+function lcLee(tabla, k){ return lcDB().then(function(db){ return new Promise(function(ok){ setTimeout(function(){ ok(null); }, 2500); var q=db.transaction(tabla).objectStore(tabla).get(k); q.onsuccess=function(){ ok(q.result||null); }; q.onerror=function(){ ok(null); }; }); }).catch(function(){ return null; }); }
+function lcPon(tabla, k, v){ return lcDB().then(function(db){ return new Promise(function(ok){ setTimeout(function(){ ok(false); }, 4000); var t=db.transaction(tabla, "readwrite"); if(v==null) t.objectStore(tabla).delete(k); else t.objectStore(tabla).put(v, k); t.oncomplete=function(){ ok(true); }; t.onerror=function(){ ok(false); }; }); }).catch(function(){ return false; }); }
 
 function lcScripts(){
   if(window.ePub) return Promise.resolve();
@@ -38,7 +41,7 @@ function lcArchivo(id){
   return lcLee("f", id).then(function(buf){
     if(buf) return buf;
     var b=lbLibro(id); if(!b || b.propio) return null;
-    return fetch("libros/"+id+".epub").then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.arrayBuffer(); })
+    return fetch("libros/"+id+".epub", { cache:"no-cache" }).then(function(r){ if(!r.ok) throw new Error("http "+r.status); return r.arrayBuffer(); })
       .then(function(buf){ lcPon("f", id, buf); return buf; });
   });
 }
@@ -118,18 +121,30 @@ function lcAbre(id){
     if(LC.id!==id) return;
     if(!buf){ lcFalta(b); return; }
     LC.book=ePub(buf);
+    /* el libro nunca ejecuta nada suyo: se le quitan los scripts antes de pintarlo. Así el marco
+       puede llevar allow-scripts, que Safari necesita para que funcionen los toques dentro del libro */
+    LC.book.spine.hooks.serialize.register(function(out, sec){
+      sec.output=String(out||"").replace(/<script[\s\S]*?<\/script\s*>/gi,"").replace(/<script[^>]*\/>/gi,"")
+        .replace(/\son[a-z]+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi,"").replace(/(href|src)\s*=\s*(["'])\s*javascript:[^"']*\2/gi,'$1="#"');
+    });
     var el=document.getElementById("lc-libro");
-    LC.rend=LC.book.renderTo(el, { width:"100%", height:"100%", flow:"paginated", spread:"none", allowScriptedContent:false });
+    LC.rend=LC.book.renderTo(el, { width:"100%", height:"100%", flow:"paginated", spread:"none", allowScriptedContent:true });
     lcTema();
     LC.rend.hooks.content.register(lcGestos);
     LC.rend.on("relocated", lcMovido);
     LC.book.loaded.navigation.then(function(nav){ LC.toc=nav && nav.toc || []; });
     var s=lbEst(id)||{};
-    return (s.cfi ? LC.rend.display(s.cfi) : LC.book.ready.then(function(){ return LC.rend.display(window.lcInicio ? lcInicio(LC.book) : undefined); })).then(function(){ return lcPaginas(id); });
-  }).catch(function(e){
-    var c=document.getElementById("lc-carga");
-    if(c) c.innerHTML='<p>No he podido abrir el libro.<br><small>'+(navigator.onLine?"Vuelve a intentarlo en un momento.":"Sin internet: la primera vez hace falta conexión para bajarlo.")+'</small></p>';
-  }).then(function(){ LC.cargando=false; });
+    return (s.cfi ? LC.rend.display(s.cfi) : LC.book.ready.then(function(){ return LC.rend.display(window.lcInicio ? lcInicio(LC.book) : undefined); }))
+      .catch(function(){ return LC.rend && LC.rend.display(); })   /* si la marca guardada falla, desde el principio */
+      .then(function(){ var c=document.getElementById("lc-carga"); if(c && LC.id===id) c.remove(); return lcPaginas(id); });
+  }).catch(function(e){ lcError(id, e); }).then(function(){ LC.cargando=false; });
+  /* si a los 25 s sigue sin abrir, se dice y se puede reintentar */
+  clearTimeout(lcAbre.t); lcAbre.t=setTimeout(function(){ if(LC.id===id && document.getElementById("lc-carga")) lcError(id, new Error("tarda demasiado")); }, 25000);
+}
+function lcError(id, e){
+  var c=document.getElementById("lc-carga"); if(!c || LC.id!==id) return;
+  c.innerHTML='<p>No he podido abrir el libro.<br><small>'+(navigator.onLine?"Vuelve a intentarlo.":"Sin internet: la primera vez hace falta conexión para bajarlo.")+'</small></p>'+
+    '<button class="lc-sube" data-act="x-lb-lotra" data-id="'+id+'">Reintentar</button><small style="opacity:.45;font-size:11px">'+esc(String(e && e.message || e || "").slice(0,80))+'</small>';
 }
 function lcFalta(b){
   var c=document.getElementById("lc-carga");
@@ -283,6 +298,7 @@ lecturaAccion=function(a, el){
   if(a==="x-lb-subir"){ lcElegir(); return true; }
   if(a==="x-lb-borra"){ if(confirm("¿Quitar este libro de Peak? Se borra el archivo de este dispositivo.")){ lcBorra(id); render(); lbSheetBiblio("mis"); avisoNube("Libro quitado."); } return true; }
   if(a==="x-lb-lcierra"){ lcCierra(); return true; }
+  if(a==="x-lb-lotra"){ lcCierra(); lcScripts.p=null; setTimeout(function(){ lcAbre(id); }, 260); return true; }
   if(a==="x-lb-lprev"){ lcPasa(-1); return true; }
   if(a==="x-lb-lnext"){ lcPasa(1); return true; }
   if(a==="x-lb-lajustes"){ lcPanel("ajustes"); return true; }

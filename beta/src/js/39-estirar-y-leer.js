@@ -56,6 +56,23 @@
 '  align-items:center; justify-content:center; gap:8px; color:var(--t2); font-size:12px; font-weight:650; text-align:center; padding:10px;',
 '  box-shadow:inset 0 0 0 1.5px var(--hairline); }',
 '.tq-subir i{ font-style:normal; font-size:26px; font-weight:300; line-height:1; color:var(--t1); }',
+/* Biblioteca: botón con icono arriba y tarjeta grande abajo */
+'.tq-cab .tq-bib{ display:inline-flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; padding:8px 14px 8px 11px; border-radius:99px; background:var(--fill); color:var(--t1); }',
+'.tq-cab .tq-bib .ic{ width:17px; height:17px; }',
+'.tq-bib-g{ display:flex; align-items:center; gap:14px; width:100%; text-align:left; margin-top:18px; padding:14px 16px; border-radius:22px; background:var(--t1); color:var(--bg); transition:transform .35s var(--spring); }',
+'.tq-bib-g:active{ transform:scale(.98); transition-duration:.12s; }',
+'.tq-bib-g .tq-bib-i{ width:42px; height:42px; flex:0 0 auto; border-radius:13px; display:grid; place-items:center; background:color-mix(in srgb, var(--bg) 16%, transparent); }',
+'.tq-bib-g .tq-bib-i .ic{ width:22px; height:22px; }',
+'.tq-bib-g span.tx{ flex:1; min-width:0; } .tq-bib-g b{ display:block; font-size:15.5px; font-weight:750; letter-spacing:-.01em; } .tq-bib-g small{ display:block; font-size:12.5px; opacity:.7; margin-top:2px; }',
+'.tq-bib-g > .ic{ width:18px; height:18px; opacity:.6; }',
+/* ¿Qué leer ahora? */
+'.lb-ahora{ margin:0 0 16px; padding:16px 16px 14px; border-radius:20px; background:var(--fill); }',
+'.lb-ahora-t{ font-size:16px; font-weight:800; letter-spacing:-.02em; margin-bottom:10px; }',
+'.lb-ahora-c{ margin:0 -16px 12px; padding:2px 16px; } .lb-ahora-c button{ background:var(--bg); } .lb-ahora-c button.on{ color:var(--bg); }',
+'.lb-ahora-f{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }',
+'.lb-ahora-f button{ text-align:left; min-width:0; } .lb-ahora-f .lb-port{ width:100%; box-shadow:0 2px 3px rgba(0,0,0,.12), 0 12px 20px -12px rgba(0,0,0,.45); }',
+'.lb-ahora-f > button > b{ display:block; font-size:12px; font-weight:700; line-height:1.25; margin-top:8px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
+'.lb-ahora-f > button > small{ display:block; font-size:11px; color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
 /* mini barra de progreso y «Leído» bajo la portada */
 '.tq-barra.tq-mini{ height:3px; margin-top:8px; }',
 '.tq-hecho{ display:inline-block; margin-top:7px; font-size:10.5px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }',
@@ -113,10 +130,11 @@
     /* primero los que ya has empezado, luego el resto; los terminados al final */
     function orden(b){ var e=lbEstado(b.id); return e==="leido" ? 2 : (lbPags(b.id)>0 ? 0 : 1); }
     gratis=gratis.map(function(b,i){ return [orden(b), i, b]; }).sort(function(x,y){ return x[0]-y[0] || x[1]-y[1]; }).map(function(x){ return x[2]; });
-    var h='<div class="tq-cab"><h2 class="display">Leer</h2><button class="tq-link" data-act="x-lb-biblio" data-t="'+(act?"mis":"para")+'">Biblioteca</button></div>'+
+    var h='<div class="tq-cab"><h2 class="display">Leer</h2><button class="tq-bib" data-act="x-lb-biblio" data-t="para">'+ico("libro")+'Biblioteca</button></div>'+
       (act ? lbTarjetaAhora(act) : '')+
       '<p class="tq-sub"'+(act?'':' style="margin-top:0"')+'>Toca uno y empieza a leer</p><div class="tq-fila">'+gratis.map(function(b){ return tqLibro(b, "x-lb-lee"); }).join("")+
-        '<button class="tq-subir" data-act="x-lb-subir"><i>+</i>Tu EPUB</button></div>';
+        '<button class="tq-subir" data-act="x-lb-subir"><i>+</i>Tu EPUB</button></div>'+
+      '<button class="tq-bib-g" data-act="x-lb-biblio" data-t="para"><span class="tq-bib-i">'+ico("libro")+'</span><span class="tx"><b>Biblioteca</b><small>'+LB.length+' libros: novelas, fantasía, misterio y más</small></span>'+ico("flecha")+'</button>';
     pinta(el, h);
   }
 
