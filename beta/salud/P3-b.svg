@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice"><defs>
+<filter id="gP3b" x="-5%" y="-5%" width="110%" height="110%">
+ <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="33" result="n"/>
+ <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<filter id="tP3b"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="3" seed="16"/>
+ <feColorMatrix values="0 0 0 0 .1  0 0 0 0 .08  0 0 0 0 .05  0 0 0 0.66 -0.22"/></filter>
+<filter id="bP3b"><feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="2" seed="29"/>
+ <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 -.2"/></filter>
+<pattern id="rP3b" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="1.7" height="7" fill="#c9bdfb"/></pattern>
+</defs><g filter="url(#gP3b)"><rect x="0" y="0" width="400" height="220" rx="0" fill="#2a2346" opacity="1"/><rect x="0" y="150" width="400" height="70" rx="0" fill="#4a3a5c" opacity="1"/><rect x="100" y="120" width="200" height="30" rx="3" fill="#6a4f3a" opacity="1"/><circle cx="150" cy="100" r="22" fill="#e0574b" opacity="1"/><circle cx="150" cy="100" r="16" fill="#f4e3c6" opacity="1"/><circle cx="134" cy="80" r="7" fill="#e0574b" opacity="1"/><circle cx="166" cy="80" r="7" fill="#e0574b" opacity="1"/><polyline points="150,100 150,90" fill="none" stroke="#1c1b19" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><polyline points="150,100 158,104" fill="none" stroke="#1c1b19" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="1"/><rect x="200" y="104" width="70" height="16" rx="2" fill="#5b4fd6" opacity="1"/><rect x="204" y="100" width="62" height="4" rx="0" fill="#f4e3c6" opacity="1"/><circle cx="150" cy="100" r="60" fill="#f3d39a" opacity="0.08"/><path d="M0 150h400v70H0z" fill="url(#rP3b)" opacity="0.15"/></g><rect width="400" height="220" filter="url(#bP3b)" opacity=".35"/><rect width="400" height="220" filter="url(#tP3b)"/></svg>

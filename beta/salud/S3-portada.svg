@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice"><defs>
+<filter id="gS3portada" x="-5%" y="-5%" width="110%" height="110%">
+ <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="13" result="n"/>
+ <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<filter id="tS3portada"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="3" seed="37"/>
+ <feColorMatrix values="0 0 0 0 .1  0 0 0 0 .08  0 0 0 0 .05  0 0 0 0.66 -0.22"/></filter>
+<filter id="bS3portada"><feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="2" seed="8"/>
+ <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 -.2"/></filter>
+<pattern id="rS3portada" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="1.7" height="7" fill="#1c1b19"/></pattern>
+</defs><g filter="url(#gS3portada)"><linearGradient id="dS3portada" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f8b56a"/><stop offset="1" stop-color="#ee7a4b"/></linearGradient><rect width="400" height="220" fill="url(#dS3portada)"/><circle cx="200" cy="120" r="48" fill="#fde3bd" opacity="1"/><path d="M0 160c80-30 160-30 240 0s120 20 160 0v60H0z" fill="#c9563f" opacity="1" /><path d="M0 190c100-25 220-25 400 5v25H0z" fill="#94392f" opacity="1" /><rect x="60" y="60" width="9" height="120" rx="0" fill="#5b2a20" opacity="1"/><rect x="330" y="70" width="9" height="110" rx="0" fill="#5b2a20" opacity="1"/><path d="M64 66c30 30 240 40 270 10" fill="none" opacity="1" stroke="#fde3bd" stroke-width="1.5"/><path d="M64 96c60 50 220 50 270 0c-20 30-240 30-270 0z" fill="#3b2d6b" opacity="1" /><path d="M0 160c80-30 160-30 240 0s120 20 160 0v60H0z" fill="url(#rS3portada)" opacity="0.2"/></g><rect width="400" height="220" filter="url(#bS3portada)" opacity=".35"/><rect width="400" height="220" filter="url(#tS3portada)"/></svg>

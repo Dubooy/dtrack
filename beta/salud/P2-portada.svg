@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice"><defs>
+<filter id="gP2portada" x="-5%" y="-5%" width="110%" height="110%">
+ <feTurbulence type="fractalNoise" baseFrequency=".035" numOctaves="2" seed="49" result="n"/>
+ <feDisplacementMap in="SourceGraphic" in2="n" scale="2.2" xChannelSelector="R" yChannelSelector="G"/>
+</filter>
+<filter id="tP2portada"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="3" seed="46"/>
+ <feColorMatrix values="0 0 0 0 .1  0 0 0 0 .08  0 0 0 0 .05  0 0 0 0.66 -0.22"/></filter>
+<filter id="bP2portada"><feTurbulence type="fractalNoise" baseFrequency=".012 .09" numOctaves="2" seed="13"/>
+ <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 .5 -.2"/></filter>
+<pattern id="rP2portada" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="1.7" height="7" fill="#1c1b19"/></pattern>
+</defs><g filter="url(#gP2portada)"><linearGradient id="dP2portada" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbe2c0"/><stop offset="1" stop-color="#f3b57a"/></linearGradient><rect width="400" height="220" fill="url(#dP2portada)"/><rect x="0" y="140" width="400" height="80" rx="0" fill="#b97a4a" opacity="1"/><rect x="130" y="124" width="120" height="26" rx="10" fill="#1c1b19" opacity="1"/><circle cx="150" cy="137" r="5" fill="#444" opacity="1"/><rect x="280" y="96" width="40" height="48" rx="4" fill="#c7724a" opacity="1"/><path d="M300 96c-20-30-10-56 0-66 10 10 20 36 0 66z" fill="#5fb37a" opacity="1" /><path d="M300 96c-26-16-34-36-30-46 12 4 30 20 30 46z" fill="#3d8a55" opacity="1" /><rect x="70" y="110" width="36" height="34" rx="6" fill="#f4e3c6" opacity="1"/><path d="M106 118c12 0 12 18 0 18" fill="none" opacity="1" stroke="#f4e3c6" stroke-width="5"/><path d="M0 0h160L60 220H0z" fill="#fff4e0" opacity="0.18" /><path d="M0 140h400v80H0z" fill="url(#rP2portada)" opacity="0.2"/></g><rect width="400" height="220" filter="url(#bP2portada)" opacity=".35"/><rect width="400" height="220" filter="url(#tP2portada)"/></svg>
