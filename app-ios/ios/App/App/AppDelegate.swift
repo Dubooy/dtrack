@@ -69,7 +69,7 @@ class PeakViewController: CAPBridgeViewController, UITabBarDelegate, WKScriptMes
         "resumen": ("square.grid.2x2", "square.grid.2x2.fill"),
         "retos": ("trophy", "trophy.fill"),
         "vital": ("figure.run", "figure.run"),
-        "academico": ("brain", "brain.fill"),
+        "academico": ("camera.macro", "camera.macro"),
         "tareas": ("checklist", "checklist"),
         "social": ("person.2", "person.2.fill")
     ]
