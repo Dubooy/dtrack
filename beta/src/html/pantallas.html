@@ -1,0 +1,490 @@
+<div class="canvas-bg"><i></i><i></i><i></i></div>
+
+<div class="flex min-h-screen">
+  <aside class="hidden lg:flex fixed inset-y-0 left-0 w-[252px] flex-col px-5 py-7 z-30">
+    <div class="flex items-center gap-3 px-2 mb-9">
+      <svg class="w-9 h-9 rounded-[12px] shrink-0" viewBox="0 0 48 48" aria-hidden="true" style="box-shadow:0 6px 18px -8px var(--accent-line)"><rect width="48" height="48" rx="13.5" fill="var(--accent)"/><path d="M450 0 0 900 600 900 525 648 538 607 634 900 680 900 561 534 577 481 714 900 760 900 497 94 594 288ZM594 288 794 900 840 900 727 554ZM900 900 824 748 874 900Z" fill="var(--on-accent)" transform="translate(11 11.6) scale(.0289)"/></svg>
+      <div class="min-w-0">
+        <p class="display text-[15px] font-bold leading-tight tracking-[-.02em]" id="brand-name">Peak.</p>
+        <p class="text-[11px] t3 leading-tight" id="brand-sub">Curso 26 · 27</p>
+      </div>
+    </div>
+    <nav class="relative flex flex-col gap-1" id="rail">
+      <span class="rail-marker" id="rail-marker"></span>
+      <button class="rail-item" data-view="resumen" aria-current="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/></svg>
+        <span data-label="resumen">Resumen</span>
+      </button>
+      <button class="rail-item" data-view="retos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v4a4 4 0 0 1-8 0V3z"/><path d="M16 4.5h3v2a3 3 0 0 1-3 3M8 4.5H5v2a3 3 0 0 0 3 3"/><path d="M12 11v4M9 21h6l-.5-3h-5L9 21z"/></svg>
+        <span data-label="retos">Objetivos</span>
+      </button>
+      <button class="rail-item" data-view="vital">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16l4.5-6.5L12 13l4-6.5 5 6"/><path d="M3 20.5h18"/></svg>
+        <span data-label="vital">Vital</span>
+      </button>
+      <button class="rail-item" data-view="academico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8.5 3v4M15.5 3v4"/></svg>
+        <span data-label="academico">Académico</span>
+      </button>
+      <button class="rail-item" data-view="social">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.4"/><path d="M2.5 20c0-3.3 2.9-5.6 6.5-5.6s6.5 2.3 6.5 5.6"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 6.6M18 14.6c2.1.6 3.5 2.3 3.5 4.6"/></svg>
+        <span data-label="social">Social</span>
+      </button>
+    </nav>
+    <div class="mt-auto">
+      <div class="glass rounded-[18px] p-4 mb-3">
+        <p class="eyebrow mb-2" id="rail-ebau-name">Cuenta atrás</p>
+        <div class="flex items-baseline gap-1.5">
+          <span class="display text-[30px] font-extrabold num leading-none" id="rail-ebau">—</span>
+          <span class="text-[11.5px] t3">días</span>
+        </div>
+        <p class="text-[11px] t3 mt-1.5" id="rail-ebau-date">—</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="icon-btn flex-1" data-act="toggle-theme" aria-label="Cambiar tema">
+          <svg viewBox="0 0 24 24" class="w-[17px] h-[17px] theme-sun" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          <svg viewBox="0 0 24 24" class="w-[17px] h-[17px] theme-moon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><svg viewBox="0 0 24 24" class="w-[17px] h-[17px] theme-leaf" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M20 4c0 8-5 13-11 13H5c0-8 5-13 11-13h4z"/><path d="M5 20c2-5 5-8 9-10"/></svg><svg viewBox="0 0 24 24" class="w-[17px] h-[17px] theme-neo" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M3 20h18M5 20V9M12 20V9M19 20V9M3 9h18l-9-6-9 6z"/></svg>
+        </button>
+        <button class="icon-btn flex-1" data-act="open-settings" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" class="w-[17px] h-[17px]" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="flex-1 lg:ml-[252px] min-w-0">
+
+    <main id="lienzo" class="relative px-5 sm:px-8 lg:px-12 xl:px-16 py-7 lg:py-12 pb-32 lg:pb-16 max-w-[1300px]">
+      <div id="acciones-flotantes" class="lg:hidden absolute right-5 top-6 z-20 flex gap-2">
+        <button class="icon-btn" data-act="toggle-theme" aria-label="Cambiar tema">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 theme-sun" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
+          <svg viewBox="0 0 24 24" class="w-4 h-4 theme-moon" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg><svg viewBox="0 0 24 24" class="w-4 h-4 theme-leaf" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M20 4c0 8-5 13-11 13H5c0-8 5-13 11-13h4z"/><path d="M5 20c2-5 5-8 9-10"/></svg><svg viewBox="0 0 24 24" class="w-4 h-4 theme-neo" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M3 20h18M5 20V9M12 20V9M19 20V9M3 9h18l-9-6-9 6z"/></svg>
+        </button>
+        <button class="icon-btn" data-act="open-settings" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+
+      <!-- ═════════ RESUMEN ═════════ -->
+      <section id="v-resumen" class="view">
+        <div class="flex flex-col xl:flex-row xl:items-end gap-8 mb-10 lg:mb-12">
+          <div class="min-w-0 flex-1">
+            <p class="eyebrow mb-3" id="hero-date">—</p>
+            <h1 class="display text-[38px] sm:text-[52px] xl:text-[60px] font-extrabold leading-[.98]" id="hero-greet">—</h1>
+            <p class="text-[14.5px] t2 mt-4 max-w-[46ch]" id="hero-sub">—</p>
+            <div class="flex items-center gap-2.5 mt-6 flex-wrap">
+            <button class="btn btn-primary" id="parte-btn" data-act="parte">
+              <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>
+              <span id="parte-btn-t">Parte del día</span></button>
+            <button class="btn btn-quiet" data-act="x-estudiar">
+              <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/></svg>
+              <span>Estudiar</span></button>
+            <span id="est-hoy" class="text-[12.5px] t3 num" hidden></span>
+            </div>
+          </div>
+          <div id="card-ring" class="glass hero rounded-[24px] px-6 py-5 flex items-center gap-6 shrink-0">
+            <div class="relative w-[78px] h-[78px] shrink-0">
+              <svg class="pring w-[78px] h-[78px] -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="34" fill="none" stroke="var(--fill-hi)" stroke-width="7"/>
+                <circle id="ring" cx="40" cy="40" r="34" fill="none" stroke="url(#gr)" stroke-width="7"
+                        stroke-linecap="round" stroke-dasharray="213.6" stroke-dashoffset="213.6"/>
+                <defs><linearGradient id="gr" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="var(--accent)"/><stop offset="100%" stop-color="var(--violet)"/>
+                </linearGradient></defs>
+              </svg>
+              <span class="absolute inset-0 grid place-items-center display text-[16px] font-bold num" id="ring-pct">0%</span>
+            </div>
+            <div class="min-w-0">
+              <p class="eyebrow mb-1.5">Progreso de hoy</p>
+              <p class="text-[13.5px] t2 leading-snug max-w-[172px]" id="ring-note">—</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="ejemplos"></div>
+        <div id="plan3"></div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 mb-4 lg:mb-5 stagger" id="kpis"></div>
+
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5">
+          <div class="lg:col-span-7 flex flex-col gap-4 lg:gap-5 min-w-0">
+            <div id="card-ideal" class="glass rounded-[24px] pad">
+              <div class="flex items-start justify-between gap-4 mb-6">
+                <div>
+                  <h2 class="display text-[17px] font-bold">Hábitos</h2>
+                  <p class="text-[12.5px] t3 mt-0.5" id="ideal-sub">—</p>
+                </div>
+                <button class="btn btn-quiet !px-3.5 !py-2 !text-[12px]" data-act="edit-ideal">Editar</button>
+              </div>
+              <div class="h-2 rounded-full overflow-hidden mb-6" style="background:var(--fill-hi)">
+                <div id="ideal-bar" class="h-full rounded-full bar-fill" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--violet))"></div>
+              </div>
+              <div id="ideal-list" class="space-y-1 max-h-[420px] overflow-y-auto px-1.5 -mx-1.5"></div>
+              <div id="ideal-graf" class="mt-5 pt-5" style="border-top:1px solid var(--hairline-2)"></div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <div class="flex items-center justify-between mb-6">
+                <div>
+                  <h2 class="display text-[17px] font-bold">Hoy en clase</h2>
+                  <p class="text-[12.5px] t3 mt-0.5" id="today-name">—</p>
+                </div>
+                <button class="btn btn-quiet !px-3.5 !py-2 !text-[12px]" data-jump="academico">Horario</button>
+              </div>
+              <div id="today-schedule" class="space-y-1"></div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 flex flex-col gap-4 lg:gap-5 min-w-0">
+            <div class="glass importante rounded-[24px] pad">
+              <div class="flex items-center justify-between mb-5">
+                <h2 class="display text-[17px] font-bold">Retos de hoy</h2>
+                <button class="text-[12.5px] font-medium" style="color:var(--accent)" data-jump="retos">Ver todos</button>
+              </div>
+              <div id="mini-challenges" class="space-y-3"></div>
+            </div>
+            <div id="next-exam"></div>
+            <div class="glass rounded-[24px] pad">
+              <div class="flex items-center justify-between mb-5">
+                <h2 class="display text-[17px] font-bold">Pendiente</h2>
+                <button class="text-[12.5px] font-medium" style="color:var(--accent)" data-jump="tareas">Ver todo</button>
+              </div>
+              <div id="today-tasks" class="space-y-3.5"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════ RETOS ═════════ -->
+      <section id="v-retos" class="view" hidden>
+        <div class="mb-8 lg:mb-10">
+          <p class="eyebrow mb-2.5">Juego limpio</p>
+          <h1 class="display text-[34px] sm:text-[44px] font-extrabold leading-[1]" data-label-h="retos">Objetivos</h1>
+        </div>
+        <div id="retos-daybar"></div>
+
+
+
+        <div class="glass hero rounded-[24px] pad mb-4 lg:mb-5" id="card-nivel">
+          <div class="flex flex-col sm:flex-row sm:items-center gap-6">
+            <div class="flex items-center gap-5">
+              <div id="lvl-emblema" data-act="x-perfil" style="cursor:pointer"></div>
+              <span id="lvl-num" hidden>1</span>
+              <div class="min-w-0">
+                <p class="eyebrow mb-1" id="lvl-rango">Rango</p>
+                <p class="display text-[21px] font-bold leading-tight" id="lvl-name">—</p>
+                <p class="text-[12.5px] t3 num mt-0.5" id="lvl-xp">0 XP</p>
+                <p class="text-[11.5px] t3 mt-1" id="lvl-siguiente"></p>
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[12px] t3" id="lvl-next">—</span>
+                <span class="text-[12px] t3 num" id="lvl-pct" hidden>0%</span>
+              </div>
+              <div class="h-2.5 rounded-full overflow-hidden" style="background:var(--fill-hi)" hidden>
+                <div id="lvl-bar" class="h-full rounded-full bar-fill" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--violet))"></div>
+              </div>
+              <div class="flex flex-wrap gap-x-5 gap-y-3 mt-5">
+                <div><p class="display text-[22px] font-extrabold num leading-none" style="color:var(--warn)" id="st-streak">0</p><p class="text-[11px] t3 mt-1">racha</p></div>
+                <div><p class="display text-[22px] font-extrabold num leading-none" id="st-best">0</p><p class="text-[11px] t3 mt-1">mejor</p></div>
+                <div><p class="display text-[22px] font-extrabold num leading-none" style="color:var(--good)" id="st-ch">0</p><p class="text-[11px] t3 mt-1">retos</p></div>
+                <div><p class="display text-[22px] font-extrabold num leading-none" style="color:var(--gold)" id="st-med">0</p><p class="text-[11px] t3 mt-1">logros</p></div>
+                <div><p class="display text-[22px] font-extrabold num leading-none" style="color:var(--cyan)" id="st-com">0</p><p class="text-[11px] t3 mt-1">comodines<svg viewBox="0 0 24 24" style="width:1.1em;height:1.1em;display:inline-block;vertical-align:-.17em;margin-left:.25em" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M12 2.3 19.6 5.2v5.9c0 4.9-3.2 8.8-7.6 10.6-4.4-1.8-7.6-5.7-7.6-10.6V5.2z M12 7.1c1.9 2.1 3.1 3.7 3.1 5.4a3.1 3.1 0 0 1-6.2 0c0-1.1.47-1.95 1.18-2.72-.05.77.2 1.3.62 1.55.1-1.6.52-2.9 1.3-4.23z"/></svg></p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5">
+          <div class="lg:col-span-7 flex flex-col gap-4 lg:gap-5 min-w-0" id="retos-left">
+            <div class="glass importante rounded-[24px] pad">
+              <div class="flex items-start justify-between mb-6">
+                <div>
+                  <h2 class="display text-[17px] font-bold" id="ch-title">Los tres de hoy</h2>
+                  <p class="text-[12.5px] t3 mt-0.5">Cambian cada día a las 00:00</p>
+                </div>
+                <button class="btn btn-quiet !px-3.5 !py-2 !text-[12px]" data-act="edit-challenges">Mis retos</button>
+              </div>
+              <div id="today-challenges" class="space-y-2.5"></div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <div class="flex items-start justify-between mb-5">
+                <div>
+                  <h2 class="display text-[17px] font-bold">Hábitos</h2>
+                  <p class="text-[12.5px] t3 mt-0.5" id="retos-cl-sub">—</p>
+                </div>
+                <button class="btn btn-quiet !px-3.5 !py-2 !text-[12px]" data-act="edit-ideal">Editar</button>
+              </div>
+              <div id="retos-checklist" class="space-y-1 max-h-[320px] overflow-y-auto pr-1"></div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <h2 class="display text-[17px] font-bold mb-5">Últimas 4 semanas</h2>
+              <div id="ch-heat"></div>
+            </div>
+          </div>
+          <div class="lg:col-span-5 glass rounded-[24px] pad min-w-0">
+            <div class="flex items-start justify-between mb-6">
+              <h2 class="display text-[17px] font-bold">Logros</h2>
+              <span class="chip" id="med-count" style="background:var(--fill);color:var(--t2)">0 / 0</span>
+            </div>
+            <div id="medals-wrap" class="relative overflow-hidden" style="transition:max-height .55s var(--ease)">
+              <div id="medals" class="grid grid-cols-1 gap-2"></div>
+              <div id="medals-fade" class="pointer-events-none absolute inset-x-0 bottom-0" style="height:76px;background:linear-gradient(to bottom,transparent,var(--bg))"></div>
+            </div>
+            <button id="medals-more" class="btn btn-quiet w-full mt-4" data-act="medals-toggle" hidden></button>
+          </div>
+        </div>
+      
+      </section>
+
+      <!-- ═════════ VITAL ═════════ -->
+      <section id="v-vital" class="view" hidden>
+        <div class="mb-8 lg:mb-10">
+          <p class="eyebrow mb-2.5">Cuerpo y descanso</p>
+          <h1 class="display text-[34px] sm:text-[44px] font-extrabold leading-[1]" data-label-h="vital">Vital</h1>
+        </div>
+        <div id="vital-daybar"></div>
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5 stagger">
+          <div class="lg:col-span-7 flex flex-col gap-4 lg:gap-5 min-w-0">
+            <div class="glass importante rounded-[24px] pad">
+              <div class="flex items-start justify-between mb-6">
+                <div>
+                  <h2 class="display text-[17px] font-bold">Ejercicio</h2>
+                  <p class="text-[12.5px] t3 mt-0.5" id="gym-sub">¿Has hecho ejercicio hoy?</p>
+                </div>
+                <div class="text-right">
+                  <div class="display text-[30px] font-extrabold num leading-none" id="gym-streak">0</div>
+                  <div class="text-[11px] t3 mt-1">días seguidos</div>
+                </div>
+              </div>
+              <button class="w-full rounded-[18px] py-5 mb-6" id="gym-btn" data-act="gym"></button>
+              <div class="flex items-end justify-between mb-3">
+                <span class="eyebrow">Esta semana</span>
+                <span class="text-[12.5px] t2 num" id="gym-week">0 días</span>
+              </div>
+              <div class="flex gap-2" id="gym-days"></div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <div class="flex items-start justify-between mb-6">
+                <div>
+                  <h2 class="display text-[17px] font-bold">Qué he comido hoy</h2>
+                  <p class="text-[12.5px] t3 mt-0.5">Toca lo que ya has comido</p>
+                </div>
+                <span class="chip" id="meals-chip" style="background:var(--fill);color:var(--t2)">0 / 3</span>
+              </div>
+              <div id="meals-list" class="space-y-1"></div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 flex flex-col gap-4 lg:gap-5 min-w-0">
+            <div class="glass rounded-[24px] pad">
+              <h2 class="display text-[17px] font-bold mb-1">Salud del día</h2>
+              <p class="text-[12.5px] t3 mb-6">Agua, descanso y pantallas</p>
+
+              <div class="mb-5">
+                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
+                    <span class="text-[13.5px] font-medium">Agua</span>
+                    <span class="text-[12.5px] t3" id="water-lab">un toque al día</span>
+                  </div>
+                <div class="flex items-center gap-3.5">
+                  <canvas class="medidor" id="mg-agua" width="64" height="64" aria-hidden="true"></canvas>
+                  <div class="flex-1 min-w-0 flex items-center gap-2">
+                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="water-val" data-act="x-agua" data-k="water" role="button" aria-label="Escribir el valor">0 / 8</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
+                    <span class="text-[13.5px] font-medium">Descanso</span>
+                    <span class="text-[12.5px] t3" id="sleep-lab">sin registrar</span>
+                  </div>
+                <div class="flex items-center gap-3.5">
+                  <canvas class="medidor" id="mg-sueno" width="64" height="64" aria-hidden="true"></canvas>
+                  <div class="flex-1 min-w-0 flex items-center gap-2">
+                    <button class="soft w-11 h-11 text-[17px]" data-act="sleep" data-d="-1" id="sleep-minus">−</button>
+                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="sleep-val" data-act="x-valor" data-k="sleep" role="button" aria-label="Escribir el valor">0,0 h</div>
+                    <button class="soft w-11 h-11 text-[17px]" data-act="sleep" data-d="1" id="sleep-plus">+</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="">
+                <div class="flex items-baseline justify-between mb-2.5 pl-[78px]">
+                    <span class="text-[13.5px] font-medium">Pantalla</span>
+                    <span class="text-[12.5px] t3" id="screen-lab">sin registrar</span>
+                  </div>
+                <div class="flex items-center gap-3.5">
+                  <canvas class="medidor" id="mg-pantalla" width="64" height="64" aria-hidden="true"></canvas>
+                  <div class="flex-1 min-w-0 flex items-center gap-2">
+                    <button class="soft w-11 h-11 text-[17px]" data-act="screen" data-d="-1" id="screen-minus">−</button>
+                    <div class="flex-1 h-11 rounded-[14px] grid place-items-center num text-[15px] font-medium" style="background:var(--fill);box-shadow:inset 0 0 0 1px var(--hairline-2);cursor:pointer" id="screen-val" data-act="x-valor" data-k="screen" role="button" aria-label="Escribir el valor">0,0 h</div>
+                    <button class="soft w-11 h-11 text-[17px]" data-act="screen" data-d="1" id="screen-plus">+</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <h2 class="display text-[17px] font-bold mb-5">Constancia · 4 semanas</h2>
+              <div id="streaks"></div>
+            </div>
+            <div class="glass rounded-[24px] pad">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="display text-[17px] font-bold">El año entero</h2>
+                <div class="flex items-center gap-1">
+                  <button class="icon-btn bare !w-8 !h-8" data-act="anio" data-d="-1" aria-label="Año anterior">‹</button>
+                  <span class="num text-[13px] t2 w-[42px] text-center" id="anio-n">—</span>
+                  <button class="icon-btn bare !w-8 !h-8" data-act="anio" data-d="1" aria-label="Año siguiente">›</button>
+                </div>
+              </div>
+              <div id="anio-grid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═════════ ACADÉMICO ═════════ -->
+      <section id="v-academico" class="view" hidden>
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-5">
+          <div>
+            <p class="eyebrow mb-2.5">Horario y exámenes</p>
+            <h1 class="display text-[34px] sm:text-[44px] font-extrabold leading-[1]" data-label-h="academico">Académico</h1>
+          </div>
+        </div>
+        <!-- la barra Horario/Tareas, debajo del nombre, como en el resto de la app -->
+        <div class="flex items-center justify-between gap-3 mb-6 lg:mb-8">
+        <div class="seg" id="sub-acad" style="display:grid;grid-template-columns:1fr 1fr;width:200px;max-width:200px">
+          <button data-sub="academico">Horario</button>
+          <button data-sub="tareas">Tareas</button>
+        </div>
+          <div class="ac-botones">
+            <div class="seg" id="modo-semana" hidden><button data-act="agenda-modo" data-m="clase">Clase</button><button data-act="agenda-modo" data-m="libre">Libre</button></div>
+            <button class="ac-bt" data-act="x-acad-menu" aria-label="Más opciones">
+              <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg></button>
+            <button class="ac-bt mas" data-act="new-exam" aria-label="Nuevo examen o entrega">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+          </div>
+        </div>
+        <div id="card-horario" class="glass rounded-[24px] pad mb-5">
+          <div class="flex items-center justify-between mb-6 gap-4">
+            <h2 class="display text-[17px] font-bold" id="tit-semana">Horario semanal</h2>
+            <p class="text-[12px] t3 hidden sm:block">Toca un hueco para poner asignatura, aula y notas</p>
+          </div>
+          <div class="hidden md:block overflow-x-auto -mx-1 px-1"><div id="grid" class="min-w-[640px]"></div></div>
+          <div class="md:hidden" id="grid-day"></div>
+        </div>
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5 mb-5">
+          <div class="lg:col-span-5 min-w-0" id="exam-featured"></div>
+          <div class="lg:col-span-7 glass rounded-[24px] pad min-w-0">
+            <h2 class="display text-[17px] font-bold mb-5">En el horizonte</h2>
+            <div id="exam-rest" class="space-y-2.5"></div>
+          </div>
+        </div>
+        <div class="glass rounded-[24px] pad">
+          <h2 class="display text-[15px] font-bold mb-4">Exámenes pasados</h2>
+          <div id="exam-past" class="space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- ═════════ TAREAS ═════════ -->
+      <section id="v-social" class="view" hidden>
+        <div class="mb-8 lg:mb-10">
+          <p class="eyebrow mb-2.5">Con los tuyos</p>
+          <h1 class="display text-[34px] sm:text-[44px] font-extrabold leading-[1]" data-label-h="social">Social</h1>
+        </div>
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5">
+          <div class="lg:col-span-7 min-w-0 space-y-4 lg:space-y-5" id="social-col"></div>
+        </div>
+      </section>
+
+      <section id="v-tareas" class="view" hidden>
+        <div class="mb-5">
+          <p class="eyebrow mb-2.5">Día a día</p>
+          <h1 class="display text-[34px] sm:text-[44px] font-extrabold leading-[1]" data-label-h="academico">Organización</h1>
+        </div>
+        <div class="seg mb-6 lg:mb-8" id="sub-tar" style="display:grid;grid-template-columns:1fr 1fr;max-width:200px">
+          <button data-sub="academico">Horario</button>
+          <button data-sub="tareas">Tareas</button>
+        </div>
+        <div class="grid lg:grid-cols-12 gap-4 lg:gap-5">
+          <div class="lg:col-span-8 min-w-0">
+            <div class="glass rounded-[24px] pad mb-5">
+              <input id="task-input" class="field mb-3" maxlength="120" placeholder="¿Qué tienes que hacer?">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+                <input id="task-due" type="date" class="field !py-2.5 !text-[13px]">
+              </div>
+              <div class="flex flex-wrap items-center gap-3">
+                <div class="seg" id="cat-picker"></div>
+                <button class="btn btn-primary ml-auto" data-act="add-task">Añadir</button>
+              </div>
+            </div>
+            <div class="flex items-center gap-3 mb-4 flex-wrap">
+              <div class="seg" id="task-filter">
+                <button data-f="pend">Pendientes</button>
+                <button data-f="todas">Todas</button>
+                <button data-f="hechas">Hechas</button>
+              </div>
+              <button class="text-[12.5px] t3 hover:opacity-70 ml-auto" data-act="clear-done">Limpiar completadas</button>
+            </div>
+            <div id="task-list" class="space-y-2.5"></div>
+          </div>
+          <aside class="lg:col-span-4 min-w-0">
+            <div class="glass rounded-[24px] pad lg:sticky lg:top-8">
+              <p class="eyebrow mb-4">Balance</p>
+              <div class="flex items-baseline gap-2 mb-1">
+                <span class="display text-[44px] font-extrabold num leading-none" id="tk-done">0</span>
+                <span class="text-[15px] t3 num" id="tk-total">/ 0</span>
+              </div>
+              <p class="text-[12.5px] t3 mb-5">completadas</p>
+              <div class="h-2 rounded-full overflow-hidden mb-7" style="background:var(--fill-hi)">
+                <div id="tk-bar" class="h-full rounded-full bar-fill" style="width:0%;background:linear-gradient(90deg,var(--accent),var(--violet))"></div>
+              </div>
+              <div class="divider mb-5"></div>
+              <p class="eyebrow mb-4">Por categoría</p>
+              <div id="cat-stats" class="space-y-3.5"></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<nav class="bottombar lg:hidden fixed inset-x-0 z-40 flex justify-center"
+     style="bottom:0;padding:0 12px calc(4px + env(safe-area-inset-bottom));pointer-events:none">
+  <div class="barpill" id="mtabs"><span id="mind"></span>
+    <button class="mtab" data-view="resumen" aria-current="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="8" height="10" rx="2.6"/><rect x="13" y="3" width="8" height="6" rx="2.6"/><rect x="3" y="15" width="8" height="6" rx="2.6"/><rect x="13" y="11" width="8" height="10" rx="2.6"/></svg><span data-label="resumen">Hoy</span></button>
+    <button class="mtab" data-view="retos">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 3h10v5.6a5 5 0 0 1-10 0V3z"/><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M7 5H4.6v1.4A3.6 3.6 0 0 0 8.2 10M17 5h2.4v1.4A3.6 3.6 0 0 1 15.8 10"/><rect x="10.8" y="12.6" width="2.4" height="4.6"/><rect x="7" y="17.2" width="10" height="3.8" rx="1.5"/></svg><span data-label="retos">Objetivos</span></button>
+    <button class="mtab" data-view="vital">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="14.2" cy="4.2" r="2.5"/><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="M13 8.4l-2.2 5.4M7.6 10.2l5.4-1.8 2.8 2.8 2.8.4M10.8 13.8l3.6 2.4-1 4.6M10.8 13.8l-2 3.8-3.6.8"/></svg><span data-label="vital">Cuerpo</span></button>
+    <button class="mtab" data-view="academico">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 6.2C9 4.9 6.3 4.4 3 4.7v14.2c3.2-.3 5.9.2 8 1.5V6.2z"/><path d="M13 6.2c2-1.3 4.7-1.8 8-1.5v14.2c-3.2-.3-5.9.2-8 1.5V6.2z"/></svg><span data-label="academico">Mente</span></button>
+    <button class="mtab" data-view="social">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="7.4" r="3.7"/><path d="M2 19.4c0-3.6 3.1-6.3 7-6.3s7 2.7 7 6.3c0 .8-.6 1.4-1.4 1.4H3.4C2.6 20.8 2 20.2 2 19.4z"/><circle cx="16.8" cy="8" r="3" opacity=".6"/><path opacity=".6" d="M17.6 13.4c2.7.4 4.4 2.6 4.4 5.4 0 .8-.5 1.3-1.3 1.3h-2.9c.2-.4.3-.9.3-1.4 0-2.1-.9-4-2.3-5.2.6-.1 1.2-.1 1.8-.1z"/></svg><span data-label="social">Social</span></button>
+  </div>
+</nav>
+
+<div id="tour" class="fixed inset-0 z-[60]" hidden style="pointer-events:none">
+  
+  <div id="tour-spot"></div>
+  <div id="tour-pop"><div id="tour-body"></div></div>
+</div>
+
+<div id="parte" class="fixed inset-0 z-[55]" hidden>
+  <div class="sheet-bg absolute inset-0" style="background:color-mix(in srgb,var(--bg) 62%,rgba(0,0,0,.5))" data-act="parte-close"></div>
+  <div class="sheet-card absolute inset-x-0 bottom-0 sm:inset-0 sm:m-auto sm:h-fit sm:max-w-[480px] glass rounded-t-[28px] sm:rounded-[28px] p-6 sm:p-7 max-h-[92vh] overflow-y-auto"
+       style="background:color-mix(in srgb,var(--bg) 84%,var(--glass-bg))">
+    <div id="parte-body"></div>
+  </div>
+</div>
+
+<div id="sheet" class="fixed inset-0 z-50" hidden>
+  <div class="sheet-bg absolute inset-0" style="background:color-mix(in srgb,var(--bg) 55%,rgba(0,0,0,.45))" data-act="close-sheet"></div>
+  <div class="sheet-card absolute inset-x-0 bottom-0 sm:inset-0 sm:m-auto sm:h-fit sm:max-w-[460px] glass rounded-t-[28px] sm:rounded-[28px] p-6 max-h-[88vh] overflow-y-auto"
+       style="background:color-mix(in srgb,var(--bg) 82%,var(--glass-bg))">
+    <div id="sheet-body"></div>
+  </div>
+</div>
+

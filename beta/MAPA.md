@@ -1,0 +1,68 @@
+# Mapa de la app (beta/)
+
+`index.html` se **genera**: no se edita. Se cambian las piezas de `src/` y se ejecuta
+`node herramientas/montar-beta.js` (con `--comprobar` solo mira que esté al día; GitHub
+también lo comprueba en cada push). El resultado es el mismo archivo de siempre, así que el
+service worker, la app de iPhone y el resto no notan nada.
+
+Cada pieza de `src/js/` es un trozo de la misma función grande (ver la plantilla), en orden:
+lo de abajo puede usar lo de arriba y al revés, como antes. Las piezas se fueron añadiendo
+por capas, así que una zona de la app puede tener retoques en varias piezas: busca con grep.
+
+## Armazón
+| Pieza | Qué hay |
+|---|---|
+| `src/index.plantilla.html` | La cabecera (meta, tema, fuentes) y el orden de todas las piezas |
+| `src/css/tailwind.css` | Tailwind compilado (una sola línea, no se toca) |
+| `src/css/estilos.css` | Estilos base de la app |
+| `src/html/arranque.html` | Pantalla de carga (logo girando) |
+| `src/html/pantallas.html` | El HTML de todas las pestañas y hojas |
+| `src/js/zz-se-actualiza-sola.js` | Registro del service worker y recarga sola al haber versión nueva |
+
+## Lógica (src/js/, en orden)
+| Pieza | Qué hay |
+|---|---|
+| `00-errores.js` | Aviso en pantalla si algo falla |
+| `01-idiomas.js` | Traducciones (es, en, fr, it) |
+| `02-textos.js` | TEXTOS de la app (`textos.js` de fuera manda si existe) |
+| `03-estado-y-datos.js` | Estado guardado (`nura-v4`), consultas, retos del día, logo |
+| `04-pintar.js` | Pintado: parte del día, gráficas, vaso/luna/reloj, compartir, año, calendario |
+| `05-hojas-avisos-tutorial.js` | Hojas (sheets), avisos diarios, tutorial |
+| `06-navegacion-y-eventos.js` | Barra de abajo (base, arrastrar la pastilla) y eventos de toque |
+| `07-cuenta-y-bienvenida.js` | Carrusel y animación de bienvenida, entrar con Google |
+| `08-modo-prueba.js` | Modo prueba (`enVisor`, usuarios de mentira) |
+| `09-fotos-prueba.js` | Fotos de los usuarios de prueba en base64 (una línea de 20 KB: no leer) |
+| `10-grupo.js` | Social: el grupo, reto en común, estilos de la pestaña |
+| `11-estudio-y-perfil.js` | Comodines de racha, temporizador de estudio, perfil |
+| `12-nivel-y-desbloqueos.js` | Desbloqueos por nivel, anillo y camino de XP, gimnasio, info del grupo, salud del día |
+| `13-novedades-semana.js` | Reto de la semana, resumen semanal, sonidos, racha del grupo |
+| `14-hoy.js` | El Resumen/Hoy, parte del día a pantalla completa |
+| `15-limpieza-pulido-retoque.js` | Historial, comidas, metas del mes, avisos, reacciones, selector de tema |
+| `16-evolucion-y-transiciones.js` | Tarjetas de Resumen, retos de la semana, Tu evolución, transiciones |
+| `17-rumbo.js` | Gran revisión: Vital, Retos, Social, Ajustes, preguntas iniciales, diario, instalar |
+| `18-diseno-temas.js` | Temas (Arena, Porcelana, Clásico, Esencial), privacidad, hábitos flexibles, tu año |
+| `19-objetivos-bucle.js` | Objetivos, tendencias, retos adaptativos, experimentos, metas del mes |
+| `20-google-calendar.js` | Google Calendar en Hoy |
+| `21-grupo-servidor.js` | Social con Supabase: bajar/subir grupo, llamadas, sincronizar |
+| `22-cuenta-entrar.js` | Cuenta: correo y código, Google, conflictos de versión, foto de perfil |
+| `23-meditacion.js` | Meditación: sonido, voz y sesión a pantalla completa |
+| `24-pegatinas-fotos-gym.js` | Pegatinas para compartir, fotos del gym, resumen del mes |
+| `25-claridad-solidez.js` | Retoques de septiembre (agua, objetivos del mes, XP justo) y el easter egg «DUBOY» |
+| `26-chat.js` | Chat del grupo en tiempo real |
+| `27-meditacion-ojos-sonidos.js` | Meditación con ojos cerrados, sonidos de fondo |
+| `28-fotos-perfil.js` | Barra de hábitos, recorte y galería de fotos de perfil, foto en grande |
+| `29-libros-habitos.js` | Lectura: biblioteca, encuesta, fichas de libros |
+| `30-lector.js` | Lector de EPUB a pantalla completa (`lcArchivo`) |
+| `31-moderacion-secciones.js` | Denunciar/bloquear y las secciones Hoy · Objetivos · Cuerpo · Mente · Social |
+| `32-estiramientos-catalogo.js` | Libros por tema y lista de estiramientos (posturas) |
+| `33-persona-3d.js` | Persona 3D de los estiramientos (`maniquiCarga`, usa `tres.js` y `cuerpo.glb`) |
+| `34-estiramientos-guia.js` | Modo guiado y ficha «?» con músculos |
+| `35-notion.js` | Conexión con Notion |
+| `36-barra.js` | Barra de abajo «Liquid Glass» (burbuja e iconos) |
+| `37-fotos-grandes-grupo.js` | Fotos de perfil en grande, foto del grupo |
+| `38-app-iphone.js` | Dentro de la app de iPhone (Capacitor, canal `peakBarra`) |
+| `39-estirar-y-leer.js` | Estirar en Cuerpo y leer en Mente, a un toque |
+
+## Fuera de src/ (archivos que la app carga tal cual)
+`textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
+`vendor/` (jszip, epub.js), `libros/` (EPUB y catálogo), `sw.js`, `manifest.webmanifest`, `privacidad.html`.
