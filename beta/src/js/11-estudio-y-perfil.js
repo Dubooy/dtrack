@@ -3,6 +3,7 @@
    nada, se gasta solo y la racha sigue. Solo se gastan si tapan el hueco
    entero; si el hueco es más largo que lo que tienes, no se malgastan. */
 var COMODIN_CADA=3, COMODIN_MAX=2;
+function comodinMax(){ return (typeof nivelCache==="number" && nivelCache>=30) ? 3 : COMODIN_MAX; }
 function comodinEstado(){
   if(!S.comodin) S.comodin={ saldo:0, nivel:1, usados:{} };
   if(!S.comodin.usados) S.comodin.usados={};
@@ -20,8 +21,8 @@ function comodinGana(st){
     var viejo=c.nivel, primeraVez=!c.visto;
     c.nivel=st.lvl; c.visto=1;
     var antes=c.saldo;
-    if(ganados>0) c.saldo=Math.min(COMODIN_MAX, c.saldo+ganados);
-    if(c.saldo>antes) nuevos.push("un comodín de racha ("+c.saldo+"/"+COMODIN_MAX+")");
+    if(ganados>0) c.saldo=Math.min(comodinMax(), c.saldo+ganados);
+    if(c.saldo>antes) nuevos.push("un comodín de racha ("+c.saldo+"/"+comodinMax()+")");
     save();
     /* la primera vez que abres esta versión no se celebra: solo se ajusta */
     if(!primeraVez){ subidaProgramada=true; setTimeout(function(){ celebraNivel(st.lvl, viejo, nuevos); }, Math.max(450, xpLlegada-Date.now()+1000)); }
@@ -32,7 +33,7 @@ function comodinGana(st){
 function comodinGasta(){
   var c=comodinEstado(); if(c.saldo<=0) return;
   var hueco=[], d=addDays(today(),-1);
-  while(!activeDay(d) && hueco.length<=COMODIN_MAX){ hueco.push(d); d=addDays(d,-1); }
+  while(!activeDay(d) && hueco.length<=comodinMax()){ hueco.push(d); d=addDays(d,-1); }
   if(!hueco.length || hueco.length>c.saldo) return;
   if(!activeDay(d)) return;                         /* no había racha que salvar */
   hueco.forEach(function(x){ c.usados[x]=1; });
@@ -282,7 +283,8 @@ function abrirPerfil(u){
             '<p class="pf-pista">Toca tu nombre para cambiarlo</p>'
           : '<h1 class="display">'+esc(p.usuario)+'</h1>')+
         '<div class="pf-rango">'+emblemaRango(p.nivel,40)+'<div><b>'+esc(rangoNombre(p.nivel))+'</b><span>Nivel '+p.nivel+'</span></div></div>'+
-        '<p class="pf-titulo"><span class="pf-nv num">NV '+p.nivel+'</span>'+esc(p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))+'</p>'+
+        ((p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))!==rangoNombre(p.nivel)
+          ? '<p class="pf-titulo"><span class="pf-nv num">Título</span>'+esc(p.yo?tituloElegido(p.nivel):(p.titulo||tituloDe(p.nivel)))+'</p>' : '')+
         (p.yo && p.nivel>=NV_TITULOS
           ? '<label class="pf-sel"><span>Tu título</span><select id="pf-titulo">'+
               LVL_NAMES.slice(0,p.nivel).map(function(n){ return '<option'+(n===tituloElegido(p.nivel)?' selected':'')+'>'+esc(n)+'</option>'; }).join("")+
@@ -308,7 +310,7 @@ function abrirPerfil(u){
         pfFila("Estudio total", horasTxt(p.estudioMin||0))+
         (p.estudioTop?pfFila("Lo que más estudia", p.estudioTop):"")+
         (p.meditaMin?pfFila("Meditación total", horasTxt(p.meditaMin)):"")+
-        (p.comodines!==null?pfFila("Comodines de racha"+ICON_COMODIN.replace("margin-left:.26em","margin-left:.3em;color:var(--cyan)"), p.comodines+" de "+COMODIN_MAX, true):"")+
+        (p.comodines!==null?pfFila("Comodines de racha"+ICON_COMODIN.replace("margin-left:.26em","margin-left:.3em;color:var(--cyan)"), p.comodines+" de "+comodinMax(), true):"")+
       '</div>'+
       (p.medallas.length
         ? '<div class="soc-sec"><h2 class="display">Logros</h2><span class="t3" style="font-size:12.5px">'+p.medallas.length+'</span></div>'+
@@ -385,7 +387,7 @@ function extrasAccion(a, el){
     save(); setTimeout(render,400); return true;
   }
   if(a==="x-acento"){
-    if(nivelCache<NV_COLORES){ avisoNube("Los colores se desbloquean en el nivel "+NV_COLORES+"."); return true; }
+    var nvC=acentoNivel(el.dataset.c||""); if(nivelCache<nvC){ avisoNube("Este color se desbloquea en el nivel "+nvC+"."); return true; }
     try{ el.dataset.c ? localStorage.setItem(ACKEY, el.dataset.c) : localStorage.removeItem(ACKEY); }catch(err){}
     aplicaAcento();
     var bs=document.querySelectorAll(".acentos button");

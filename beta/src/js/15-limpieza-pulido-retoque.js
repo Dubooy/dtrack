@@ -487,10 +487,13 @@ var PULIDO_CSS=[
 
 /* ── selector de tema: el botón del sol abre las muestras ── */
 var TEMA_MUESTRA={
+  cielo:["#eaf1fa","#ffffff","#2f7fd8"], melocoton:["#fbeee6","#fffaf6","#e0664a"],
+  lavanda:["#f0ecfa","#fcfaff","#7457d9"], menta:["#e8f5ef","#f8fdfb","#15936c"],
   light:["#f5f0e6","#fffcf6","#1c1b19"], dark:["#141311","#1e1c19","#f1ebdf"],
   sage:["#eef3ec","#ffffff","#4f7d63"],  neo:["#e6dcc6","#fbf6ea","#2f4a7d"],
   medianoche:["#000000","#161618","#8f8fff"], oro:["#12100b","#1f1b12","#d9ae45"],
-  arena:["#efe6d8","#fffcf7","#b5562f"], porcelana:["#f3f4f6","#ffffff","#1f4fd1"]
+  arena:["#efe6d8","#fffcf7","#b5562f"], porcelana:["#f3f4f6","#ffffff","#1f4fd1"],
+  esmeralda:["#07140f","#10251c","#34c98a"], leyenda:["#110a1b","#1f1430","#b57bff"], aurora:["#06121a","#0e2230","#5ee0c8"]
 };
 var TEMA_VISTO="dtrack-temas-visto";
 function temaVisto(){ try{ return !!localStorage.getItem(TEMA_VISTO); }catch(e){ return true; } }
@@ -578,10 +581,10 @@ function vitalVacios(){
 /* ── logros bloqueados: cuánto te falta ── */
 var MED_PROG={ m1:["ch",1], m2:["best",7], m3:["best",30], m4:["ch",50], m5:["ch",100], m6:["gym",20], m7:["gym",100],
   m8:["sleep",10], m9:["lowScreen",5], m10:["perfect",1], m11:["perfect",5], m12:["tasksDone",10], m13:["examsPast",10],
-  m14:["lvl",13], m15:["lvl",20], m16:["triples",1], m17:["triples",10] };
+  m14:["lvl",26], m15:["lvl",40], m16:["triples",1], m17:["triples",10] };
 function medProg(m, st){
   var p=MED_PROG[m.id]; if(!p || p[1]<=1) return "";
-  var v=Math.min(p[1], Math.max(0, +(st[p[0]]||0))), obj=p[0]==="lvl"?(p[1]===20?LVL_NAMES.length:p[1]):p[1];
+  var v=Math.min(p[1], Math.max(0, +(st[p[0]]||0))), obj=p[1];
   var u = p[0]==="lvl" ? "nivel "+v+" de "+obj : v+" de "+obj;
   return '<span class="md-prog"><span class="md-barra"><i style="width:'+Math.round(v/obj*100)+'%"></i></span><span class="num">'+u+'</span></span>';
 }
@@ -712,7 +715,10 @@ var RETOQUE_CSS=[
 '#ideal-list, #retos-checklist{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }',
 
 /* oscuro: las tarjetas se separan mejor del fondo */
-'html.dark:not(.medianoche):not(.oro){ --glass-bg:rgba(255,255,255,.07); }',
+'html.dark:not(.medianoche):not(.oro):not(.esmeralda):not(.leyenda):not(.aurora){ --glass-bg:rgba(255,255,255,.07); }',
+'html.dark.esmeralda .rg, html.dark.esmeralda .hg, html.dark.esmeralda .soc-reto, html.dark.esmeralda .rk, html.dark.esmeralda .hist-boton{ background:#11261c!important; }',
+'html.dark.leyenda .rg, html.dark.leyenda .hg, html.dark.leyenda .soc-reto, html.dark.leyenda .rk, html.dark.leyenda .hist-boton{ background:#1e1530!important; }',
+'html.dark.aurora .rg, html.dark.aurora .hg, html.dark.aurora .soc-reto, html.dark.aurora .rk, html.dark.aurora .hist-boton{ background:#0f2231!important; }',
 'html.dark .rg, html.dark .hg, html.dark .soc-reto, html.dark .rk, html.dark .hist-boton{ background:#29292c!important; box-shadow:inset 0 0 0 1px rgba(255,255,255,.07)!important; }',
 'html.dark.medianoche .rg, html.dark.medianoche .hg, html.dark.medianoche .soc-reto, html.dark.medianoche .rk, html.dark.medianoche .hist-boton{ background:#141416!important; }',
 'html.dark.oro .rg, html.dark.oro .hg, html.dark.oro .soc-reto, html.dark.oro .rk, html.dark.oro .hist-boton{ background:#221d13!important; }'

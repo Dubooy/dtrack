@@ -1,6 +1,9 @@
 /* ════════════════ lo que se desbloquea con el nivel ════════════════ */
 var NV_ARENA=7, NV_PORCELANA=13;
 var NV_COLORES=4, NV_REACC1=5, NV_EXTRA=7, NV_TITULOS=8, NV_MEDIANOCHE=10, NV_REACC2=11, NV_ORO=16, NV_REACC3=17;
+/* lo nuevo, del 21 al 40 */
+var NV_COLORES2=22, NV_REACC4=23, NV_REACC5=25, NV_ESMERALDA=26, NV_REACC6=28, NV_COLORES3=29, NV_COMODIN3=30,
+    NV_LEYENDA=31, NV_REACC7=34, NV_COLORES4=35, NV_REACC8=37, NV_AURORA=40;
 var DESBLOQUEOS=[
   {nv:3,  t:"Comodín de racha"},
   {nv:4,  t:"Colores de acento: azul, rosa y naranja"},
@@ -17,7 +20,26 @@ var DESBLOQUEOS=[
   {nv:15, t:"Comodín de racha"},
   {nv:16, t:"Tema Oro"},
   {nv:17, t:"Reacción 🐐"},
-  {nv:18, t:"Comodín de racha"}
+  {nv:18, t:"Comodín de racha"},
+  {nv:21, t:"Comodín de racha"},
+  {nv:22, t:"Colores de acento: verde y turquesa"},
+  {nv:23, t:"Reacciones 🤯 y 🫶"},
+  {nv:24, t:"Comodín de racha"},
+  {nv:25, t:"Reacción 🙌"},
+  {nv:26, t:"Tema Esmeralda"},
+  {nv:27, t:"Comodín de racha"},
+  {nv:28, t:"Reacciones 🚀 y 💎"},
+  {nv:29, t:"Color de acento: rojo"},
+  {nv:30, t:"Comodín de racha"},
+  {nv:30, t:"Guardar hasta 3 comodines"},
+  {nv:31, t:"Tema Leyenda"},
+  {nv:33, t:"Comodín de racha"},
+  {nv:34, t:"Reacción 🦁"},
+  {nv:35, t:"Color de acento: violeta"},
+  {nv:36, t:"Comodín de racha"},
+  {nv:37, t:"Reacción 🏆"},
+  {nv:39, t:"Comodín de racha"},
+  {nv:40, t:"Tema Aurora"}
 ];
 var nivelCache=1;
 function nivelRefresca(st){ nivelCache=(st||stats()).lvl; return nivelCache; }
@@ -29,6 +51,9 @@ function temasDesbloqueados(){
   if(nivelCache>=NV_MEDIANOCHE) t.push("medianoche");
   if(nivelCache>=NV_PORCELANA) t.push("porcelana");
   if(nivelCache>=NV_ORO) t.push("oro");
+  if(nivelCache>=NV_ESMERALDA) t.push("esmeralda");
+  if(nivelCache>=NV_LEYENDA) t.push("leyenda");
+  if(nivelCache>=NV_AURORA) t.push("aurora");
   return t;
 }
 function temaVigila(){
@@ -44,15 +69,20 @@ function temaVigila(){
 var ACKEY="dtrack-acento";
 var ACENTOS=[
   {k:"",        n:"Por defecto", c:"#1c1b19"},
-  {k:"azul",    n:"Azul",        c:"#1f6fe0"},
-  {k:"rosa",    n:"Rosa",        c:"#d6337f"},
-  {k:"naranja", n:"Naranja",     c:"#e0661c"}
+  {k:"azul",     n:"Azul",        c:"#1f6fe0", nv:4},
+  {k:"rosa",     n:"Rosa",        c:"#d6337f", nv:4},
+  {k:"naranja",  n:"Naranja",     c:"#e0661c", nv:4},
+  {k:"verde",    n:"Verde",       c:"#16a34a", nv:22},
+  {k:"turquesa", n:"Turquesa",    c:"#0d9fa0", nv:22},
+  {k:"rojo",     n:"Rojo",        c:"#dc2c3c", nv:29},
+  {k:"violeta",  n:"Violeta",     c:"#8b3fe0", nv:35}
 ];
+function acentoNivel(k){ for(var i=0;i<ACENTOS.length;i++) if(ACENTOS[i].k===k) return ACENTOS[i].nv||0; return 0; }
 function acentoActual(){ try{ return localStorage.getItem(ACKEY)||""; }catch(e){ return ""; } }
 function aplicaAcento(){
   var r=document.documentElement, k=acentoActual();
-  if(k && nivelCache<NV_COLORES && typeof S!=="undefined" && S) k="";   /* si bajas de nivel, vuelve al de siempre */
-  r.classList.remove("acento-azul","acento-rosa","acento-naranja");
+  if(k && nivelCache<acentoNivel(k) && typeof S!=="undefined" && S) k="";   /* si bajas de nivel, vuelve al de siempre */
+  r.classList.remove("acento-azul","acento-rosa","acento-naranja","acento-verde","acento-turquesa","acento-rojo","acento-violeta");
   if(k) r.classList.add("acento-"+k);
 }
 function selectorAcento(){
@@ -60,9 +90,9 @@ function selectorAcento(){
   return '<p class="eyebrow mb-2">Color'+(bloq?' <span style="letter-spacing:0;text-transform:none;font-weight:500">· se desbloquea en el nivel '+NV_COLORES+'</span>':'')+'</p>'+
     '<div class="acentos mb-6'+(bloq?' bloq':'')+'">'+
       ACENTOS.map(function(a){
-        var on=(a.k===cur) || (!a.k && !cur);
-        return '<button data-act="x-acento" data-c="'+a.k+'" class="'+(on?"on":"")+'" aria-label="'+a.n+'">'+
-          '<i style="background:'+a.c+'"></i><span>'+a.n+'</span></button>';
+        var on=(a.k===cur) || (!a.k && !cur), cerrado=(a.nv||0)>nivelCache;
+        return '<button data-act="x-acento" data-c="'+a.k+'" class="'+(on?"on":"")+(cerrado?" cerrado":"")+'" aria-label="'+a.n+'">'+
+          '<i style="background:'+a.c+'"></i><span>'+(cerrado?"Nv "+a.nv:a.n)+'</span></button>';
       }).join("")+
     '</div>';
 }
@@ -73,6 +103,11 @@ function emojisDisponibles(){
   if(nivelCache>=NV_REACC1) e=e.concat(["😂","💀"]);
   if(nivelCache>=NV_REACC2) e=e.concat(["🫡","👑"]);
   if(nivelCache>=NV_REACC3) e=e.concat(["🐐"]);
+  if(nivelCache>=NV_REACC4) e=e.concat(["🤯","🫶"]);
+  if(nivelCache>=NV_REACC5) e=e.concat(["🙌"]);
+  if(nivelCache>=NV_REACC6) e=e.concat(["🚀","💎"]);
+  if(nivelCache>=NV_REACC7) e=e.concat(["🦁"]);
+  if(nivelCache>=NV_REACC8) e=e.concat(["🏆"]);
   return e;
 }
 
@@ -199,25 +234,27 @@ var DESBLOQ_CSS=[
    El nivel se ve como un anillo que se llena con la XP, del color del rango.
    Cada vez que ganas XP, unas bolitas vuelan hasta el anillo (si estás en
    Retos) o hasta el icono de Retos de la barra, que enseña un anillo pequeño
-   llenándose. Debajo del anillo, el camino con los 20 niveles y lo que da cada uno. */
+   llenándose. Debajo del anillo, el camino con los 40 niveles y lo que da cada uno. */
 var RANGOS=[
-  { n:"Bronce",   desde:1,  hasta:4,  c:"#c9773a", d:"#9a5424" },
-  { n:"Plata",    desde:5,  hasta:9,  c:"#9aa7b4", d:"#6c7a88" },
-  { n:"Oro",      desde:10, hasta:14, c:"#e8b32c", d:"#c07f0c" },
-  { n:"Diamante", desde:15, hasta:17, c:"#3ea4e4", d:"#2560c8" },
-  { n:"Leyenda",  desde:18, hasta:20, c:"#9b5cf6", d:"#d9468f" }
+  { n:"Bronce",    desde:1,  hasta:5,  c:"#c9773a", d:"#9a5424" },
+  { n:"Plata",     desde:6,  hasta:10, c:"#9aa7b4", d:"#6c7a88" },
+  { n:"Oro",       desde:11, hasta:15, c:"#e8b32c", d:"#c07f0c" },
+  { n:"Platino",   desde:16, hasta:20, c:"#6fc2bd", d:"#3b8c93" },
+  { n:"Diamante",  desde:21, hasta:25, c:"#3ea4e4", d:"#2560c8" },
+  { n:"Esmeralda", desde:26, hasta:30, c:"#2fbf71", d:"#0f8a5a" },
+  { n:"Leyenda",   desde:31, hasta:40, c:"#9b5cf6", d:"#d9468f" }
 ];
 function rangoDe(n){
   for(var i=0;i<RANGOS.length;i++) if(n>=RANGOS[i].desde && n<=RANGOS[i].hasta) return RANGOS[i];
   return RANGOS[RANGOS.length-1];
 }
-var ROMANOS=["I","II","III","IV","V"];
+var ROMANOS=["I","II","III","IV","V","VI","VII","VIII","IX","X"];
 function rangoNombre(n){ var r=rangoDe(n); return r.n+" "+ROMANOS[n-r.desde]; }
 
 /* XP → nivel y progreso, con la misma curva que stats() */
 function nivelDeXP(xp){
-  var lv=1, need=150, acc=0;
-  while(lv<LVL_NAMES.length && xp>=acc+need){ acc+=need; lv++; need=Math.round(need*1.215); }
+  var lv=1, need=NV_XP_BASE, acc=0;
+  while(lv<LVL_NAMES.length && xp>=acc+need){ acc+=need; lv++; need=Math.round(need*NV_XP_CRECE); }
   var pct = lv>=LVL_NAMES.length ? 1 : Math.max(0, Math.min(1, (xp-acc)/need));
   return { lvl:lv, pct:pct, falta:Math.max(0, acc+need-xp) };
 }
@@ -287,7 +324,7 @@ function xpPreparar(){ if(xpMostrado==null) xpMostrado=stats().xp; xpLlegada=Mat
 
 function pintaTextosNivel(v){
   var nm=document.getElementById("lvl-name"); if(nm) nm.textContent=LVL_NAMES[v.lvl-1];
-  var ey=document.getElementById("lvl-rango"); if(ey) ey.textContent="Rango "+rangoNombre(v.lvl);
+  var ey=document.getElementById("lvl-rango"); if(ey) ey.textContent="Nivel "+v.lvl+" de "+LVL_NAMES.length;
   var nx=document.getElementById("lvl-next");
   if(nx) nx.textContent = v.lvl>=LVL_NAMES.length ? "Has llegado al final. Ya no hay nada por encima." : "Faltan "+v.falta+" XP para "+LVL_NAMES[v.lvl];
   var sig=document.getElementById("lvl-siguiente");
@@ -393,9 +430,11 @@ function xpAlcanza(){
   if(sube) setTimeout(function(){ comodinGana(stats()); }, 200);
 }
 
-/* ── el camino de los 20 niveles ── */
+/* ── el camino de los 40 niveles ── */
 var CAMINO_PREMIO={3:"+1 comodín",4:"Colores",5:"😂 💀",6:"+1 comodín",7:"Arena",8:"Títulos",9:"+1 comodín",
-  10:"Medianoche",11:"🫡 👑",12:"+1 comodín",13:"Porcelana",15:"+1 comodín",16:"Tema Oro",17:"🐐",18:"+1 comodín",20:"La cima"};
+  10:"Medianoche",11:"🫡 👑",12:"+1 comodín",13:"Porcelana",15:"+1 comodín",16:"Tema Oro",17:"🐐",18:"+1 comodín",
+  21:"+1 comodín",22:"Colores",23:"🤯 🫶",24:"+1 comodín",25:"🙌",26:"Esmeralda",27:"+1 comodín",28:"🚀 💎",29:"Rojo",
+  30:"3 comodines",31:"Tema Leyenda",33:"+1 comodín",34:"🦁",35:"Violeta",36:"+1 comodín",37:"🏆",39:"+1 comodín",40:"Aurora · la cima"};
 /* Todas las paradas tienen el mismo dibujo (fondo, pista, arco y número) y lo que
    cambia es la clase: futura, pasada (ok) o la tuya (yo). Así, al subir de nivel
    nada desaparece: el anillo se cierra, la parada se hace pequeña y se apaga un
@@ -521,7 +560,7 @@ function caminoAnima(){
 }
 function caminoInfo(n){
   var nombre=LVL_NAMES[n-1], d=DESBLOQUEOS.filter(function(u){ return u.nv===n; }).map(function(u){ return u.t; });
-  if(n===LVL_NAMES.length) d.push("el último título");
+  if(n===LVL_NAMES.length) d.push("la cima");
   avisoNube(d.length ? "Nivel "+n+" · "+nombre+". Desbloqueas: "+d.join(", ")+"." : "Nivel "+n+" · "+nombre+".");
 }
 
@@ -536,7 +575,7 @@ function celebraNivel(nuevo, viejo, lista){
   for(var i=0;i<12;i++){
     puntos+='<i style="--ang:'+(i*30+15)+'deg;--dist:'+(98+(i%2)*14)+'px;--ret:'+((i%3)*.03)+'s"></i>';
   }
-  var filas=[{ ey:"Título nuevo", t:tituloDe(nuevo) }].concat((lista||[]).map(function(t){ return { ey:"Desbloqueado", t:t }; }));
+  var filas=[{ ey:"Nivel nuevo", t:tituloDe(nuevo) }].concat((lista||[]).map(function(t){ return { ey:"Desbloqueado", t:t }; }));
   var sobran=0; if(filas.length>4){ sobran=filas.length-4; filas=filas.slice(0,4); }
   var icoTitulo='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.4 5 5.4.6-4 3.7 1.1 5.4L12 15.5l-4.9 2.7 1.1-5.4-4-3.7 5.4-.6z"/></svg>';
   var icoAbierto='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5V7.5a3.5 3.5 0 0 1 6.8-1.2"/></svg>';
@@ -772,7 +811,7 @@ function abrirGrupo(){
         var yo=(m.usuario===GRUPO.yo), nv=yo?yoNv:(m.nivel||1);
         return '<div class="soc-fila" data-act="x-perfil" data-u="'+esc(m.usuario)+'" style="cursor:pointer">'+caraDe(m,40)+
           '<div class="soc-cuerpo"><div style="flex:1;min-width:0"><p class="soc-nombre">'+esc(m.usuario)+(yo?'<span class="t3" style="font-weight:500"> · tú</span>':'')+'</p>'+
-          '<p class="soc-sub">'+esc(rangoNombre(nv))+' · '+esc(yo?tituloElegido(nv):tituloDe(nv))+'</p></div>'+
+          '<p class="soc-sub">Nivel '+nv+' · '+esc(yo?tituloElegido(nv):tituloDe(nv))+'</p></div>'+
           emblemaRango(nv,28)+'</div></div>';
       }).join("")+'</div>'+
       '<div class="soc-sec"><h2 class="display">Objetivo del grupo</h2></div>'+
