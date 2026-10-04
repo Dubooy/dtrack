@@ -66,8 +66,9 @@ function lcSube(f){
       if(!ok){ avisoNube("No he podido guardar el libro en este dispositivo."); return; }
       save(); sonido("pop");
       avisoNube(ya?"Libro actualizado en este dispositivo.":"Añadido a tus libros: «"+t+"».");
+      /* recién subido, se abre ya en el lector */
       if(document.getElementById("lc-capa")){ lcCierra(); setTimeout(function(){ lcAbre(id); }, 260); }
-      else lbSheetLibro(id);
+      else lcAbre(id);
     });
   }).catch(function(){ avisoNube("No he podido abrir ese archivo. ¿Es un EPUB sin DRM?"); });
 }
@@ -159,6 +160,8 @@ function lcTema(){
     "html, body":{ "background":col.bg+" !important", "color":col.tx+" !important" },
     "body":{ "font-family":"Georgia, 'Iowan Old Style', 'Palatino Linotype', serif !important", "line-height":"1.6 !important", "padding":"0 !important" },
     "p":{ "text-align":"justify", "hyphens":"auto", "-webkit-hyphens":"auto" },
+    "h1, h2, h3, h4, h5":{ "text-align":"center !important", "hyphens":"none !important", "letter-spacing":"normal !important", "word-spacing":"normal !important", "line-height":"1.25 !important", "margin":"1.2em 0 .8em !important" },
+    "h1":{ "font-size":"1.5em !important" }, "h2":{ "font-size":"1.3em !important" }, "h3, h4, h5":{ "font-size":"1.1em !important" },
     "a":{ "color":"inherit !important" },
     "img":{ "max-width":"100% !important", "height":"auto !important" }
   });
@@ -191,7 +194,11 @@ function lcTeclas(e){
   else if(e.key==="ArrowLeft"||e.key==="PageUp"){ e.preventDefault(); lcPasa(-1); }
   else if(e.key==="Escape") lcCierra();
 }
-function lcPasa(dir){ if(!LC.rend) return; if(dir>0) LC.rend.next(); else LC.rend.prev(); }
+function lcPasa(dir){
+  if(!LC.rend) return; if(dir>0) LC.rend.next(); else LC.rend.prev();
+  /* al pasar página las barras se apartan; un toque en el centro las vuelve a traer */
+  var c=document.getElementById("lc-capa"); if(c && !document.getElementById("lc-panel").dataset.t) c.classList.add("limpio");
+}
 
 /* cada vez que cambias de página: guarda por dónde vas y suma las páginas nuevas al hábito */
 function lcMovido(loc, inicial){
@@ -264,8 +271,8 @@ function lcCierra(){
   var id=LC.id; LC.id=null;
   c.classList.remove("ve"); document.documentElement.classList.remove("lc-abierto");
   setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); }, 220);
+  /* al cerrar vuelves a donde estabas, sin fichas por medio */
   render();
-  if(id && lbLibro(id)) lbSheetLibro(id);
 }
 
 /* ── acciones ── */

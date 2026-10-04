@@ -56,6 +56,10 @@
 '  align-items:center; justify-content:center; gap:8px; color:var(--t2); font-size:12px; font-weight:650; text-align:center; padding:10px;',
 '  box-shadow:inset 0 0 0 1.5px var(--hairline); }',
 '.tq-subir i{ font-style:normal; font-size:26px; font-weight:300; line-height:1; color:var(--t1); }',
+/* mini barra de progreso y «Leído» bajo la portada */
+'.tq-barra.tq-mini{ height:3px; margin-top:8px; }',
+'.tq-hecho{ display:inline-block; margin-top:7px; font-size:10.5px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }',
+'#mt-leer{ margin-top:8px; }',
 /* Hoy: solo una fila para seguir leyendo */
 '#lb-hab.tq-hoy{ margin-top:18px; }',
 '#lb-hab.tq-hoy .tq-now{ padding:12px; border-radius:20px; } #lb-hab.tq-hoy .tq-now .lb-port{ width:44px; }',
@@ -92,22 +96,27 @@
       '<em class="num">'+pg+' de '+tot+' págs · '+pc+' %</em></span><span class="tq-seguir">'+(b.d?"Seguir":"Apuntar")+'</span></button>';
   }
   function tqLibro(b, act){
-    return '<button class="tq-libro" data-act="'+act+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+esc(b.a)+'</small></button>';
+    var e=lbEstado(b.id), pg=lbPags(b.id), tot=lbTotal(b.id), marca="";
+    if(e==="leido") marca='<span class="tq-hecho">Leído</span>';
+    else if(pg>0 && tot) marca='<span class="tq-barra tq-mini"><i style="width:'+Math.min(100, Math.max(4, Math.round(pg/tot*100)))+'%"></i></span>';
+    return '<button class="tq-libro" data-act="'+act+'" data-id="'+b.id+'">'+lbPortada(b,"l")+marca+'<b>'+esc(b.t)+'</b><small>'+esc(b.a)+'</small></button>';
   }
   function pintaLeer(){
     var vid=view==="tareas" ? "v-tareas" : view==="academico" ? "v-academico" : null; if(!vid) return;
     var v=document.getElementById(vid); if(!v || typeof LB==="undefined") return;
     var el=document.getElementById("mt-leer");
     if(!el){ el=document.createElement("div"); el.id="mt-leer"; el.className="tq"; }
-    pon(el, v, v.firstElementChild);
+    /* va debajo de la meditación */
+    pon(el, v, document.getElementById("mente-"+vid.slice(2)) || v.firstElementChild);
     var act=lbActual(), P=lcPropios();
     var gratis=Object.keys(P).map(function(id){ return P[id]; }).concat(LB.filter(function(b){ return b.d; })).filter(function(b){ return b.id!==act; });
-    var recs=lbRecs(10).filter(function(b){ return b && !b.d && b.id!==act; });
+    /* primero los que ya has empezado, luego el resto; los terminados al final */
+    function orden(b){ var e=lbEstado(b.id); return e==="leido" ? 2 : (lbPags(b.id)>0 ? 0 : 1); }
+    gratis=gratis.map(function(b,i){ return [orden(b), i, b]; }).sort(function(x,y){ return x[0]-y[0] || x[1]-y[1]; }).map(function(x){ return x[2]; });
     var h='<div class="tq-cab"><h2 class="display">Leer</h2><button class="tq-link" data-act="x-lb-biblio" data-t="'+(act?"mis":"para")+'">Biblioteca</button></div>'+
       (act ? lbTarjetaAhora(act) : '')+
-      '<p class="tq-sub"'+(act?'':' style="margin-top:0"')+'>Léelos aquí, gratis</p><div class="tq-fila">'+gratis.map(function(b){ return tqLibro(b, "x-lb-lee"); }).join("")+
-        '<button class="tq-subir" data-act="x-lb-subir"><i>+</i>Subir tu EPUB</button></div>'+
-      (recs.length ? '<p class="tq-sub">Para ti</p><div class="tq-fila">'+recs.map(function(b){ return tqLibro(b, "x-lb-libro"); }).join("")+'</div>' : '');
+      '<p class="tq-sub"'+(act?'':' style="margin-top:0"')+'>Toca uno y empieza a leer</p><div class="tq-fila">'+gratis.map(function(b){ return tqLibro(b, "x-lb-lee"); }).join("")+
+        '<button class="tq-subir" data-act="x-lb-subir"><i>+</i>Tu EPUB</button></div>';
     pinta(el, h);
   }
 
@@ -129,6 +138,13 @@
 
   /* el lector empieza en el texto, no en la portada de la edición */
   window.lcInicio=function(bk){
+    /* si el índice trae un prólogo o un capítulo uno, se empieza ahí (sin tasas, erratas ni portadillas) */
+    try{ var toc=(bk.navigation && bk.navigation.toc) || [], ok=null;
+      (function busca(l){ (l||[]).forEach(function(x){ if(ok) return;
+        var t=String(x.label||"").replace(/[^0-9A-Za-zÀ-ÿ. ]+/g," ").replace(/\s+/g," ").trim();
+        if(/^(pr[oó]logo|al lector|cap[ií]tulo (primero|i\b|1\b)|tratado primero|acto primero|personas|i\b|1\b)/i.test(t)) ok=x.href;
+        else busca(x.subitems); }); })(toc);
+      if(ok) return ok; }catch(e){}
     try{ var it=(bk.spine && bk.spine.spineItems) || [];
       for(var i=0;i<it.length;i++){ var x=it[i]; if(!/cover|wrap0000|portada/i.test((x.idref||"")+" "+(x.href||""))) return x.href; } }catch(e){}
     return undefined;
