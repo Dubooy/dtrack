@@ -19013,7 +19013,7 @@ function lbSheetBiblio(t){
   lbTab=t||lbTab||"para";
   var L=lbSt(), e=L.enc, leidos=lbLeidos(), act=lbActual();
   var tabs=[["para","Para ti"]].concat(LB_TEMAS.map(function(T){ return [T.k, T.t]; })).concat([["mis","Mis libros"]]);
-  var h='<div class="flex items-start justify-between mb-1"><div><p class="eyebrow mb-1.5">Mente · Leer</p><h3 class="display text-[20px] font-bold">Biblioteca</h3></div>'+closeBtn()+'</div>'+
+  var h='<div class="flex items-start justify-between mb-1"><div><p class="eyebrow mb-1.5">Mente · Leer</p><h3 class="display text-[20px] font-bold">Biblioteca</h3></div>'+''+'</div>'+
     '<p class="text-[12.5px] t3 mb-4">'+LB.length+' libros: novelas, fantasía, misterio, clásicos gratis y para crecer'+(leidos.length?' · has leído '+leidos.length:'')+'.</p>'+
     lbAhoraPanel()+
     '<div class="lb-chips">'+tabs.map(function(x){ var T=lbTema(x[0]), c=(x[0]==="para"||x[0]==="mis")?"var(--accent)":T.c;
@@ -19037,7 +19037,7 @@ function lbSheetBiblio(t){
     h+='<div class="lb-lista">'+LB.filter(function(b){ return b.k===lbTab; }).map(function(b){ return lbFila(b); }).join("")+'</div>';
   }
   h+='<p class="lb-nota">Las páginas son aproximadas y cambian según la edición. Puedes ajustarlas en cada libro.</p>';
-  openSheet(h);
+  openSheet(lbX()+h);
   lbArriba();
 }
 /* «¿Qué leer ahora?»: eliges cómo te apetece y salen tres, sin encuestas */
@@ -19062,6 +19062,8 @@ function lbAhoraPanel(){
     '<div class="lb-ahora-f">'+bs.map(function(b){
       return '<button data-act="'+(b.d?"x-lb-lee":"x-lb-libro")+'" data-id="'+b.id+'">'+lbPortada(b,"l")+'<b>'+esc(b.t)+'</b><small>'+(b.d?"Léelo ya, gratis":esc(lbTema(b.k).t))+'</small></button>'; }).join("")+'</div></div>';
 }
+/* la X de cerrar va siempre arriba a la derecha, también al bajar por la hoja */
+function lbX(){ return '<div class="lb-x">'+closeBtn()+'</div>'; }
 function lbArriba(){ var sc=document.querySelector("#sheet .sheet-card"); if(sc) sc.scrollTop=0; }
 
 function lbSheetLibro(id){
@@ -19069,7 +19071,7 @@ function lbSheetLibro(id){
   var T=lbTema(b.k), e=lbEstado(id), act=lbActual(), s=lbEst(id);
   if(lbRitmoSel==null || lbRitmoSel.id!==id) lbRitmoSel={ id:id, n:(lbHabActivo(id)||{}).meta||lbRitmoEnc() };
   var rit=lbRitmoSel.n, pg=lbPags(id), tot=lbTotal(id);
-  var h='<div class="flex items-center justify-between mb-4"><button class="lb-volver" data-act="x-lb-biblio">'+ico("flecha")+'Biblioteca</button>'+closeBtn()+'</div>'+
+  var h='<div class="flex items-center justify-between mb-4"><button class="lb-volver" data-act="x-lb-biblio">'+ico("flecha")+'Biblioteca</button>'+''+'</div>'+
     '<div class="lb-ficha">'+lbPortada(b,"l")+
       '<div class="lb-ficha-t"><span class="lb-tema" style="--c:'+T.c+'">'+esc(T.t)+'</span><h3 class="display">'+esc(b.t)+'</h3><p>'+esc(b.a)+'</p>'+
       '<small class="num">'+[b.y?esc(lbAnyo(b)):"", (b.propio && !b.n && !(s&&s.total))?"":tot+" págs", b.l?esc(LB_NIVEL_TXT[b.l]):""].filter(Boolean).join(" · ")+'</small></div></div>'+
@@ -19104,7 +19106,7 @@ function lbSheetLibro(id){
   }
   if(b.propio) h+='<button class="lb-link" data-act="x-lb-borra" data-id="'+id+'">Quitar este libro</button>';
   else if(!b.d) h+='<a class="lb-link" href="https://www.google.com/search?tbm=bks&q='+encodeURIComponent(b.t+" "+b.a)+'" target="_blank" rel="noopener noreferrer">Buscar el libro '+ico("flecha")+'</a>';
-  openSheet(h);
+  openSheet(lbX()+h);
   lbArriba();
 }
 function lbRitmosHTML(id, rit){
@@ -19121,13 +19123,13 @@ function lbSheetEnc(){
   var Q=LB_ENC[lbEncPaso];
   var h='<div class="flex items-center justify-between mb-4">'+
       (lbEncPaso>0?'<button class="icon-btn !w-8 !h-8 lb-atras" data-act="x-lb-atras" aria-label="Atrás">'+ico("flecha")+'</button>':'<span class="eyebrow">Tu libro perfecto</span>')+
-      closeBtn()+'</div>'+
+      ''+'</div>'+
     '<div class="lb-pasos">'+LB_ENC.map(function(x,i){ return '<i class="'+(i<lbEncPaso?"ya":i===lbEncPaso?"on":"")+'"></i>'; }).join("")+'</div>'+
     '<p class="lb-enc-n num">'+(lbEncPaso+1)+' de '+LB_ENC.length+'</p>'+
     '<h3 class="display lb-enc-q">'+esc(Q.q)+'</h3>'+
     '<div class="lb-ops">'+Q.ops.map(function(o){
       return '<button class="lb-op'+(lbEncR[Q.k]===o[0]?" on":"")+'" data-act="x-lb-resp" data-v="'+o[0]+'"><span class="lb-op-e">'+o[1]+'</span><span>'+esc(o[2])+'</span><i>'+ICON_CHECK+'</i></button>'; }).join("")+'</div>';
-  openSheet(h);
+  openSheet(lbX()+h);
   lbArriba();
 }
 function lbSheetResultado(fin){
@@ -19135,7 +19137,7 @@ function lbSheetResultado(fin){
   var rk=lbRanking(e.r); if(!rk.length){ lbSheetBiblio("mis"); return; }
   var top=rk[0].b, T=lbTema(top.k), rit=lbRitmoEnc();
   lbRitmoSel={ id:top.id, n:rit };
-  var h='<div class="flex items-start justify-between mb-2"><p class="eyebrow mt-2">'+(fin?"Y ahora…":"Tu libro perfecto")+'</p>'+closeBtn()+'</div>'+
+  var h='<div class="flex items-start justify-between mb-2"><p class="eyebrow mt-2">'+(fin?"Y ahora…":"Tu libro perfecto")+'</p>'+''+'</div>'+
     '<div class="lb-res">'+
       '<div class="lb-res-port">'+lbPortada(top,"xl")+'<span class="lb-res-match num">'+lbMatch(rk[0].s)+' %</span></div>'+
       '<span class="lb-tema" style="--c:'+T.c+'">'+esc(T.t)+'</span>'+
@@ -19145,7 +19147,7 @@ function lbSheetResultado(fin){
     '<button class="btn btn-quiet w-full !py-3 mt-2" data-act="x-lb-libro" data-id="'+top.id+'">Ver de qué va</button>'+
     (rk.length>1?'<p class="lb-sec">También te encajan</p><div class="lb-lista">'+rk.slice(1,3).map(function(x){ return lbFila(x.b, '<i class="lb-match num">'+lbMatch(x.s)+' %</i>'); }).join("")+'</div>':'')+
     '<button class="lb-link" data-act="x-lb-enc">Repetir la encuesta</button>';
-  openSheet(h);
+  openSheet(lbX()+h);
   lbArriba();
 }
 function lbFiesta(){
@@ -22058,6 +22060,8 @@ rcSubeAvatar=function(blob, previa){
 '.lb-ahora-f button{ text-align:left; min-width:0; } .lb-ahora-f .lb-port{ width:100%; box-shadow:0 2px 3px rgba(0,0,0,.12), 0 12px 20px -12px rgba(0,0,0,.45); }',
 '.lb-ahora-f > button > b{ display:block; font-size:12px; font-weight:700; line-height:1.25; margin-top:8px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
 '.lb-ahora-f > button > small{ display:block; font-size:11px; color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.lb-x{ position:sticky; top:0; height:0; z-index:6; display:flex; justify-content:flex-end; pointer-events:none; }',
+'.lb-x .icon-btn{ pointer-events:auto; box-shadow:0 4px 14px -6px rgba(0,0,0,.35); background:var(--bg); }',
 /* mini barra de progreso y «Leído» bajo la portada */
 '.tq-barra.tq-mini{ height:3px; margin-top:8px; }',
 '.tq-hecho{ display:inline-block; margin-top:7px; font-size:10.5px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }',

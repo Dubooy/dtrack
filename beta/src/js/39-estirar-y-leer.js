@@ -73,6 +73,8 @@
 '.lb-ahora-f button{ text-align:left; min-width:0; } .lb-ahora-f .lb-port{ width:100%; box-shadow:0 2px 3px rgba(0,0,0,.12), 0 12px 20px -12px rgba(0,0,0,.45); }',
 '.lb-ahora-f > button > b{ display:block; font-size:12px; font-weight:700; line-height:1.25; margin-top:8px; overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
 '.lb-ahora-f > button > small{ display:block; font-size:11px; color:var(--t3); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.lb-x{ position:sticky; top:0; height:0; z-index:6; display:flex; justify-content:flex-end; pointer-events:none; }',
+'.lb-x .icon-btn{ pointer-events:auto; box-shadow:0 4px 14px -6px rgba(0,0,0,.35); background:var(--bg); }',
 /* mini barra de progreso y «Leído» bajo la portada */
 '.tq-barra.tq-mini{ height:3px; margin-top:8px; }',
 '.tq-hecho{ display:inline-block; margin-top:7px; font-size:10.5px; font-weight:750; letter-spacing:.06em; text-transform:uppercase; color:var(--t3); }',
