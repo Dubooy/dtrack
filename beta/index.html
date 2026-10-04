@@ -21027,7 +21027,37 @@ var GUIA=null, guiaWake=null;
 var GUIA_PREP=5;   /* segundos para colocarse antes de cada estiramiento */
 function guiaPasoDoble(p){ return /por (lado|pierna)/.test(p.d); }
 function guiaVozOn(){ return prefs().guiaVoz!==false; }
-function guiaHabla(txt){ if(guiaVozOn() && typeof medHabla==="function") medHabla(txt); }
+/* voz de hombre, la más natural del móvil: en iPhone Jorge (mejor si es la mejorada), en Windows Álvaro o Pablo.
+   Si el móvil no dice el sexo de sus voces (Android), se queda con la más natural que tenga. */
+var guiaVozElegida=null;
+function guiaVoz(){
+  if(!window.speechSynthesis) return null;
+  var vs=speechSynthesis.getVoices()||[], lang=(typeof IDIOMA==="string"?IDIOMA:"es"), mejor=null, pm=-99;
+  vs.forEach(function(v){
+    var l=(v.lang||"").toLowerCase().replace("_","-"); if(l.indexOf(lang)!==0) return;
+    var p=0, n=v.name||"";
+    if(/premium/i.test(n)) p+=12;
+    if(/enhanced|mejorad|natural|neural|siri/i.test(n)) p+=9;
+    if(/google/i.test(n)) p+=3;
+    if(lang==="es" && l==="es-es") p+=2;
+    if(/jorge|juan|diego|carlos|pablo|[aá]lvaro|alvaro|dar[ií]o|ra[uú]l|enrique|miguel|male|hombre|masculin|daniel|aaron|arthur|tom\b|thomas|luca|markus/i.test(n)) p+=10;
+    if(/m[oó]nica|marisa|paulina|marisol|luciana|helena|laura|elvira|elena|sabina|dalia|female|mujer|samantha|ava|zoe|amelie|alice|federica|elsa|karen|moira|tessa|anna/i.test(n)) p-=4;
+    if(v.localService===false) p+=1;
+    if(/compact|eloquence|grandma|grandpa|albert|bad news|bahh|bells|boing|bubbles|cellos|jester|organ|superstar|trinoids|whisper|wobble|zarvox|rocko|shelley|flo|reed|sandy|eddy/i.test(n)) p-=20;
+    if(p>pm){ pm=p; mejor=v; }
+  });
+  guiaVozElegida=mejor; return mejor;
+}
+if(window.speechSynthesis){ try{ speechSynthesis.addEventListener("voiceschanged", function(){ guiaVoz(); }); }catch(e){} }
+function guiaHabla(txt){
+  if(!guiaVozOn() || !window.speechSynthesis || !txt) return;
+  try{
+    var u=new SpeechSynthesisUtterance(tr(txt)), v=guiaVozElegida||guiaVoz();
+    if(v){ u.voice=v; u.lang=v.lang; } else u.lang=(typeof IDIOMA==="string"?IDIOMA:"es");
+    u.rate=0.95; u.pitch=1; u.volume=0.9;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
 /* pitidos propios: suenan aunque los sonidos de la app estén apagados, y se callan con la voz */
 SONIDOS.cuenta=[{f:880,d:.09,g:.05}];
 SONIDOS.ya=[{f:1320,d:.28,g:.05},{f:660,d:.28,g:.015}];
