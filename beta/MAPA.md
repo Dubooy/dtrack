@@ -66,9 +66,9 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `41-rutinas-estirar.js` | Rutinas de estirar al final de Cuerpo: miniaturas, la rutina en orden y editable, y crear la tuya |
 | `42-salud-filas.js` | Salud del día: filas de agua, sueño y pantalla con color, frase, barra, «+» y animación de los iconos (el marcado está en html/pantallas.html) |
 | `43-alimentacion.js` | Alimentación en Cuerpo (debajo de Ejercicio): «He comido bien» (+10 XP), objetivo (definir, mantener, volumen) e ideas de desayuno, almuerzo y cena con macros |
-| `44-salud-articulos.js` | Artículos largos de Salud del día (sueño, agua, pantalla): portada, secciones con imagen, consejos con icono y «Pruébalo hoy». Imágenes en `beta/salud/*.svg` |
+| `44-salud-articulos.js` | Artículos largos de Salud del día (sueño, agua, pantalla): portada, secciones con imagen, consejos con icono y «Pruébalo hoy». Imágenes en `beta/salud/*.jpg` |
 | `45-mapa-musculos.js` | Mapa 2D de músculos de la ficha «?» (`mapaMusculos`) |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
-`vendor/` (jszip, epub.js), `salud/` (imágenes de los artículos de salud), `libros/` (EPUB y catálogo), `sw.js`, `manifest.webmanifest`, `privacidad.html`.
+`vendor/` (jszip, epub.js), `salud/` (imágenes de los artículos de salud, JPG a 1200×660 sacados de los SVG de /mnt/project-files/salud-articulos/svg), `libros/` (EPUB y catálogo), `sw.js`, `manifest.webmanifest`, `privacidad.html`.
