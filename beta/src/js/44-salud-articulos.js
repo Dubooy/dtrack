@@ -49,156 +49,195 @@ var SF_IC={
   diana:'<circle cx="12" cy="12" r="8.5"/><circle class="f" cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="5"/><circle class="s" cx="12" cy="12" r="1.8"/>'
 };
 
-/* artículos: d = portada, t = título, s = entradilla, i = introducción,
-   sec = secciones { h, p, img, tips:[[icono, título, texto]] }, reto = «Pruébalo hoy» */
+/* artículos: d = portada, t = título, s = entradilla, i = introducción (párrafos),
+   sec = secciones { h, p:[párrafos], img, tips:[[icono, título, texto]] },
+   res = en resumen, reto = «Pruébalo hoy» */
 SF_ARTS={
   sleep:[
-    { d:"S1-portada", t:"Por qué dormir bien lo cambia todo", s:"Lo que hace tu cuerpo mientras duermes.",
-      i:"Dormir no es tiempo perdido. Mientras descansas, el cuerpo y el cerebro hacen un trabajo que no pueden hacer despiertos.",
+    { d:"S1-portada", t:"Por qué dormir bien lo cambia todo", s:"Qué ocurre en el cuerpo y en el cerebro durante la noche, y cuánto descanso necesitas de verdad.",
+      i:["Solemos tratar el sueño como el margen que queda cuando todo lo demás está hecho. Es un error caro: dormir no es una pausa, sino un estado activo en el que el organismo hace tareas que no puede hacer despierto.",
+         "Cuando el descanso falla de forma repetida, se nota en casi todo: en la concentración, en el estado de ánimo, en el apetito y en cómo responde el cuerpo al entrenamiento. Entender qué pasa durante la noche ayuda a darle la prioridad que merece."],
       sec:[
         { h:"Lo que pasa mientras duermes", img:"S1-a",
-          p:"Cada noche pasas varias veces por el sueño ligero y el profundo, en vueltas de hora y media más o menos. En cada fase pasa algo distinto.",
-          tips:[["cerebro","Memoria","El cerebro repasa lo que has aprendido y lo guarda. Estudiar y luego dormir funciona mejor que pasar la noche en vela."],
-                ["pesa","Músculos","En el sueño profundo se repara el músculo que has trabajado al entrenar."],
-                ["tenedor","Hambre","Dormir poco desajusta las ganas de comer: al día siguiente te apetece más dulce y más comida rápida."],
-                ["cara","Ánimo","Con sueño todo molesta más. Dormir bien te ayuda a tener paciencia y a llevar mejor el estrés."]] },
+          p:["El sueño no es uniforme. A lo largo de la noche se suceden ciclos de unos 90 minutos en los que se alternan el sueño ligero, el profundo y la fase REM, la de los sueños más vívidos. Al principio de la noche predomina el sueño profundo; hacia el final, el REM.",
+             "Cada fase cumple una función distinta, y por eso no da igual recortar por el principio o por el final: acostarse tarde y levantarse temprano elimina sobre todo las fases que más se concentran en esos extremos."],
+          tips:[["cerebro","Memoria y aprendizaje","Durante el sueño, el cerebro reactiva y consolida lo aprendido durante el día. Estudiar y dormir después rinde más que sacrificar horas de sueño para estudiar más."],
+                ["pesa","Recuperación física","En el sueño profundo aumenta la liberación de hormona del crecimiento y se reparan los tejidos. Entrenar duro y dormir poco frena la mejora."],
+                ["tenedor","Apetito","La falta de sueño altera las señales que regulan el hambre y la saciedad. Es habitual que, tras una mala noche, aumente el deseo de alimentos dulces o muy calóricos."],
+                ["cara","Emociones","Con poco descanso, la parte del cerebro que reacciona ante las amenazas se vuelve más sensible y la que la regula, menos eficaz. Por eso todo parece más difícil de gestionar."]] },
         { h:"Cuántas horas necesitas", img:"S1-b",
-          p:"Depende de la edad. Son referencias: hay quien necesita un poco más y quien un poco menos.",
-          tips:[["reloj","De 14 a 17 años","Entre 8 y 10 horas."],
-                ["reloj","De 18 a 25 años","Entre 7 y 9 horas."],
-                ["calendario","Casi todos los días","Lo que cuenta es dormir bien entre semana, no recuperar el fin de semana."]] }
+          p:["Las necesidades cambian con la edad. Las recomendaciones de las sociedades del sueño son rangos, no cifras exactas: hay personas que funcionan bien en la parte baja y otras que necesitan la alta.",
+             "La mejor señal es cómo te encuentras: si necesitas el despertador para salir de un sueño profundo, si te cuesta concentrarte a media mañana o si el fin de semana duermes muchas más horas, probablemente arrastras una deuda de sueño."],
+          tips:[["reloj","De 14 a 17 años","Entre 8 y 10 horas por noche."],
+                ["reloj","De 18 a 25 años","Entre 7 y 9 horas por noche."],
+                ["calendario","La regularidad cuenta","Dormir bien de lunes a viernes importa más que recuperar el fin de semana. Los grandes cambios de horario desajustan el reloj interno, como un pequeño desfase horario."]] }
       ],
-      reto:"Esta noche, pon una alarma para irte a la cama 8 horas antes de la hora a la que te levantas." },
-    { d:"S2-portada", t:"Una rutina para dormirte antes", s:"Pequeños cambios que se notan en una semana.",
-      i:"El cuerpo tiene un reloj interno que se guía por la luz y por los horarios. Si le das pistas claras, te costará menos dormirte.",
+      res:["El sueño es un proceso activo que consolida la memoria, repara los músculos y regula el apetito y las emociones.",
+           "Entre los 18 y los 25 años se recomiendan de 7 a 9 horas.",
+           "La constancia de horarios es tan importante como la cantidad."],
+      reto:"Esta noche, pon una alarma para empezar a prepararte para dormir 8 horas antes de la hora a la que te levantas." },
+    { d:"S2-portada", t:"Una rutina para dormirte antes", s:"El reloj interno responde a la luz y a los horarios. Estas son las palancas que más influyen.",
+      i:["Dormirse no se puede forzar, pero sí se pueden crear las condiciones para que ocurra. El cuerpo tiene un reloj interno, el ritmo circadiano, que se ajusta cada día con señales del entorno: sobre todo la luz, pero también la hora de las comidas, el ejercicio y la propia rutina.",
+         "La idea no es aplicar todos los consejos a la vez, sino elegir dos o tres y mantenerlos el tiempo suficiente para notar el efecto, que suele aparecer en una o dos semanas."],
       sec:[
         { h:"Durante el día", img:"S2-a",
-          p:"Lo que haces por la mañana y por la tarde también cuenta para la noche.",
-          tips:[["sol","Luz por la mañana","Sal fuera un rato nada más levantarte. La luz del sol pone en hora el reloj del cuerpo."],
-                ["taza","Cafeína, antes de las 16:00","El café, el té y las bebidas energéticas siguen haciendo efecto 6 horas después."],
-                ["zapatilla","Muévete","El ejercicio ayuda a dormir mejor, pero evita entrenar fuerte justo antes de acostarte."]] },
+          p:["La calidad de la noche empieza a decidirse por la mañana. La luz natural temprana adelanta el reloj interno y hace que, por la noche, el sueño llegue antes y con más fuerza."],
+          tips:[["sol","Luz natural por la mañana","Pasa entre 10 y 30 minutos al aire libre poco después de levantarte, aunque esté nublado. Es la señal más potente para poner en hora el reloj."],
+                ["taza","Cafeína con horario","La cafeína tarda horas en eliminarse: tomada seis horas antes de acostarse todavía puede reducir el sueño de forma medible. Como norma, evita café, té fuerte y bebidas energéticas después de las 16:00."],
+                ["zapatilla","Actividad física","El ejercicio regular mejora la profundidad del sueño. Lo ideal es terminar los entrenamientos intensos al menos dos o tres horas antes de acostarte."]] },
         { h:"Antes de acostarte", img:"S2-b",
-          p:"La última hora del día es para bajar el ritmo.",
-          tips:[["luna","Siempre a la misma hora","Acuéstate y levántate a la misma hora, también el fin de semana."],
-                ["libro","Lee en papel","Un rato de lectura avisa al cerebro de que toca descansar."],
-                ["termometro","Habitación fresca","Se duerme mejor a unos 18 o 19 grados, a oscuras y sin ruido."],
-                ["movilfuera","Móvil fuera","Déjalo cargando lejos de la cama."]] },
+          p:["La última hora del día funciona como una transición. Si pasas directamente de una actividad estimulante a la cama, el cerebro sigue en marcha."],
+          tips:[["luna","Horarios estables","Acuéstate y levántate a la misma hora todos los días, con un margen de una hora el fin de semana."],
+                ["libro","Una actividad tranquila","Leer en papel, estirar o escribir unas líneas sirven de señal de cierre. Lo importante es que sea siempre parecido."],
+                ["termometro","Un dormitorio fresco y oscuro","La temperatura corporal baja al dormirse; una habitación a unos 18 o 19 grados lo facilita. Oscuridad y silencio hacen el resto."],
+                ["movilfuera","Pantallas fuera","No es solo la luz: el contenido mantiene la mente activa. Deja el móvil cargando fuera del alcance de la cama."]] },
         { h:"Si no te duermes", img:"S2-c",
-          p:"Dar vueltas en la cama enseña al cerebro que la cama es para estar despierto.",
-          tips:[["arena","Unos 20 minutos","Si pasa más o menos ese tiempo y sigues despierto, no mires la hora y levántate."],
-                ["sofa","Levántate un rato","Haz algo tranquilo con poca luz y vuelve a la cama cuando tengas sueño."]] }
+          p:["Pasar mucho tiempo despierto en la cama hace que el cerebro asocie la cama con estar alerta. Es uno de los mecanismos que mantienen el insomnio."],
+          tips:[["arena","La regla de los 20 minutos","Si te parece que llevas unos 20 minutos sin dormirte, no mires el reloj: levántate."],
+                ["sofa","Algo aburrido, con poca luz","Siéntate fuera de la cama y haz algo tranquilo hasta que vuelvas a notar sueño. Después, regresa."]] }
       ],
-      reto:"Elige una hora para acostarte y otra para levantarte, y mantenlas los próximos 7 días." },
-    { d:"S3-portada", t:"Siestas: cuándo sí y cuándo no", s:"Cortas y temprano, mejor.",
-      i:"Una siesta bien hecha te despeja toda la tarde. Mal hecha, te deja peor y te quita sueño por la noche.",
+      res:["La luz de la mañana y unos horarios estables son las dos palancas más eficaces.",
+           "La cafeína y el ejercicio intenso, lejos de la hora de dormir.",
+           "Si no concilias el sueño, mejor levantarse que dar vueltas en la cama."],
+      reto:"Elige una hora para acostarte y otra para levantarte, y mantenlas durante los próximos 7 días." },
+    { d:"S3-portada", t:"Siestas: cuándo sí y cuándo no", s:"Bien hechas recargan la tarde. Mal planteadas, empeoran la noche.",
+      i:["A primera hora de la tarde hay una bajada natural del estado de alerta, independiente de la comida. Una siesta corta en ese momento puede mejorar la atención y el rendimiento durante horas.",
+         "El problema aparece cuando la siesta es demasiado larga o demasiado tardía: entonces resta presión de sueño a la noche y puede convertirse en parte del problema."],
       sec:[
-        { h:"La siesta buena", img:"S3-a",
-          p:"El truco es despertarte antes de entrar en el sueño profundo.",
-          tips:[["crono","De 10 a 20 minutos","Pon una alarma. Es suficiente para recargar sin quedarte atontado."],
-                ["reloj","Antes de las 16:00","Cuanto más tarde, más te costará dormirte por la noche."]] },
-        { h:"Cuándo evitarla", img:"S3-b",
-          p:"Si pasas de media hora, te despiertas en pleno sueño profundo, sin saber muy bien dónde estás.",
-          tips:[["aviso","Si duermes mal de noche","Las siestas largas empeoran el problema. Mejor aguantar y acostarte antes."],
-                ["luna","Si ya es de tarde","Una cabezada a las ocho le roba horas a la noche."]] }
+        { h:"La siesta que funciona", img:"S3-a",
+          p:["La clave es despertarse antes de entrar en sueño profundo. Si lo consigues, te levantas despejado; si no, aparece la inercia del sueño, esa sensación de aturdimiento que puede durar media hora."],
+          tips:[["crono","Entre 10 y 20 minutos","Pon una alarma. Es el margen que mejora la alerta sin dejarte aturdido."],
+                ["reloj","Mejor antes de las 16:00","Cuanto más tarde, más se resiente el sueño nocturno."]] },
+        { h:"Cuándo conviene evitarla", img:"S3-b",
+          p:["Si pasas de la media hora, es probable que te despiertes en pleno sueño profundo: desorientado y con más cansancio que antes."],
+          tips:[["aviso","Si duermes mal por la noche","Las siestas largas reducen el sueño acumulado y hacen más difícil dormirse después. En ese caso, es mejor evitarlas y adelantar la hora de acostarse."],
+                ["luna","Al final de la tarde","Una cabezada a las ocho de la tarde le roba horas a la noche, aunque solo dure unos minutos."]] }
       ],
+      res:["Una siesta de 10 a 20 minutos mejora la alerta sin efectos secundarios.",
+           "Las siestas largas o tardías empeoran el sueño nocturno.",
+           "Si duermes mal por la noche, la solución no es la siesta."],
       reto:"La próxima vez que estés cansado después de comer, prueba una siesta de 15 minutos con alarma." }
   ],
   water:[
-    { d:"A1-portada", t:"¿De verdad hacen falta 8 vasos?", s:"Lo que dice la ciencia, sin mitos.",
-      i:"Los 8 vasos son una referencia fácil de recordar, no una regla exacta. Lo importante es beber a menudo y fijarte en lo que te pide el cuerpo.",
+    { d:"A1-portada", t:"¿De verdad hacen falta 8 vasos?", s:"De dónde viene la cifra, cuánto necesitas y cómo saber si vas bien.",
+      i:["Los famosos 8 vasos al día son una forma cómoda de recordar una cantidad aproximada, no una prescripción médica. Las autoridades sanitarias europeas recomiendan una ingesta total de unos 2 litros al día para las mujeres y 2,5 para los hombres, contando toda el agua que se consume, también la de los alimentos.",
+         "Esa cifra varía mucho según el tamaño corporal, la actividad, el clima y la dieta. Más que contar con exactitud, conviene entender de dónde sale el agua y cuándo el cuerpo necesita más."],
       sec:[
         { h:"De dónde sale el agua", img:"A1-a",
-          p:"No toda el agua que necesitas viene del vaso: una parte te llega con la comida.",
-          tips:[["vaso","Agua y bebidas","Son la mayor parte. El agua es la mejor opción."],
-                ["manzana","Fruta y verdura","La sandía, la naranja o el pepino son casi todo agua."],
-                ["sopa","Sopas y cremas","También cuentan, sobre todo en invierno."]] },
+          p:["Alrededor de una quinta parte del agua que tomamos llega con la comida. Una dieta rica en fruta, verdura y platos de cuchara aporta bastante más que una basada en alimentos secos o procesados."],
+          tips:[["vaso","Agua y otras bebidas","Son la principal fuente. El agua es la mejor opción; las bebidas azucaradas hidratan, pero añaden calorías que no sacian."],
+                ["manzana","Fruta y verdura","La sandía, la naranja, el pepino o el tomate tienen más de un 85 % de agua."],
+                ["sopa","Sopas, cremas y guisos","Cuentan como agua, y en invierno son una forma cómoda de llegar a la cantidad diaria."]] },
         { h:"Cuándo necesitas más", img:"A1-b",
-          p:"Hay días en los que el cuerpo pierde más agua de lo normal.",
-          tips:[["sol","Calor","Con calor sudas más, aunque no lo notes."],
-                ["zapatilla","Deporte","Por cada hora de entreno, suma uno o dos vasos."],
-                ["termometro","Si estás malo","Con fiebre, vómitos o diarrea se pierde mucha agua."]] },
-        { h:"La pista más fácil", img:"A1-c",
-          p:"El color de la orina te dice cómo vas sin tener que contar nada.",
-          tips:[["gota","Amarillo claro","Vas bien."],
-                ["gotallena","Amarillo oscuro","Toca beber más."]] }
+          p:["Hay situaciones en las que las pérdidas aumentan de forma notable, a veces sin que lo percibas."],
+          tips:[["sol","Calor","Con temperaturas altas se suda más, incluso sin hacer ejercicio. La sed llega con algo de retraso."],
+                ["zapatilla","Actividad física","Según la intensidad y el calor, una hora de entrenamiento puede suponer perder entre medio litro y más de un litro de sudor."],
+                ["termometro","Enfermedad","La fiebre, los vómitos o la diarrea aumentan mucho las pérdidas. En esos casos, las soluciones de rehidratación son más eficaces que el agua sola."]] },
+        { h:"La señal más fiable", img:"A1-c",
+          p:["No hace falta llevar la cuenta de cada vaso. El color de la orina es un indicador sencillo y bastante fiable del estado de hidratación en personas sanas."],
+          tips:[["gota","Amarillo pálido","Indica una hidratación adecuada."],
+                ["gotallena","Amarillo oscuro","Es señal de que conviene beber más. Algunos suplementos vitamínicos pueden oscurecerla sin que haya deshidratación."]] }
       ],
+      res:["Los 8 vasos son una referencia útil, no una regla exacta.",
+           "Una parte del agua llega con los alimentos.",
+           "El color de la orina es la forma más sencilla de saber cómo vas."],
       reto:"Mañana, bebe un vaso de agua nada más levantarte y apúntalo con «+ vaso»." },
-    { d:"A2-portada", t:"Trucos para beber más sin pensarlo", s:"Que beber agua sea lo fácil.",
-      i:"Casi nadie se olvida de beber por pereza, sino porque no tiene agua a mano. Cambia lo que te rodea y lo demás viene solo.",
+    { d:"A2-portada", t:"Trucos para beber más sin pensarlo", s:"Por qué la fuerza de voluntad falla y qué funciona en su lugar.",
+      i:["Casi nadie bebe poca agua por desinterés, sino porque no la tiene a mano en el momento en que la necesita. Beber es un comportamiento muy sensible al entorno: si el agua está cerca y visible, se consume más sin esfuerzo.",
+         "Por eso las estrategias más eficaces no dependen de acordarse, sino de cambiar lo que te rodea y de enganchar el hábito a rutinas que ya tienes."],
       sec:[
-        { h:"Que sea lo fácil", img:"A2-a",
-          p:"Pon el agua donde vas a estar.",
-          tips:[["botella","Llévala siempre","Una botella que te guste es la mejor inversión."],
-                ["ojo","Déjala a la vista","Lo que ves, lo bebes. Si está en la mochila, se queda ahí."],
-                ["plato","Un vaso con cada comida","Engánchalo a algo que ya haces tres veces al día."]] },
-        { h:"Si el agua te aburre", img:"A2-b",
-          p:"Dale sabor sin añadir azúcar.",
-          tips:[["limon","Limón o naranja","Unas rodajas y listo."],
-                ["hoja","Menta","Un par de hojas en la botella refrescan mucho."],
-                ["fresa","Fruta","Fresas, frutos rojos o pepino, mejor si los dejas un rato en la nevera."]] }
+        { h:"Que sea lo más fácil", img:"A2-a",
+          p:["La regla es sencilla: reduce los pasos entre la sed y el vaso. Cuantos menos obstáculos, más veces bebes."],
+          tips:[["botella","Una botella propia","Llevar una botella reutilizable que te guste multiplica las ocasiones de beber durante el día."],
+                ["ojo","A la vista","Lo que está a la vista se usa. Déjala en la mesa de trabajo o de estudio, no dentro de la mochila."],
+                ["plato","Ligada a las comidas","Un vaso de agua con cada comida asegura tres o cuatro vasos al día sin pensar en ello."]] },
+        { h:"Si el agua te resulta aburrida", img:"A2-b",
+          p:["Darle sabor sin azúcar es una forma eficaz de beber más, sobre todo para quien está acostumbrado a refrescos."],
+          tips:[["limon","Cítricos","Unas rodajas de limón, lima o naranja cambian el sabor sin añadir calorías."],
+                ["hoja","Hierbas","La menta o la hierbabuena dan frescor, especialmente con agua fría."],
+                ["fresa","Fruta","Fresas, frutos rojos o pepino, mejor si se dejan reposar un rato en la nevera."]] }
       ],
+      res:["Cambiar el entorno funciona mejor que proponérselo.",
+           "Ten el agua a la vista y ligada a las comidas.",
+           "Si el agua sola no te apetece, dale sabor sin azúcar."],
       reto:"Rellena una botella y déjala hoy a la vista en tu mesa. Cada vaso que bebas, toca «+ vaso»." },
-    { d:"A3-portada", t:"Agua y deporte", s:"Antes, durante y después de entrenar.",
-      i:"Cuando entrenas, sudas, y con el sudor se van agua y sales. Si no las repones, rindes menos y te cansas antes.",
+    { d:"A3-portada", t:"Agua y deporte", s:"Cuánto beber antes, durante y después de entrenar.",
+      i:["Durante el ejercicio, el cuerpo se refrigera sudando, y con el sudor pierde agua y sales minerales. Una pérdida de solo el 2 % del peso corporal ya puede reducir el rendimiento y aumentar la sensación de esfuerzo.",
+         "La hidratación deportiva no consiste en beber mucho, sino en beber con criterio: llegar bien hidratado, reponer durante el esfuerzo si es largo y recuperar después."],
       sec:[
         { h:"Antes, durante y después", img:"A3-a",
-          p:"Reparte el agua a lo largo del entreno.",
-          tips:[["reloj","Antes","Uno o dos vasos en las dos horas anteriores."],
-                ["gota","Durante","Sorbos pequeños cada 15 o 20 minutos."],
-                ["pesa","Después","Recupera lo que has sudado durante la hora siguiente."]] },
-        { h:"Si hace calor o entrenas mucho", img:"A3-b",
-          p:"Con más de una hora de ejercicio o mucho calor, el agua sola puede quedarse corta.",
-          tips:[["sol","Elige la hora","Con calor, entrena a primera hora o al final de la tarde."],
-                ["sal","Bebida con sales","Ayuda a reponer lo que pierdes al sudar. Para entrenos cortos no hace falta."]] }
+          p:["Cada fase tiene su objetivo. Antes, empezar sin déficit; durante, limitar las pérdidas; después, recuperar lo que falta."],
+          tips:[["reloj","Antes","Uno o dos vasos de agua en las dos o tres horas previas, para llegar hidratado sin sentirte pesado."],
+                ["gota","Durante","En sesiones de más de una hora, sorbos pequeños cada 15 o 20 minutos. En entrenamientos cortos suele bastar con beber al terminar."],
+                ["pesa","Después","Si te pesas antes y después, cada kilo perdido equivale aproximadamente a un litro de sudor. Lo recomendable es reponer algo más de esa cantidad en las horas siguientes."]] },
+        { h:"Calor y esfuerzos largos", img:"A3-b",
+          p:["Con más de una hora de ejercicio intenso o con calor, el agua sola puede quedarse corta, porque el sudor también arrastra sodio."],
+          tips:[["sol","Elige la hora","En verano, entrena a primera hora de la mañana o al final de la tarde, y busca sombra."],
+                ["sal","Bebidas con electrolitos","Ayudan a reponer el sodio y favorecen que el agua se retenga. Para entrenamientos cortos o suaves no son necesarias."]] }
       ],
-      reto:"En tu próximo entreno, lleva una botella y da un sorbo cada vez que descanses." }
+      res:["Llega al entrenamiento bien hidratado.",
+           "En sesiones largas, bebe a sorbos durante el esfuerzo.",
+           "Con calor o más de una hora de ejercicio, añade electrolitos."],
+      reto:"En tu próximo entreno, pésate antes y después: la diferencia te dirá cuánto sudas." }
   ],
   screen:[
-    { d:"P1-portada", t:"¿Por qué menos de 2 horas?", s:"El tiempo de ocio con pantallas, en su sitio.",
-      i:"Las 2 horas al día son una referencia muy usada para el tiempo libre delante de una pantalla. No se trata de dejar el móvil, sino de que lo uses tú a él.",
+    { d:"P1-portada", t:"¿Por qué menos de 2 horas?", s:"De dónde sale la cifra, qué cuenta y qué efectos tiene pasarse.",
+      i:["El límite de 2 horas diarias de pantallas en el tiempo libre procede de las guías de salud para niños y adolescentes, y se ha convertido en una referencia útil también para adultos jóvenes. No hay una cifra mágica: lo que importa es qué desplaza ese tiempo.",
+         "Cada hora frente al móvil es una hora que no se dedica a dormir, moverse, ver a otras personas o concentrarse en algo. Ese es, en buena medida, el problema."],
       sec:[
         { h:"Qué cuenta y qué no", img:"P1-a",
-          p:"Solo cuenta el ocio. Lo que haces para estudiar o trabajar, no.",
-          tips:[["corazon","Redes sociales","Cuentan."],
-                ["play","Vídeos y series","Cuentan."],
-                ["mando","Videojuegos","Cuentan."],
-                ["libro","Clase y deberes","No cuentan."]] },
+          p:["La referencia se aplica al ocio. El tiempo que dedicas a estudiar o trabajar con un ordenador tiene otros efectos y se valora aparte."],
+          tips:[["corazon","Redes sociales","Cuentan. Son además las más asociadas al malestar por comparación con los demás."],
+                ["play","Vídeos y series","Cuentan, sobre todo el vídeo corto, que dificulta poner un final."],
+                ["mando","Videojuegos","Cuentan. Con moderación pueden ser sociales y estimulantes."],
+                ["libro","Estudio y trabajo","No cuentan, aunque conviene hacer pausas para la vista y el cuerpo."]] },
         { h:"Lo que notas cuando te pasas", img:"P1-b",
-          p:"Muchas horas de pantalla se relacionan con cosas que se notan en el día a día.",
-          tips:[["luna","Duermes peor","Te acuestas más tarde y te cuesta más dormirte."],
-                ["zapatilla","Te mueves menos","Las horas sentado se acumulan sin que te des cuenta."],
-                ["nube","Más agobio","Compararte en redes puede hacerte sentir peor contigo."]] }
+          p:["Los estudios encuentran asociaciones consistentes entre muchas horas de ocio con pantallas y varios problemas. No siempre está claro qué es causa y qué es consecuencia, pero el patrón se repite."],
+          tips:[["luna","Peor sueño","Se retrasa la hora de dormir y se tarda más en conciliar el sueño."],
+                ["zapatilla","Más sedentarismo","Las horas sentado se acumulan sin que se perciban."],
+                ["nube","Más ansiedad","El uso intensivo de redes se asocia a más ansiedad y peor imagen de uno mismo, sobre todo por la comparación constante."]] }
       ],
+      res:["Las 2 horas son una referencia para el ocio, no para el estudio o el trabajo.",
+           "El problema principal es lo que ese tiempo desplaza.",
+           "Sueño, actividad física y bienestar son lo primero que se resiente."],
       reto:"Mira en los ajustes del móvil cuánto tiempo pasaste ayer en cada app." },
-    { d:"P2-portada", t:"Cómo mirar menos el móvil", s:"Ideas que funcionan de verdad.",
-      i:"Las apps están hechas para que no las sueltes. La fuerza de voluntad sirve de poco: es más fácil cambiar el móvil y el sitio donde lo dejas.",
+    { d:"P2-portada", t:"Cómo mirar menos el móvil", s:"Estrategias que no dependen de la fuerza de voluntad.",
+      i:["Las aplicaciones más usadas están diseñadas por equipos enteros cuyo objetivo es captar tu atención el mayor tiempo posible. Plantearlo como una cuestión de autocontrol es partir en desventaja.",
+         "Lo que mejor funciona es añadir fricción: pequeños obstáculos que no impiden usar el móvil, pero que obligan a hacerlo de forma intencionada y no por inercia."],
       sec:[
         { h:"Cambia el móvil", img:"P2-a",
-          p:"Haz que el móvil sea un poco menos atractivo.",
-          tips:[["campanafuera","Quita notificaciones","Deja solo las de personas, no las de apps."],
-                ["byn","Blanco y negro","Sin colores, las apps pierden mucha gracia. Se activa en los ajustes de accesibilidad."],
-                ["candado","Pon límites","Ponle un tiempo máximo al día a la app que más usas."]] },
-        { h:"Cambia el sitio", img:"P2-b",
-          p:"Si el móvil no está a mano, no lo coges.",
-          tips:[["puerta","Fuera del dormitorio","Que duerma en otra habitación."],
-                ["enchufe","Cárgalo lejos","Elige un sitio fijo para cargarlo, lejos de la cama y de la mesa de estudio."],
-                ["despertador","Despertador normal","Así el móvil no es lo primero que miras al despertarte."]] }
+          p:["Unos pocos ajustes reducen mucho las veces que lo coges sin motivo."],
+          tips:[["campanafuera","Notificaciones al mínimo","Deja activas solo las de personas (mensajes y llamadas) y desactiva las de aplicaciones."],
+                ["byn","Escala de grises","Sin color, las aplicaciones resultan mucho menos atractivas. Se activa en los ajustes de accesibilidad y algunos estudios muestran reducciones notables del tiempo de uso."],
+                ["candado","Límites por aplicación","Fija un tiempo máximo diario para las dos o tres aplicaciones que más usas."]] },
+        { h:"Cambia el entorno", img:"P2-b",
+          p:["La distancia física es una de las barreras más eficaces. Basta con que el móvil esté en otra habitación para que el impulso de cogerlo se debilite."],
+          tips:[["puerta","Fuera del dormitorio","Es el cambio con más impacto, sobre todo para el sueño."],
+                ["enchufe","Un sitio fijo para cargarlo","Lejos de la cama y de la mesa de estudio."],
+                ["despertador","Un despertador independiente","Así el móvil deja de ser lo primero y lo último que ves cada día."]] }
       ],
-      reto:"Hoy, mientras estudias, deja el móvil boca abajo en otra habitación durante una hora." },
-    { d:"P3-portada", t:"Pantallas y sueño", s:"Por qué el móvil en la cama te quita horas.",
-      i:"El problema no es solo la luz de la pantalla. Lo que más pesa es lo que ves en ella.",
+      res:["La fuerza de voluntad compite en desventaja con aplicaciones diseñadas para engancharte.",
+           "Menos notificaciones, escala de grises y límites por aplicación.",
+           "La distancia física es la barrera más eficaz."],
+      reto:"Hoy, mientras estudias o trabajas, deja el móvil en otra habitación durante una hora." },
+    { d:"P3-portada", t:"Pantallas y sueño", s:"Por qué el móvil en la cama te quita horas, y no solo por la luz.",
+      i:["Durante años se ha culpado a la luz azul de las pantallas. Su efecto existe, pero es modesto. Lo que más pesa es el contenido: mensajes, vídeos y notificaciones mantienen la mente activa y, sobre todo, retrasan la hora real de dormir.",
+         "Muchas personas no duermen poco porque tarden en dormirse, sino porque se acuestan con el móvil y no lo sueltan hasta mucho después."],
       sec:[
         { h:"Por qué te quita horas", img:"P3-a",
-          p:"Cada vídeo dura poco y siempre hay otro esperando.",
-          tips:[["play","Uno más","Los vídeos cortos están pensados para que no haya un final."],
-                ["bucle","Sin final","Sin un final claro, es fácil seguir mucho más de lo que querías."],
-                ["reloj","Hora de dormir","Una hora de móvil en la cama suele ser una hora menos de sueño."]] },
+          p:["Los formatos actuales están pensados para que no haya un punto final natural. Cuando no hay un final, decidir parar requiere un esfuerzo que, a última hora del día, cuesta más."],
+          tips:[["play","El siguiente vídeo","Cada pieza dura poco, por lo que el coste de ver otra parece mínimo."],
+                ["bucle","Sin final","El desplazamiento infinito elimina las pausas en las que normalmente te detendrías."],
+                ["reloj","El coste real","Una hora de móvil en la cama suele traducirse en una hora menos de sueño."]] },
         { h:"Qué hacer", img:"P3-b",
-          p:"Prepara la noche para que el móvil no esté.",
-          tips:[["despertador","Despertador de los de antes","Para no necesitar el móvil al lado."],
-                ["libro","Un libro en la mesilla","Para tener algo que hacer que no sea mirar la pantalla."],
-                ["cargador","Cargador fuera","Deja el cargador del móvil en otra habitación."]] }
+          p:["La solución más eficaz es sencilla: que el móvil no duerma contigo. Lo demás son formas de hacerlo más llevadero."],
+          tips:[["despertador","Un despertador clásico","Elimina la excusa más habitual para tener el móvil junto a la cama."],
+                ["libro","Una alternativa a mano","Un libro en la mesilla ocupa el hueco que deja la pantalla."],
+                ["cargador","El cargador en otra habitación","Si el cargador está fuera, el móvil también."]] }
       ],
+      res:["Lo que más afecta al sueño es el contenido, no tanto la luz.",
+           "El problema principal es que retrasa la hora real de dormir.",
+           "Cargar el móvil fuera del dormitorio es la medida más eficaz."],
       reto:"Esta noche, deja el móvil cargando fuera del dormitorio." }
   ]
 };
@@ -207,6 +246,10 @@ SF_ARTS={
 function sfDibujo(d){ return '<img src="salud/'+d+'.svg" alt="" loading="lazy" decoding="async">'; }
 function sfIcono(n){ return '<svg viewBox="0 0 24 24" aria-hidden="true">'+(SF_IC[n]||"")+'</svg>'; }
 
+function sfMinutos(a){
+  var txt=[].concat(a.i).join(" ")+" "+a.sec.map(function(s){ return [].concat(s.p).join(" ")+" "+s.tips.map(function(t){ return t[1]+" "+t[2]; }).join(" "); }).join(" ")+" "+(a.res||[]).join(" ");
+  return Math.max(1, Math.round(txt.split(/\s+/).length/200));
+}
 function sfArticulo(k, i){
   var a=SF_ARTS[k][i]; if(!a) return;
   openSheet(
@@ -214,14 +257,16 @@ function sfArticulo(k, i){
     '<div class="sfh-cab"><button class="sfh-volver" data-act="x-sf-volver" data-k="'+k+'"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>'+SF_HOJA[k].t+'</button>'+closeBtn()+'</div>'+
     '<div class="sfh-dib grande">'+sfDibujo(a.d)+'</div>'+
     '<h3>'+a.t+'</h3><p class="sfh-ent">'+a.s+'</p>'+
-    '<p class="sfa-intro">'+a.i+'</p>'+
+    '<p class="sfa-min">Lectura de '+sfMinutos(a)+' min</p>'+
+    [].concat(a.i).map(function(x,n){ return '<p class="'+(n?'':'sfa-intro')+'">'+x+'</p>'; }).join("")+
     a.sec.map(function(s){
-      return '<section class="sfa-sec"><h4>'+s.h+'</h4><p>'+s.p+'</p>'+
+      return '<section class="sfa-sec"><h4>'+s.h+'</h4>'+[].concat(s.p).map(function(x){ return '<p>'+x+'</p>'; }).join("")+
         '<div class="sfh-dib sfa-img">'+sfDibujo(s.img)+'</div>'+
         '<ul class="sfa-tips">'+s.tips.map(function(t){
           return '<li><span class="sfa-ic">'+sfIcono(t[0])+'</span><div><b>'+t[1]+'</b><span>'+t[2]+'</span></div></li>';
         }).join("")+'</ul></section>';
     }).join("")+
+    (a.res ? '<div class="sfa-res"><b>En resumen</b><ul>'+a.res.map(function(x){ return '<li>'+x+'</li>'; }).join("")+'</ul></div>' : '')+
     '<div class="sfa-reto"><span class="sfa-ic">'+sfIcono("diana")+'</span><div><b>Pruébalo hoy</b><span>'+a.reto+'</span></div></div>'+
     '</div>'
   );
@@ -249,6 +294,12 @@ function sfArticulo(k, i){
 '.sfa-reto{ margin:28px 0 6px; padding:16px; border-radius:20px; background:color-mix(in srgb, var(--sf) 10%, transparent);',
 '  box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--sf) 35%, transparent); }',
 '.sfa-reto .sfa-ic{ background:var(--sf); color:#fff; }',
-'.sfa-reto b{ color:var(--sf); }'
+'.sfa-reto b{ color:var(--sf); }',
+'.sfa-min{ font-size:12.5px!important; font-weight:600; letter-spacing:.02em; color:var(--t3)!important; margin:-8px 0 16px!important; }',
+'.sfa-res{ margin-top:30px; padding-top:18px; border-top:1px solid color-mix(in srgb, var(--t1) 12%, transparent); }',
+'.sfa-res b{ display:block; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--sf); margin-bottom:10px; }',
+'.sfa-res ul{ list-style:disc; margin:0; padding:0 0 0 18px; display:flex; flex-direction:column; gap:8px; }',
+'.sfa-res li{ font-size:15px; line-height:1.5; color:var(--t1); }',
+'.sfa-res li::marker{ color:var(--sf); }'
   ].join("\n"); document.head.appendChild(st);
 })();
