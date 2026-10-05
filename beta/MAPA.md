@@ -69,6 +69,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `44-salud-articulos.js` | Artículos largos de Salud del día (sueño, agua, pantalla): portada, secciones con imagen, consejos con icono y «Pruébalo hoy». Imágenes en `beta/salud/*.jpg` |
 | `45-mapa-musculos.js` | Mapa 2D de músculos de la ficha «?» (`mapaMusculos`; formas MIT de react-native-body-highlighter) |
 | `46-experimentos-ajustes.js` | Experimentos fuera de Objetivos: se activan en Ajustes › Avanzado › «Activar experimento» |
+| `47-montana.js` | «Ver tu montaña» en Progreso: los 40 niveles como una montaña de luz a pantalla completa, con los rangos en los picos, Peak. en la cima y la gente de tus grupos |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
