@@ -22054,7 +22054,8 @@ var BARRA_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
    toma el color de la burbuja (la línea del libro) · f: solo relleno, solo
    debajo de la burbuja · h: contorno que separa figuras rellenas */
 var BARRA_ICO={
-  resumen:'<rect class="r" x="3.5" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="3.5" width="7.25" height="7.25" rx="2"/><rect class="r" x="3.5" y="13.25" width="7.25" height="7.25" rx="2"/><rect class="r" x="13.25" y="13.25" width="7.25" height="7.25" rx="2"/>',
+  /* Hoy: la montaña del logo de Peak., maciza como la del corredor; al abrirla da un saltito */
+  resumen:'<g class="mk"><path fill="currentColor" stroke="none" transform="translate(2.55 2.4) scale(.0211)" d="'+PEAK_MK_D+'"/></g>',
   retos:'<path class="r" d="M7 3.5h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 5.25H5.4a1.15 1.15 0 0 0-1.15 1.2c.08 2 1.4 3.6 3.25 4M17 5.25h1.6a1.15 1.15 0 0 1 1.15 1.2c-.08 2-1.4 3.6-3.25 4"/><path class="r" d="M10.9 14h2.2v3.6h-2.2z"/><path class="r" d="M8 20.5h8v-.6a2.3 2.3 0 0 0-2.3-2.3h-3.4A2.3 2.3 0 0 0 8 19.9z"/>',
   /* el corredor de la app de iPhone: macizo, igual abierto o cerrado */
   vital:'<g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.9" cy="4" r="2" stroke="none"/>'+
@@ -22087,6 +22088,9 @@ ICO_TAREAS=barraIco("tareas");
 '#mtabs .mtab[aria-current="true"] svg{ transform:none; }',
 '#mtabs .mtab svg .f, #mtabs .mtab svg .h{ display:none; }',
 '#mtabs .mtab:active svg{ transform:scale(.9); }',
+'#mtabs .mtab svg .mk{ transform-box:fill-box; transform-origin:50% 100%; }',
+'#mtabs .mtab[aria-current="true"] svg .mk{ animation:mkSalta .55s cubic-bezier(.3,1.5,.5,1); }',
+'@keyframes mkSalta{ 0%{ transform:none; } 35%{ transform:scale(1.08,.86); } 70%{ transform:scale(.96,1.07) translateY(-1.2px); } 100%{ transform:none; } }',
 /* la burbuja de siempre: pastilla del color de la app que salta con muelle */
 '#mind{ top:5px; height:54px; width:66px; opacity:0; background:none!important; box-shadow:none!important; will-change:transform;',
 '  transition:transform .55s var(--spring), width .45s var(--spring), opacity .3s var(--ease); }',
