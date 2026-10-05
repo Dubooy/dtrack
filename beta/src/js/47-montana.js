@@ -66,10 +66,12 @@ function mtForma(W, H){
   }
   var min=Math.min.apply(null, alt), max=Math.max.apply(null, alt), P=[];
   for(var k=0;k<=41;k++){
-    var x=W*(.11+.69*(k/41)), y=abajo+(Ht-arriba-abajo)*(alt[k]-min)/(max-min);
+    var x=W*(.10+.62*(k/41)), y=abajo+(Ht-arriba-abajo)*(alt[k]-min)/(max-min);
     P.push({ x:Math.round(x*10)/10, y:Math.round((Ht-y)*10)/10 });
   }
-  return { W:W, Ht:Ht, P:P };
+  /* después de la cima la montaña cae por el otro lado (con un pequeño resalte) hasta salir de la pantalla */
+  var c=P[41], B=[{ x:Math.round(W*.83), y:c.y+78 }, { x:Math.round(W*.89), y:c.y+58 }, { x:W+6, y:c.y+190 }];
+  return { W:W, Ht:Ht, P:P, B:B };
 }
 function mtD(P){ return P.map(function(p,i){ return (i?"L":"M")+p.x+" "+p.y; }).join(""); }
 /* dónde vas: entre tu nivel y el siguiente, según lo que llevas */
@@ -125,14 +127,14 @@ function mtAbre(){
   var est=""; for(var i=0;i<70;i++){ var sx=(i*137.5%100), sy=((i*61.8)%100), r=(i%7===0?1.6:i%3===0?1.1:.7);
     est+='<circle cx="'+(sx*W/100).toFixed(1)+'" cy="'+(sy*F.Ht/100).toFixed(1)+'" r="'+r+'" class="'+(i%4===0?"mt-tit":"")+'" style="animation-delay:-'+(i%9)*.7+'s;opacity:'+(.25+(i%5)*.12).toFixed(2)+'"/>'; }
   /* la ladera: lo que queda debajo de la línea */
-  var lad=mtD(P)+"L"+W+" "+P[41].y+"L"+W+" "+F.Ht+"L0 "+F.Ht+"L0 "+P[0].y+"Z";
+  var lad=mtD(P.concat(F.B))+"L"+(W+6)+" "+F.Ht+"L0 "+F.Ht+"L0 "+P[0].y+"Z";
   var svg='<svg class="mt-svg" width="'+W+'" height="'+F.Ht+'" viewBox="0 0 '+W+' '+F.Ht+'">'+
     '<defs><linearGradient id="mt-lad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba('+L.rgb+',.20)"/><stop offset=".55" stop-color="rgba('+L.rgb+',.05)"/><stop offset="1" stop-color="rgba('+L.rgb+',0)"/></linearGradient>'+
     '<radialGradient id="mt-cima" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="rgba('+L.rgb+',.45)"/><stop offset="1" stop-color="rgba('+L.rgb+',0)"/></radialGradient></defs>'+
     '<g class="mt-est">'+est+'</g>'+
     '<circle cx="'+P[41].x+'" cy="'+P[41].y+'" r="120" fill="url(#mt-cima)" class="mt-halo"/>'+
     '<path d="'+lad+'" fill="url(#mt-lad)" class="mt-ladera"/>'+
-    '<path d="'+mtD(P)+'" class="mt-falta"/>'+
+    '<path d="'+mtD(P.concat(F.B))+'" class="mt-falta"/>'+
     '<path d="'+mtD(PB)+'" class="mt-l mt-l1"/>'+
     P.map(function(p,n){ if(n<1 || n>40) return ""; var pico=MT_PICOS.indexOf(n)>=0;
       return '<g class="mt-p'+(pico?" pico":"")+'" data-n="'+n+'">'+(pico?'<circle class="mt-aro" cx="'+p.x+'" cy="'+p.y+'" r="5.5"/>':'')+
