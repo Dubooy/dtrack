@@ -456,3 +456,6 @@ html.embebido #acciones-flotantes{ top:94px; }
 ::-webkit-scrollbar{ width:11px; height:11px } ::-webkit-scrollbar-track{ background:transparent }
 ::-webkit-scrollbar-thumb{ background:var(--fill-hi); border-radius:10px; border:3px solid transparent; background-clip:content-box }
 @media (prefers-reduced-motion:reduce){ *{ animation:none!important; transition-duration:.01ms!important } }
+
+/* el nombre de la app delante del título pequeño de cada pestaña: «PEAK. // JUEGO LIMPIO» */
+.view p.eyebrow:has(+ h1.display)::before, #hero-date::before{ content:"Peak.\00a0\00a0//\00a0\00a0"; color:var(--t1); font-weight:800; white-space:pre; }
