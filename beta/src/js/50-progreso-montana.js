@@ -30,7 +30,7 @@ function pmMini(box){
     var w=box.clientWidth||320, h=box.clientHeight||260; if(w===W && h===H && cv.width) return;
     W=w; H=h; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
     var ancho=W>=640;
-    S=Math.min(H*.5, W*(ancho ? .26 : .42)); CX=W*(ancho ? .8 : .74); CY=H*.5+S*.12;
+    S=Math.min(H*.4, W*(ancho ? .24 : .38)); CX=W*(ancho ? .8 : .74); CY=H*.52;
   }
   var PX=new Float32Array(NV), PY=new Float32Array(NV), PZ=new Float32Array(NV), vis=[];
   var CAM=[]; for(var k=0;k<=160;k++) CAM.push(m3Camino(k/160*40));
@@ -121,7 +121,7 @@ function pmInsignia(st){
   var t=bar.querySelector(".pm-barra-t"), v=bar.querySelector("i");
   if(sig){
     var x0=pmXPSuelo(r.desde), x1=pmXPSuelo(sig.desde), pct=Math.max(0, Math.min(1, (st.xp-x0)/Math.max(1, x1-x0)));
-    t.innerHTML=tr("Te faltan")+' <b class="num">'+Math.max(0, x1-st.xp)+' XP</b> '+tr("para")+' <b style="color:'+sig.c+'">'+esc(tr(sig.n))+'</b>';
+    t.innerHTML=tr("Te faltan")+' <b class="num">'+Math.max(0, x1-st.xp)+' XP</b> '+tr("para")+' <b>'+esc(tr(sig.n))+'</b>';
     v.style.width=(pct*100).toFixed(1)+"%"; v.style.setProperty("--c1", r.c); v.style.setProperty("--c2", sig.c);
   } else {
     t.textContent=tr("Rango máximo: eres Leyenda"); v.style.width="100%"; v.style.setProperty("--c1", r.c); v.style.setProperty("--c2", r.d);
@@ -132,6 +132,8 @@ function pmInsignia(st){
 function pmLlama(st){
   var n=document.getElementById("st-streak"), caja=n && n.parentNode; if(!caja) return;
   caja.classList.add("pm-racha");
+  /* en la cabecera solo queda la racha: mejor, retos, logros y comodines se ocultan */
+  [].forEach.call(caja.parentNode.children, function(c){ if(c!==caja) c.classList.add("pm-otro"); });
   var ll=caja.querySelector(".pm-llama");
   if(!ll){ ll=document.createElement("span"); ll.className="pm-llama"; ll.setAttribute("aria-hidden", "true");
     ll.innerHTML='<svg viewBox="0 0 24 32"><defs><linearGradient id="pm-ll-g" x1="0" y1="1" x2="0" y2="0"><stop offset="0" class="pm-ll-a"/><stop offset="1" class="pm-ll-b"/></linearGradient></defs>'+
@@ -260,24 +262,30 @@ pintaRangoRetos=function(st){
 '#card-nivel.pm-noche::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:0; background:linear-gradient(90deg, rgba(7,8,15,.92) 0%, rgba(7,8,15,.7) 42%, rgba(7,8,15,0) 70%), linear-gradient(0deg, rgba(7,8,15,.85) 0%, rgba(7,8,15,0) 38%); }',
 '#card-nivel.pm-noche > :not(canvas){ z-index:1; }',
 '#card-nivel.pm-noche .min-w-0{ max-width:62%; }',
+/* cabecera sobria: nivel, rango, una barra y la racha; lo demás está en «Tu camino» y en el perfil */
+'#card-nivel.pm-noche #lvl-xp, #card-nivel.pm-noche #lvl-siguiente{ display:none; }',
+'#card-nivel.pm-noche #lvl-next{ display:none; }',
+'#card-nivel.pm-noche .pm-otro{ display:none; }',
+'#card-nivel.pm-noche #pm-barra{ max-width:62%; }',
+'@media (min-width:640px){ #card-nivel.pm-noche #pm-barra{ max-width:45%; } }',
 '@media (min-width:640px){ #card-nivel.pm-noche .min-w-0{ max-width:45%; } }',
 '#pm-rango{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px 3px 4px; border-radius:99px; background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); }',
-'.pm-escudo svg{ width:22px; height:22px; display:block; filter:drop-shadow(0 0 6px var(--c1)); }',
+'.pm-escudo svg{ width:22px; height:22px; display:block; }',
 '.pm-escudo path:first-child{ fill:var(--c1); }',
 '.pm-escudo .pm-esc-b{ fill:rgba(255,255,255,.85); }',
-'.pm-rango-n{ font:700 11px Unbounded, system-ui, sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--c1); text-shadow:0 0 10px var(--c1); }',
+'.pm-rango-n{ font:700 11px Unbounded, system-ui, sans-serif; letter-spacing:.1em; text-transform:uppercase; color:var(--c1); }',
 '#pm-barra{ margin:2px 0 4px; }',
 '.pm-barra-t{ font-size:12px; margin:0 0 7px; color:rgba(243,238,227,.75); }',
 '.pm-barra-t b{ color:#fff; font-weight:700; }',
 '.pm-barra-v{ height:6px; border-radius:99px; background:rgba(255,255,255,.1); overflow:visible; }',
-'.pm-barra-v i{ display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, var(--c1), var(--c2)); box-shadow:0 0 10px var(--c1), 0 0 2px #fff; transition:width .8s cubic-bezier(.3,.9,.3,1); min-width:6px; }',
+'.pm-barra-v i{ display:block; height:100%; border-radius:99px; background:var(--accent, #0E8A6E); transition:width .8s cubic-bezier(.3,.9,.3,1); min-width:6px; }',
 /* 3 · la llama */
 '.pm-racha{ display:grid; grid-template-columns:auto auto; column-gap:4px; align-items:end; }',
 '.pm-racha .pm-llama{ grid-row:1 / span 2; align-self:center; width:calc(18px * var(--t,1)); transform-origin:50% 100%; animation:pmLlama 1.6s ease-in-out infinite alternate; }',
-'.pm-llama svg{ width:100%; height:auto; display:block; filter:drop-shadow(0 0 6px rgba(255,140,40,.7)); }',
-'.pm-ll-f{ fill:url(#pm-ll-g); } .pm-ll-c{ fill:#fff3c4; opacity:.9; }',
-'.pm-ll-a{ stop-color:#ff5a1f; } .pm-ll-b{ stop-color:#ffb43a; }',
-'.pm-racha.dorada .pm-ll-a{ stop-color:#e8a10c; } .pm-racha.dorada .pm-ll-b{ stop-color:#fff1a6; } .pm-racha.dorada .pm-llama svg{ filter:drop-shadow(0 0 9px rgba(255,210,80,.9)); }',
+'.pm-llama svg{ width:100%; height:auto; display:block; }',
+'.pm-ll-f{ fill:url(#pm-ll-g); } .pm-ll-c{ fill:#f3eee3; opacity:.85; }',
+'.pm-ll-a{ stop-color:var(--accent, #0E8A6E); } .pm-ll-b{ stop-color:var(--accent, #0E8A6E); }',
+'.pm-racha.dorada .pm-ll-a{ stop-color:#e8a10c; } .pm-racha.dorada .pm-ll-b{ stop-color:#fff1a6; } ',
 '.pm-racha.apagada .pm-llama{ animation:none; } .pm-racha.apagada .pm-llama svg{ filter:none; opacity:.35; } .pm-racha.apagada .pm-ll-a, .pm-racha.apagada .pm-ll-b{ stop-color:#8a8a8a; } .pm-racha.apagada .pm-ll-c{ opacity:0; }',
 '@keyframes pmLlama{ 0%{ transform:scale(1,1) skewX(0); } 50%{ transform:scale(.96,1.05) skewX(-2deg); } 100%{ transform:scale(1.03,.97) skewX(2deg); } }',
 /* 4 · el sendero */
@@ -287,7 +295,7 @@ pintaRangoRetos=function(st){
 '.pm-via{ position:absolute; left:0; top:0; overflow:visible; pointer-events:none; }',
 '.pm-via path{ fill:none; stroke-linecap:round; }',
 '.pm-via-f{ stroke:var(--hairline, rgba(0,0,0,.12)); stroke-width:3; stroke-dasharray:2 7; }',
-'.pm-via-h{ stroke:var(--accent); stroke-width:9; opacity:.18; }',
+'.pm-via-h{ display:none; }',
 '.pm-via-l{ stroke:var(--accent); stroke-width:3.5; }',
 '.pm-via-h, .pm-via-l{ transition:stroke-dashoffset 1s cubic-bezier(.3,.9,.3,1); }',
 '.pm-sendero .cm-rango{ display:inline-flex; align-items:center; gap:3px; }',
