@@ -234,46 +234,98 @@ function m3Arranca(capa){
   }
   caja.addEventListener("pointerup", suelta); caja.addEventListener("pointercancel", suelta);
   /* tocar tu foto o la de alguien abre su perfil */
-  /* ── pájaros: de vez en cuando cruza uno el cielo; si lo tocas, explota y te da XP (con tope al día) ── */
+  /* ── pájaros de luz: de vez en cuando cruza uno el cielo dejando estela; a veces, una estrella fugaz.
+     Si los tocas se abren en un anillo de luz y te dan XP (con tope al día) ── */
   var PAJ=[], CHISP=[], pajProx=performance.now()+4000;
-  var PAJ_XP=5, PAJ_XP_ORO=20, PAJ_DIA=5;
+  var PAJ_XP=5, PAJ_XP_ORO=20, PAJ_DIA=5, ORO="245,197,66";
   function pajHoy(){ var E=m3Estado(), d=today(); if(!E.pajaros || E.pajaros.d!==d) E.pajaros={ d:d, n:0 }; return E.pajaros; }
-  function pajNuevo(ahora){
-    var izq=Math.random()<.5, oro=Math.random()<.12;
-    PAJ.push({ x:izq ? -30 : W+30, y:H*(.12+Math.random()*.3), vx:(izq ? 1 : -1)*(45+Math.random()*35), fase:Math.random()*6, oro:oro, t0:ahora });
+  function pajNuevo(){
+    if(Math.random()<.15){   /* estrella fugaz: cruza en diagonal por arriba */
+      var dr=Math.random()<.5 ? 1 : -1;
+      PAJ.push({ oro:true, x:dr>0 ? -40 : W+40, y:H*(.06+Math.random()*.14), vx:dr*(150+Math.random()*40), vy:40+Math.random()*25, fase:0, cola:[] });
+    } else {
+      var izq=Math.random()<.5;
+      PAJ.push({ oro:false, x:izq ? -30 : W+30, y:H*(.12+Math.random()*.28), vx:(izq ? 1 : -1)*(48+Math.random()*30), vy:0, fase:Math.random()*6, cola:[] });
+    }
   }
   function pajPinta(dt, ahora, tt){
-    if(!vuelo && ahora>pajProx && PAJ.length<2){ pajNuevo(ahora); pajProx=ahora+9000+Math.random()*12000; }
+    if(!vuelo && ahora>pajProx && PAJ.length<2){ pajNuevo(); pajProx=ahora+9000+Math.random()*12000; }
+    ctx.save(); ctx.globalCompositeOperation="lighter"; ctx.lineCap="round"; ctx.lineJoin="round";
     for(var i=PAJ.length-1;i>=0;i--){
-      var b=PAJ[i]; b.x+=b.vx*dt; b.y+=Math.sin(tt*1.6+b.fase)*12*dt;
-      if(b.x<-60 || b.x>W+60){ PAJ.splice(i, 1); continue; }
-      var al=Math.sin(tt*11+b.fase), r=b.oro ? 9 : 7, dir=b.vx>0 ? 1 : -1;
-      ctx.save(); ctx.translate(b.x, b.y); ctx.scale(dir, 1);
-      if(b.oro){ ctx.shadowColor="#f5c542"; ctx.shadowBlur=14; }
-      ctx.strokeStyle=b.oro ? "#f5c542" : "rgba(255,255,255,.9)"; ctx.lineWidth=2; ctx.lineCap="round"; ctx.lineJoin="round";
-      ctx.beginPath(); ctx.moveTo(-r*1.3, -al*r*.8); ctx.quadraticCurveTo(-r*.5, -r*.2, 0, 0); ctx.quadraticCurveTo(r*.5, -r*.2, r*1.3, -al*r*.8); ctx.stroke();
-      ctx.restore();
+      var b=PAJ[i];
+      b.x+=b.vx*dt; b.y+=(b.oro ? b.vy : Math.sin(tt*1.4+b.fase)*14)*dt;
+      b.cola.unshift([b.x, b.y]); if(b.cola.length>(b.oro ? 26 : 16)) b.cola.pop();
+      if(b.x<-80 || b.x>W+80 || b.y>H*.6){ PAJ.splice(i, 1); continue; }
+      var rgb=b.oro ? ORO : Lz_.rgb, j, c0, c1;
+      /* la estela: se adelgaza y se apaga */
+      for(j=1;j<b.cola.length;j++){
+        c0=b.cola[j-1]; c1=b.cola[j]; var k=1-j/b.cola.length;
+        ctx.strokeStyle="rgba("+rgb+","+(k*(b.oro ? .75 : .4)).toFixed(3)+")"; ctx.lineWidth=(b.oro ? 3.4 : 2.2)*k+.3;
+        ctx.beginPath(); ctx.moveTo(c0[0], c0[1]); ctx.lineTo(c1[0], c1[1]); ctx.stroke();
+      }
+      /* el halo */
+      var hr=b.oro ? 22 : 16, gh=ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, hr);
+      gh.addColorStop(0, "rgba("+rgb+",.55)"); gh.addColorStop(1, "rgba("+rgb+",0)");
+      ctx.fillStyle=gh; ctx.beginPath(); ctx.arc(b.x, b.y, hr, 0, 6.283); ctx.fill();
+      if(b.oro){
+        /* la cabeza de la estrella: un punto blanco con cuatro destellos que laten */
+        var lt=4+2*Math.sin(tt*14);
+        ctx.strokeStyle="rgba(255,250,230,.85)"; ctx.lineWidth=1.2;
+        ctx.beginPath(); ctx.moveTo(b.x-lt*2.2, b.y); ctx.lineTo(b.x+lt*2.2, b.y); ctx.moveTo(b.x, b.y-lt*2.2); ctx.lineTo(b.x, b.y+lt*2.2); ctx.stroke();
+        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.arc(b.x, b.y, 2.6, 0, 6.283); ctx.fill();
+      } else {
+        /* el pájaro: dos alas en media luna que baten suave, de luz */
+        var al=Math.sin(tt*7.5+b.fase), dir=b.vx>0 ? 1 : -1, r=9;
+        ctx.save(); ctx.translate(b.x, b.y); ctx.scale(dir, 1);
+        ctx.fillStyle="rgba("+rgb+",.9)";
+        for(var s2=-1;s2<=1;s2+=2){
+          var py=-al*r*.9, mx=s2*r*.55;
+          ctx.beginPath(); ctx.moveTo(0, 0);
+          ctx.quadraticCurveTo(mx, py*.6-r*.35, s2*r*1.35, py);
+          ctx.quadraticCurveTo(mx, py*.6-r*.05, 0, r*.18);
+          ctx.closePath(); ctx.fill();
+        }
+        ctx.fillStyle="#fff"; ctx.beginPath(); ctx.ellipse(r*.12, .5, 2.6, 1.6, 0, 0, 6.283); ctx.fill();
+        ctx.restore();
+      }
     }
+    /* lo que queda al tocarlos: anillos, chispas y la XP */
     for(i=CHISP.length-1;i>=0;i--){
       var c=CHISP[i]; c.v+=dt;
       if(c.v>c.vida){ CHISP.splice(i, 1); continue; }
-      var k=c.v/c.vida;
-      if(c.txt){ ctx.globalAlpha=1-k; ctx.font='800 15px "Plus Jakarta Sans", system-ui, sans-serif'; ctx.textAlign="center"; ctx.textBaseline="middle";
-        ctx.lineWidth=3; ctx.strokeStyle="rgba(5,5,7,.7)"; ctx.strokeText(c.txt, c.x, c.y-k*40); ctx.fillStyle=c.c; ctx.fillText(c.txt, c.x, c.y-k*40); }
-      else { c.x+=c.dx*dt; c.y+=c.dy*dt; c.dy+=90*dt; ctx.globalAlpha=1-k; ctx.fillStyle=c.c; ctx.beginPath(); ctx.arc(c.x, c.y, 2.4*(1-k*.6), 0, 6.283); ctx.fill(); }
+      var q=c.v/c.vida, e=1-Math.pow(1-q, 3);
+      if(c.anillo){
+        ctx.strokeStyle="rgba("+c.rgb+","+(.9*(1-q)).toFixed(3)+")"; ctx.lineWidth=2.5*(1-q)+.5;
+        ctx.beginPath(); ctx.arc(c.x, c.y, 6+c.r*e, 0, 6.283); ctx.stroke();
+      } else if(c.txt){
+        ctx.globalCompositeOperation="source-over";
+        ctx.globalAlpha=q<.15 ? q/.15 : 1-Math.max(0, (q-.55)/.45);
+        ctx.font='700 '+(c.big ? 17 : 15)+'px Unbounded, "Plus Jakarta Sans", system-ui, sans-serif'; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.shadowColor="rgba("+c.rgb+",.9)"; ctx.shadowBlur=12; ctx.fillStyle="#fff";
+        ctx.fillText(c.txt, c.x, c.y-e*46); ctx.shadowBlur=0; ctx.globalAlpha=1;
+        ctx.globalCompositeOperation="lighter";
+      } else {
+        var px=c.x+c.dx*e, py2=c.y+c.dy*e, rr=c.t*(1-q*.7);
+        var gp=ctx.createRadialGradient(px, py2, 0, px, py2, rr*3);
+        gp.addColorStop(0, "rgba(255,255,255,"+(1-q).toFixed(3)+")"); gp.addColorStop(.35, "rgba("+c.rgb+","+(.8*(1-q)).toFixed(3)+")"); gp.addColorStop(1, "rgba("+c.rgb+",0)");
+        ctx.fillStyle=gp; ctx.beginPath(); ctx.arc(px, py2, rr*3, 0, 6.283); ctx.fill();
+      }
     }
-    ctx.globalAlpha=1;
+    ctx.restore();
   }
   function pajToca(x, y){
     for(var i=PAJ.length-1;i>=0;i--){
-      var b=PAJ[i]; if(Math.hypot(b.x-x, b.y-y)>30) continue;
+      var b=PAJ[i]; if(Math.hypot(b.x-x, b.y-y)>(b.oro ? 42 : 34)) continue;
       PAJ.splice(i, 1);
-      var col=b.oro ? "#f5c542" : Lz_.claro;
-      for(var j=0;j<22;j++){ var a=j/22*6.283, v=60+Math.random()*110; CHISP.push({ x:b.x, y:b.y, dx:Math.cos(a)*v, dy:Math.sin(a)*v-30, c:j%3 ? col : "#fff", v:0, vida:.7+Math.random()*.4 }); }
+      var rgb=b.oro ? ORO : Lz_.rgb, n=b.oro ? 16 : 11;
+      CHISP.push({ anillo:true, x:b.x, y:b.y, r:b.oro ? 60 : 42, rgb:rgb, v:0, vida:.7 });
+      CHISP.push({ anillo:true, x:b.x, y:b.y, r:b.oro ? 34 : 24, rgb:"255,255,255", v:-.08, vida:.6 });
+      for(var j=0;j<n;j++){ var a=j/n*6.283+Math.random()*.3, d=(b.oro ? 46 : 32)+Math.random()*22;
+        CHISP.push({ x:b.x, y:b.y, dx:Math.cos(a)*d, dy:Math.sin(a)*d, t:1.6+Math.random()*1.4, rgb:rgb, v:0, vida:.65+Math.random()*.3 }); }
       var h=pajHoy(), xp=0;
-      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; var E=m3Estado(); E.xpPajaros=(E.xpPajaros||0)+xp; try{ save(); }catch(e){} }
-      CHISP.push({ x:b.x, y:b.y-6, txt:xp ? "+"+xp+" XP" : tr("Hoy ya no da más XP"), c:xp ? col : "#fff", v:0, vida:1.3 });
-      if(typeof sonido==="function") sonido(b.oro ? "nivel" : "pop");
+      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; var E=m3Estado(); E.xpPajaros=(E.xpPajaros||0)+xp; try{ save(); }catch(er){} }
+      CHISP.push({ x:b.x, y:b.y-10, txt:xp ? "+"+xp+" XP" : tr("Hoy ya no da más XP"), big:!!xp, rgb:rgb, v:0, vida:1.5 });
+      if(typeof sonido==="function") sonido(b.oro ? "nivel" : "ok");
       return true;
     }
     return false;
