@@ -186,9 +186,9 @@ function m3Arranca(capa){
   caja.addEventListener("pointermove", function(ev){
     if(!tocando) return;
     var ahora=performance.now(), dt=Math.max(1, ahora-tocando.t);
-    yaw=tocando.yaw+(ev.clientX-tocando.x)*.0095;
+    yaw=tocando.yaw-(ev.clientX-tocando.x)*.0095;
     pitch=Math.max(.16, Math.min(.72, tocando.pitch+(ev.clientY-tocando.y)*.0035));
-    vel=vel*.6+((ev.clientX-tocando.lx)*.0095/dt*1000)*.4;
+    vel=vel*.6+(-(ev.clientX-tocando.lx)*.0095/dt*1000)*.4;
     tocando.lx=ev.clientX; tocando.t=ahora;
   });
   function suelta(){ if(!tocando) return; if(performance.now()-tocando.t>90) vel=0; tocando=null; ultimo=performance.now(); }
