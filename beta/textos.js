@@ -121,7 +121,7 @@ window.DTRACK_TEXTOS = {
   ],
 
   tutorial: [
-    {t:"Tu día en tres anillos", d:"Retos, hábitos y Vital. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
+    {t:"Tu día en tres anillos", d:"Retos, hábitos y Cuerpo. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
     {t:"Tus hábitos",            d:"Lo que quieres hacer cada día. Tócalo para marcarlo; mantén pulsado uno para cambiarlo."},
     {t:"Para moverte",           d:"Aquí cambias de sección. En Ajustes puedes volver a ver esta guía cuando quieras."}
   ]

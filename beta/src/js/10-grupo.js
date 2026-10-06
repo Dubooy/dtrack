@@ -326,7 +326,7 @@ function socMeta(){
         '<b class="num">'+pct+'%</b></div>'+
       '<div style="min-width:0;flex:1">'+
         '<p style="font-size:15px;font-weight:600;line-height:1.35">'+esc(m.txt)+'</p>'+
-        '<p class="soc-sub" style="white-space:normal">Vais por '+m.hecho+' de '+m.objetivo+'. Se cuenta solo desde Vital. Si llegáis, '+esc(m.premio)+'.</p>'+
+        '<p class="soc-sub" style="white-space:normal">Vais por '+m.hecho+' de '+m.objetivo+'. Se cuenta solo desde Cuerpo. Si llegáis, '+esc(m.premio)+'.</p>'+
       '</div>'+
     '</div>';
 }

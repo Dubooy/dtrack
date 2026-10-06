@@ -36,6 +36,6 @@
   }
   var _goNativo=go;
   go=function(){ var r=_goNativo.apply(this, arguments); setTimeout(manda, 30); return r; };
-  setInterval(manda, 400);
+  setInterval(function(){ if(document.visibilityState!=="hidden") manda(); }, 400);   /* en segundo plano no hay nada que contar */
   setTimeout(manda, 50);
 })();

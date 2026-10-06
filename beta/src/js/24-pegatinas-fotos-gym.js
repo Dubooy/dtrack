@@ -384,7 +384,7 @@ function fgGaleria(u){
   var dentro=box.querySelector("#fg-gal-in");
   if(yo){
     var F=fgFotos(); dentro.innerHTML=fgRejilla(Object.keys(F).map(function(d){ return { d:d, u:F[d].u }; }));
-    if(!Object.keys(F).length) dentro.innerHTML='<p class="soc-nota">Cuando marques ejercicio en Vital, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.</p>';
+    if(!Object.keys(F).length) dentro.innerHTML='<p class="soc-nota">Cuando marques ejercicio en Cuerpo, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.</p>';
     return;
   }
   var uid=fgUidDe(u);
@@ -481,8 +481,8 @@ function mesVigila(){
   var sh=document.getElementById("sheet"); if(sh && !sh.hidden) return;
   mesMirado=true;
   var ant=mesAnterior(), dia=+today().slice(8,10);
-  /* en la beta se puede ver ya con el mes en curso, una vez */
-  if(window.DTRACK_BETA && !S.mesPruebaBeta){ S.mesPruebaBeta=1; save(); setTimeout(function(){ abrirMes(today().slice(0,7)); }, 900); return; }
+  /* (la vista previa con el mes en curso era para probar: la app publicada lleva
+     DTRACK_BETA y se la enseñaba a todos, también a quien acababa de empezar) */
   if(S.mesVisto===ant || S.mesVisto>ant) return;
   var usado=mesDias(ant).some(function(d){ return activeDay(d); });
   if(dia>7 || !usado){ S.mesVisto=ant; save(); return; }

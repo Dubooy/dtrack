@@ -202,8 +202,9 @@ function load(){
 }
 var storageOK=(function(){ try{ localStorage.setItem("__t","1"); localStorage.removeItem("__t"); return true; }catch(e){ return false; } })();
 /* si el móvil no deja guardar (sin espacio o en modo privado), se avisa: antes fallaba sin decir nada */
-var saveAvisado=0;
+var saveAvisado=0, guardados=0;
 function save(){
+  guardados++;   /* cuenta de guardados: lo calculado de paso (retos de días pasados) se rehace si algo cambia */
   try{ localStorage.setItem(KEY,JSON.stringify(S)); }
   catch(e){ if(storageOK && Date.now()-saveAvisado>60000){ saveAvisado=Date.now(); setTimeout(function(){ if(typeof avisoNube==="function") avisoNube("No se ha podido guardar en este móvil: puede que no quede espacio. Si tienes cuenta, pulsa «Guardar ahora» en Social."); }, 0); } }
   espejo();
@@ -352,7 +353,11 @@ function drawChallenges(d){
   }
   return out;
 }
-/* los tres de un día se fijan la primera vez y ya no cambian aunque edites la lista */
+/* los tres de un día se fijan la primera vez y ya no cambian aunque edites la lista.
+   Solo se guardan los de hoy (o los de un día pasado en el que marcaste alguno): pintar el
+   año o las estadísticas pasaba por cientos de días vacíos y guardaba los de cada uno, con
+   un guardado entero por día. Esos se calculan y se recuerdan mientras no cambie nada. */
+var chPickTmp={}, chPickTmpN=-1;
 function todaysChallenges(d){
   if(!S.chPick) S.chPick={};
   var saved=S.chPick[d];
@@ -360,8 +365,13 @@ function todaysChallenges(d){
     var kept=[]; for(var i=0;i<saved.length;i++){ var c=byChId(saved[i]); if(c) kept.push(c); }
     if(kept.length) return kept;
   }
+  var fija = d>=today() || !!(S.chDone && S.chDone[d] && S.chDone[d].length);
+  if(!fija){
+    if(chPickTmpN!==guardados){ chPickTmp={}; chPickTmpN=guardados; }
+    if(chPickTmp[d]) return chPickTmp[d];
+  }
   var sel=drawChallenges(d);
-  if(sel.length){ S.chPick[d]=sel.map(function(c){ return c.id; }); save(); }
+  if(sel.length){ if(fija){ S.chPick[d]=sel.map(function(c){ return c.id; }); save(); } else chPickTmp[d]=sel; }
   return sel;
 }
 function descansoDe(d){ return !!(S.descanso && S.descanso[d]); }
@@ -386,7 +396,7 @@ function tasksByDay(){
   return m;
 }
 function dayXP(d, tmap){
-  var x=0, done=chOf(d).length, total=todaysChallenges(d).length;
+  var x=0, done=chOf(d).length, total=done?todaysChallenges(d).length:0;   /* sin retos hechos, el ×1,5 no puede tocar */
   x += done*15;
   if(wentGym(d)) x+=20;
   x += checksOf(d).length*4;
@@ -401,7 +411,7 @@ function dayXP(d, tmap){
   if(S.retoExtra && S.retoExtra[d]) x+=50;   /* cuarto reto, desde el nivel 7 */
   return x;
 }
-function tripleDone(d){ var tc=todaysChallenges(d).length; return tc>0 && chOf(d).length>=tc; }
+function tripleDone(d){ var dn=chOf(d).length; if(!dn) return false; var tc=todaysChallenges(d).length; return tc>0 && dn>=tc; }
 var NV_XP_BASE=80, NV_XP_CRECE=1.1;
 function stats(){
   var s={ch:0,gym:0,sleep:0,lowScreen:0,perfect:0,tasksDone:0,pending:0,examsPast:0,streak:0,best:0,xp:0,lvl:1};

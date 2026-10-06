@@ -536,15 +536,17 @@ function subirDatos(){
   if(subiendo) return subiendo;
   var vAntes=verLocal(), v=vAntes+1, ahora=new Date().toISOString();
   nubeSucia=false;
+  /* se sube una foto de cómo está todo ahora: si sale bien, esa foto es la nueva «base» */
+  var txt=JSON.stringify(S), foto=JSON.parse(txt);
   /* solo se sobrescribe si en la nube sigue la versión que este móvil conoce: si otro
-     dispositivo ha guardado entre medias, no se pisa y se pregunta con cuál quedarse */
+     dispositivo ha guardado entre medias, no se pisa: se juntan las dos (o se pregunta) */
   var peticion = vAntes>0
     ? pedirAuth("/rest/v1/datos?id=eq."+ses.uid+"&version=eq."+vAntes+"&select=version",
-        { method:"PATCH", prefer:"return=representation", body:{ estado:S, version:v, actualizado:ahora } })
+        { method:"PATCH", prefer:"return=representation", body:{ estado:foto, version:v, actualizado:ahora } })
     : pedirAuth("/rest/v1/datos?select=version",
-        { method:"POST", prefer:"return=representation", body:{ id:ses.uid, estado:S, version:v, actualizado:ahora } });
+        { method:"POST", prefer:"return=representation", body:{ id:ses.uid, estado:foto, version:v, actualizado:ahora } });
   subiendo=peticion.then(function(r){
-    if(r.ok && Array.isArray(r.datos) && r.datos.length){ verLocalSet(v); ultimoSync=Date.now(); pintaEstadoNube("guardado"); return true; }
+    if(r.ok && Array.isArray(r.datos) && r.datos.length){ verLocalSet(v); baseGuarda(v, txt); ultimoSync=Date.now(); pintaEstadoNube("guardado"); return true; }
     nubeSucia=true;
     if((r.ok && Array.isArray(r.datos)) || r.estado===409){ nubeConflicto(); return false; }
     pintaEstadoNube(r.estado===401 ? "caducada" : "error"); return false;
@@ -581,17 +583,108 @@ function resumenEstado(e){
   return { dias:dias, tareas:tareas, hechas:hechas, ultimo:ult };
 }
 
+/* ── la «base»: cómo estaba todo la última vez que este móvil y la nube coincidieron ──
+   Con ella, cuando la nube va por delante, se sabe qué ha cambiado aquí y qué allí, y se
+   juntan las dos sin preguntar. Antes se obligaba a quedarse con una versión entera (y la
+   otra se perdía) aunque en este móvil no se hubiera tocado nada: bastaba con usar la web
+   y la app de iPhone, que guardan cada una lo suyo. Va en IndexedDB, con su versión, para
+   no quitarle sitio al estado en el almacén del navegador. */
+function baseIDB(escribe){
+  return new Promise(function(ok){
+    try{
+      if(!ses || !ses.uid || !window.indexedDB) return ok(null);
+      var clave="sync:"+ses.uid, r=indexedDB.open("dutrack",1);
+      r.onupgradeneeded=function(){ try{ r.result.createObjectStore("estado"); }catch(e){} };
+      r.onerror=function(){ ok(null); };
+      r.onsuccess=function(){
+        try{
+          var db=r.result, tx=db.transaction("estado", escribe?"readwrite":"readonly"), st=tx.objectStore("estado");
+          var q=escribe ? st.put(escribe, clave) : st.get(clave);
+          q.onsuccess=function(){ if(!escribe) ok(q.result||null); };
+          tx.oncomplete=function(){ db.close(); ok(escribe ? true : (q.result||null)); };
+          tx.onerror=tx.onabort=function(){ try{ db.close(); }catch(e){} ok(null); };
+        }catch(e){ ok(null); }
+      };
+    }catch(e){ ok(null); }
+  });
+}
+function baseGuarda(v, txt){ return baseIDB({ v:v, txt:txt }); }
+function baseLee(){ return baseIDB(null); }
+
+/* JSON con las claves en orden, para saber si dos trozos son iguales */
+function jsonFijo(v){
+  if(v===undefined) return "~";
+  if(v===null || typeof v!=="object") return JSON.stringify(v);
+  if(Array.isArray(v)) return "["+v.map(jsonFijo).join(",")+"]";
+  return "{"+Object.keys(v).sort().filter(function(k){ return v[k]!==undefined; })
+    .map(function(k){ return JSON.stringify(k)+":"+jsonFijo(v[k]); }).join(",")+"}";
+}
+function esObjeto(v){ return v!==null && typeof v==="object" && !Array.isArray(v); }
+function esVacio(v){ return v==null || v==="" || v===0 || v===false || (Array.isArray(v) && !v.length) || (esObjeto(v) && !Object.keys(v).length); }
+/* lo que cambió en los dos sitios a la vez y aun así tiene una respuesta clara */
+function fusionaChoque(ruta, l, n, local, nube){
+  var p=ruta.split(".");
+  /* los tres retos de un día (y su «por qué») se calculan solos al abrir la app: valen los
+     del lado donde ese día se marcó alguno; si no, los de la nube */
+  if((p[0]==="chPick" || p[0]==="chInfo") && p.length===2){
+    var dl=((local.chDone||{})[p[1]]||[]).length, dn=((nube.chDone||{})[p[1]]||[]).length;
+    return { v:(dl && !dn) ? l : n };
+  }
+  /* el saldo de comodines también se recalcula solo */
+  if(p[0]==="comodin" && p.length===2 && p[1]!=="usados") return { v:n };
+  /* listas de marcas (hábitos o retos hechos un día…): se juntan las de los dos */
+  if(Array.isArray(l) && Array.isArray(n) && l.concat(n).every(function(x){ return x===null || typeof x!=="object"; })){
+    var u=l.slice(); n.forEach(function(x){ if(u.indexOf(x)<0) u.push(x); }); return { v:u };
+  }
+  return null;
+}
+/* fusión a tres bandas: b es la base, l lo de este móvil y n lo de la nube */
+function fusiona3(b, l, n, ruta, local, nube, choques){
+  var jl=jsonFijo(l), jn=jsonFijo(n);
+  if(jl===jn) return l;
+  var jb=jsonFijo(b);
+  if(jl===jb) return n;                     /* solo cambió en la nube */
+  if(jn===jb) return l;                     /* solo cambió aquí */
+  if(b===undefined && esVacio(l)) return n; /* aquí solo se preparó, vacío */
+  if(b===undefined && esVacio(n)) return l;
+  if(esObjeto(l) && esObjeto(n)){
+    var o={}, bo=esObjeto(b)?b:{}, ks={};
+    Object.keys(l).concat(Object.keys(n)).forEach(function(k){ ks[k]=1; });
+    Object.keys(ks).forEach(function(k){
+      var v=fusiona3(bo[k], l[k], n[k], ruta?ruta+"."+k:k, local, nube, choques);
+      if(v!==undefined) o[k]=v;
+    });
+    return o;
+  }
+  var r=fusionaChoque(ruta, l, n, local, nube);
+  if(r) return r.v;
+  choques.push(ruta); return l;
+}
+/* el estado juntado, o null si algo cambió de verdad en los dos sitios (entonces se pregunta) */
+function fusionaConNube(nube, base){
+  try{
+    if(!base || !base.txt || base.v!==verLocal() || !esObjeto(nube.estado)) return null;
+    var b=JSON.parse(base.txt), l=JSON.parse(JSON.stringify(S)), choques=[];
+    var f=fusiona3(b, l, nube.estado, "", l, nube.estado, choques);
+    return (choques.length || !esObjeto(f)) ? null : f;
+  }catch(e){ return null; }
+}
+
 /* se trae lo de la nube y se recarga. Mientras, nada puede volver a subir ni guardar
-   lo viejo (al recargar se dispara el «al cerrar») */
+   lo viejo (al recargar se dispara el «al cerrar»). «base» es lo que hay en la nube en
+   esa versión (si no se pasa, es el propio estado) */
 var aplicando=false;
-function aplicarEstado(e, version){
+function aplicarEstado(e, version, base){
   try{
     aplicando=true; nubeSucia=false;
     S=e;
     localStorage.setItem(KEY, JSON.stringify(e));
     verLocalSet(version||0);
-    location.reload();
-  }catch(err){ aplicando=false; avisoNube("No se ha podido guardar lo de la nube en este navegador."); }
+  }catch(err){ aplicando=false; avisoNube("No se ha podido guardar lo de la nube en este navegador."); return; }
+  var listo=false;
+  function recarga(){ if(listo) return; listo=true; location.reload(); }
+  baseGuarda(version||0, JSON.stringify(base||e)).then(recarga, recarga);
+  setTimeout(recarga, 1500);
 }
 
 /* ── sincronizar al abrir ────────────────────────────────── */
@@ -603,7 +696,9 @@ function sincronizarAlAbrir(){
     if(!nube){ verLocalSet(0); return subirDatos(); }   /* primera vez: sube lo que haya */
     var vLocal=verLocal();
     if(nube.version===vLocal){
-      /* la misma versión: si en este móvil hay algo sin subir (se cerró sin red), se sube */
+      /* la misma versión: lo de la nube es justo la base de este móvil */
+      baseGuarda(vLocal, JSON.stringify(nube.estado));
+      /* si en este móvil hay algo sin subir (se cerró sin red), se sube */
       if(JSON.stringify(nube.estado)!==JSON.stringify(S)) return subirDatos();
       pintaEstadoNube("aldia"); return;
     }
@@ -611,7 +706,15 @@ function sincronizarAlAbrir(){
     if(vLocal===0 && aqui && aqui.dias===0 && aqui.tareas===0){
       aplicarEstado(nube.estado, nube.version); return;  /* móvil vacío: baja sin preguntar */
     }
-    if(nube.version>vLocal){ preguntarConflicto(nube, aqui, alla); return; }
+    if(nube.version>vLocal){
+      /* la nube va por delante: si lo de aquí y lo de allí no chocan, se juntan sin preguntar
+         (y al recargar se sube lo juntado); si algo cambió en los dos sitios, se pregunta */
+      return baseLee().then(function(base){
+        var f=fusionaConNube(nube, base);
+        if(f){ aplicarEstado(f, nube.version, nube.estado); return; }
+        preguntarConflicto(nube, aqui, alla);
+      });
+    }
     /* la nube va por detrás de este móvil: se sube lo de aquí */
     verLocalSet(nube.version); return subirDatos();
   }).catch(function(){ pintaEstadoNube("sinred"); });

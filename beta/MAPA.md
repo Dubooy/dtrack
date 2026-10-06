@@ -43,7 +43,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `18-diseno-temas.js` | Temas (Arena, Porcelana, Clásico, Esencial), privacidad, hábitos flexibles, tu año |
 | `19-objetivos-bucle.js` | Objetivos, tendencias, retos adaptativos, experimentos, metas del mes |
 | `20-google-calendar.js` | Google Calendar en Hoy |
-| `21-grupo-servidor.js` | Social con Supabase: bajar/subir grupo, llamadas, sincronizar |
+| `21-grupo-servidor.js` | Social con Supabase: bajar/subir grupo, llamadas, sincronizar (con fusión a tres bandas: `fusiona3`, base en IndexedDB) |
 | `22-cuenta-entrar.js` | Cuenta: correo y código, Google, conflictos de versión, foto de perfil |
 | `23-meditacion.js` | Meditación: sonido, voz y sesión a pantalla completa |
 | `24-pegatinas-fotos-gym.js` | Pegatinas para compartir, fotos del gym, resumen del mes |

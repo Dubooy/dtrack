@@ -427,8 +427,8 @@ function difDe(c, h){
 function drawChallenges(d){
   var list=S.challenges||[]; if(!list.length) return [];
   var carga=cargaDe(d);
-  if(!S.chInfo) S.chInfo={};
-  S.chInfo[d]=carga;
+  /* el «por qué» solo se enseña para hoy: no se guarda el de cada día pasado que se calcula */
+  if(d>=today()){ if(!S.chInfo) S.chInfo={}; S.chInfo[d]=carga; }
   if(list.length<=3) return list.slice();
   var hist=chHistoria(d, 30), metas=misMetas(), rnd=azar(hash("dtrack"+d));
   var cand=list.map(function(c){
@@ -619,11 +619,11 @@ var EXPS=[
     c:function(d){ var s=vHab(d).sleep; return s>0 ? s>=7 : null; }, met:["retos","habitos","animo"] },
   { k:"pantalla", ik:"pantalla", e:"📵", t:"¿Menos de 2 h de pantalla cambia tus días?", si:"con menos de 2 h de pantalla", no:"con 2 h o más", falta:"Apunta tu tiempo de pantalla para que hoy cuente",
     c:function(d){ var s=vHab(d).screen; return (s!=null&&s>0) ? s<2 : null; }, met:["estudio","retos","animo"] },
-  { k:"ejercicio", ik:"moverme", e:"🏃", t:"¿Hacer ejercicio cambia tu ánimo?", si:"con ejercicio", no:"sin ejercicio", falta:"Si hoy haces ejercicio, márcalo en Vital",
+  { k:"ejercicio", ik:"moverme", e:"🏃", t:"¿Hacer ejercicio cambia tu ánimo?", si:"con ejercicio", no:"sin ejercicio", falta:"Si hoy haces ejercicio, márcalo en Cuerpo",
     c:function(d){ return wentGym(d) ? true : (d<today() ? false : null); }, met:["animo","habitos","retos"] },
   { k:"parte", ik:"dormir", e:"🌙", t:"¿Hacer el Parte del día cambia cómo empiezas el siguiente?", si:"después de hacer el Parte", no:"sin Parte la noche anterior", falta:"",
     c:function(d){ return !!(S.parte && S.parte[addDays(d,-1)]); }, met:["retos","habitos","animo"] },
-  { k:"agua", ik:"agua", e:"💧", t:"¿Beber suficiente agua cambia tus días?", si:"bien hidratado", no:"sin marcar el agua", falta:"Marca el agua en Vital para que hoy cuente",
+  { k:"agua", ik:"agua", e:"💧", t:"¿Beber suficiente agua cambia tus días?", si:"bien hidratado", no:"sin marcar el agua", falta:"Marca el agua en Cuerpo para que hoy cuente",
     c:function(d){ var s=vHab(d).water; return s>0 ? s>=8 : null; }, met:["habitos","animo","retos"] },
   { k:"habito", ik:"habito", e:"✅", t:"¿Qué pasa los días que cumples un hábito?", si:"en que lo cumples", no:"en que no", falta:"Márcalo en tus hábitos si lo haces",
     c:null, met:["retos","animo","habitos"] }

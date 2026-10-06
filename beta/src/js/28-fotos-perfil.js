@@ -255,7 +255,7 @@ fgGaleria=function(u){
   var dentro=box.querySelector("#fg-gal-in");
   if(yo){
     var F=fgFotos(), l=Object.keys(F).filter(function(d){ return gUrl(F[d].u); }).map(function(d){ return { d:d, u:F[d].u }; });
-    if(!l.length){ dentro.innerHTML='<p class="soc-nota">Cuando marques ejercicio en Vital, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.</p>'; return; }
+    if(!l.length){ dentro.innerHTML='<p class="soc-nota">Cuando marques ejercicio en Cuerpo, podrás subir una foto haciendo deporte: gym, fútbol, correr, lo que sea. Aquí se guardan todas, por meses.</p>'; return; }
     dentro.innerHTML=fpRejilla(l, ses.uid)+'<p class="soc-nota">Toca una foto para ponerle descripción y ver sus likes.</p>';
     fpMarcas(ses.uid); fpCarga(ses.uid); return;
   }

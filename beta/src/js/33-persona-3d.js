@@ -836,9 +836,19 @@ function maniquiFoto(k, tam){
   MQ_COLA=p.catch(function(){});
   return p;
 }
-/* rellena los <img data-mq="postura"> que haya dentro de un elemento */
+/* rellena los <img data-mq="postura"> que haya dentro de un elemento, cuando está a punto
+   de verse: «Estirar» va al final de Cuerpo y antes, solo con entrar en Cuerpo, se bajaba
+   el 3D (tres.js y cuerpo.glb, 1,2 MB) y se hacían todas sus fotos aunque no se miraran */
+var mqVista=null;
 function maniquiFotos(dentro){
   if(!dentro) return;
+  if(!window.IntersectionObserver){ maniquiFotosYa(dentro); return; }
+  if(!mqVista) mqVista=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ mqVista.unobserve(e.target); maniquiFotosYa(e.target); } });
+  }, { rootMargin:"600px 0px" });
+  mqVista.unobserve(dentro); mqVista.observe(dentro);
+}
+function maniquiFotosYa(dentro){
   Array.prototype.forEach.call(dentro.querySelectorAll("img[data-mq]:not([src])"), function(im){
     maniquiFoto(im.dataset.mq, +im.dataset.mqt||0).then(function(u){ im.src=u; im.classList.add("ve"); }).catch(function(){});
   });

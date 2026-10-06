@@ -96,7 +96,11 @@ function moveMTab(){
   },true);
 })();
 
+/* la barra lateral solo se ve en pantallas anchas (lg); en el móvil, medirla forzaba
+   un cálculo de toda la página en cada cambio de pestaña para nada */
+var railVisible=window.matchMedia ? window.matchMedia("(min-width:1024px)") : { matches:true };
 function moveMarker(){
+  if(!railVisible.matches) return;
   var m=$("#rail-marker"), b=$('#rail button[data-view="'+(view==="tareas"?"academico":view)+'"]');
   if(!m||!b) return;
   m.style.height=b.offsetHeight+"px"; m.style.transform="translateY("+b.offsetTop+"px)"; m.style.opacity="1";
@@ -106,8 +110,11 @@ function go(v){
   setTimeout(function(){ if(typeof socMini==="function") socMini(); }, 30);
   ["resumen","retos","vital","academico","tareas","social"].forEach(function(k){
     var el=$("#v-"+k); if(!el) return;
+    var estaba=!el.hidden;
     el.hidden=(k!==v);
-    if(k===v){ el.classList.remove("view"); void el.offsetWidth; el.classList.add("view"); }
+    /* al pasar de oculta a visible la animación de entrada empieza sola; quitar y poner .view
+       (con un reflow forzado de toda la vista) solo hace falta si ya estaba a la vista */
+    if(k===v && estaba){ el.classList.remove("view"); void el.offsetWidth; el.classList.add("view"); }
   });
   /* Horario y Tareas comparten pestaña: la de abajo se marca igual en las dos */
   var tab = (v==="tareas" && !(typeof academicoOff==="function" && academicoOff())) ? "academico" : v;
@@ -509,6 +516,18 @@ function addTask(){
 document.addEventListener("visibilitychange",function(){
   if(document.visibilityState==="hidden") sincronizarAlCerrar();
 });
+/* la app se queda abierta en el móvil de un día para otro: al volver (o al pasar la
+   medianoche con ella delante) se pinta el día nuevo. Antes la pantalla seguía en el día
+   anterior y cada botón llevaba su fecha, así que lo que se marcaba se apuntaba ayer.
+   Con el Parte del día abierto se espera a que se cierre, para no cambiarle el día a medias. */
+var diaPintado=today();
+function diaNuevoMira(){
+  var t=today(); if(t===diaPintado || parteOn) return;
+  diaPintado=t;
+  render();
+}
+document.addEventListener("visibilitychange",function(){ if(document.visibilityState==="visible") diaNuevoMira(); });
+setInterval(function(){ if(document.visibilityState!=="hidden") diaNuevoMira(); }, 30000);
 window.addEventListener("pagehide", sincronizarAlCerrar);
 document.addEventListener("keydown",function(e){ if(e.key==="Escape"){ if(parteOn) parteClose(); else closeSheet(); } });
 window.addEventListener("resize",function(){ moveMarker(); moveMTab(); fitBottomBar(); if(view==="retos") fitMedals(); });
