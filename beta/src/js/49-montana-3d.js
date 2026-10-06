@@ -160,6 +160,9 @@ function m3Arranca(capa){
   m3RangoMarca(miRango);
   var vuelo=!quieto && (!m3VueloVisto() || nuevoRango), cimaSono=false, vT0=0, ZM=1, S0=100;
   var V_SUBE=6.2, V_LOGO=5.6, V_FIN=8.6;
+  /* empieza mirando el banderín de inicio y da más de una vuelta hasta acabar frente a ti */
+  var yawIni=Math.PI/2-M3_A0, dVuelo=((yawFin-yawIni)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)+2*Math.PI;
+  var yIni=m3Camino(0)[1]+.1, yArriba=CIMA[1]+.62;   /* arriba, la cámara queda por encima de la cima: el logo tiene aire */
   var elVuelo=null;
   if(vuelo){
     m3VueloMarca(); intro=false; luz=0;
@@ -229,8 +232,53 @@ function m3Arranca(capa){
   }
   caja.addEventListener("pointerup", suelta); caja.addEventListener("pointercancel", suelta);
   /* tocar tu foto o la de alguien abre su perfil */
+  /* ── pájaros: de vez en cuando cruza uno el cielo; si lo tocas, explota y te da XP (con tope al día) ── */
+  var PAJ=[], CHISP=[], pajProx=performance.now()+4000;
+  var PAJ_XP=5, PAJ_XP_ORO=20, PAJ_DIA=5;
+  function pajHoy(){ var d=today(); if(!S.pajaros || S.pajaros.d!==d) S.pajaros={ d:d, n:0 }; return S.pajaros; }
+  function pajNuevo(ahora){
+    var izq=Math.random()<.5, oro=Math.random()<.12;
+    PAJ.push({ x:izq ? -30 : W+30, y:H*(.12+Math.random()*.3), vx:(izq ? 1 : -1)*(45+Math.random()*35), fase:Math.random()*6, oro:oro, t0:ahora });
+  }
+  function pajPinta(dt, ahora, tt){
+    if(!vuelo && ahora>pajProx && PAJ.length<2){ pajNuevo(ahora); pajProx=ahora+9000+Math.random()*12000; }
+    for(var i=PAJ.length-1;i>=0;i--){
+      var b=PAJ[i]; b.x+=b.vx*dt; b.y+=Math.sin(tt*1.6+b.fase)*12*dt;
+      if(b.x<-60 || b.x>W+60){ PAJ.splice(i, 1); continue; }
+      var al=Math.sin(tt*11+b.fase), r=b.oro ? 9 : 7, dir=b.vx>0 ? 1 : -1;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.scale(dir, 1);
+      if(b.oro){ ctx.shadowColor="#f5c542"; ctx.shadowBlur=14; }
+      ctx.strokeStyle=b.oro ? "#f5c542" : "rgba(255,255,255,.9)"; ctx.lineWidth=2; ctx.lineCap="round"; ctx.lineJoin="round";
+      ctx.beginPath(); ctx.moveTo(-r*1.3, -al*r*.8); ctx.quadraticCurveTo(-r*.5, -r*.2, 0, 0); ctx.quadraticCurveTo(r*.5, -r*.2, r*1.3, -al*r*.8); ctx.stroke();
+      ctx.restore();
+    }
+    for(i=CHISP.length-1;i>=0;i--){
+      var c=CHISP[i]; c.v+=dt;
+      if(c.v>c.vida){ CHISP.splice(i, 1); continue; }
+      var k=c.v/c.vida;
+      if(c.txt){ ctx.globalAlpha=1-k; ctx.font='800 15px "Plus Jakarta Sans", system-ui, sans-serif'; ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.lineWidth=3; ctx.strokeStyle="rgba(5,5,7,.7)"; ctx.strokeText(c.txt, c.x, c.y-k*40); ctx.fillStyle=c.c; ctx.fillText(c.txt, c.x, c.y-k*40); }
+      else { c.x+=c.dx*dt; c.y+=c.dy*dt; c.dy+=90*dt; ctx.globalAlpha=1-k; ctx.fillStyle=c.c; ctx.beginPath(); ctx.arc(c.x, c.y, 2.4*(1-k*.6), 0, 6.283); ctx.fill(); }
+    }
+    ctx.globalAlpha=1;
+  }
+  function pajToca(x, y){
+    for(var i=PAJ.length-1;i>=0;i--){
+      var b=PAJ[i]; if(Math.hypot(b.x-x, b.y-y)>30) continue;
+      PAJ.splice(i, 1);
+      var col=b.oro ? "#f5c542" : Lz_.claro;
+      for(var j=0;j<22;j++){ var a=j/22*6.283, v=60+Math.random()*110; CHISP.push({ x:b.x, y:b.y, dx:Math.cos(a)*v, dy:Math.sin(a)*v-30, c:j%3 ? col : "#fff", v:0, vida:.7+Math.random()*.4 }); }
+      var h=pajHoy(), xp=0;
+      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; S.xpPajaros=(S.xpPajaros||0)+xp; try{ save(); }catch(e){} }
+      CHISP.push({ x:b.x, y:b.y-6, txt:xp ? "+"+xp+" XP" : tr("Hoy ya no da más XP"), c:xp ? col : "#fff", v:0, vida:1.3 });
+      if(typeof sonido==="function") sonido(b.oro ? "nivel" : "pop");
+      return true;
+    }
+    return false;
+  }
   function dentro(el, x, y){ if(!el || !el.offsetParent) return false; var r=el.getBoundingClientRect(); return x>=r.left-6 && x<=r.right+6 && y>=r.top-6 && y<=r.bottom+6; }
   function tocaPerfil(x, y){
+    var rc=caja.getBoundingClientRect(); if(pajToca(x-rc.left, y-rc.top)) return;
     if(typeof abrirPerfil!=="function") return;
     var u=null;
     for(var i=CHIPS.length-1;i>=0;i--) if(dentro(CHIPS[i].el, x, y) && +getComputedStyle(CHIPS[i].el).opacity>.3){ u=gente[i] && gente[i].u; break; }
@@ -255,8 +303,8 @@ function m3Arranca(capa){
     if(vuelo){
       if(!vT0) vT0=ahora;
       var vt=(ahora-vT0)/1000, p=suave(Math.min(1, vt/V_SUBE));
-      var dS=2.7, ySub=.12+(CIMA[1]+.08-.12)*p, pS=.1+.26*p, zS=1.9;
-      if(vt<V_SUBE){ yaw=yawFin-4*Math.PI*(1-p); YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
+      var dS=2.9, ySub=yIni+(yArriba-yIni)*p, pS=.14+.3*p, zS=1.8;
+      if(vt<V_SUBE){ yaw=yawIni+dVuelo*p; YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
       else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
       S=S0*ZM;
       if(elVuelo){
@@ -266,7 +314,7 @@ function m3Arranca(capa){
       }
       if(!cimaSono && vt>=V_SUBE-.25){   /* al llegar a la cima: un toque de sonido y una vibración corta */
         cimaSono=true;
-        if(typeof sonido==="function") sonido("nivel");
+        if(typeof sonido==="function") sonido("nivel");   /* yaw llega a yawFin; lo que sigue ya no gira */
         try{ if(typeof prefValor!=="function" || prefValor("sonido")) navigator.vibrate && navigator.vibrate([18, 60, 28]); }catch(e){}
       }
       if(vt>=V_FIN){ vueloAcaba(); S=S0; }
@@ -418,6 +466,8 @@ function m3Arranca(capa){
     var cim=ctx.createRadialGradient(pt[0], pt[1], 0, pt[0], pt[1], 26*lat);
     cim.addColorStop(0, "rgba(255,255,255,.95)"); cim.addColorStop(.25, "rgba("+Lz_.rgb+",.7)"); cim.addColorStop(1, "rgba("+Lz_.rgb+",0)");
     ctx.fillStyle=cim; ctx.beginPath(); ctx.arc(pt[0], pt[1], 26*lat, 0, 6.283); ctx.fill();
+
+    pajPinta(dt, ahora, tt);
 
     /* encima, en HTML: Peak., tú y la gente */
     elMarca.style.transform="translate("+pt[0].toFixed(1)+"px,"+(pt[1]-30).toFixed(1)+"px) translate(-50%,-100%)";

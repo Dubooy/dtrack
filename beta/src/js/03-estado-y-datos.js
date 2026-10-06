@@ -447,6 +447,7 @@ function stats(){
   s.xp+=s.medXP;
   if(typeof semanalXP==="function") s.xp+=semanalXP();
   if(typeof metasXP==="function") s.xp+=metasXP();   /* metas del mes */   /* retos de la semana */
+  s.xp+=(S.xpPajaros||0);   /* pájaros de la montaña 3D */
   s.xp+=(S.xpPrueba||0)+(typeof grupoXP==="function"?grupoXP():0);              /* solo modo prueba */
   lv=1; need=NV_XP_BASE; acc=0;
   /* 40 niveles: el primero pide 80 XP y cada uno un 10 % más que el anterior */
