@@ -323,7 +323,7 @@ function m3Arranca(capa){
       for(var j=0;j<n;j++){ var a=j/n*6.283+Math.random()*.3, d=(b.oro ? 46 : 32)+Math.random()*22;
         CHISP.push({ x:b.x, y:b.y, dx:Math.cos(a)*d, dy:Math.sin(a)*d, t:1.6+Math.random()*1.4, rgb:rgb, v:0, vida:.65+Math.random()*.3 }); }
       var h=pajHoy(), xp=0;
-      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; var E=m3Estado(); E.xpPajaros=(E.xpPajaros||0)+xp; try{ save(); }catch(er){} }
+      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; h.xp=(h.xp||0)+xp; var E=m3Estado(); E.xpPajaros=(E.xpPajaros||0)+xp; try{ save(); }catch(er){} }
       CHISP.push({ x:b.x, y:b.y-10, txt:xp ? "+"+xp+" XP" : tr("Hoy ya no da más XP"), big:!!xp, rgb:rgb, v:0, vida:1.5 });
       if(typeof sonido==="function") sonido(b.oro ? "nivel" : "ok");
       return true;
@@ -356,8 +356,11 @@ function m3Arranca(capa){
     /* la entrada: la montaña gira hasta dejarte de frente mientras se enciende el camino */
     if(vuelo){
       if(!vT0) vT0=ahora;
-      var vt=(ahora-vT0)/1000, p=suave(Math.min(1, vt/V_SUBE));
-      var dS=2.9, ySub=yIni+(yArriba-yIni)*p, pS=.14+.3*p, zS=1.8;
+      /* curva seno: arranca y frena con suavidad, sin el acelerón de la cúbica */
+      var vt=(ahora-vT0)/1000, p=.5-.5*Math.cos(Math.PI*Math.min(1, vt/V_SUBE));
+      /* la cámara va a la altura de la punta de luz y, al final, se eleva por encima de la cima */
+      var hLuz=m3Camino(40*p)[1]+.12, alza=Math.max(0, Math.min(1, (p-.7)/.3)); alza=alza*alza*(3-2*alza);
+      var dS=2.9, ySub=hLuz+(yArriba-hLuz)*alza, pS=.14+.3*p, zS=1.8;
       if(vt<V_SUBE){ yaw=yawIni+dVuelo*p; YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
       else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
       S=S0*ZM;
@@ -446,7 +449,9 @@ function m3Arranca(capa){
       var m=(CVT[Math.max(0,i-2)]+CVT[Math.max(0,i-1)]*2+CVT[i]*3+CVT[Math.min(NS,i+1)]*2+CVT[Math.min(NS,i+2)])/9;
       CVS[i]=CVS[i]<0 ? m : CVS[i]+(m-CVS[i])*kV; CVI[i]=CVS[i]>.5 ? 1 : 0;
     }
-    var corte=Math.round(luz/40*NS);
+    var corteF=Math.max(0, Math.min(NS, luz/40*NS)), corte=Math.floor(corteF), fr=corteF-corte;
+    /* la punta exacta de la luz, entre dos muestras: así avanza continua y no a saltitos */
+    var hx=corte<NS ? CPX[corte]+(CPX[corte+1]-CPX[corte])*fr : CPX[NS], hy=corte<NS ? CPY[corte]+(CPY[corte+1]-CPY[corte])*fr : CPY[NS];
     /* se dibuja por tramos de igual transparencia (6 escalones), así el borde que tapa la montaña se difumina */
     function tramos(desde, hasta, pinta){
       var nivelA=-1, em=false;
@@ -464,11 +469,19 @@ function m3Arranca(capa){
     tramos(corte, NS, function(){ ctx.strokeStyle="rgba("+Lz_.rgb+",.4)"; ctx.lineWidth=1.5; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]); });
     if(corte>0){
       ctx.save();
-      tramos(0, corte, function(){
-        ctx.shadowColor="rgba("+Lz_.rgb+",.95)"; ctx.shadowBlur=14;
-        ctx.strokeStyle="rgba("+Lz_.rgb+",.55)"; ctx.lineWidth=4.5; ctx.stroke();
-        ctx.shadowBlur=4; ctx.strokeStyle=Lz_.claro; ctx.lineWidth=1.9; ctx.stroke();
-      });
+      /* sin shadowBlur (en el iPhone hacía que fuera a tirones): tres trazos, del halo ancho al hilo blanco */
+      var pintaLuz=function(){
+        ctx.globalCompositeOperation="lighter";
+        var ga=ctx.globalAlpha;
+        ctx.globalAlpha=ga*.10; ctx.strokeStyle="rgba("+Lz_.rgb+",1)"; ctx.lineWidth=11; ctx.stroke();
+        ctx.globalAlpha=ga*.28; ctx.lineWidth=5.5; ctx.stroke();
+        ctx.globalAlpha=ga*.95; ctx.strokeStyle=Lz_.claro; ctx.lineWidth=2; ctx.stroke();
+        ctx.globalAlpha=ga; ctx.globalCompositeOperation="source-over";
+      };
+      tramos(0, corte, pintaLuz);
+      if(fr>0 && corte<NS && Math.min(CVS[corte], CVS[corte+1])>.05){
+        ctx.globalAlpha=Math.min(CVS[corte], CVS[corte+1]); ctx.beginPath(); ctx.moveTo(CPX[corte], CPY[corte]); ctx.lineTo(hx, hy); pintaLuz(); ctx.globalAlpha=1;
+      }
       ctx.restore();
     }
     /* el inicio: un banderín con «Inicio» en el primer punto del camino */
@@ -511,9 +524,18 @@ function m3Arranca(capa){
     ctx.globalAlpha=1;
 
     /* la cabeza de la luz mientras sube */
-    if(luz<tu-.02 && corte>0 && CVI[corte]){
-      ctx.save(); ctx.shadowColor="rgba("+Lz_.rgb+",1)"; ctx.shadowBlur=18; ctx.fillStyle="#fff";
-      ctx.beginPath(); ctx.arc(CPX[corte], CPY[corte], 3.2, 0, 6.283); ctx.fill(); ctx.restore();
+    if(luz<tu-.02 && corte>0 && CVS[corte]>.05){
+      /* un cometa: la cola se aviva cerca de la punta y la punta late */
+      ctx.save(); ctx.globalCompositeOperation="lighter"; ctx.lineCap="round";
+      var cola=Math.min(corte, 30);
+      for(var q=corte-cola;q<corte;q++){ var kq=(q-(corte-cola))/cola;
+        ctx.globalAlpha=kq*kq*.9*CVS[q]; ctx.strokeStyle=Lz_.claro; ctx.lineWidth=2+kq*3;
+        ctx.beginPath(); ctx.moveTo(CPX[q], CPY[q]); ctx.lineTo(q+1===corte+1 ? hx : CPX[q+1], q+1===corte+1 ? hy : CPY[q+1]); ctx.stroke(); }
+      ctx.globalAlpha=CVS[corte];
+      var rh=13+3*Math.sin(tt*9), gh2=ctx.createRadialGradient(hx, hy, 0, hx, hy, rh);
+      gh2.addColorStop(0, "rgba(255,255,255,1)"); gh2.addColorStop(.25, "rgba("+Lz_.rgb+",.8)"); gh2.addColorStop(1, "rgba("+Lz_.rgb+",0)");
+      ctx.fillStyle=gh2; ctx.beginPath(); ctx.arc(hx, hy, rh, 0, 6.283); ctx.fill();
+      ctx.restore();
     }
     /* la cima: una estrella de luz que late */
     var lat=.75+.25*Math.sin(tt*1.8);
