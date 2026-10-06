@@ -178,21 +178,43 @@ function m3Arranca(capa){
   }
 
   /* ── el dedo ── */
+  var dedos={};
   caja.addEventListener("pointerdown", function(ev){
-    tocando={ x:ev.clientX, y:ev.clientY, yaw:yaw, pitch:pitch, t:performance.now(), lx:ev.clientX }; vel=0; intro=false;
+    dedos[ev.pointerId]=1;
+    if(tocando){ tocando.varios=true; return; }   /* segundo dedo: no cuenta, así no se dispara el giro */
+    tocando={ id:ev.pointerId, x0:ev.clientX, y0:ev.clientY, t0:performance.now(), x:ev.clientX, y:ev.clientY, yaw:yaw, pitch:pitch, t:performance.now(), lx:ev.clientX }; vel=0; intro=false;
     try{ caja.setPointerCapture(ev.pointerId); }catch(e){}
     elPista.classList.add("fuera");
   });
   caja.addEventListener("pointermove", function(ev){
-    if(!tocando) return;
+    if(!tocando || ev.pointerId!==tocando.id) return;
+    if(tocando.varios){ tocando.t=performance.now(); tocando.lx=ev.clientX; vel=0; return; }
     var ahora=performance.now(), dt=Math.max(1, ahora-tocando.t);
     yaw=tocando.yaw-(ev.clientX-tocando.x)*.0095;
     pitch=Math.max(.16, Math.min(.72, tocando.pitch+(ev.clientY-tocando.y)*.0035));
     vel=vel*.6+(-(ev.clientX-tocando.lx)*.0095/dt*1000)*.4;
     tocando.lx=ev.clientX; tocando.t=ahora;
   });
-  function suelta(){ if(!tocando) return; if(performance.now()-tocando.t>90) vel=0; tocando=null; ultimo=performance.now(); }
+  function suelta(ev){
+    delete dedos[ev.pointerId];
+    if(!tocando || ev.pointerId!==tocando.id) return;
+    if(tocando.varios || performance.now()-tocando.t>90) vel=0;
+    var toque=ev.type==="pointerup" && !tocando.varios && Math.hypot(ev.clientX-tocando.x0, ev.clientY-tocando.y0)<10 && performance.now()-tocando.t0<450;
+    tocando=null; ultimo=performance.now();
+    if(toque) tocaPerfil(ev.clientX, ev.clientY);
+  }
   caja.addEventListener("pointerup", suelta); caja.addEventListener("pointercancel", suelta);
+  /* tocar tu foto o la de alguien abre su perfil */
+  function dentro(el, x, y){ if(!el || !el.offsetParent) return false; var r=el.getBoundingClientRect(); return x>=r.left-6 && x<=r.right+6 && y>=r.top-6 && y<=r.bottom+6; }
+  function tocaPerfil(x, y){
+    if(typeof abrirPerfil!=="function") return;
+    var u=null;
+    for(var i=CHIPS.length-1;i>=0;i--) if(dentro(CHIPS[i].el, x, y) && +getComputedStyle(CHIPS[i].el).opacity>.3){ u=gente[i] && gente[i].u; break; }
+    if(!u && dentro(elYo, x, y)) u=(GRUPO && GRUPO.yo) || "";
+    if(u===null) return;
+    abrirPerfil(u);
+    var pc=document.getElementById("perfil-capa"); if(pc) pc.style.zIndex=200;   /* por encima de la montaña */
+  }
   var pistaT=setTimeout(function(){ elPista.classList.add("fuera"); }, 6500);
 
   function suave(x){ x=Math.max(0, Math.min(1, x)); return x<.5 ? 4*x*x*x : 1-Math.pow(-2*x+2, 3)/2; }
