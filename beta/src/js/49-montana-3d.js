@@ -154,8 +154,7 @@ function m3Arranca(capa){
   /* ── el vuelo: la primera vez (o tras reiniciarlo en Ajustes) subes la montaña en espiral, como un pájaro;
      arriba del todo sale el logo delante, limpio, y luego la cámara se aleja a la vista de siempre ── */
   var vuelo=!quieto && !m3VueloVisto(), vT0=0, ZM=1, S0=100;
-  var V_SUBE=6.2, V_LOGO=5.6, V_QUIETO=7.1, V_FIN=9.6, vQ=0, vA=0, vFuera=0;
-  var yawTop=Math.PI/2-CIMA[3], dYaw=yawFin-yawTop; dYaw=Math.atan2(Math.sin(dYaw), Math.cos(dYaw));
+  var V_SUBE=6.2, V_LOGO=5.6, V_FIN=8.6;
   var elVuelo=null;
   if(vuelo){
     m3VueloMarca(); intro=false; luz=0;
@@ -164,9 +163,7 @@ function m3Arranca(capa){
     elVuelo.innerHTML='<svg viewBox="'+PEAK_WM_VB+'" aria-label="Peak."><path d="'+PEAK_WM_D+'"/></svg>';
     caja.appendChild(elVuelo);
   }
-  function vueloAcaba(){ vuelo=false; caja.classList.remove("volando");
-    /* el logo del vuelo ya está encima del de la cima: se funde con él mientras aparece lo demás */
-    if(elVuelo){ var ev_=elVuelo; elVuelo=null; ev_.style.transition="opacity .8s ease"; ev_.style.opacity="0"; setTimeout(function(){ ev_.remove(); }, 900); } D=6.5; YC=.95; pitch=.42; ZM=1; yaw=yawFin; ultimo=performance.now(); }
+  function vueloAcaba(){ vuelo=false; caja.classList.remove("volando"); if(elVuelo){ elVuelo.remove(); elVuelo=null; } D=6.5; YC=.95; pitch=.42; ZM=1; yaw=yawFin; ultimo=performance.now(); }
   function mide(){
     W=caja.clientWidth||window.innerWidth; H=caja.clientHeight||window.innerHeight;
     dpr=Math.min(2, window.devicePixelRatio||1);
@@ -251,13 +248,16 @@ function m3Arranca(capa){
     if(vuelo){
       if(!vT0) vT0=ahora;
       var vt=(ahora-vT0)/1000, p=suave(Math.min(1, vt/V_SUBE));
-      /* sube siguiendo el camino: la cámara siempre mira al punto del camino por el que va */
-      var Lv=40*p, cp=m3Camino(Lv), dS=2.7, pS=.2+.16*p, zS=1.9, ySub=cp[1]+.06;
-      if(vt<V_QUIETO){ yaw=Math.PI/2-cp[3]; YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, Lv); vQ=0; }
-      else { var q=suave((vt-V_QUIETO)/(V_FIN-V_QUIETO)); vQ=q; yaw=yawTop+dYaw*q; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=Math.min(tu, Lv); }
+      var dS=2.7, ySub=.12+(CIMA[1]+.08-.12)*p, pS=.1+.26*p, zS=1.9;
+      if(vt<V_SUBE){ yaw=yawFin+4*Math.PI*(1-p); YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
+      else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
       S=S0*ZM;
-      vA=vt<V_LOGO ? 0 : Math.min(1, (vt-V_LOGO)/.7);
-      if(vt>=V_FIN){ vFuera=1; S=S0; }
+      if(elVuelo){
+        var a=vt<V_LOGO ? 0 : vt<V_LOGO+.7 ? (vt-V_LOGO)/.7 : vt<V_FIN-1.3 ? 1 : Math.max(0, (V_FIN-.4-vt)/.9);
+        elVuelo.style.opacity=a.toFixed(3);
+        elVuelo.style.setProperty("--k", (.94+.06*Math.min(1, (vt-V_LOGO)/1.6)).toFixed(3));
+      }
+      if(vt>=V_FIN){ vueloAcaba(); S=S0; }
     }
     if(intro){ var u=suave((tt-.25)/2.4); yaw=yawFin-2.4*(1-u); if(u>=1) intro=false; }
     if(!vuelo && luz<tu) luz=quieto ? tu : Math.min(tu, tu*suave((tt-.35)/2.3));
@@ -384,17 +384,6 @@ function m3Arranca(capa){
     ctx.fillStyle=cim; ctx.beginPath(); ctx.arc(pt[0], pt[1], 26*lat, 0, 6.283); ctx.fill();
 
     /* encima, en HTML: Peak., tú y la gente */
-    if(elVuelo){
-      /* el logo: grande delante de ti, y al alejarse la cámara viaja hasta su sitio en la cima */
-      var lg=elVuelo.firstChild, lw=lg._w||(lg._w=lg.offsetWidth||260), lh=lg._h||(lg._h=lg.offsetHeight||70);
-      var x0=W/2, y0=H*.45+lh/2, x1=pt[0], y1=pt[1]-30, k=1+(132/lw-1)*vQ;
-      lg.style.transform="translate("+(x0+(x1-x0)*vQ-lw/2).toFixed(1)+"px,"+(y0+(y1-y0)*vQ-lh).toFixed(1)+"px) scale("+k.toFixed(3)+")";
-      lg.style.opacity=vA.toFixed(3);
-      elVuelo.style.opacity="1";
-      elVuelo.style.setProperty("--f", (vA*(1-vQ)).toFixed(3));
-      if(vFuera){ vFuera=0; vueloAcaba(); }
-    }
-    else if(vFuera){ vFuera=0; vueloAcaba(); }
     elMarca.style.transform="translate("+pt[0].toFixed(1)+"px,"+(pt[1]-30).toFixed(1)+"px) translate(-50%,-100%)";
     var my=m3Camino(Math.min(tu, luz)); pr(my[0], my[1], my[2], o);
     if(!elYo._w) elYo._w=elYo.offsetWidth||150;
@@ -465,9 +454,8 @@ grupoAccion=function(a, el){
 '.m3-cv{ position:absolute; inset:0; display:block; }',
 '.m3-capa{ position:absolute; inset:0; pointer-events:none; overflow:hidden; transition:opacity .8s ease; }',
 '.m3.volando .m3-capa{ opacity:0; transition:none; }',
-'.m3-vuelo{ position:absolute; inset:0; pointer-events:none; opacity:0; }',
-'.m3-vuelo::before{ content:""; position:absolute; inset:0; opacity:var(--f,0); background:radial-gradient(70% 45% at 50% 45%, rgba(5,5,7,.78), rgba(5,5,7,.35) 70%, transparent); }',
-'.m3-vuelo svg{ position:absolute; left:0; top:0; display:block; width:min(62vw,280px); height:auto; fill:var(--mt-claro); opacity:0; transform-origin:50% 100%; filter:drop-shadow(0 0 8px var(--mt)) drop-shadow(0 0 24px rgba(var(--mt-rgb),.55)); }',
+'.m3-vuelo{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; background:radial-gradient(70% 45% at 50% 45%, rgba(5,5,7,.78), rgba(5,5,7,.35) 70%, transparent); }',
+'.m3-vuelo svg{ width:min(62vw,280px); height:auto; fill:#fff; transform:scale(var(--k,1)); filter:drop-shadow(0 0 18px rgba(var(--mt-rgb),.45)); }',
 '.m3-marca{ position:absolute; left:0; top:0; will-change:transform; }',
 '.m3-marca svg{ display:block; width:132px; height:auto; fill:var(--mt-claro); filter:drop-shadow(0 0 8px var(--mt)) drop-shadow(0 0 24px rgba(var(--mt-rgb),.55)); animation:mtCima 3.6s ease-in-out infinite; }',
 '.m3-yo{ position:absolute; left:0; top:0; z-index:400; display:flex; align-items:center; gap:8px; margin:-20px 0 0 -20px; transition:opacity .35s ease; will-change:transform; }',
