@@ -17,6 +17,8 @@ function m3Pref(){ try{ return localStorage.getItem(M3_KEY)==="3d" ? "3d" : "2d"
 var M3_VUELO="peak-monte-vuelo";
 function m3VueloVisto(){ try{ return localStorage.getItem(M3_VUELO)==="1"; }catch(e){ return true; } }
 function m3VueloMarca(){ try{ localStorage.setItem(M3_VUELO, "1"); }catch(e){} }
+/* dentro de la vista 3D «S» es la escala del dibujo y tapa el estado de la app: esto lo alcanza */
+function m3Estado(){ return S; }
 var M3_RANGO="peak-monte-rango";   /* el último rango con el que viste la montaña: si subes de rango, el vuelo sale otra vez */
 function m3RangoVisto(){ try{ var v=localStorage.getItem(M3_RANGO); return v===null ? null : +v; }catch(e){ return null; } }
 function m3RangoMarca(i){ try{ localStorage.setItem(M3_RANGO, String(i)); }catch(e){} }
@@ -235,7 +237,7 @@ function m3Arranca(capa){
   /* ── pájaros: de vez en cuando cruza uno el cielo; si lo tocas, explota y te da XP (con tope al día) ── */
   var PAJ=[], CHISP=[], pajProx=performance.now()+4000;
   var PAJ_XP=5, PAJ_XP_ORO=20, PAJ_DIA=5;
-  function pajHoy(){ var d=today(); if(!S.pajaros || S.pajaros.d!==d) S.pajaros={ d:d, n:0 }; return S.pajaros; }
+  function pajHoy(){ var E=m3Estado(), d=today(); if(!E.pajaros || E.pajaros.d!==d) E.pajaros={ d:d, n:0 }; return E.pajaros; }
   function pajNuevo(ahora){
     var izq=Math.random()<.5, oro=Math.random()<.12;
     PAJ.push({ x:izq ? -30 : W+30, y:H*(.12+Math.random()*.3), vx:(izq ? 1 : -1)*(45+Math.random()*35), fase:Math.random()*6, oro:oro, t0:ahora });
@@ -269,7 +271,7 @@ function m3Arranca(capa){
       var col=b.oro ? "#f5c542" : Lz_.claro;
       for(var j=0;j<22;j++){ var a=j/22*6.283, v=60+Math.random()*110; CHISP.push({ x:b.x, y:b.y, dx:Math.cos(a)*v, dy:Math.sin(a)*v-30, c:j%3 ? col : "#fff", v:0, vida:.7+Math.random()*.4 }); }
       var h=pajHoy(), xp=0;
-      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; S.xpPajaros=(S.xpPajaros||0)+xp; try{ save(); }catch(e){} }
+      if(h.n<PAJ_DIA){ h.n++; xp=b.oro ? PAJ_XP_ORO : PAJ_XP; var E=m3Estado(); E.xpPajaros=(E.xpPajaros||0)+xp; try{ save(); }catch(e){} }
       CHISP.push({ x:b.x, y:b.y-6, txt:xp ? "+"+xp+" XP" : tr("Hoy ya no da más XP"), c:xp ? col : "#fff", v:0, vida:1.3 });
       if(typeof sonido==="function") sonido(b.oro ? "nivel" : "pop");
       return true;
