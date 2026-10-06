@@ -116,6 +116,12 @@ function m3Arranca(capa){
   /* el camino, muestreado una vez (12 puntos por nivel) */
   var NS=480, CAM=[];
   for(var k=0;k<=NS;k++) CAM.push(m3Camino(k/NS*40));
+  /* la normal del terreno en cada punto del camino: el camino se ve si su ladera mira a la cámara.
+     Así se esconde por el borde de la montaña de forma continua, igual que la roca, sin parpadeos */
+  var CNX=new Float32Array(NS+1), CNY=new Float32Array(NS+1), CNZ=new Float32Array(NS+1);
+  for(k=0;k<=NS;k++){ var cc=CAM[k], ep=.02;
+    var gx=(m3Alt(cc[0]+ep, cc[2])-m3Alt(cc[0]-ep, cc[2]))/(2*ep)*M3_ALTO, gz=(m3Alt(cc[0], cc[2]+ep)-m3Alt(cc[0], cc[2]-ep))/(2*ep)*M3_ALTO;
+    var nl=Math.hypot(gx, 1, gz); CNX[k]=-gx/nl; CNY[k]=1/nl; CNZ[k]=-gz/nl; }
   var CPX=new Float32Array(NS+1), CPY=new Float32Array(NS+1), CPF=new Float32Array(NS+1), CVI=new Float32Array(NS+1), CVS=new Float32Array(NS+1).fill(-1), CVT=new Float32Array(NS+1);
   var CIMA=m3Camino(40);
 
@@ -293,6 +299,7 @@ function m3Arranca(capa){
     for(i=CHISP.length-1;i>=0;i--){
       var c=CHISP[i]; c.v+=dt;
       if(c.v>c.vida){ CHISP.splice(i, 1); continue; }
+      if(c.v<0) continue;   /* aún no ha empezado: con q negativo el radio salía negativo y arc() rompía todo el dibujo */
       var q=c.v/c.vida, e=1-Math.pow(1-q, 3);
       if(c.anillo){
         ctx.strokeStyle="rgba("+c.rgb+","+(.9*(1-q)).toFixed(3)+")"; ctx.lineWidth=2.5*(1-q)+.5;
@@ -358,9 +365,7 @@ function m3Arranca(capa){
       if(!vT0) vT0=ahora;
       /* curva seno: arranca y frena con suavidad, sin el acelerón de la cúbica */
       var vt=(ahora-vT0)/1000, p=.5-.5*Math.cos(Math.PI*Math.min(1, vt/V_SUBE));
-      /* la cámara va a la altura de la punta de luz y, al final, se eleva por encima de la cima */
-      var hLuz=m3Camino(40*p)[1]+.12, alza=Math.max(0, Math.min(1, (p-.7)/.3)); alza=alza*alza*(3-2*alza);
-      var dS=2.9, ySub=hLuz+(yArriba-hLuz)*alza, pS=.14+.3*p, zS=1.8;
+      var dS=2.9, ySub=yIni+(yArriba-yIni)*p, pS=.14+.3*p, zS=1.8;
       if(vt<V_SUBE){ yaw=yawIni+dVuelo*p; YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
       else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
       S=S0*ZM;
@@ -443,11 +448,13 @@ function m3Arranca(capa){
 
     /* el camino: solo lo que se ve; lo que falta, tenue; lo que llevas, de luz */
     /* lo que tapa la montaña no desaparece de golpe: cada punto se funde, en el espacio y en el tiempo */
-    for(i=0;i<=NS;i++){ var c=CAM[i]; pr(c[0], c[1], c[2], o); CPX[i]=o[0]; CPY[i]=o[1]; CPF[i]=o[3]; CVT[i]=seVe(c[0], c[1], c[2]) ? 1 : 0; }
+    for(i=0;i<=NS;i++){ var c=CAM[i]; pr(c[0], c[1], c[2], o); CPX[i]=o[0]; CPY[i]=o[1]; CPF[i]=o[3]; 
+      var nz1=CNX[i]*sY+CNZ[i]*cY, nz2=CNY[i]*sP+nz1*cP, w=Math.max(0, Math.min(1, (nz2+.04)/.2));
+      CVT[i]=w*w*(3-2*w); }
     var kV=Math.min(1, dt*10);
     for(i=0;i<=NS;i++){
       var m=(CVT[Math.max(0,i-2)]+CVT[Math.max(0,i-1)]*2+CVT[i]*3+CVT[Math.min(NS,i+1)]*2+CVT[Math.min(NS,i+2)])/9;
-      CVS[i]=CVS[i]<0 ? m : CVS[i]+(m-CVS[i])*kV; CVI[i]=CVS[i]>.5 ? 1 : 0;
+      CVS[i]=m; CVI[i]=CVS[i]>.5 ? 1 : 0;
     }
     var corteF=Math.max(0, Math.min(NS, luz/40*NS)), corte=Math.floor(corteF), fr=corteF-corte;
     /* la punta exacta de la luz, entre dos muestras: así avanza continua y no a saltitos */
@@ -457,7 +464,7 @@ function m3Arranca(capa){
       var nivelA=-1, em=false;
       function cierra(){ if(em && nivelA>0){ ctx.globalAlpha=nivelA; pinta(); } em=false; }
       for(var i=desde;i<hasta;i++){
-        var a=Math.round(Math.min(CVS[i], CVS[i+1])*6)/6;
+        var a=Math.round(Math.min(CVS[i], CVS[i+1])*12)/12;
         if(a!==nivelA){ cierra(); nivelA=a; }
         if(a<=0) continue;
         if(!em){ ctx.beginPath(); ctx.moveTo(CPX[i], CPY[i]); em=true; }
@@ -543,7 +550,7 @@ function m3Arranca(capa){
     cim.addColorStop(0, "rgba(255,255,255,.95)"); cim.addColorStop(.25, "rgba("+Lz_.rgb+",.7)"); cim.addColorStop(1, "rgba("+Lz_.rgb+",0)");
     ctx.fillStyle=cim; ctx.beginPath(); ctx.arc(pt[0], pt[1], 26*lat, 0, 6.283); ctx.fill();
 
-    pajPinta(dt, ahora, tt);
+    try{ pajPinta(dt, ahora, tt); }catch(e){ PAJ.length=0; CHISP.length=0; }   /* un fallo de los pájaros nunca para la montaña */
 
     /* encima, en HTML: Peak., tú y la gente */
     elMarca.style.transform="translate("+pt[0].toFixed(1)+"px,"+(pt[1]-30).toFixed(1)+"px) translate(-50%,-100%)";
