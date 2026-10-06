@@ -22,15 +22,21 @@ function pmMini(box){
   if(PM_MINI) PM_MINI.para();
   if(!M3_MALLA) M3_MALLA=m3Malla();
   var V=M3_MALLA.V, T=M3_MALLA.T, NV=V.length;
-  var cv=document.createElement("canvas"); cv.className="pm-mini-cv";
-  box.innerHTML=""; box.appendChild(cv);
-  box.setAttribute("data-act", "x-monte"); box.setAttribute("aria-label", tr("Ver tu montaña"));
-  var tam=96, dpr=Math.min(2, window.devicePixelRatio||1), ctx=cv.getContext("2d");
-  cv.width=tam*dpr; cv.height=tam*dpr;
+  /* la montaña es el fondo de toda la tarjeta: a la derecha, grande; el texto va encima, a la izquierda */
+  var cv=document.createElement("canvas"); cv.className="pm-fondo-cv"; cv.setAttribute("aria-hidden", "true");
+  box.insertBefore(cv, box.firstChild);
+  var W=320, H=260, dpr=Math.min(2, window.devicePixelRatio||1), ctx=cv.getContext("2d");
+  function mide(){
+    var w=box.clientWidth||320, h=box.clientHeight||260; if(w===W && h===H && cv.width) return;
+    W=w; H=h; cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    var ancho=W>=640;
+    S=Math.min(H*.5, W*(ancho ? .26 : .42)); CX=W*(ancho ? .8 : .74); CY=H*.5+S*.12;
+  }
   var PX=new Float32Array(NV), PY=new Float32Array(NV), PZ=new Float32Array(NV), vis=[];
   var CAM=[]; for(var k=0;k<=160;k++) CAM.push(m3Camino(k/160*40));
   var Lx=-.78, Ly=.5, Lz=.42, ll=Math.hypot(Lx, Ly, Lz); Lx/=ll; Ly/=ll; Lz/=ll;
-  var yaw=0, pitch=.38, cY, sY, cP, sP, D=6.5, YC=.95, S=tam*.38, CX=tam/2, CY=tam*.56;
+  var yaw=0, pitch=.34, cY, sY, cP, sP, D=6.5, YC=.95, S=100, CX=200, CY=130;
+  mide();
   var raf=0, vivo=true, prev=0, visto=true, o=[0,0,0,0];
   function pr(x, y, z){
     var x1=x*cY-z*sY, z1=x*sY+z*cY, yy=y-YC, y2=yy*cP-z1*sP, z2=yy*sP+z1*cP, f=D/(D-z2);
@@ -39,7 +45,7 @@ function pmMini(box){
   function pinta(){
     var Lz_=mtLuz(), LR=Lz_.rgb.split(",").map(Number), yo=mtYo(), tu=Math.min(40, yo.lvl+yo.pct);
     cY=Math.cos(yaw); sY=Math.sin(yaw); cP=Math.cos(pitch); sP=Math.sin(pitch);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, tam, tam);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
     for(var i=0;i<NV;i++){ var v=V[i]; pr(v[0], v[1], v[2]); PX[i]=o[0]; PY[i]=o[1]; PZ[i]=o[2]; }
     vis.length=0;
     for(i=0;i<T.length;i++){
@@ -66,22 +72,22 @@ function pmMini(box){
     for(i=0;i<=fin;i++){ var c=CAM[i]; pr(c[0], c[1], c[2]);
       if(o[2]<-.15){ em=false; continue; }
       if(!em){ ctx.moveTo(o[0], o[1]); em=true; } else ctx.lineTo(o[0], o[1]); }
-    ctx.strokeStyle="rgba("+Lz_.rgb+",.35)"; ctx.lineWidth=3.2; ctx.stroke();
-    ctx.strokeStyle=Lz_.claro; ctx.lineWidth=1.2; ctx.stroke();
+    ctx.strokeStyle="rgba("+Lz_.rgb+",.25)"; ctx.lineWidth=7; ctx.stroke();
+    ctx.strokeStyle=Lz_.claro; ctx.lineWidth=1.8; ctx.stroke();
     /* tu punto */
     var m=m3Camino(tu); pr(m[0], m[1], m[2]);
     if(o[2]>-.15){
-      var gr=ctx.createRadialGradient(o[0], o[1], 0, o[0], o[1], 7);
-      gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.35, "rgba("+Lz_.rgb+",.85)"); gr.addColorStop(1, "rgba("+Lz_.rgb+",0)");
-      ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(o[0], o[1], 7, 0, 6.283); ctx.fill();
+      var gr=ctx.createRadialGradient(o[0], o[1], 0, o[0], o[1], 12);
+      gr.addColorStop(0, "rgba(255,255,255,1)"); gr.addColorStop(.3, "rgba("+Lz_.rgb+",.85)"); gr.addColorStop(1, "rgba("+Lz_.rgb+",0)");
+      ctx.fillStyle=gr; ctx.beginPath(); ctx.arc(o[0], o[1], 12, 0, 6.283); ctx.fill();
     }
     ctx.restore();
   }
   function cuadro(ahora){
     if(!vivo) return;
     var dt=prev ? Math.min(.1, (ahora-prev)/1000) : 0;
-    if(!prev || ahora-prev>=40){   /* 25 imágenes por segundo bastan para algo tan pequeño */
-      prev=ahora; if(!medQuieto()) yaw+=dt*.35; pinta();
+    if(!prev || ahora-prev>=40){   /* 25 imágenes por segundo bastan para un fondo */
+      prev=ahora; if(!medQuieto()) yaw+=dt*.22; mide(); pinta();
     }
     raf=visto && !document.hidden ? requestAnimationFrame(cuadro) : 0;
   }
@@ -230,7 +236,7 @@ pintaRangoRetos=function(st){
   var r=_pmPintaRango.apply(this, arguments);
   try{
     var card=document.getElementById("card-nivel"); if(card) card.classList.add("pm-noche");
-    var box=document.getElementById("lvl-emblema"); if(box) pmMini(box);
+    if(card) pmMini(card);
     var s=stats();
     pmInsignia(s); pmLlama(s); pmSendero(); pmExtra(s);
   }catch(e){ if(window.console) console.warn("progreso", e); }
@@ -247,9 +253,14 @@ pintaRangoRetos=function(st){
 '#card-nivel.pm-noche > *{ position:relative; }',
 '#card-nivel.pm-noche .t3, #card-nivel.pm-noche .eyebrow{ color:rgba(243,238,227,.62) !important; }',
 '#card-nivel.pm-noche #lvl-name{ font-family:Unbounded, var(--font-display, inherit); letter-spacing:-.01em; }',
-'#card-nivel.pm-noche #lvl-emblema{ width:96px; height:96px; flex:0 0 96px; padding:0; border-radius:24px; position:relative; background:radial-gradient(80% 70% at 50% 35%, rgba(120,140,220,.22), rgba(0,0,0,0) 70%); box-shadow:none; }',
-'.pm-mini-cv{ width:96px; height:96px; display:block; }',
-'#lvl-emblema::after{ content:""; position:absolute; inset:-6px; border-radius:30px; box-shadow:0 0 0 1px rgba(255,255,255,.08) inset; pointer-events:none; }',
+'#card-nivel.pm-noche #lvl-emblema{ display:none; }',
+'#card-nivel.pm-noche{ min-height:300px; cursor:pointer; }',
+'.pm-fondo-cv{ position:absolute !important; inset:0; width:100%; height:100%; display:block; pointer-events:none; z-index:0; }',
+/* una sombra por la izquierda y por abajo para que el texto se lea sobre la montaña */
+'#card-nivel.pm-noche::after{ content:""; position:absolute; inset:0; pointer-events:none; z-index:0; background:linear-gradient(90deg, rgba(7,8,15,.92) 0%, rgba(7,8,15,.7) 42%, rgba(7,8,15,0) 70%), linear-gradient(0deg, rgba(7,8,15,.85) 0%, rgba(7,8,15,0) 38%); }',
+'#card-nivel.pm-noche > :not(canvas){ z-index:1; }',
+'#card-nivel.pm-noche .min-w-0{ max-width:62%; }',
+'@media (min-width:640px){ #card-nivel.pm-noche .min-w-0{ max-width:45%; } }',
 '#pm-rango{ display:inline-flex; align-items:center; gap:6px; margin-top:6px; padding:3px 10px 3px 4px; border-radius:99px; background:rgba(255,255,255,.07); box-shadow:inset 0 0 0 1px rgba(255,255,255,.1); }',
 '.pm-escudo svg{ width:22px; height:22px; display:block; filter:drop-shadow(0 0 6px var(--c1)); }',
 '.pm-escudo path:first-child{ fill:var(--c1); }',
@@ -300,3 +311,9 @@ pintaRangoRetos=function(st){
 '.pm-xp li{ display:flex; justify-content:space-between; font-size:13.5px; } .pm-xp li b{ font-weight:700; color:var(--accent); }',
 '@media (prefers-reduced-motion:reduce){ #card-nivel.pm-noche::before, .pm-racha .pm-llama{ animation:none; } }'
 ].join("\n"); document.head.appendChild(st); })();
+/* tocar la cabecera (fuera de sus botones) abre tu montaña grande */
+document.addEventListener("click", function(e){
+  var c=e.target.closest && e.target.closest("#card-nivel.pm-noche"); if(!c) return;
+  if(e.target.closest("button, a, input, [data-act]")) return;
+  if(typeof mtAbre==="function"){ if(typeof sonido==="function") sonido("tick"); mtAbre(); }
+});
