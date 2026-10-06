@@ -24561,6 +24561,9 @@ function m3Pref(){ try{ return localStorage.getItem(M3_KEY)==="3d" ? "3d" : "2d"
 var M3_VUELO="peak-monte-vuelo";
 function m3VueloVisto(){ try{ return localStorage.getItem(M3_VUELO)==="1"; }catch(e){ return true; } }
 function m3VueloMarca(){ try{ localStorage.setItem(M3_VUELO, "1"); }catch(e){} }
+var M3_RANGO="peak-monte-rango";   /* el último rango con el que viste la montaña: si subes de rango, el vuelo sale otra vez */
+function m3RangoVisto(){ try{ var v=localStorage.getItem(M3_RANGO); return v===null ? null : +v; }catch(e){ return null; } }
+function m3RangoMarca(i){ try{ localStorage.setItem(M3_RANGO, String(i)); }catch(e){} }
 function m3PonPref(v){ try{ localStorage.setItem(M3_KEY, v); }catch(e){} }
 function m3Azar(i){ var x=Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }
 
@@ -24588,7 +24591,7 @@ function m3Alt(x, z){
 var M3_GIROS=2.15, M3_A0=-2.4;
 function m3Camino(L){
   L=Math.max(0, Math.min(40, L));
-  var u=L/40, a=M3_A0+u*M3_GIROS*Math.PI*2, d=1.08*Math.pow(1-u, .85);
+  var u=L/40, a=M3_A0-u*M3_GIROS*Math.PI*2, d=1.08*Math.pow(1-u, .85);
   var x=d*Math.cos(a), z=d*Math.sin(a), h=m3Alt(x, z);
   return [x, h*M3_ALTO+.014, z, a, h];
 }
@@ -24655,7 +24658,7 @@ function m3Arranca(capa){
   /* el camino, muestreado una vez (12 puntos por nivel) */
   var NS=480, CAM=[];
   for(var k=0;k<=NS;k++) CAM.push(m3Camino(k/NS*40));
-  var CPX=new Float32Array(NS+1), CPY=new Float32Array(NS+1), CPF=new Float32Array(NS+1), CVI=new Float32Array(NS+1);
+  var CPX=new Float32Array(NS+1), CPY=new Float32Array(NS+1), CPF=new Float32Array(NS+1), CVI=new Float32Array(NS+1), CVS=new Float32Array(NS+1).fill(-1), CVT=new Float32Array(NS+1);
   var CIMA=m3Camino(40);
 
   /* estrellas */
@@ -24697,14 +24700,18 @@ function m3Arranca(capa){
 
   /* ── el vuelo: la primera vez (o tras reiniciarlo en Ajustes) subes la montaña en espiral, como un pájaro;
      arriba del todo sale el logo delante, limpio, y luego la cámara se aleja a la vista de siempre ── */
-  var vuelo=!quieto && !m3VueloVisto(), vT0=0, ZM=1, S0=100;
+  var miRango=RANGOS.indexOf(rangoDe(yo.lvl)), rgVisto=m3RangoVisto(), nuevoRango=rgVisto!==null && miRango>rgVisto;
+  m3RangoMarca(miRango);
+  var vuelo=!quieto && (!m3VueloVisto() || nuevoRango), cimaSono=false, vT0=0, ZM=1, S0=100;
   var V_SUBE=6.2, V_LOGO=5.6, V_FIN=8.6;
   var elVuelo=null;
   if(vuelo){
     m3VueloMarca(); intro=false; luz=0;
     caja.classList.add("volando");
     elVuelo=document.createElement("div"); elVuelo.className="m3-vuelo";
-    elVuelo.innerHTML='<svg viewBox="'+PEAK_WM_VB+'" aria-label="Peak."><path d="'+PEAK_WM_D+'"/></svg>';
+    var rgN=RANGOS[miRango]||rangoDe(yo.lvl);
+    elVuelo.innerHTML='<div class="m3-vuelo-c"><svg viewBox="'+PEAK_WM_VB+'" aria-label="Peak."><path d="'+PEAK_WM_D+'"/></svg>'+
+      (nuevoRango ? '<p class="m3-vuelo-r"><small>'+tr("Nuevo rango")+'</small><b style="color:'+rgN.c+'">'+esc(tr(rgN.n))+'</b></p>' : '')+'</div>';
     caja.appendChild(elVuelo);
   }
   function vueloAcaba(){ vuelo=false; caja.classList.remove("volando"); if(elVuelo){ elVuelo.remove(); elVuelo=null; } D=6.5; YC=.95; pitch=.42; ZM=1; yaw=yawFin; ultimo=performance.now(); }
@@ -24793,13 +24800,18 @@ function m3Arranca(capa){
       if(!vT0) vT0=ahora;
       var vt=(ahora-vT0)/1000, p=suave(Math.min(1, vt/V_SUBE));
       var dS=2.7, ySub=.12+(CIMA[1]+.08-.12)*p, pS=.1+.26*p, zS=1.9;
-      if(vt<V_SUBE){ yaw=yawFin+4*Math.PI*(1-p); YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
+      if(vt<V_SUBE){ yaw=yawFin-4*Math.PI*(1-p); YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
       else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
       S=S0*ZM;
       if(elVuelo){
         var a=vt<V_LOGO ? 0 : vt<V_LOGO+.7 ? (vt-V_LOGO)/.7 : vt<V_FIN-1.3 ? 1 : Math.max(0, (V_FIN-.4-vt)/.9);
         elVuelo.style.opacity=a.toFixed(3);
         elVuelo.style.setProperty("--k", (.94+.06*Math.min(1, (vt-V_LOGO)/1.6)).toFixed(3));
+      }
+      if(!cimaSono && vt>=V_SUBE-.25){   /* al llegar a la cima: un toque de sonido y una vibración corta */
+        cimaSono=true;
+        if(typeof sonido==="function") sonido("nivel");
+        try{ if(typeof prefValor!=="function" || prefValor("sonido")) navigator.vibrate && navigator.vibrate([18, 60, 28]); }catch(e){}
       }
       if(vt>=V_FIN){ vueloAcaba(); S=S0; }
     }
@@ -24869,31 +24881,54 @@ function m3Arranca(capa){
     }
 
     /* el camino: solo lo que se ve; lo que falta, tenue; lo que llevas, de luz */
-    for(i=0;i<=NS;i++){ var c=CAM[i]; pr(c[0], c[1], c[2], o); CPX[i]=o[0]; CPY[i]=o[1]; CPF[i]=o[3]; CVI[i]=(i%2 && i<NS) ? -1 : seVe(c[0], c[1], c[2]); }
-    for(i=1;i<NS;i+=2) CVI[i]=CVI[i-1] && CVI[i+1] ? 1 : 0;
+    /* lo que tapa la montaña no desaparece de golpe: cada punto se funde, en el espacio y en el tiempo */
+    for(i=0;i<=NS;i++){ var c=CAM[i]; pr(c[0], c[1], c[2], o); CPX[i]=o[0]; CPY[i]=o[1]; CPF[i]=o[3]; CVT[i]=seVe(c[0], c[1], c[2]) ? 1 : 0; }
+    var kV=Math.min(1, dt*10);
+    for(i=0;i<=NS;i++){
+      var m=(CVT[Math.max(0,i-2)]+CVT[Math.max(0,i-1)]*2+CVT[i]*3+CVT[Math.min(NS,i+1)]*2+CVT[Math.min(NS,i+2)])/9;
+      CVS[i]=CVS[i]<0 ? m : CVS[i]+(m-CVS[i])*kV; CVI[i]=CVS[i]>.5 ? 1 : 0;
+    }
     var corte=Math.round(luz/40*NS);
-    function tramo(desde, hasta){
-      ctx.beginPath(); var em=false;
-      for(var i=desde;i<=hasta;i++){
-        if(!CVI[i]){ em=false; continue; }
-        if(!em){ ctx.moveTo(CPX[i], CPY[i]); em=true; } else ctx.lineTo(CPX[i], CPY[i]);
+    /* se dibuja por tramos de igual transparencia (6 escalones), así el borde que tapa la montaña se difumina */
+    function tramos(desde, hasta, pinta){
+      var nivelA=-1, em=false;
+      function cierra(){ if(em && nivelA>0){ ctx.globalAlpha=nivelA; pinta(); } em=false; }
+      for(var i=desde;i<hasta;i++){
+        var a=Math.round(Math.min(CVS[i], CVS[i+1])*6)/6;
+        if(a!==nivelA){ cierra(); nivelA=a; }
+        if(a<=0) continue;
+        if(!em){ ctx.beginPath(); ctx.moveTo(CPX[i], CPY[i]); em=true; }
+        ctx.lineTo(CPX[i+1], CPY[i+1]);
       }
+      cierra(); ctx.globalAlpha=1;
     }
     ctx.lineCap="round";
-    tramo(corte, NS); ctx.strokeStyle="rgba("+Lz_.rgb+",.4)"; ctx.lineWidth=1.5; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]);
+    tramos(corte, NS, function(){ ctx.strokeStyle="rgba("+Lz_.rgb+",.4)"; ctx.lineWidth=1.5; ctx.setLineDash([2, 5]); ctx.stroke(); ctx.setLineDash([]); });
     if(corte>0){
-      tramo(0, corte);
       ctx.save();
-      ctx.shadowColor="rgba("+Lz_.rgb+",.95)"; ctx.shadowBlur=14;
-      ctx.strokeStyle="rgba("+Lz_.rgb+",.55)"; ctx.lineWidth=4.5; ctx.stroke();
-      ctx.shadowBlur=4; ctx.strokeStyle=Lz_.claro; ctx.lineWidth=1.9; ctx.stroke();
+      tramos(0, corte, function(){
+        ctx.shadowColor="rgba("+Lz_.rgb+",.95)"; ctx.shadowBlur=14;
+        ctx.strokeStyle="rgba("+Lz_.rgb+",.55)"; ctx.lineWidth=4.5; ctx.stroke();
+        ctx.shadowBlur=4; ctx.strokeStyle=Lz_.claro; ctx.lineWidth=1.9; ctx.stroke();
+      });
+      ctx.restore();
+    }
+    /* el inicio: un banderín con «Inicio» en el primer punto del camino */
+    if(CVS[0]>.03){
+      var bx=CPX[0], by=CPY[0], bf=Math.min(1.2, CPF[0]);
+      ctx.save(); ctx.globalAlpha=CVS[0];
+      ctx.beginPath(); ctx.arc(bx, by, 4*bf, 0, 6.283); ctx.fillStyle=Lz_.claro; ctx.fill();
+      ctx.strokeStyle="#fff"; ctx.lineWidth=1.3; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, by-24*bf); ctx.stroke();
+      ctx.fillStyle="rgba("+Lz_.rgb+",1)"; ctx.beginPath(); ctx.moveTo(bx, by-24*bf); ctx.lineTo(bx+13*bf, by-19.5*bf); ctx.lineTo(bx, by-15*bf); ctx.closePath(); ctx.fill();
+      ctx.font="800 "+(9.5*bf).toFixed(1)+'px "Plus Jakarta Sans", system-ui, sans-serif'; ctx.textAlign="center"; ctx.textBaseline="top";
+      ctx.lineWidth=3; ctx.strokeStyle="rgba(5,5,7,.75)"; ctx.strokeText(tr("INICIO"), bx, by+7*bf); ctx.fillStyle="#fff"; ctx.fillText(tr("INICIO"), bx, by+7*bf);
       ctx.restore();
     }
     anillo(true);
 
     /* los niveles: un punto en cada uno; en el pico de cada rango, su nombre encima */
     for(var n=1;n<=40;n++){
-      var ix=Math.round(n/40*NS); if(!CVI[ix]) continue;
+      var ix=Math.round(n/40*NS); if(CVS[ix]<.03) continue; ctx.globalAlpha=Math.min(1, CVS[ix]*1.2);
       var ya=n<=luz+1e-6, pico=M3_NIV.indexOf(n)>=0, rg=rangoDe(n), x=CPX[ix], y=CPY[ix], f=CPF[ix];
       if(pico){
         ctx.beginPath(); ctx.arc(x, y, 5.2*f, 0, 6.283); ctx.fillStyle="#08080a"; ctx.fill();
@@ -24915,6 +24950,7 @@ function m3Arranca(capa){
         try{ ctx.letterSpacing="0px"; }catch(er){}
       }
     }
+    ctx.globalAlpha=1;
 
     /* la cabeza de la luz mientras sube */
     if(luz<tu-.02 && corte>0 && CVI[corte]){
@@ -24999,7 +25035,11 @@ grupoAccion=function(a, el){
 '.m3-capa{ position:absolute; inset:0; pointer-events:none; overflow:hidden; transition:opacity .8s ease; }',
 '.m3.volando .m3-capa{ opacity:0; transition:none; }',
 '.m3-vuelo{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; background:radial-gradient(70% 45% at 50% 45%, rgba(5,5,7,.78), rgba(5,5,7,.35) 70%, transparent); }',
-'.m3-vuelo svg{ width:min(62vw,280px); height:auto; fill:#fff; transform:scale(var(--k,1)); filter:drop-shadow(0 0 18px rgba(var(--mt-rgb),.45)); }',
+'.m3-vuelo-c{ display:flex; flex-direction:column; align-items:center; gap:14px; transform:scale(var(--k,1)); }',
+'.m3-vuelo-r{ margin:0; display:flex; flex-direction:column; align-items:center; gap:2px; }',
+'.m3-vuelo-r small{ font:700 11px "Plus Jakarta Sans",system-ui,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.7); }',
+'.m3-vuelo-r b{ font:700 22px Unbounded,"Plus Jakarta Sans",system-ui,sans-serif; letter-spacing:.02em; }',
+'.m3-vuelo svg{ width:min(62vw,280px); height:auto; fill:#fff; filter:drop-shadow(0 0 18px rgba(var(--mt-rgb),.45)); }',
 '.m3-marca{ position:absolute; left:0; top:0; will-change:transform; }',
 '.m3-marca svg{ display:block; width:132px; height:auto; fill:var(--mt-claro); filter:drop-shadow(0 0 8px var(--mt)) drop-shadow(0 0 24px rgba(var(--mt-rgb),.55)); animation:mtCima 3.6s ease-in-out infinite; }',
 '.m3-yo{ position:absolute; left:0; top:0; z-index:400; display:flex; align-items:center; gap:8px; margin:-20px 0 0 -20px; transition:opacity .35s ease; will-change:transform; }',
