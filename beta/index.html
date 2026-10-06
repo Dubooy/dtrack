@@ -24558,6 +24558,9 @@ grupoAccion=function(a, el){
    ════════════════════════════════════════════════════════════════ */
 var M3_KEY="peak-monte-vista", M3_ALTO=1.95, M3_R=1.25;
 function m3Pref(){ try{ return localStorage.getItem(M3_KEY)==="3d" ? "3d" : "2d"; }catch(e){ return "2d"; } }
+var M3_VUELO="peak-monte-vuelo";
+function m3VueloVisto(){ try{ return localStorage.getItem(M3_VUELO)==="1"; }catch(e){ return true; } }
+function m3VueloMarca(){ try{ localStorage.setItem(M3_VUELO, "1"); }catch(e){} }
 function m3PonPref(v){ try{ localStorage.setItem(M3_KEY, v); }catch(e){} }
 function m3Azar(i){ var x=Math.sin(i*127.1+311.7)*43758.5453; return x-Math.floor(x); }
 
@@ -24692,13 +24695,26 @@ function m3Arranca(capa){
   var miAng=m3Camino(tu)[3];
   var yawFin=Math.PI/2-miAng, yaw=quieto ? yawFin : yawFin-2.4, pitch=.42, vel=0, tocando=null, ultimo=0, t0=0, luz=quieto ? tu : 0, intro=!quieto, raf=0, vivo=true, parado=false, prev=0;
 
+  /* ── el vuelo: la primera vez (o tras reiniciarlo en Ajustes) subes la montaña en espiral, como un pájaro;
+     arriba del todo sale el logo delante, limpio, y luego la cámara se aleja a la vista de siempre ── */
+  var vuelo=!quieto && !m3VueloVisto(), vT0=0, ZM=1, S0=100;
+  var V_SUBE=6.2, V_LOGO=5.6, V_FIN=8.6;
+  var elVuelo=null;
+  if(vuelo){
+    m3VueloMarca(); intro=false; luz=0;
+    caja.classList.add("volando");
+    elVuelo=document.createElement("div"); elVuelo.className="m3-vuelo";
+    elVuelo.innerHTML='<svg viewBox="'+PEAK_WM_VB+'" aria-label="Peak."><path d="'+PEAK_WM_D+'"/></svg>';
+    caja.appendChild(elVuelo);
+  }
+  function vueloAcaba(){ vuelo=false; caja.classList.remove("volando"); if(elVuelo){ elVuelo.remove(); elVuelo=null; } D=6.5; YC=.95; pitch=.42; ZM=1; yaw=yawFin; ultimo=performance.now(); }
   function mide(){
     W=caja.clientWidth||window.innerWidth; H=caja.clientHeight||window.innerHeight;
     dpr=Math.min(2, window.devicePixelRatio||1);
     cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr); cv.style.width=W+"px"; cv.style.height=H+"px";
     var arriba=150, abajo=H-150;
     S=Math.max(80, Math.min(W*.44, (abajo-arriba)/2.45));
-    CX=W/2; CY=(arriba+abajo)/2+.08*S;
+    CX=W/2; CY=(arriba+abajo)/2+.08*S; S0=S;
   }
   mide();
   window.addEventListener("resize", mide);
@@ -24725,6 +24741,7 @@ function m3Arranca(capa){
   var dedos={};
   caja.addEventListener("pointerdown", function(ev){
     dedos[ev.pointerId]=1;
+    if(vuelo){ var ya=(performance.now()-vT0)/1000; if(ya<V_SUBE) vT0=performance.now()-V_SUBE*1000; return; }   /* tocar salta al final */
     if(tocando){ tocando.varios=true; return; }   /* segundo dedo: no cuenta, así no se dispara el giro */
     tocando={ id:ev.pointerId, x0:ev.clientX, y0:ev.clientY, t0:performance.now(), x:ev.clientX, y:ev.clientY, yaw:yaw, pitch:pitch, t:performance.now(), lx:ev.clientX }; vel=0; intro=false;
     try{ caja.setPointerCapture(ev.pointerId); }catch(e){}
@@ -24772,8 +24789,22 @@ function m3Arranca(capa){
     if(!t0) t0=ahora;
     var tt=(ahora-t0)/1000;
     /* la entrada: la montaña gira hasta dejarte de frente mientras se enciende el camino */
+    if(vuelo){
+      if(!vT0) vT0=ahora;
+      var vt=(ahora-vT0)/1000, p=suave(Math.min(1, vt/V_SUBE));
+      var dS=2.7, ySub=.12+(CIMA[1]+.08-.12)*p, pS=.1+.26*p, zS=1.9;
+      if(vt<V_SUBE){ yaw=yawFin-4*Math.PI*(1-p); YC=ySub; D=dS; pitch=pS; ZM=zS; luz=Math.min(tu, 40*p); }
+      else { var q=suave((vt-V_SUBE)/(V_FIN-V_SUBE)); yaw=yawFin; YC=ySub+(.95-ySub)*q; D=dS+(6.5-dS)*q; pitch=pS+(.42-pS)*q; ZM=zS+(1-zS)*q; luz=tu; }
+      S=S0*ZM;
+      if(elVuelo){
+        var a=vt<V_LOGO ? 0 : vt<V_LOGO+.7 ? (vt-V_LOGO)/.7 : vt<V_FIN-1.3 ? 1 : Math.max(0, (V_FIN-.4-vt)/.9);
+        elVuelo.style.opacity=a.toFixed(3);
+        elVuelo.style.setProperty("--k", (.94+.06*Math.min(1, (vt-V_LOGO)/1.6)).toFixed(3));
+      }
+      if(vt>=V_FIN){ vueloAcaba(); S=S0; }
+    }
     if(intro){ var u=suave((tt-.25)/2.4); yaw=yawFin-2.4*(1-u); if(u>=1) intro=false; }
-    if(luz<tu) luz=quieto ? tu : Math.min(tu, tu*suave((tt-.35)/2.3));
+    if(!vuelo && luz<tu) luz=quieto ? tu : Math.min(tu, tu*suave((tt-.35)/2.3));
     if(!tocando && !intro){
       if(Math.abs(vel)>.01){ yaw+=vel*dt; vel*=Math.exp(-dt*2.6); }
       else if(!quieto && ahora-ultimo>2600) yaw+=dt*.07;   /* gira sola, muy despacio */
@@ -24924,7 +24955,7 @@ function m3Arranca(capa){
   return {
     pausa:function(){ parado=true; cancelAnimationFrame(raf); },
     sigue:function(){ if(!parado) return; parado=false; prev=0; pintaGente(); raf=requestAnimationFrame(cuadro); },
-    para:function(){ vivo=false; cancelAnimationFrame(raf); clearTimeout(gTimer); clearTimeout(pistaT); window.removeEventListener("resize", mide); }
+    para:function(){ if(vuelo) vueloAcaba(); vivo=false; cancelAnimationFrame(raf); clearTimeout(gTimer); clearTimeout(pistaT); window.removeEventListener("resize", mide); }
   };
 }
 
@@ -24965,7 +24996,10 @@ grupoAccion=function(a, el){
 '#mt-capa.en3d .mt-scroll{ visibility:hidden; }',
 '@keyframes m3Entra{ from{ opacity:0; transform:scale(.97); } to{ opacity:1; transform:none; } }',
 '.m3-cv{ position:absolute; inset:0; display:block; }',
-'.m3-capa{ position:absolute; inset:0; pointer-events:none; overflow:hidden; }',
+'.m3-capa{ position:absolute; inset:0; pointer-events:none; overflow:hidden; transition:opacity .8s ease; }',
+'.m3.volando .m3-capa{ opacity:0; transition:none; }',
+'.m3-vuelo{ position:absolute; inset:0; display:grid; place-items:center; pointer-events:none; opacity:0; background:radial-gradient(70% 45% at 50% 45%, rgba(5,5,7,.78), rgba(5,5,7,.35) 70%, transparent); }',
+'.m3-vuelo svg{ width:min(62vw,280px); height:auto; fill:#fff; transform:scale(var(--k,1)); filter:drop-shadow(0 0 18px rgba(var(--mt-rgb),.45)); }',
 '.m3-marca{ position:absolute; left:0; top:0; will-change:transform; }',
 '.m3-marca svg{ display:block; width:132px; height:auto; fill:var(--mt-claro); filter:drop-shadow(0 0 8px var(--mt)) drop-shadow(0 0 24px rgba(var(--mt-rgb),.55)); animation:mtCima 3.6s ease-in-out infinite; }',
 '.m3-yo{ position:absolute; left:0; top:0; z-index:400; display:flex; align-items:center; gap:8px; margin:-20px 0 0 -20px; transition:opacity .35s ease; will-change:transform; }',
@@ -24998,6 +25032,27 @@ grupoAccion=function(a, el){
 '.m3-barra i{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg, var(--mt), var(--mt-claro)); box-shadow:0 0 12px rgba(var(--mt-rgb),.8); }',
 '@media (prefers-reduced-motion:reduce){ .m3-marca svg, .m3-yo::before, .m3-pista svg, .mt-vista i{ animation:none!important; transition:none!important; } }'
 ].join("\n"); document.head.appendChild(st); })();
+
+/* Ajustes › Avanzado: volver a ver el vuelo la próxima vez que abras la montaña en 3D */
+var _sheetSettingsVuelo=sheetSettings;
+sheetSettings=function(){
+  var r=_sheetSettingsVuelo.apply(this, arguments);
+  var av=document.getElementById("aj-av"); if(!av || document.getElementById("aj-vuelo")) return r;
+  var b=document.createElement("button");
+  b.id="aj-vuelo"; b.className="aj-priv"; b.setAttribute("data-act","x-vuelo-ajustes");
+  b.innerHTML='<span class="aj-m-ico">'+ico("meta")+'</span><span class="aj-priv-t"><b>'+tr("Ver otra vez el vuelo de la montaña")+'</b><small>'+tr("Sale al abrir tu montaña en 3D")+'</small></span>'+ico("flecha");
+  av.appendChild(b);
+  return r;
+};
+var _vueloGA=grupoAccion;
+grupoAccion=function(a, el){
+  if(a==="x-vuelo-ajustes"){
+    try{ localStorage.removeItem(M3_VUELO); }catch(e){}
+    var sm=el && el.querySelector && el.querySelector("small"); if(sm) sm.textContent=tr("Listo: lo verás la próxima vez que abras tu montaña en 3D");
+    return true;
+  }
+  return _vueloGA.apply(this, arguments);
+};
 })();
 </script>
 <script>
