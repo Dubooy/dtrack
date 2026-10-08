@@ -26042,27 +26042,26 @@ function hoyAnillo(v, max, col, centro, etiqueta, sub, act, jump){
 }
 function anilloDetalle(){ return ""; }
 
-/* Estudiar y Parte del día: dos filas de una misma lista, sin números grandes */
-function hsLinea(k, titulo, frase, act, extra, derecha){
-  return '<button class="hs-lin'+(extra||"")+'" data-act="'+act+'" style="--sf:var('+hsColor(k)+')">'+
-    '<span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc(k)+'</svg></span>'+
-    '<span class="hs-lin-t"><b>'+esc(titulo)+'</b><small>'+esc(frase)+'</small></span>'+
-    (derecha||"")+hsChev()+'</button>';
-}
+/* Estudiar y Parte del día, lado a lado y con poco texto; el Parte, el protagonista */
 function tarjetaEstudio(){
-  var a=S.estudio && S.estudio.actual, hoy=today(), min=estudioMinDia(hoy);
+  var a=S.estudio && S.estudio.actual, min=estudioMinDia(today());
+  var t="Estudiar", sub=min ? horasTxt(min)+" hoy" : "Pomodoro", act="x-estudiar", extra="";
   if(a){
     var rest=Math.max(0, a.fin ? a.fin-Date.now() : (a.resto||0)), mm=Math.floor(rest/60000), ss=Math.floor(rest%60000/1000);
-    var fase=a.fase==="descanso"?"Descanso":a.fase==="listo"?"Bloque terminado":(a.fin?"Concentración":"En pausa");
-    return hsLinea("estudio", fase, a.nombre||"Estudiar", "x-hoy-estudio", " activo",
-      '<span class="hs-lin-d num" id="hy-est-t">'+(a.fase==="listo"?"✓":(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss)+'</span>');
-  }
-  return hsLinea("estudio", "Estudiar", min ? horasTxt(min)+" hoy" : "Empieza un pomodoro", "x-estudiar");
+    t=a.fase==="descanso"?"Descanso":a.fase==="listo"?"Terminado":(a.fin?"Estudiando":"En pausa");
+    sub='<b class="num" id="hy-est-t">'+(a.fase==="listo"?"✓":(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss)+'</b>'; act="x-hoy-estudio"; extra=" activo";
+  } else sub=esc(sub);
+  return '<button class="hs-fila hs-est'+extra+'" data-act="'+act+'" style="--sf:var(--hs-estudio)">'+
+    '<span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc("estudio")+'</svg></span>'+
+    '<b class="hs-t">'+esc(t)+'</b><span class="hs-s">'+sub+'</span></button>';
 }
 function tarjetaParte(){
   var hoy=today(), hecho=!!(S.parte && S.parte[hoy]), hh=new Date().getHours(), toca=(hh>=19||hh<4);
-  var frase = hecho ? "Hecho hoy" : toca ? "Toca ahora: un minuto para cerrar el día" : "Esta noche, un minuto para repasar el día";
-  return hsLinea("parte", "Parte del día", frase, "parte", hecho?" ok":toca?" toca":"");
+  var sub = hecho ? "Hecho. Buenas noches" : toca ? "Un minuto para cerrar el día" : "Esta noche, un minuto";
+  return '<button class="hs-fila hs-parte'+(hecho?" ok":toca?" toca":"")+'" data-act="parte" style="--sf:var(--hs-parte)">'+
+    '<span class="hs-luna"><svg viewBox="0 0 24 24">'+hsIc("parte")+'</svg></span>'+
+    '<b class="hs-t">Parte del día</b><span class="hs-s">'+esc(sub)+'</span>'+
+    (hecho?'':'<span class="hs-boton">'+(toca?"Empezar":"Ver")+'</span>')+'</button>';
 }
 
 /* la gráfica de hábitos se despliega al tocar su título */
@@ -26089,18 +26088,26 @@ document.addEventListener("click", function(e){
 '.hs-col .hs-num small{ margin-left:2px; font-size:13px; }',
 '.hs-col .hs-sem{ height:30px; gap:3px; margin-top:12px; }',
 '.hs-col .hs-sem i{ width:6px; border-radius:2px; }',
-/* Estudiar y Parte del día: una lista de dos filas */
-'#hoy .hy-dos{ display:block!important; max-width:none!important; margin-top:12px; padding:0 16px; border-radius:22px; background:var(--tarjeta, var(--glass-bg)); }',
-'#hoy .hy-dos > div + div{ box-shadow:inset 0 1px 0 var(--hairline); }',
-'.hs-lin{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:14px 0; -webkit-tap-highlight-color:transparent; }',
-'.hs-lin:active{ opacity:.6; }',
-'.hs-lin .hs-ic{ color:var(--sf); width:22px; height:22px; }',
-'.hs-lin .hs-ic svg{ width:21px; height:21px; }',
-'.hs-lin-t{ flex:1; min-width:0; display:flex; flex-direction:column; }',
-'.hs-lin-t b{ font-size:16px; font-weight:600; color:var(--t1); }',
-'.hs-lin-t small{ font-size:13px; color:var(--t3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
-'.hs-lin.toca .hs-lin-t small, .hs-lin.ok .hs-lin-t small{ color:var(--sf); font-weight:600; }',
-'.hs-lin-d{ font-family:Unbounded,sans-serif; font-size:17px; font-weight:700; color:var(--sf); }',
+/* Estudiar y Parte del día: el Parte, ancho y primero; Estudiar, pequeño al lado */
+'#hoy .hy-dos{ display:grid!important; grid-template-columns:1.7fr 1fr; gap:10px; max-width:none!important; margin-top:10px; }',
+'#hoy .hy-dos > div{ display:flex; min-width:0; }',
+'#hoy #hoy-parte{ order:-1; }',
+'.hy-dos .hs-fila{ display:flex; flex-direction:column; align-items:flex-start; padding:16px; border-radius:20px; }',
+'.hy-dos .hs-t{ font-size:16px; font-weight:600; color:var(--t1); margin-top:auto; padding-top:14px; }',
+'.hy-dos .hs-s{ font-size:13px; color:var(--t3); margin-top:2px; line-height:1.3; }',
+'.hy-dos .hs-s b{ font-family:Unbounded,sans-serif; font-size:20px; color:var(--sf); }',
+'.hs-est .hs-ic{ color:var(--sf); width:26px; height:26px; }',
+'.hs-est .hs-ic svg{ width:26px; height:26px; }',
+/* el Parte: fondo de noche con su color, luna grande y botón */
+'.hs-parte{ position:relative; overflow:hidden; color:#fff;',
+'  background:linear-gradient(160deg, color-mix(in srgb, var(--sf) 82%, #1a1030), color-mix(in srgb, var(--sf) 45%, #0d0820))!important; }',
+'.hs-parte .hs-t{ color:#fff; font-size:19px; font-weight:700; padding-top:30px; }',
+'.hs-parte .hs-s{ color:rgba(255,255,255,.78); }',
+'.hs-luna{ width:40px; height:40px; color:#fff; filter:drop-shadow(0 0 12px rgba(255,255,255,.45)); }',
+'.hs-luna svg{ width:40px; height:40px; fill:currentColor; }',
+'.hs-boton{ margin-top:12px; padding:7px 14px; border-radius:99px; background:#fff; color:color-mix(in srgb, var(--sf) 80%, #000); font-size:13.5px; font-weight:700; }',
+'.hs-parte.ok{ background:var(--tarjeta, var(--glass-bg))!important; color:var(--t1); }',
+'.hs-parte.ok .hs-t{ color:var(--t1); } .hs-parte.ok .hs-s{ color:var(--sf); font-weight:600; } .hs-parte.ok .hs-luna{ color:var(--sf); filter:none; }',
 /* gráfica de hábitos plegada hasta que la tocas */
 '#ideal-graf > div:first-child{ cursor:pointer; margin-bottom:0!important; align-items:center!important; }',
 '#ideal-graf > div:first-child > span:first-child{ font-size:14px!important; font-weight:600; color:var(--hs-habitos)!important; }',
