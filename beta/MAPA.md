@@ -75,6 +75,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `50-progreso-montana.js` | Progreso con la estética de la montaña: cabecera de noche con estrellas, montaña 3D pequeña, insignia de rango con barra de luz, llama de racha, «Tu camino» como sendero, amigos por delante/detrás y XP de hoy |
 | `51-objetivos-peak.js` | Objetivos con aire Peak.: «Los tres de hoy» como tres cumbres del logo, títulos en Unbounded con rayita, reto de la semana como sendero de puntos, metas del mes como tramos con %, selector con pastilla de tinta, tarjetas sin sombra |
 | `52-hoy-salud.js` | Hoy con la estética de Salud del día: Retos, Hábitos, Cuerpo, Estudiar y Parte del día como tarjetas (icono y título en su color, número grande, barritas de la semana); títulos con color en Hábitos, Lectura y Tu evolución. Sobrescribe `hoyAnillo`, `anilloDetalle`, `tarjetaEstudio` y `tarjetaParte` |
+| `53-temas-degradado.js` | Modos con degradado (Atardecer, Océano, Uva; claros y «noche»): degradado diagonal de dos colores en el primer 25 % de la pantalla que pasa a blanco o negro. Libres desde el inicio. Sobrescribe `applyTheme` y `muestraTema` |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
