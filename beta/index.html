@@ -26185,12 +26185,12 @@ document.addEventListener("click", function(e){
 
 /* funciones y no variables: applyTheme se llama antes de que esta pieza se ejecute */
 function grTemas(){ return [
-  { k:"gr-atardecer",  n:"Atardecer",       a:"#ff8a3d", b:"#ff3d8b", osc:false },
-  { k:"gr-oceano",     n:"Océano",          a:"#2f7bff", b:"#18d2c0", osc:false },
-  { k:"gr-uva",        n:"Uva",             a:"#7a5cff", b:"#e24cff", osc:false },
-  { k:"gr-atardecer-n",n:"Atardecer noche", a:"#ff8a3d", b:"#ff3d8b", osc:true },
-  { k:"gr-oceano-n",   n:"Océano noche",    a:"#2f7bff", b:"#18d2c0", osc:true },
-  { k:"gr-uva-n",      n:"Uva noche",       a:"#7a5cff", b:"#e24cff", osc:true }
+  { k:"gr-atardecer",  n:"Atardecer",       a:"#e0712e", b:"#7472c4", osc:false },
+  { k:"gr-oceano",     n:"Océano",          a:"#2a78d6", b:"#2fb5a6", osc:false },
+  { k:"gr-uva",        n:"Uva",             a:"#7457d6", b:"#c24fbf", osc:false },
+  { k:"gr-atardecer-n",n:"Atardecer noche", a:"#b4501c", b:"#4f4e9e", osc:true },
+  { k:"gr-oceano-n",   n:"Océano noche",    a:"#1c5aa8", b:"#1f8a80", osc:true },
+  { k:"gr-uva-n",      n:"Uva noche",       a:"#5a3fb0", b:"#9a3a98", osc:true }
 ]; }
 function grDe(k){ return grTemas().filter(function(t){ return t.k===k; })[0]||null; }
 
@@ -26255,8 +26255,16 @@ function muestraTema(k){
 '  --fill:rgba(255,255,255,.08); --fill-hi:rgba(255,255,255,.14); --hairline:rgba(255,255,255,.12); --accent:var(--gr-a); --on-accent:#fff; }',
 /* el degradado: diagonal de dos colores en el primer 25 % y luego se funde con el fondo */
 'html.gr, html.gr body{ background-color:var(--bg)!important; }',
-'html.gr body{ background-image:linear-gradient(180deg, transparent 0, transparent 8vh, var(--bg) 25vh), linear-gradient(135deg, var(--gr-a), var(--gr-b))!important;',
-'  background-size:100% 25vh, 100% 25vh!important; background-repeat:no-repeat!important; background-position:top left!important; }',
+/* como en Salud: color casi horizontal arriba y una caída larga y suave hasta el fondo */
+'html.gr body{ background-image:linear-gradient(180deg, transparent 0, transparent 30%, color-mix(in srgb, var(--bg) 18%, transparent) 48%,',
+'  color-mix(in srgb, var(--bg) 45%, transparent) 64%, color-mix(in srgb, var(--bg) 75%, transparent) 80%, color-mix(in srgb, var(--bg) 93%, transparent) 90%, var(--bg) 96%),',
+'  linear-gradient(110deg, var(--gr-a) 0%, color-mix(in srgb, var(--gr-a) 50%, var(--gr-b)) 55%, var(--gr-b) 100%)!important;',
+'  background-size:100% 34vh, 100% 33vh!important; background-repeat:no-repeat!important; background-position:top left!important; }',
+/* la cabecera encima del color: letra blanca y botones de cristal */
+"html.gr .view > :first-child h1, html.gr .view > :first-child .eyebrow, html.gr .view > :first-child .eyebrow *{ color:#fff!important; }",
+"html.gr .view p.eyebrow::before, html.gr #hero-date::before{ color:#fff!important; }",
+"html.gr.dark .view > :first-child h1 + p{ color:rgba(255,255,255,.82)!important; }",
+"html.gr #acciones-flotantes .icon-btn{ background:rgba(255,255,255,.2)!important; box-shadow:none!important; border:0!important; color:#fff!important; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }",
 'html.gr .canvas-bg{ display:none!important; }',
 /* la cabecera fija al bajar, con el mismo fondo que la página */
 'html.gr .barpill{ background:color-mix(in srgb, var(--bg) 82%, transparent); }'
