@@ -26035,7 +26035,11 @@ function hoyAnillo(v, max, col, centro, etiqueta, sub, act, jump){
     msg= falta ? "Ejercicio, agua, sueño y pantalla" : "Cuerpo al día";
     attrs='data-jump="vital"'; uni="de 4";
   }
-  return hsTarjeta(k, etiqueta, v, uni, msg, sem, attrs, falta||!max?"":" ok");
+  /* una columna de la tarjeta de arriba: icono, título, número y barritas */
+  return '<button class="hs-col'+(falta||!max?"":" ok")+'" '+attrs+' style="--sf:var('+hsColor(k)+')" aria-label="'+esc(etiqueta+": "+v+" "+uni+". "+msg)+'">'+
+    '<span class="hs-cab"><span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc(k)+'</svg></span><b>'+esc(etiqueta)+'</b></span>'+
+    '<span class="hs-num num">'+v+'<small>/'+(max||0)+'</small></span>'+
+    '<span class="hs-sem" aria-hidden="true">'+sem+'</span></button>';
 }
 function anilloDetalle(){ return ""; }
 
@@ -26075,9 +26079,31 @@ function tarjetaParte(){
 ':root{ --hs-retos:#e8930c; --hs-habitos:#1f9d6b; --hs-vital:#ff375f; --hs-estudio:#0a9fb5; --hs-parte:#a54fd6; --hs-leer:#a0703c; --hs-xp:#c98a1b; }',
 'html.dark{ --hs-retos:#ffb340; --hs-habitos:#3ed598; --hs-vital:#ff6482; --hs-estudio:#40cbe0; --hs-parte:#c77dff; --hs-leer:#d0a06a; --hs-xp:#f2c14e; }',
 /* las tarjetas */
-'#hoy .hy-anillos, #hoy .hy-dos{ display:flex!important; flex-direction:column; gap:12px; max-width:none!important; margin-top:0; }',
-'#hoy .hy-dos{ margin-top:12px; }',
-'#hoy .hy-dos > div{ display:block; }',
+/* arriba: una sola tarjeta con Retos, Hábitos y Cuerpo en tres columnas */
+'#hoy .hy-anillos{ display:grid!important; grid-template-columns:repeat(3,1fr); gap:0; max-width:none!important; margin-top:0; padding:16px 4px 16px;',
+'  border-radius:24px; background:var(--tarjeta, var(--glass-bg)); box-shadow:0 0 0 1px var(--tarjeta-borde, var(--hairline)); }',
+'.hs-col{ display:flex; flex-direction:column; align-items:flex-start; text-align:left; padding:0 14px; min-width:0; -webkit-tap-highlight-color:transparent; transition:transform .25s var(--spring); }',
+'.hs-col + .hs-col{ box-shadow:inset 1px 0 0 var(--hairline); }',
+'.hs-col:active{ transform:scale(.95); }',
+'.hs-col .hs-cab{ width:100%; gap:5px; }',
+'.hs-col .hs-cab b{ font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.hs-col .hs-ic, .hs-col .hs-ic svg{ width:16px; height:16px; }',
+'.hs-col .hs-num{ margin-top:14px; font-size:30px; }',
+'.hs-col .hs-num small{ margin-left:2px; font-size:13px; }',
+'.hs-col .hs-sem{ height:30px; gap:3px; margin-top:12px; }',
+'.hs-col .hs-sem i{ width:6px; border-radius:2px; }',
+/* Estudiar y Parte del día, una al lado de la otra */
+'#hoy .hy-dos{ display:grid!important; grid-template-columns:1fr 1fr; gap:12px; max-width:none!important; margin-top:12px; }',
+'#hoy .hy-dos > div{ display:flex; min-width:0; }',
+'.hy-dos .hs-fila{ display:flex; flex-direction:column; padding:16px 16px 16px; min-height:0!important; }',
+'.hy-dos .hs-cuando, .hy-dos .hs-chev{ display:none; }',
+'.hy-dos .hs-cab b{ font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.hy-dos .hs-cuerpo{ flex:1; flex-direction:column; align-items:stretch; justify-content:space-between; gap:12px; margin-top:16px; }',
+'.hy-dos .hs-num{ font-size:30px; }',
+'.hy-dos .hs-num small{ display:block; margin:6px 0 0; font-size:12.5px; }',
+'.hy-dos .hs-msg{ white-space:normal; line-height:1.35; margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
+'.hy-dos .hs-sem{ height:34px; justify-content:space-between; }',
+'.hy-dos .hs-sem i{ width:9px; }',
 '.hs-fila{ --sf:var(--accent); display:block; width:100%; text-align:left; padding:16px 18px 18px; border-radius:24px; cursor:pointer;',
 '  background:var(--tarjeta, var(--glass-bg)); box-shadow:0 0 0 1px var(--tarjeta-borde, var(--hairline));',
 '  -webkit-tap-highlight-color:transparent; transition:transform .25s var(--spring); }',
