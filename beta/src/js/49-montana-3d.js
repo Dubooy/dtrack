@@ -140,9 +140,8 @@ function m3Arranca(capa){
   var tuSem=semXP>0 ? Math.max(0, Math.min(tu, nivelDeXP(Math.max(0, st.xp-semXP)))) : tu;
   /* el clima depende de la racha; el cielo, de la hora del móvil */
   var racha=st.streak||0, horaM=new Date().getHours();
-  /* solo dos cielos: atardecer mientras hay luz (7 a 21 h) y noche el resto */
-  var CIELO=horaM>=7 && horaM<21 ? "atardecer" : "noche";
-  var ESTK={ noche:1, atardecer:.3 }[CIELO];
+  var CIELO=horaM>=6 && horaM<9 ? "amanecer" : horaM>=9 && horaM<18 ? "dia" : horaM>=18 && horaM<21 ? "atardecer" : "noche";
+  var ESTK={ noche:1, amanecer:.35, atardecer:.3, dia:0 }[CIELO];
   capaHTML.innerHTML=
     '<div class="m3-marca"><svg viewBox="'+PEAK_WM_VB+'" aria-label="Peak."><path d="'+PEAK_WM_D+'"/></svg></div>'+
     '<div class="m3-gente"></div>'+
@@ -432,26 +431,29 @@ function m3Arranca(capa){
     sombPrimera=false;
   }
   /* el color de la luz y del cielo que rellena las sombras, según la hora */
-  var LUZC={ noche:[1,1,1.04], atardecer:[1.15,.86,.7] }[CIELO];
-  var AMB={ noche:[0,0,0], atardecer:[20,12,26] }[CIELO];
-  var CLARO=CIELO==="noche" ? 1 : 1.25;
+  var LUZC={ noche:[1,1,1.04], dia:[1.06,1,.9], amanecer:[1.12,.9,.8], atardecer:[1.15,.86,.7] }[CIELO];
+  var AMB={ noche:[0,0,0], dia:[16,26,44], amanecer:[18,14,30], atardecer:[20,12,26] }[CIELO];
+  var CLARO=CIELO==="dia" ? 1.55 : CIELO==="noche" ? 1 : 1.25;
   var Hx=Lx, Hy=Ly, Hz=Lz+1, hl=Math.hypot(Hx, Hy, Hz); Hx/=hl; Hy/=hl; Hz/=hl;   /* entre la luz y la vista: para el reflejo */
   var BANS=[];
   /* el cielo según la hora: degradado detrás de todo */
-  var CIELOS={ atardecer:[[0,"rgba(30,22,60,.95)"],[.55,"rgba(120,52,78,.65)"],[1,"rgba(238,122,66,.6)"]] };
+  var CIELOS={ amanecer:[[0,"rgba(24,28,58,.95)"],[.55,"rgba(96,60,88,.6)"],[1,"rgba(236,150,112,.55)"]],
+               dia:[[0,"rgba(22,52,98,1)"],[.6,"rgba(52,98,150,.95)"],[1,"rgba(132,170,206,.9)"]],
+               atardecer:[[0,"rgba(30,22,60,.95)"],[.55,"rgba(120,52,78,.65)"],[1,"rgba(238,122,66,.6)"]] };
   function pintaCielo(tt){
     var cs=CIELOS[CIELO]; if(!cs) return;
     var hz=pr(0, 0, 0, [0,0,0,0])[1], gc=ctx.createLinearGradient(0, 0, 0, hz);
     cs.forEach(function(c){ gc.addColorStop(c[0], c[1]); });
     ctx.fillStyle=gc; ctx.fillRect(0, 0, W, hz);
     var gb=ctx.createLinearGradient(0, hz, 0, H); gb.addColorStop(0, cs[cs.length-1][1]);
-    gb.addColorStop(.35, "rgba(0,0,0,0)");
+    if(CIELO==="dia"){ gb.addColorStop(.3, "rgba(38,52,66,.9)"); gb.addColorStop(1, "rgba(10,14,20,1)"); } else gb.addColorStop(.35, "rgba(0,0,0,0)");
     ctx.fillStyle=gb; ctx.fillRect(0, hz, W, H-hz);
-    /* el sol del atardecer: bajo y naranja */
-    var sx=W*.17, sy=hz-Math.min(90, hz*.22), sr=22, col="255,170,110";
+    /* el sol */
+    var dia=CIELO==="dia", sx=W*.17, sy=dia ? Math.max(70, hz*.2) : hz-Math.min(90, hz*.22), sr=dia ? 17 : 22;
+    var col=dia ? "255,246,214" : "255,170,110";
     ctx.save(); ctx.globalCompositeOperation="lighter";
     var gs=ctx.createRadialGradient(sx, sy, 0, sx, sy, sr*9);
-    gs.addColorStop(0, "rgba("+col+",.5)"); gs.addColorStop(.18, "rgba("+col+",.18)"); gs.addColorStop(1, "rgba("+col+",0)");
+    gs.addColorStop(0, "rgba("+col+","+(dia ? .55 : .5)+")"); gs.addColorStop(.18, "rgba("+col+",.18)"); gs.addColorStop(1, "rgba("+col+",0)");
     ctx.fillStyle=gs; ctx.fillRect(sx-sr*9, sy-sr*9, sr*18, sr*18);
     /* rayos muy suaves que giran despacio */
     ctx.translate(sx, sy); ctx.rotate(tt*.03);
@@ -459,7 +461,7 @@ function m3Arranca(capa){
       var gr=ctx.createLinearGradient(0, 0, sr*6, 0); gr.addColorStop(0, "rgba("+col+",.13)"); gr.addColorStop(1, "rgba("+col+",0)");
       ctx.fillStyle=gr; ctx.beginPath(); ctx.moveTo(sr*.8, -2.5); ctx.lineTo(sr*(k%2 ? 4.2 : 6), 0); ctx.lineTo(sr*.8, 2.5); ctx.fill(); }
     ctx.restore();
-    ctx.fillStyle="#ffd3a8"; ctx.beginPath(); ctx.arc(sx, sy, sr, 0, 6.283); ctx.fill();
+    ctx.fillStyle=dia ? "#fffaf0" : "#ffd3a8"; ctx.beginPath(); ctx.arc(sx, sy, sr, 0, 6.283); ctx.fill();
   }
   /* nubes y niebla cuando no hay racha */
   var NUB=[]; for(var nb=0;nb<7;nb++) NUB.push({ a:m3Azar(nb*5.1)*6.283, r:.95+m3Azar(nb*2.3)*.55, y:.35+m3Azar(nb*7.7)*.55, s:.28+m3Azar(nb*3.9)*.2, v:.02+m3Azar(nb)*.03 });
@@ -589,7 +591,7 @@ function m3Arranca(capa){
       if(gl>.01){ r+=LR[0]*gl; g+=LR[1]*gl; bl+=LR[2]*gl; }
       r+=LR[0]*.02; g+=LR[1]*.02; bl+=LR[2]*.02;
       /* hacia el borde se funde con la noche */
-      var fo=Math.min(1, Math.pow(Math.max(0, 1-q.rr)*2.6, .8)); r*=fo; g*=fo; bl*=fo;
+      var fo=Math.min(1, Math.pow(Math.max(0, 1-q.rr)*2.6, .8)); if(CIELO==="dia") fo=.35+.65*fo; r*=fo; g*=fo; bl*=fo;
       var col=rgb(r, g, bl);
       ctx.fillStyle=col; ctx.strokeStyle=col;
       ctx.beginPath(); ctx.moveTo(PX[q.a], PY[q.a]); ctx.lineTo(PX[q.b], PY[q.b]); ctx.lineTo(PX[q.c], PY[q.c]); ctx.closePath();
