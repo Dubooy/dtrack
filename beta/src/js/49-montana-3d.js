@@ -476,6 +476,7 @@ function m3Arranca(capa){
   var CIELOS={ amanecer:[[0,"rgba(24,28,58,.95)"],[.55,"rgba(96,60,88,.6)"],[1,"rgba(236,150,112,.55)"]],
                dia:[[0,"rgba(22,52,98,1)"],[.6,"rgba(52,98,150,.95)"],[1,"rgba(132,170,206,.9)"]],
                atardecer:[[0,"rgba(30,22,60,.95)"],[.55,"rgba(120,52,78,.65)"],[1,"rgba(238,122,66,.6)"]] };
+  var SUELO={ noche:"40,38,48", dia:"58,70,82", amanecer:"62,46,58", atardecer:"64,42,48" };
   function pintaCielo(tt){
     var cs=CIELOS[CIELO]; if(!cs) return;
     var hz=pr(0, 0, 0, [0,0,0,0])[1], gc=ctx.createLinearGradient(0, 0, 0, hz);
@@ -584,11 +585,22 @@ function m3Arranca(capa){
     var hal=ctx.createRadialGradient(pt[0], pt[1], 0, pt[0], pt[1], S*1.15);
     hal.addColorStop(0, "rgba("+Lz_.rgb+",.30)"); hal.addColorStop(.35, "rgba("+Lz_.rgb+",.10)"); hal.addColorStop(1, "rgba("+Lz_.rgb+",0)");
     ctx.fillStyle=hal; ctx.fillRect(0, 0, W, H);
-    /* el suelo: una sombra y un anillo de luz alrededor de la base */
-    var suelo=ctx.createRadialGradient(pb[0], pb[1], 0, pb[0], pb[1], S*1.6);
-    suelo.addColorStop(0, "rgba(0,0,0,.7)"); suelo.addColorStop(.6, "rgba("+Lz_.rgb+",.07)"); suelo.addColorStop(1, "rgba("+Lz_.rgb+",0)");
-    ctx.save(); ctx.translate(pb[0], pb[1]); ctx.scale(1, Math.max(.15, sP)); ctx.translate(-pb[0], -pb[1]);
-    ctx.fillStyle=suelo; ctx.beginPath(); ctx.arc(pb[0], pb[1], S*1.6, 0, 6.283); ctx.fill(); ctx.restore();
+    /* el suelo: una llanura que se pierde en la niebla del horizonte, con la sombra de la montaña
+       pegada a la base para que no parezca que flota */
+    var esc_=Math.max(.15, sP), SG=SUELO[CIELO]||SUELO.noche;
+    ctx.save(); ctx.translate(pb[0], pb[1]); ctx.scale(1, esc_); ctx.translate(-pb[0], -pb[1]);
+    var lla=ctx.createRadialGradient(pb[0], pb[1], 0, pb[0], pb[1], S*4.2);
+    lla.addColorStop(0, "rgba("+SG+",1)"); lla.addColorStop(.38, "rgba("+SG+",.9)"); lla.addColorStop(.7, "rgba("+SG+",.35)"); lla.addColorStop(1, "rgba("+SG+",0)");
+    ctx.fillStyle=lla; ctx.beginPath(); ctx.arc(pb[0], pb[1], S*4.2, 0, 6.283); ctx.fill();
+    /* niebla de luz donde la llanura se junta con el cielo */
+    var nie=ctx.createRadialGradient(pb[0], pb[1], S*2.2, pb[0], pb[1], S*4.2);
+    nie.addColorStop(0, "rgba("+Lz_.rgb+",0)"); nie.addColorStop(.55, "rgba("+Lz_.rgb+",.07)"); nie.addColorStop(1, "rgba("+Lz_.rgb+",0)");
+    ctx.fillStyle=nie; ctx.beginPath(); ctx.arc(pb[0], pb[1], S*4.2, 0, 6.283); ctx.fill();
+    /* sombra de contacto */
+    var som=ctx.createRadialGradient(pb[0], pb[1], 0, pb[0], pb[1], S*1.75);
+    som.addColorStop(0, "rgba(0,0,0,.85)"); som.addColorStop(.62, "rgba(0,0,0,.55)"); som.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle=som; ctx.beginPath(); ctx.arc(pb[0], pb[1], S*1.75, 0, 6.283); ctx.fill();
+    ctx.restore();
     function anillo(delante){
       ctx.beginPath(); var em=false;
       for(var q=0;q<=96;q++){ var a=q/96*6.283, fr=Math.sin(a+yaw)>0;
