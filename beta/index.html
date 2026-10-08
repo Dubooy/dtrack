@@ -26038,40 +26038,38 @@ function hoyAnillo(v, max, col, centro, etiqueta, sub, act, jump){
   /* una columna de la tarjeta de arriba: icono, título, número y barritas */
   return '<button class="hs-col'+(falta||!max?"":" ok")+'" '+attrs+' style="--sf:var('+hsColor(k)+')" aria-label="'+esc(etiqueta+": "+v+" "+uni+". "+msg)+'">'+
     '<span class="hs-cab"><span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc(k)+'</svg></span><b>'+esc(etiqueta)+'</b></span>'+
-    '<span class="hs-num num">'+v+'<small>/'+(max||0)+'</small></span>'+
-    '<span class="hs-sem" aria-hidden="true">'+sem+'</span></button>';
+    '<span class="hs-num num">'+v+'<small>/'+(max||0)+'</small></span></button>';
 }
 function anilloDetalle(){ return ""; }
 
+/* Estudiar y Parte del día: dos filas de una misma lista, sin números grandes */
+function hsLinea(k, titulo, frase, act, extra, derecha){
+  return '<button class="hs-lin'+(extra||"")+'" data-act="'+act+'" style="--sf:var('+hsColor(k)+')">'+
+    '<span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc(k)+'</svg></span>'+
+    '<span class="hs-lin-t"><b>'+esc(titulo)+'</b><small>'+esc(frase)+'</small></span>'+
+    (derecha||"")+hsChev()+'</button>';
+}
 function tarjetaEstudio(){
-  var a=S.estudio && S.estudio.actual, hoy=today(), min=estudioMinDia(hoy), max=30, semana=0;
-  for(var i=0;i<7;i++){ var m=estudioMinDia(addDays(hoy,-i)); semana+=m; if(m>max) max=m; }
-  var sem=hsSemana(function(d){ return estudioMinDia(d)/max; });
+  var a=S.estudio && S.estudio.actual, hoy=today(), min=estudioMinDia(hoy);
   if(a){
     var rest=Math.max(0, a.fin ? a.fin-Date.now() : (a.resto||0)), mm=Math.floor(rest/60000), ss=Math.floor(rest%60000/1000);
     var fase=a.fase==="descanso"?"Descanso":a.fase==="listo"?"Bloque terminado":(a.fin?"Concentración":"En pausa");
-    return '<button class="hs-fila activo" data-act="x-hoy-estudio" style="--sf:var(--hs-estudio)">'+
-      '<span class="hs-cab"><span class="hs-ic"><svg viewBox="0 0 24 24">'+hsIc("estudio")+'</svg></span><b>'+esc(fase)+'</b><span class="hs-cuando">ahora</span>'+hsChev()+'</span>'+
-      '<span class="hs-cuerpo"><span class="hs-dato"><span class="hs-num num" id="hy-est-t">'+(a.fase==="listo"?"✓":(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss)+'</span>'+
-      '<span class="hs-msg">'+esc(a.nombre||"")+'</span></span><span class="hs-sem" aria-hidden="true">'+sem+'</span></span></button>';
+    return hsLinea("estudio", fase, a.nombre||"Estudiar", "x-hoy-estudio", " activo",
+      '<span class="hs-lin-d num" id="hy-est-t">'+(a.fase==="listo"?"✓":(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss)+'</span>');
   }
-  var h=Math.floor(min/60), r=min%60;
-  var num= !min ? "0" : h ? h+'<small>h</small> '+r : String(min);
-  return hsTarjeta("estudio", "Estudiar", num, "min",
-    semana ? horasTxt(semana)+" esta semana" : "Empieza un pomodoro", sem, 'data-act="x-estudiar"');
+  return hsLinea("estudio", "Estudiar", min ? horasTxt(min)+" hoy" : "Empieza un pomodoro", "x-estudiar");
 }
-
 function tarjetaParte(){
   var hoy=today(), hecho=!!(S.parte && S.parte[hoy]), hh=new Date().getHours(), toca=(hh>=19||hh<4);
-  var sem=hsSemana(function(d){
-    if(!(S.parte && S.parte[d])) return null;
-    var an=(typeof animoDe==="function"&&animoDe(d))||{};
-    return an.v ? (20+an.v*16)/100 : .6;
-  });
-  var racha=0, d2=hecho?hoy:addDays(hoy,-1); while(S.parte && S.parte[d2] && racha<400){ racha++; d2=addDays(d2,-1); }
-  var msg = hecho ? "Hecho · +"+dayXP(hoy,tasksByDay())+" XP hoy" : toca ? "Toca ahora: un minuto para cerrar el día" : "Esta noche, un minuto para repasar el día";
-  return hsTarjeta("parte", "Parte del día", racha, racha===1?"noche seguida":"noches seguidas", msg, sem, 'data-act="parte"', hecho?" ok":toca?" toca":"");
+  var frase = hecho ? "Hecho hoy" : toca ? "Toca ahora: un minuto para cerrar el día" : "Esta noche, un minuto para repasar el día";
+  return hsLinea("parte", "Parte del día", frase, "parte", hecho?" ok":toca?" toca":"");
 }
+
+/* la gráfica de hábitos se despliega al tocar su título */
+document.addEventListener("click", function(e){
+  var t=e.target.closest && e.target.closest("#ideal-graf > div:first-child"); if(!t) return;
+  var c=document.getElementById("card-ideal"); if(c) c.classList.toggle("graf-abierta");
+});
 
 (function(){
   var st=document.createElement("style");
@@ -26091,18 +26089,27 @@ function tarjetaParte(){
 '.hs-col .hs-num small{ margin-left:2px; font-size:13px; }',
 '.hs-col .hs-sem{ height:30px; gap:3px; margin-top:12px; }',
 '.hs-col .hs-sem i{ width:6px; border-radius:2px; }',
-/* Estudiar y Parte del día, una al lado de la otra */
-'#hoy .hy-dos{ display:grid!important; grid-template-columns:1fr 1fr; gap:12px; max-width:none!important; margin-top:12px; }',
-'#hoy .hy-dos > div{ display:flex; min-width:0; }',
-'.hy-dos .hs-fila{ display:flex; flex-direction:column; padding:16px 16px 16px; min-height:0!important; }',
-'.hy-dos .hs-cuando, .hy-dos .hs-chev{ display:none; }',
-'.hy-dos .hs-cab b{ font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
-'.hy-dos .hs-cuerpo{ flex:1; flex-direction:column; align-items:stretch; justify-content:space-between; gap:12px; margin-top:16px; }',
-'.hy-dos .hs-num{ font-size:30px; }',
-'.hy-dos .hs-num small{ display:block; margin:6px 0 0; font-size:12.5px; }',
-'.hy-dos .hs-msg{ white-space:normal; line-height:1.35; margin-top:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; }',
-'.hy-dos .hs-sem{ height:34px; justify-content:space-between; }',
-'.hy-dos .hs-sem i{ width:9px; }',
+/* Estudiar y Parte del día: una lista de dos filas */
+'#hoy .hy-dos{ display:block!important; max-width:none!important; margin-top:12px; padding:0 16px; border-radius:22px; background:var(--tarjeta, var(--glass-bg)); }',
+'#hoy .hy-dos > div + div{ box-shadow:inset 0 1px 0 var(--hairline); }',
+'.hs-lin{ display:flex; align-items:center; gap:12px; width:100%; text-align:left; padding:14px 0; -webkit-tap-highlight-color:transparent; }',
+'.hs-lin:active{ opacity:.6; }',
+'.hs-lin .hs-ic{ color:var(--sf); width:22px; height:22px; }',
+'.hs-lin .hs-ic svg{ width:21px; height:21px; }',
+'.hs-lin-t{ flex:1; min-width:0; display:flex; flex-direction:column; }',
+'.hs-lin-t b{ font-size:16px; font-weight:600; color:var(--t1); }',
+'.hs-lin-t small{ font-size:13px; color:var(--t3); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
+'.hs-lin.toca .hs-lin-t small, .hs-lin.ok .hs-lin-t small{ color:var(--sf); font-weight:600; }',
+'.hs-lin-d{ font-family:Unbounded,sans-serif; font-size:17px; font-weight:700; color:var(--sf); }',
+/* gráfica de hábitos plegada hasta que la tocas */
+'#ideal-graf > div:first-child{ cursor:pointer; margin-bottom:0!important; align-items:center!important; }',
+'#ideal-graf > div:first-child > span:first-child{ font-size:14px!important; font-weight:600; color:var(--hs-habitos)!important; }',
+'#ideal-graf > div:first-child::after{ content:""; width:9px; height:9px; margin-left:8px; border:solid var(--t3); border-width:0 2px 2px 0; transform:rotate(45deg) translateY(-3px); transition:transform .25s; }',
+'#card-ideal.graf-abierta #ideal-graf > div:first-child::after{ transform:rotate(-135deg) translateY(-3px); }',
+'#card-ideal.graf-abierta #ideal-graf > div:first-child{ margin-bottom:8px!important; }',
+'#card-ideal:not(.graf-abierta) #ideal-graf > *:not(:first-child){ display:none!important; }',
+/* sin bordes en ninguna ventana de la app */
+'.glass::before{ display:none!important; }',
 '.hs-fila{ --sf:var(--accent); display:block; width:100%; text-align:left; padding:16px 18px 18px; border-radius:24px; cursor:pointer;',
 '  background:var(--tarjeta, var(--glass-bg)); box-shadow:none;',
 '  -webkit-tap-highlight-color:transparent; transition:transform .25s var(--spring); }',
@@ -26127,7 +26134,7 @@ function tarjetaParte(){
 /* el resto de Hoy: títulos con icono y color, sin degradados */
 '#card-ideal, #hy-xp, #hy-evo .he-main, #lb-hab .lb-desc{ background:var(--tarjeta, var(--glass-bg))!important; box-shadow:none!important; border:0!important; border-radius:22px!important; }',
 '#hoy .hs-fila, #card-ideal, #hy-xp, #hy-evo, #hy-evo .he-main{ border:0!important; outline:0!important; }',
-'#v-resumen{ --tarjeta-borde:transparent; }',
+
 '#card-ideal h2{ display:flex; align-items:center; gap:7px; font-family:inherit!important; font-size:15.5px!important; font-weight:600!important; color:var(--hs-habitos); }',
 '#card-ideal h2::before{ content:""; width:19px; height:19px; background:currentColor;',
 '  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\'%3E%3Cpath fill-rule=\'evenodd\' d=\'M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20zm-1.3 13.7 6-6-1.4-1.4-4.6 4.6-2.4-2.4-1.4 1.4z\'/%3E%3C/svg%3E") center/contain no-repeat;',
@@ -26150,6 +26157,7 @@ function tarjetaParte(){
 '#hy-evo .he-t{ font-family:Unbounded,sans-serif!important; font-size:24px!important; letter-spacing:-.04em; }',
 '#hy-xp .hy-xp-hoy b{ font-family:Unbounded,sans-serif; letter-spacing:-.04em; color:var(--hs-xp); }'
   ].join("\n"); document.head.appendChild(st);
+  document.documentElement.style.setProperty("--tarjeta-borde", "transparent");
 })();
 })();
 </script>
