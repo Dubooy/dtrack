@@ -36,7 +36,7 @@ function hoyNuevo(st){
 
   /* arriba, la fecha en grande; la racha, en la línea pequeña */
   var hd=document.getElementById("hero-date");
-  if(hd) hd.textContent=mes+(racha ? " · racha de "+racha+(racha===1?" día":" días") : "");
+  if(hd) hd.innerHTML=mes+(racha ? ' · <span class="hn-racha">racha de '+racha+(racha===1?" día":" días")+'</span>' : "");
   var hg=document.getElementById("hero-greet");
   if(hg) hg.innerHTML=dia+" "+dd.getDate()+'<span class="hn-punto">.</span>';
 
@@ -55,10 +55,10 @@ function hoyNuevo(st){
 
   box.innerHTML=
     '<div class="hn-fila3">'+
-      '<button data-act="x-hn-ir" data-k="retos"><small>Retos</small><b class="num">'+hechos.length+'<span>/'+retos.length+'</span></b></button>'+
-      '<button data-act="x-hn-ir" data-k="habitos"><small>Hábitos</small><b class="num">'+cks.length+'<span>/'+habs.length+'</span></b></button>'+
-      '<button data-jump="vital"><small>Cuerpo</small><b class="num">'+sa+'<span>/4</span></b></button>'+
-    '</div>'+
+      '<button data-act="x-hn-ir" data-k="retos"><small>Retos</small><b class="num'+(retos.length&&hechos.length>=retos.length?" lleno":"")+'">'+hechos.length+'<span>/'+retos.length+'</span></b></button>'+
+      '<button data-act="x-hn-ir" data-k="habitos"><small>Hábitos</small><b class="num'+(habs.length&&cks.length>=habs.length?" lleno":"")+'">'+cks.length+'<span>/'+habs.length+'</span></b></button>'+
+      '<button data-jump="vital"><small>Cuerpo</small><b class="num'+(sa>=4?" lleno":"")+'">'+sa+'<span>/4</span></b></button>'+
+    '</div>'+hnGuia()+
     (retos.length ?
     '<div class="hn-sec" id="hn-retos"><h2>Retos de hoy</h2><span>+15 XP c/u</span></div>'+
     hnLista(retos, function(c){ return hechos.indexOf(c.id)>=0; }, "ch", 0) : '')+
@@ -82,6 +82,50 @@ function hoyNuevo(st){
     yo.innerHTML=hnAvatar();
   }
   requestAnimationFrame(hnAlinea);
+  hnFlip(box);
+}
+
+/* ── al marcar: el check se rellena al momento y, al repintar, cada fila se desliza
+   desde donde estaba hasta su sitio nuevo (lo hecho baja al final) ── */
+var hnAntes=null;
+document.addEventListener("click", function(e){
+  var r=e.target.closest && e.target.closest("#hoy .hn-r"); if(!r) return;
+  hnAntes={};
+  document.querySelectorAll("#hoy .hn-r").forEach(function(x){ hnAntes[x.dataset.act+x.dataset.id]=x.getBoundingClientRect().top; });
+  r.classList.toggle("ok");
+  if(r.classList.contains("ok")){ r.classList.remove("hn-pop"); void r.offsetWidth; r.classList.add("hn-pop"); }
+}, true);
+function hnFlip(box){
+  var antes=hnAntes; hnAntes=null; if(!antes) return;
+  if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  box.querySelectorAll(".hn-r").forEach(function(x){
+    var y0=antes[x.dataset.act+x.dataset.id]; if(y0==null) return;
+    var dy=y0-x.getBoundingClientRect().top; if(Math.abs(dy)<2) return;
+    x.style.transition="none"; x.style.transform="translateY("+dy+"px)";
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){
+      x.style.transition="transform .5s cubic-bezier(.3,1.25,.5,1)"; x.style.transform="";
+      setTimeout(function(){ x.style.transition=""; }, 520);
+    }); });
+  });
+}
+
+/* ── «Empieza aquí»: para quien aún no ha marcado nada; se va sola al completar los tres pasos ── */
+function hnGuia(){
+  if(S.hnGuiaFuera) return "";
+  var algoMarcado=Object.keys(S.chDone||{}).some(function(k){ return (S.chDone[k]||[]).length; }) || Object.keys(S.checks||{}).some(function(k){ return (S.checks[k]||[]).length; });
+  var habitos=!!S.hnGuiaHab || Object.keys(S.checks||{}).some(function(k){ return (S.checks[k]||[]).length; });
+  var grupo=!!(typeof GRUPO!=="undefined" && GRUPO && GRUPO.real);
+  var hechos=(algoMarcado?1:0)+(habitos?1:0)+(grupo?1:0);
+  if(hechos>=3 || (algoMarcado && Object.keys(S.chDone||{}).length>3)) return "";
+  function paso(ok, n, t, s, attr){
+    return '<button class="hn-g-p'+(ok?" ok":"")+'" '+attr+'><i class="num">'+(ok?'<svg viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></svg>':n)+'</i>'+
+      '<span><b>'+t+'</b><small>'+s+'</small></span></button>';
+  }
+  return '<div class="hn-guia"><div class="hn-g-cab"><p>Empieza aquí</p><button data-act="x-hn-guia-fuera" aria-label="Ocultar">Ocultar</button></div>'+
+    paso(algoMarcado, 1, "Marca tu primer reto", "Tócalo en la lista de abajo cuando lo hagas", 'data-act="x-hn-ir" data-k="retos"')+
+    paso(habitos, 2, "Elige tus hábitos", "Los que quieres cumplir cada día", 'data-act="x-hn-guia-hab"')+
+    paso(grupo, 3, "Únete a un grupo", "Sube la montaña con tus amigos", 'data-jump="social"')+
+    '<div class="hn-g-bar"><i style="width:'+Math.round(hechos/3*100)+'%"></i></div></div>';
 }
 /* en cada pestaña, tu foto a la altura de PEAK. */
 function hnAlinea(){
@@ -126,6 +170,8 @@ function hnMenuCierra(){
 function hoyNuevoAccion(a, el){
   if(a==="x-hn-yo"){ hnMenu(); return true; }
   if(a==="x-hn-mas"){ hnTodos=!hnTodos; render(); return true; }
+  if(a==="x-hn-guia-fuera"){ S.hnGuiaFuera=1; save(); render(); return true; }
+  if(a==="x-hn-guia-hab"){ S.hnGuiaHab=1; save(); if(typeof sheetIdeal==="function") sheetIdeal(null); return true; }
   if(a==="x-pn-u"){ abrirPerfil(el.dataset.u); return true; }   /* tu grupo, en Progreso (57) */
   if(typeof cnAccion==="function" && cnAccion(a, el)) return true;   /* Cuerpo (58) */
   if(a==="x-hn-ir"){ var s=document.getElementById(el.dataset.k==="retos"?"hn-retos":"hn-habitos"); if(s) s.scrollIntoView({behavior:"smooth", block:"start"}); return true; }
@@ -185,7 +231,34 @@ go=function(v){ var r=_goHn.apply(this, arguments); requestAnimationFrame(hnAlin
 '.hn-r i{ font-style:normal; font-family:var(--f-titulo); font-weight:700; font-size:13px; color:var(--t3); }',
 '.hn-p{ display:block; font-size:16px; font-weight:500; line-height:1.3; color:var(--t1); }',
 '.hn-r small{ display:block; font-size:13px; color:var(--t2); margin-top:2px; }',
-'.hn-r.ok .hn-p{ color:var(--t3); text-decoration:line-through; text-decoration-thickness:1.5px; }',
+'.hn-p{ display:inline; background:linear-gradient(currentColor, currentColor) no-repeat 0 58% / 0 1.5px; -webkit-box-decoration-break:clone; box-decoration-break:clone;',
+'  transition:color .3s, background-size .35s cubic-bezier(.4,0,.2,1); }',
+'.hn-r.ok .hn-p{ color:var(--t3); background-size:100% 1.5px; }',
+'.hn-r.hn-pop .hn-ck{ animation:hnPop .45s cubic-bezier(.3,1.6,.5,1); }',
+'.hn-r.hn-pop .hn-ck::after{ animation:hnTick .3s ease-out .05s both; }',
+'@keyframes hnPop{ 0%{ transform:scale(.6); } 60%{ transform:scale(1.15); } 100%{ transform:none; } }',
+'@keyframes hnTick{ from{ opacity:0; transform:rotate(45deg) scale(.4); } to{ opacity:1; transform:rotate(45deg); } }',
+/* la guía */
+'.hn-guia{ margin-top:24px; background:var(--tarjeta); border-radius:22px; padding:16px; }',
+'.hn-g-cab{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }',
+'.hn-g-cab p{ font-family:var(--f-titulo); font-weight:700; font-size:17px; letter-spacing:-.03em; }',
+'.hn-g-cab button{ font-size:13px; color:var(--t3); font-weight:600; }',
+'.hn-g-p{ width:100%; display:flex; align-items:center; gap:12px; padding:10px 0; text-align:left; color:var(--t1); }',
+'.hn-g-p + .hn-g-p{ border-top:1px solid var(--hairline); }',
+'.hn-g-p i{ width:30px; height:30px; flex:none; border-radius:50%; border:1.5px solid var(--t3); display:grid; place-items:center; font-style:normal; font-family:var(--f-titulo); font-weight:700; font-size:12px; color:var(--t2); }',
+'.hn-g-p.ok i{ background:var(--hn-ac); border-color:var(--hn-ac); color:var(--bg); }',
+'.hn-g-p i svg{ width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }',
+'.hn-g-p b{ display:block; font-weight:600; font-size:15px; } .hn-g-p small{ display:block; font-size:12.5px; color:var(--t2); margin-top:1px; }',
+'.hn-g-p.ok b{ color:var(--t3); text-decoration:line-through; }',
+'.hn-g-bar{ height:4px; border-radius:2px; background:var(--hairline); margin-top:8px; overflow:hidden; }',
+'.hn-g-bar i{ display:block; height:100%; background:var(--hn-ac); border-radius:2px; transition:width .5s; }',
+/* el verde, con brillo en oscuro */
+'.hn-fila3 b.lleno{ color:var(--hn-ac); }',
+'.hn-racha{ color:var(--hn-ac); }',
+'html.dark .hn-fila3 b.lleno, html.dark .hn-racha, html.dark .hn-r.ok i, html.dark .cn-ok, html.dark .pn-am.me .pn-pos{ text-shadow:0 0 14px rgba(59,224,139,.55); }',
+'html.dark .hn-sem .hoy i, html.dark .pn-xp u.ac, html.dark .hn-g-bar i{ box-shadow:0 0 14px rgba(59,224,139,.55), 0 0 2px rgba(59,224,139,.8); }',
+'html.dark .hn-sem .hoy em{ color:var(--hn-ac); text-shadow:0 0 10px rgba(59,224,139,.5); }',
+'html.dark .pn-hecho{ filter:drop-shadow(0 0 4px rgba(59,224,139,.7)); }',
 '.hn-r.ok i{ color:var(--hn-ac); }',
 '.hn-ck{ width:26px; height:26px; border-radius:50%; border:1.5px solid var(--t3); position:relative; transition:background .2s, border-color .2s; }',
 '.hn-r.ok .hn-ck{ background:var(--t1); border-color:var(--t1); }',

@@ -5,13 +5,15 @@
    Ejercicio: tarjeta de tinta «Entreno de hoy» con el tipo (Gym, Correr, Deporte,
    Otro), la semana con un check por día y el botón de registrar. */
 
+/* iconos rellenos, como los de la barra (el corredor es el mismo de Cuerpo) */
 var CN_TIPOS=[
-  { n:"Gimnasio", t:"Gym", d:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>' },
-  { n:"Correr", t:"Correr", d:'<circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v4M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>' },
-  { n:"Deporte", t:"Deporte", d:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6c3 2 3 10 0 12M18 6c-3 2-3 10 0 12"/>' },
-  { n:"Otro", t:"Otro", d:'<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>' }
+  { n:"Gimnasio", t:"Gym", d:'<rect x="1.4" y="9" width="3" height="6" rx="1.2"/><rect x="4.6" y="5.8" width="3.8" height="12.4" rx="1.5"/><rect x="15.6" y="5.8" width="3.8" height="12.4" rx="1.5"/><rect x="19.6" y="9" width="3" height="6" rx="1.2"/><rect x="8" y="10.7" width="8" height="2.6" rx=".6"/>' },
+  { n:"Correr", t:"Correr", d:'<circle cx="14.2" cy="4.2" r="2.5"/><path fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" d="M13 8.4l-2.2 5.4M7.6 10.2l5.4-1.8 2.8 2.8 2.8.4M10.8 13.8l3.6 2.4-1 4.6M10.8 13.8l-2 3.8-3.6.8"/>' },
+  { n:"Deporte", t:"Deporte", d:'<circle cx="12" cy="12" r="9.6"/><path class="cn-c" fill="none" stroke-width="1.7" stroke-linecap="round" d="M12 2.6v18.8M2.6 12h18.8M5.6 5.3c3.1 3.5 3.1 9.9 0 13.4M18.4 5.3c-3.1 3.5-3.1 9.9 0 13.4"/>' },
+  { n:"Otro", t:"Otro", d:'<circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="19" cy="12" r="2.4"/>' }
 ];
-function cnIc(d, tam){ return '<svg viewBox="0 0 24 24" width="'+(tam||20)+'" height="'+(tam||20)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+var CN_CHECK='<path fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.2 4.2L19 7"/>';
+function cnIc(d, tam){ return '<svg viewBox="0 0 24 24" width="'+(tam||20)+'" height="'+(tam||20)+'" fill="currentColor">'+d+'</svg>'; }
 function cnTipoDe(d){
   var l=(S.deporteDia && S.deporteDia[d]) || [];
   for(var i=0;i<CN_TIPOS.length;i++) if(l.indexOf(CN_TIPOS[i].n)>=0) return CN_TIPOS[i];
@@ -33,7 +35,7 @@ function cnPinta(){
   if(ult){ var ut=cnTipoDe(ult), dia=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][new Date(ult+"T00:00:00").getDay()];
     ultTxt="Último: "+(ut?ut.t.toLowerCase():"entreno")+" · "+(ult===addDays(hoy,-1)?"ayer":dia); }
   else ultTxt="Elige qué haces y suma +20 XP";
-  var big = hecho ? (tipo ? tipo.t : "Hecho")+'<span class="cn-ok">'+cnIc('<path d="M5 12.5l4.2 4.2L19 7"/>', 26)+'</span>'
+  var big = hecho ? (tipo ? tipo.t : "Hecho")+'<span class="cn-ok">'+cnIc(CN_CHECK, 26)+'</span>'
           : esHoy ? "¿Qué toca hoy?" : "¿Qué hiciste?";
   var tipos=CN_TIPOS.map(function(T){
     var on=hecho && tipo && (tipo.n===T.n || (T.n==="Otro" && tipo.otro));
@@ -42,13 +44,13 @@ function cnPinta(){
   var l=lunesDe(hoy), dias="";
   for(var k=0;k<7;k++){
     var d=addDays(l,k), on=wentGym(d), fut=d>hoy;
-    dias+='<button class="'+(on?"ok":"")+(d===t?" hoy":"")+'" data-act="day-go" data-d="'+d+'"'+(fut?" disabled":"")+'><i>'+(on?cnIc('<path d="M5 12.5l4.2 4.2L19 7"/>', 16):"")+'</i>'+"LMXJVSD".charAt(k)+'</button>';
+    dias+='<button class="'+(on?"ok":"")+(d===t?" hoy":"")+'" data-act="day-go" data-d="'+d+'"'+(fut?" disabled":"")+'><i>'+(on?cnIc(CN_CHECK, 16):"")+'</i>'+"LMXJVSD".charAt(k)+'</button>';
   }
   var html=
     '<div class="hn-sec cn-sec"><h2>Ejercicio</h2><span>'+(gs?"Racha de "+gs:"Sin racha aún")+'</span></div>'+
     '<div class="cn-entreno"><div class="cn-ar"><div><p class="cn-eti">'+(esHoy?"Entreno de hoy":"Entreno de ese día")+'</p>'+
       '<p class="cn-big">'+big+'</p><small>'+esc(hecho?"+20 XP sumados. Toca otro tipo para cambiarlo":ultTxt)+'</small></div>'+
-      '<span class="cn-ico">'+cnIc(CN_TIPOS[0].d, 28)+'</span></div>'+
+      '<span class="cn-ico">'+cnIc(((tipo && !tipo.otro) ? tipo : CN_TIPOS[0]).d, 28)+'</span></div>'+
       '<div class="cn-tipos">'+tipos+'</div></div>'+
     '<div class="cn-dias">'+dias+'</div>'+
     '<button class="cn-btn'+(hecho?" si":"")+'" data-act="gym" data-day="'+t+'">'+
@@ -132,6 +134,8 @@ rVital=function(){ var r=_cnVital.apply(this, arguments); try{ cnPinta(); }catch
 '  font-size:12px; font-weight:600; color:var(--bg); transition:transform .2s; }',
 '.cn-tipos button:active{ transform:scale(.94); }',
 '.cn-tipos button.on{ background:var(--bg); color:var(--t1); border-color:var(--bg); }',
+'.cn-c{ stroke:var(--t1); } .cn-tipos button.on .cn-c{ stroke:var(--bg); } .cn-ico .cn-c{ stroke:color-mix(in srgb, var(--bg) 12%, var(--t1)); }',
+'html.dark .cn-ok svg{ filter:drop-shadow(0 0 6px rgba(59,224,139,.7)); }',
 '.cn-dias{ display:flex; gap:6px; margin-top:14px; }',
 '.cn-dias button{ flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--t3); }',
 '.cn-dias i{ display:grid; place-items:center; height:40px; border-radius:12px; border:1.5px solid var(--hairline); margin-bottom:6px; color:var(--bg); }',
