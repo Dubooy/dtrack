@@ -9682,6 +9682,7 @@ function pintaHoy(st){
   /* la checklist de siempre, justo debajo */
   var ci=document.getElementById("card-ideal");
   if(ci && ci.previousElementSibling!==box) box.parentNode.insertBefore(ci, box.nextSibling);
+  if(typeof hoyNuevo==="function") hoyNuevo(st);   /* diseño nuevo (56) */
   hoyAjusta();
 }
 /* lo de arriba (saludo, anillos y tarjetas) llena la pantalla hasta la barra;
@@ -12022,6 +12023,7 @@ setInterval(function(){
 function rumboAccion(a, el){
   if(onbAccion(a, el)) return true;
   if(rumboAccion2(a, el)) return true;
+  if(typeof hoyNuevoAccion==="function" && hoyNuevoAccion(a, el)) return true;
   if(typeof disenoAccion==="function" && disenoAccion(a, el)) return true;
   if(typeof bucleAccion==="function" && bucleAccion(a, el)) return true;
   if(typeof grupoAccion==="function" && grupoAccion(a, el)) return true;
@@ -26425,6 +26427,608 @@ function uiCuenta(){
       }, 260);
     } else card.style.translate="";
   });
+})();
+/* ════════ diseño nuevo · la base (oct 2026) ════════
+   Maquetas y reglas en diseno/ui-peak/ (LEEME.md). Aquí solo la base común:
+   · letras: Instrument Sans (500 normal, 600 para destacar) en el texto y
+     Unbounded en títulos de pestaña, títulos de sección y números grandes
+   · colores de Claro y Oscuro: crema y tinta más puros, un solo acento
+   Los temas con color propio (Arena, Porcelana…, degradados) no se tocan. */
+(function(){
+  if(!document.querySelector('link[href*="family=Instrument+Sans"]')){
+    var fi=document.createElement("link"); fi.rel="stylesheet";
+    fi.href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap";
+    document.head.appendChild(fi);
+  }
+  var P="html:not(.sage):not(.neo):not(.arena):not(.porcelana):not(.medianoche):not(.oro):not(.gr)", D=P+".dark";
+  var st=document.createElement("style"); st.id="diseno-base-css"; st.textContent=[
+/* letras */
+':root{ --f-texto:"Instrument Sans",-apple-system,BlinkMacSystemFont,"SF Pro Text",Inter,Roboto,sans-serif; }',
+'body{ font-weight:500; letter-spacing:-.005em; }',
+'b, strong, .font-semibold, .font-bold{ font-weight:600; }',
+'html #lienzo .view h2.display, html #lienzo #ch-title, html #lienzo #metas-mes .mm-mes, html #lienzo #hy-evo .he-t{',
+'  font-family:var(--f-titulo) !important; font-weight:700 !important; letter-spacing:-.03em !important; }',
+'html #lienzo .view h3, html .sheet-card h3{ font-family:var(--f-texto) !important; font-weight:600 !important; }',
+/* colores */
+P+'{ --bg:#F1ECE1; --tarjeta:#FBF8F1; --t1:#141414; --t2:rgba(20,20,20,.6); --t3:rgba(20,20,20,.4);',
+'  --hairline:rgba(20,20,20,.12); --tarjeta-borde:rgba(20,20,20,.07); }',
+D+'{ --bg:#0A0A0A; --tarjeta:#161513; --t1:#F3EEE3; --t2:rgba(243,238,227,.62); --t3:rgba(243,238,227,.4);',
+'  --hairline:rgba(243,238,227,.12); --tarjeta-borde:rgba(243,238,227,.08); }',
+P+' body{ background:var(--bg); }',
+P+' .canvas-bg{ display:none; }'
+  ].join("\n");
+  document.head.appendChild(st);
+})();
+/* ════════ diseño nuevo · Hoy (oct 2026) ════════
+   Maqueta: diseno/ui-peak/hoy-claro.html. pintaHoy (14) llama a hoyNuevo al final:
+   la racha en grande (DÍA N.), Retos · Hábitos · Cuerpo en una fila, los retos y
+   los hábitos en listas numeradas (lo hecho, tachado y al final), Parte del día
+   y Estudiar, y tu semana en barras.
+   Arriba a la derecha va tu foto: abre Tu perfil, Ajustes y Modo.
+   Solo funciones: Hoy se pinta antes de que esta pieza llegue a ejecutarse. */
+
+function hnFila(n, txt, sub, hecho, act, id){
+  return '<button class="hn-r'+(hecho?' ok':'')+'" data-act="'+act+'" data-id="'+id+'" data-day="'+today()+'">'+
+    '<i class="num">'+(n<10?'0':'')+n+'</i><span class="hn-tx"><span class="hn-p">'+esc(txt)+'</span><small>'+sub+'</small></span>'+
+    '<b class="hn-ck" aria-hidden="true"></b></button>';
+}
+/* las tareas hechas bajan al final; el número es el puesto en la lista */
+function hnLista(items, hechoDe, act, xp){
+  var pend=items.filter(function(x){ return !hechoDe(x); }), ok=items.filter(hechoDe);
+  return pend.concat(ok).map(function(x,i){ return hnFila(i+1, x.text, "+"+xp+" XP", hechoDe(x), act, x.id); }).join("");
+}
+function hnTramos(v, max){
+  var s=""; for(var i=0;i<max;i++) s+='<u'+(i<v?' class="on"':'')+'></u>';
+  return '<div class="hn-tot" aria-hidden="true">'+s+'</div>';
+}
+function hnAvatar(){
+  var p=(typeof perfil!=="undefined" && perfil) || {}, nom=p.usuario || (S.profile && S.profile.name) || "";
+  return p.avatar ? '<img src="'+esc(p.avatar)+'" alt="">' : '<span>'+esc((nom||"·").charAt(0).toUpperCase())+'</span>';
+}
+
+function hoyNuevo(st){
+  var box=document.getElementById("hoy"); if(!box) return;
+  document.documentElement.classList.add("hoy-n");
+  var t=today(), retos=todaysChallenges(t), hechos=chOf(t), habs=ordenIdeal(idealActivos()), cks=checksOf(t), sa=saludHoy(t);
+  var racha=(st && st.streak)||0, dd=new Date(t+"T00:00:00");
+  var dia=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"][dd.getDay()];
+
+  var hd=document.getElementById("hero-date");
+  if(hd) hd.textContent=dia+" "+dd.getDate()+" · "+(racha?"Racha":"Hoy");
+  var hg=document.getElementById("hero-greet");
+  if(hg) hg.innerHTML=(racha?"Día "+racha:"Hoy")+'<span class="hn-punto">.</span>';
+
+  var sem=resumenSemana(lunesDe(t)), tope=Math.max.apply(null, sem.porDia.concat([1]));
+  var barras=sem.dias.map(function(d,i){
+    var x=sem.porDia[i];
+    return '<div class="'+(d===t?"hoy":x>0?"on":"")+'"><i style="height:'+(x>0?Math.max(10, Math.round(x/tope*64)):6)+'px"></i>'+"LMXJVSD".charAt(i)+'</div>';
+  }).join("");
+
+  var est=S.estudio && S.estudio.actual, estSub, estAct="x-estudiar";
+  if(est){
+    var rest=Math.max(0, est.fin ? est.fin-Date.now() : (est.resto||0)), mm=Math.floor(rest/60000), ss=Math.floor(rest%60000/1000);
+    estSub='<b class="num" id="hy-est-t">'+(est.fase==="listo"?"✓":(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss)+'</b>'; estAct="x-hoy-estudio";
+  } else { var min=estudioMinDia(t); estSub=min ? esc(horasTxt(min))+" hoy" : "Pomodoro · 25 min"; }
+  var parteHecho=!!(S.parte && S.parte[t]), hh=new Date().getHours();
+
+  box.innerHTML=
+    '<div class="hn-fila3">'+
+      '<button data-act="x-hn-ir" data-k="retos"><small>Retos</small><b class="num">'+hechos.length+'<span>/'+retos.length+'</span></b></button>'+
+      '<button data-act="x-hn-ir" data-k="habitos"><small>Hábitos</small><b class="num">'+cks.length+'<span>/'+habs.length+'</span></b></button>'+
+      '<button data-jump="vital"><small>Cuerpo</small><b class="num">'+sa+'<span>/4</span></b></button>'+
+    '</div>'+
+    (retos.length ?
+    '<div class="hn-sec" id="hn-retos"><h2>Retos de hoy</h2><span>'+hechos.length+' de '+retos.length+'</span></div>'+
+    hnTramos(hechos.length, retos.length)+
+    hnLista(retos, function(c){ return hechos.indexOf(c.id)>=0; }, "ch", 15) : '')+
+    '<div class="hn-sec" id="hn-habitos"><h2>Hábitos</h2><button data-act="edit-ideal">Editar</button></div>'+
+    (habs.length ? hnTramos(cks.length, habs.length)+hnLista(habs, function(it){ return cks.indexOf(it.id)>=0; }, "check", 4)
+      : '<button class="hn-vacio" data-act="edit-ideal">Añade los hábitos que quieres cumplir cada día</button>')+
+    '<div class="hn-dos">'+
+      '<button class="hn-card neg'+(parteHecho?" ok":"")+'" data-act="parte"><span class="hn-ic"><svg viewBox="0 0 24 24"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg></span>'+
+        '<span><b>Parte del día</b><small>'+(parteHecho?"Hecho. Buenas noches":(hh>=19||hh<4)?"Ahora · 1 min":"Esta noche · 1 min")+'</small></span></button>'+
+      '<button class="hn-card" data-act="'+estAct+'"><span class="hn-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>'+
+        '<span><b>'+(est?"Estudiando":"Estudiar")+'</b><small>'+estSub+'</small></span></button>'+
+    '</div>'+
+    '<div class="hn-sec"><h2>Tu semana</h2><span class="num">+'+sem.xp+' XP</span></div>'+
+    '<div class="hn-sem">'+barras+'</div>';
+
+  /* tu foto arriba a la derecha, en lugar de tema y ajustes */
+  var af=document.getElementById("acciones-flotantes");
+  if(af){
+    var yo=af.querySelector(".hn-yo");
+    if(!yo){ yo=document.createElement("button"); yo.className="hn-yo"; yo.setAttribute("data-act","x-hn-yo"); yo.setAttribute("aria-label","Tu perfil, ajustes y modo"); af.appendChild(yo); }
+    yo.innerHTML=hnAvatar();
+  }
+  requestAnimationFrame(hnAlinea);
+}
+/* en Hoy, Objetivos y Cuerpo, tu foto a la altura de PEAK.; en las demás pestañas, arriba */
+function hnAlinea(){
+  var af=document.getElementById("acciones-flotantes"); if(!af) return;
+  var hd = view==="resumen" ? document.getElementById("hero-date")
+         : (view==="retos" && document.documentElement.classList.contains("obj-n")) ? document.querySelector("#v-retos p.eyebrow")
+         : (view==="vital" && document.documentElement.classList.contains("cu-n")) ? document.querySelector("#v-vital p.eyebrow") : null;
+  if(!hd || !af.offsetParent){ af.style.top=""; return; }
+  /* con offsetTop y no con la posición en pantalla: las entradas animadas aún se mueven */
+  var y=0, e=hd, op=af.offsetParent;
+  while(e && e!==op){ y+=e.offsetTop; e=e.offsetParent; }
+  if(e===op) af.style.top=y+"px";
+}
+
+/* el menú de tu foto */
+function hnMenu(){
+  var m=document.getElementById("hn-menu");
+  if(m){ hnMenuCierra(); return; }
+  var oscuro=document.documentElement.classList.contains("dark"), p=(typeof perfil!=="undefined" && perfil) || {};
+  var nom=p.usuario || (S.profile && S.profile.name) || "Tú";
+  var ic=function(d){ return '<svg viewBox="0 0 24 24">'+d+'</svg>'; };
+  m=document.createElement("div"); m.id="hn-menu";
+  m.innerHTML='<div class="hn-velo"></div><div class="hn-caja" role="menu">'+
+    '<button class="hn-yo2" data-act="x-perfil"><span class="hn-yo">'+hnAvatar()+'</span><span><b>'+esc(nom)+'</b><small>Ver tu perfil</small></span></button>'+
+    '<button class="hn-op" data-act="x-perfil">'+ic('<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>')+'Tu perfil</button>'+
+    '<button class="hn-op" data-act="open-settings">'+ic('<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>')+'Ajustes</button>'+
+    '<div class="hn-op">'+ic('<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>')+'Modo'+
+      '<span class="hn-modo"><button data-act="x-hn-modo" data-th="light"'+(oscuro?'':' class="on"')+'>Claro</button><button data-act="x-hn-modo" data-th="dark"'+(oscuro?' class="on"':'')+'>Oscuro</button></span></div>'+
+    '<button class="hn-op hn-mas" data-act="x-hn-temas">'+ic('<circle cx="8" cy="9" r="2"/><circle cx="15" cy="7" r="2"/><circle cx="17" cy="14" r="2"/><path d="M12 21a9 9 0 1 1 9-9c0 2-1.5 3-3.5 3H16a2 2 0 0 0-1.5 3.3A2 2 0 0 1 12 21z"/>')+'Más temas</button>'+
+  '</div>';
+  document.body.appendChild(m);
+  requestAnimationFrame(function(){ m.classList.add("ve"); });
+  /* cualquier opción cierra el menú; la acción la hace el manejador de siempre */
+  m.addEventListener("click", function(ev){
+    if(ev.target.classList.contains("hn-velo")){ hnMenuCierra(); return; }
+    var b=ev.target.closest("[data-act]");
+    if(b && b.dataset.act!=="x-hn-modo" && b.dataset.act!=="x-hn-temas") setTimeout(hnMenuCierra, 0);
+  });
+}
+function hnMenuCierra(){
+  var m=document.getElementById("hn-menu"); if(!m) return;
+  m.classList.remove("ve"); setTimeout(function(){ if(m.parentNode) m.parentNode.removeChild(m); }, 220);
+}
+function hoyNuevoAccion(a, el){
+  if(a==="x-hn-yo"){ hnMenu(); return true; }
+  if(a==="x-pn-u"){ abrirPerfil(el.dataset.u); return true; }   /* tu grupo, en Progreso (57) */
+  if(typeof cnAccion==="function" && cnAccion(a, el)) return true;   /* Cuerpo (58) */
+  if(a==="x-hn-ir"){ var s=document.getElementById(el.dataset.k==="retos"?"hn-retos":"hn-habitos"); if(s) s.scrollIntoView({behavior:"smooth", block:"start"}); return true; }
+  if(a==="x-hn-modo"){
+    var r=el.getBoundingClientRect(), th=el.dataset.th;
+    el.parentNode.querySelectorAll("button").forEach(function(b){ b.classList.toggle("on", b===el); });
+    setTimeout(hnMenuCierra, 120);
+    setTimeout(function(){ temaConTransicion(th, r.left+r.width/2, r.top+r.height/2); }, 300);
+    return true;
+  }
+  if(a==="x-hn-temas"){
+    var yo=document.querySelector("#acciones-flotantes .hn-yo");
+    hnMenuCierra(); setTimeout(function(){ temaPicker(yo||el); }, 240); return true;
+  }
+  return false;
+}
+
+var _goHn=go;
+go=function(v){ var r=_goHn.apply(this, arguments); requestAnimationFrame(hnAlinea); return r; };
+
+(function(){
+  var st=document.createElement("style"); st.id="diseno-hoy-css"; st.textContent=[
+':root{ --hn-ac:#0E8A6E; } html.dark{ --hn-ac:#3BE08B; }',
+/* lo que ya no va en Hoy */
+'html.hoy-n #v-resumen .hy-racha, html.hoy-n #v-resumen #card-ring, html.hoy-n #v-resumen #card-ideal, html.hoy-n #v-resumen #hy-xp,',
+'html.hoy-n #v-resumen div:has(> #parte-btn), html.hoy-n #acciones-flotantes > .icon-btn{ display:none !important; }',
+'html.hoy-n #hoy{ min-height:0 !important; }',
+/* arriba: PEAK. y la racha en grande */
+'html.hoy-n #hero-date{ font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--t3); margin:0; }',
+'html.hoy-n #hero-date::before{ content:"PEAK."; display:block; font-family:var(--f-titulo); font-weight:800; font-size:17px; letter-spacing:-.03em;',
+'  color:var(--t1); text-transform:none; margin-bottom:34px; line-height:40px; }',
+'html.hoy-n #v-resumen #hero-greet{ font-family:var(--f-titulo) !important; font-weight:800 !important; font-size:64px !important; letter-spacing:-.06em !important;',
+'  line-height:.92 !important; text-transform:uppercase; margin-top:18px; }',
+'html.hoy-n .hn-punto{ color:var(--t3); margin-left:.08em; }',
+'html.hoy-n #v-resumen #hero-sub{ font-size:16px; color:var(--t2); margin-top:12px; }',
+'html.hoy-n #v-resumen > div:first-child{ margin-bottom:28px !important; }',
+/* tu foto */
+'.hn-yo{ width:40px; height:40px; border-radius:50%; overflow:hidden; display:grid; place-items:center; background:var(--t1); color:var(--bg);',
+'  font-family:var(--f-titulo); font-weight:700; font-size:16px; box-shadow:0 0 0 2px var(--bg), 0 0 0 3.5px var(--t1); flex:none; }',
+'.hn-yo img{ width:100%; height:100%; object-fit:cover; }',
+/* Retos · Hábitos · Cuerpo */
+'.hn-fila3{ display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); }',
+'.hn-fila3 button{ text-align:left; padding:14px 0; }',
+'.hn-fila3 button+button{ padding-left:14px; border-left:1px solid var(--hairline); }',
+'.hn-fila3 small{ font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--t3); }',
+'.hn-fila3 b{ display:block; font-family:var(--f-titulo); font-weight:700; font-size:24px; letter-spacing:-.04em; margin-top:5px; color:var(--t1); }',
+'.hn-fila3 b span{ font:500 13px var(--f-texto); color:var(--t3); margin-left:2px; letter-spacing:0; }',
+/* títulos de sección */
+'.hn-sec{ display:flex; justify-content:space-between; align-items:baseline; margin:36px 0 12px; scroll-margin-top:80px; }',
+'.hn-sec h2{ font-family:var(--f-titulo); font-weight:700; font-size:19px; letter-spacing:-.03em; color:var(--t1); }',
+'.hn-sec span, .hn-sec button{ font-size:14px; color:var(--t2); }',
+'.hn-sec button{ font-weight:600; color:var(--t1); }',
+'.hn-tot{ display:flex; gap:4px; margin-bottom:6px; }',
+'.hn-tot u{ flex:1; height:4px; border-radius:2px; background:var(--hairline); transition:background .3s; }',
+'.hn-tot u.on{ background:var(--t1); }',
+/* filas numeradas */
+'.hn-r{ width:100%; display:grid; grid-template-columns:34px 1fr auto; align-items:center; gap:10px; padding:15px 0; border-bottom:1px solid var(--hairline); text-align:left; }',
+'.hn-r i{ font-style:normal; font-family:var(--f-titulo); font-weight:700; font-size:13px; color:var(--t3); }',
+'.hn-p{ display:block; font-size:16px; font-weight:500; line-height:1.3; color:var(--t1); }',
+'.hn-r small{ display:block; font-size:13px; color:var(--t2); margin-top:2px; }',
+'.hn-r.ok .hn-p{ color:var(--t3); text-decoration:line-through; text-decoration-thickness:1.5px; }',
+'.hn-r.ok i{ color:var(--hn-ac); }',
+'.hn-ck{ width:26px; height:26px; border-radius:50%; border:1.5px solid var(--t3); position:relative; transition:background .2s, border-color .2s; }',
+'.hn-r.ok .hn-ck{ background:var(--t1); border-color:var(--t1); }',
+'.hn-r.ok .hn-ck::after{ content:""; position:absolute; left:8.5px; top:4.5px; width:5px; height:10px; border:solid var(--bg); border-width:0 2px 2px 0; transform:rotate(45deg); }',
+'.hn-vacio{ width:100%; text-align:left; padding:15px 0; border-bottom:1px solid var(--hairline); color:var(--t2); font-size:15px; }',
+/* Parte del día y Estudiar */
+'.hn-dos{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:36px; }',
+'.hn-card{ background:var(--tarjeta); border-radius:20px; padding:16px; min-height:118px; display:flex; flex-direction:column; justify-content:space-between; align-items:flex-start; text-align:left; color:var(--t1); }',
+'.hn-card b{ display:block; font-weight:600; font-size:16px; }',
+'.hn-card small{ display:block; color:var(--t2); font-size:13px; margin-top:2px; }',
+'.hn-ic{ width:34px; height:34px; border-radius:10px; border:1px solid var(--hairline); display:grid; place-items:center; }',
+'.hn-ic svg{ width:18px; height:18px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }',
+'.hn-card.neg{ background:var(--t1); color:var(--bg); }',
+'.hn-card.neg small{ color:color-mix(in srgb, var(--bg) 60%, transparent); }',
+'.hn-card.neg .hn-ic{ border-color:color-mix(in srgb, var(--bg) 22%, transparent); }',
+'.hn-card.neg.ok{ background:var(--tarjeta); color:var(--t1); } .hn-card.neg.ok small{ color:var(--t2); } .hn-card.neg.ok .hn-ic{ border-color:var(--hairline); }',
+/* tu semana */
+'.hn-sem{ display:flex; gap:8px; align-items:flex-end; height:90px; }',
+'.hn-sem div{ flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--t3); }',
+'.hn-sem i{ display:block; width:16px; margin:0 auto 6px; border-radius:99px; background:var(--hairline); }',
+'.hn-sem .on i{ background:var(--t1); } .hn-sem .hoy{ color:var(--t1); } .hn-sem .hoy i{ background:var(--hn-ac); }',
+'html.hoy-n #hy-evo{ margin-top:36px; }',
+/* el menú de tu foto */
+'#hn-menu{ position:fixed; inset:0; z-index:80; }',
+'.hn-velo{ position:absolute; inset:0; background:rgba(0,0,0,.22); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); opacity:0; transition:opacity .2s; }',
+'.hn-caja{ position:absolute; top:calc(env(safe-area-inset-top) + 72px); right:20px; width:264px; background:var(--tarjeta); border:1px solid var(--hairline); border-radius:22px; padding:8px;',
+'  box-shadow:0 20px 50px -12px rgba(0,0,0,.35); transform-origin:top right; transform:scale(.92); opacity:0; transition:transform .25s var(--spring, ease), opacity .2s; }',
+'#hn-menu.ve .hn-velo, #hn-menu.ve .hn-caja{ opacity:1; } #hn-menu.ve .hn-caja{ transform:none; }',
+'.hn-yo2{ width:100%; display:flex; align-items:center; gap:12px; padding:10px 10px 14px; border-bottom:1px solid var(--hairline); margin-bottom:6px; text-align:left; color:var(--t1); }',
+'.hn-yo2 .hn-yo{ width:44px; height:44px; box-shadow:none; }',
+'.hn-yo2 b{ display:block; font-weight:600; font-size:16px; } .hn-yo2 small{ font-size:13px; color:var(--t2); }',
+'.hn-op{ width:100%; display:flex; align-items:center; gap:12px; padding:12px 10px; border-radius:14px; font-size:15.5px; color:var(--t1); text-align:left; }',
+'button.hn-op:active{ background:var(--hairline); }',
+'.hn-op > svg{ width:20px; height:20px; fill:none; stroke:var(--t2); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none; }',
+'.hn-modo{ margin-left:auto; display:flex; background:var(--bg); border-radius:99px; padding:3px; }',
+'.hn-modo button{ font-size:12.5px; font-weight:600; padding:5px 10px; border-radius:99px; color:var(--t2); }',
+'.hn-modo button.on{ background:var(--t1); color:var(--bg); }',
+'.hn-mas{ color:var(--t2); font-size:14.5px; }'
+  ].join("\n");
+  document.head.appendChild(st);
+})();
+/* ════════ diseño nuevo · Objetivos y Progreso (oct 2026) ════════
+   Maquetas: diseno/ui-peak/objetivos-claro.html y progreso-claro.html.
+   Objetivos: sin tarjetas, con títulos de sección; «Los tres de hoy» ya va en Hoy,
+   así que aquí sale «Más» con Mis retos y Experimentos.
+   Progreso: tu rango en grande con la barra por tramos, la montaña de noche con
+   el gancho de tus amigos y «Abrir 3D», hoy · racha · mejor, y tu grupo por nivel.
+   Las tarjetas viejas siguen en la página (escondidas) porque otras piezas las usan. */
+
+function onObjetivos(){
+  var v=document.getElementById("v-retos"); if(!v) return;
+  document.documentElement.classList.add("obj-n");
+  var eb=v.querySelector("p.eyebrow"); if(eb && eb.textContent!=="Tus metas") eb.textContent="Tus metas";
+  /* metas del mes: cabecera como las demás secciones */
+  var mm=document.getElementById("metas-mes"), cab=mm && mm.querySelector(".mm-cab");
+  if(cab){
+    var q=cab.querySelector(".mm-quedan b"), n=q ? +q.textContent : 0;
+    var h=document.createElement("div"); h.className="hn-sec on-cab";
+    h.innerHTML='<h2>Metas del mes</h2><span>'+(n===1?"Queda 1 día":"Quedan "+n+" días")+'</span>';
+    cab.parentNode.replaceChild(h, cab);
+  }
+  /* Más: Mis retos y Experimentos */
+  var obj=document.getElementById("rt-obj");
+  if(obj){
+    var mas=document.getElementById("on-mas");
+    if(!mas){ mas=document.createElement("div"); mas.id="on-mas"; }
+    if(mas.parentNode!==obj || mas.nextElementSibling) obj.appendChild(mas);
+    var ex=typeof expActivo==="function" && expActivo();
+    var html='<div class="hn-sec"><h2>Más</h2></div>'+
+      '<button class="on-fila" data-act="edit-challenges"><span><b>Mis retos</b><small>Elige los tres de cada día</small></span><i>›</i></button>'+
+      '<button class="on-fila" data-act="'+(ex?"x-exp-ver":"x-exp-catalogo")+'"><span><b>Experimentos</b><small>'+(ex?"Tienes uno en marcha":"Prueba un cambio 7 días")+'</small></span><i>›</i></button>';
+    if(mas.dataset.h!==html){ mas.innerHTML=html; mas.dataset.h=html; }
+  }
+}
+
+function pnPinta(){
+  var prog=document.getElementById("rt-prog"); if(!prog) return;
+  var st=stats(), lv=st.lvl, sig=Math.min(40, lv+1);
+  var x0=pmXPSuelo(lv), x1=pmXPSuelo(lv+1), dentro=Math.max(0, st.xp-x0), need=Math.max(1, x1-x0);
+  var on=Math.max(0, Math.min(20, Math.floor(dentro/need*20))), seg="";
+  for(var i=0;i<20;i++) seg+='<u'+(i<on?' class="on"':i===on?' class="ac"':'')+'></u>';
+  var nombre=function(n){ return LVL_NAMES[Math.min(n-1, LVL_NAMES.length-1)]; };
+  /* tu grupo, por nivel */
+  var gente=typeof mtGente==="function" ? mtGente() : [], arriba=null;
+  gente.forEach(function(g){ var n=g.nv||1; if(n>lv && (!arriba || n<arriba.nv)) arriba=g; });
+  var yoNom=(typeof perfil!=="undefined" && perfil && perfil.usuario) || "Tú";
+  var lista=gente.map(function(g){ return { u:g.u, nv:g.nv||1, g:g }; }).concat([{ u:yoNom, nv:lv, yo:true }]);
+  lista.sort(function(a,b){ return b.nv-a.nv || (a.yo?-1:b.yo?1:0); });
+  var pos=0; lista.forEach(function(p,i){ if(p.yo) pos=i; });
+  var desde=Math.max(0, Math.min(pos-2, lista.length-5));
+  var grupo=gente.length ? lista.slice(desde, desde+5).map(function(p,i){
+      return '<button class="pn-am'+(p.yo?' me':'')+'"'+(p.yo?' data-act="x-perfil"':' data-act="x-pn-u" data-u="'+esc(p.u)+'"')+'>'+
+        '<span class="pn-pos num">'+(desde+i+1)+'</span><span class="pn-av">'+(p.yo?hnAvatar():mtCara(p.g, 36))+'</span>'+
+        '<span class="pn-tx"><b>'+(p.yo?"Tú":esc(String(p.u).slice(0,18)))+'</b><small>'+esc(nombre(p.nv))+'</small></span><b class="pn-nv num">'+p.nv+'</b></button>';
+    }).join("")
+    : '<button class="on-fila" data-jump="social"><span><b>Sube con tus amigos</b><small>Únete a un grupo y verás aquí cómo vais</small></span><i>›</i></button>';
+  var gancho = arriba ? esc(String(arriba.u).slice(0,14))+" va "+((arriba.nv||1)-lv)+((arriba.nv||1)-lv===1?" nivel":" niveles")+" por encima. Mira por dónde va."
+    : gente.length ? "Vas el primero de tu grupo. Mira la vista desde arriba."
+    : "Mira todo lo que te queda hasta la cima.";
+  var html=
+    '<div class="pn-rango"><p class="pn-eti">Tu rango</p><p class="pn-big">'+esc(nombre(lv))+'</p>'+
+      '<div class="pn-xp">'+seg+'</div>'+
+      '<div class="pn-xpl"><span class="num">'+dentro+' / '+need+' XP</span><span>'+(lv<40?esc(nombre(sig))+' en '+Math.max(0, x1-st.xp)+' XP':'Has llegado a la cima')+'</span></div></div>'+
+    '<button class="pn-mont" data-act="x-monte" aria-label="Abrir tu montaña en 3D">'+
+      '<svg viewBox="0 0 350 210" preserveAspectRatio="xMidYMax slice" aria-hidden="true">'+
+        '<defs><pattern id="pn-ry" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(-35)"><rect width="2" height="6" fill="#F3EEE3" opacity=".22"/></pattern>'+
+        '<radialGradient id="pn-cie" cx=".7" cy=".1" r=".9"><stop offset="0" stop-color="#2b3a55"/><stop offset="1" stop-color="#0d0f16"/></radialGradient></defs>'+
+        '<rect width="350" height="210" fill="url(#pn-cie)"/>'+
+        '<g fill="#F3EEE3"><circle cx="40" cy="30" r="1"/><circle cx="90" cy="18" r=".8"/><circle cx="150" cy="40" r="1.1"/><circle cx="300" cy="28" r=".9"/><circle cx="260" cy="60" r=".7"/><circle cx="20" cy="80" r=".8"/></g>'+
+        '<path d="M0 210 L120 95 L150 112 L205 40 L240 70 L262 58 L350 150 L350 210Z" fill="#1d2230"/>'+
+        '<path d="M205 40 L240 70 L262 58 L350 150 L350 210 L230 210 Z" fill="url(#pn-ry)"/>'+
+        '<path class="pn-senda" d="M40 210 C90 190 150 185 170 160 S150 120 185 105 S215 75 205 46" fill="none" stroke="#F3EEE3" stroke-width="1.6" stroke-dasharray="2 5" opacity=".55"/>'+
+        '<path class="pn-hecho" d="M40 210 C90 190 150 185 170 160 S150 120 185 105 S215 75 205 46" fill="none" stroke="#3BE08B" stroke-width="2.5"/>'+
+        '<path d="M205 40 V22 L218 27 L205 32" fill="#F3EEE3"/>'+
+        '<g class="pn-yo"><circle r="8" fill="#3BE08B" opacity=".25"/><circle r="5.5" fill="#3BE08B" stroke="#0d0f16" stroke-width="2"/></g>'+
+      '</svg>'+
+      '<span class="pn-mt-top"><span>Nivel '+lv+' de 40</span><span>'+(lv<40?"Cima ▸ "+(40-lv)+(40-lv===1?" nivel":" niveles"):"En la cima")+'</span></span>'+
+      '<span class="pn-mt-pie"><span><b>Ver tu montaña</b><small>'+gancho+'</small></span><span class="pn-btn">Abrir 3D</span></span>'+
+    '</button>'+
+    '<div class="hn-fila3 pn-f3"><div><small>Hoy</small><b class="num">+'+pmXPHoy().total+'<span>XP</span></b></div>'+
+      '<div><small>Racha</small><b class="num">'+(st.streak||0)+'<span>'+((st.streak||0)===1?" día":" días")+'</span></b></div>'+
+      '<div><small>Mejor</small><b class="num">'+(st.best||0)+'<span>'+((st.best||0)===1?" día":" días")+'</span></b></div></div>'+
+    '<div class="hn-sec"><h2>Tu grupo</h2><span>'+(gente.length?"Por nivel":"")+'</span></div>'+grupo;
+  var box=document.getElementById("pn");
+  if(!box){ box=document.createElement("div"); box.id="pn"; }
+  if(box.parentNode!==prog || box!==prog.firstElementChild) prog.insertBefore(box, prog.firstElementChild);
+  if(box.dataset.h===html) return;
+  box.innerHTML=html; box.dataset.h=html;
+  document.documentElement.classList.add("obj-n");
+  /* tu punto sube por el sendero según tu nivel */
+  try{
+    var p=box.querySelector(".pn-hecho"), L=p.getTotalLength(), f=Math.max(.04, Math.min(1, (lv-1)/39)), pt=p.getPointAtLength(L*f);
+    p.style.strokeDasharray=(L*f).toFixed(1)+" "+L.toFixed(1);
+    box.querySelector(".pn-yo").setAttribute("transform", "translate("+pt.x.toFixed(1)+" "+pt.y.toFixed(1)+")");
+  }catch(e){}
+}
+
+var _onMetas=pintaMetas;
+pintaMetas=function(){ var r=_onMetas.apply(this, arguments); try{ onObjetivos(); }catch(e){ if(window.console) console.warn("objetivos", e); } return r; };
+var _pnRango=pintaRangoRetos;
+pintaRangoRetos=function(){ var r=_pnRango.apply(this, arguments); try{ pnPinta(); }catch(e){ if(window.console) console.warn("progreso", e); } return r; };
+/* retosOrganiza crea los paneles después; al final pinta el diario, así que ahí se repasa todo */
+var _pnDiario=pintaTarjetaDiario;
+pintaTarjetaDiario=function(){ var r=_pnDiario.apply(this, arguments); try{ onObjetivos(); pnPinta(); }catch(e){ if(window.console) console.warn("objetivos", e); } return r; };
+
+(function(){
+  var st=document.createElement("style"); st.id="diseno-objetivos-css"; st.textContent=[
+/* cabecera: PEAK. arriba, «Tus metas» y el título */
+'html.obj-n #v-retos p.eyebrow:has(+ h1.display){ font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--t3); }',
+'html.obj-n #v-retos p.eyebrow:has(+ h1.display)::before{ content:"PEAK."; display:block; font-family:var(--f-titulo); font-weight:800; font-size:17px; letter-spacing:-.03em;',
+'  color:var(--t1); text-transform:none; margin-bottom:30px; line-height:40px; white-space:normal; }',
+'html.obj-n #v-retos h1.display{ font-size:36px !important; font-weight:800 !important; letter-spacing:-.05em !important; line-height:1 !important; margin-top:14px; }',
+/* lo que ya no va */
+'html.obj-n #v-retos .glass:has(#ch-title), html.obj-n #card-nivel, html.obj-n #pm-extra, html.obj-n #camino .cm-monte, html.obj-n #metas-mes .mm-tiempo{ display:none !important; }',
+/* sin tarjetas */
+'html.obj-n #v-retos #reto-semana, html.obj-n #v-retos #metas-mes, html.obj-n #v-retos #rt-desc{ background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; border-radius:0 !important; }',
+'html.obj-n #reto-semana::before, html.obj-n #metas-mes::before, html.obj-n #rt-desc::before{ display:none !important; }',
+/* el selector Objetivos / Progreso */
+'html.obj-n .rt-tabs{ border:1px solid var(--hairline) !important; border-radius:99px !important; padding:3px !important; margin-top:22px; background:transparent !important; }',
+'html.obj-n .rt-tabs button{ height:38px; font-family:var(--f-texto) !important; font-size:14.5px !important; font-weight:600; letter-spacing:0; color:var(--t2); }',
+'html.obj-n .rt-tabs .rt-pill{ border-radius:99px !important; }',
+/* reto de la semana */
+'html.obj-n #reto-semana{ margin-top:16px; }',
+'html.obj-n #reto-semana .rs-top{ align-items:baseline; }',
+'html.obj-n #v-retos #reto-semana .rs-top .eyebrow{ font-family:var(--f-titulo) !important; font-weight:700; font-size:19px; letter-spacing:-.03em !important; text-transform:none; color:var(--t1); }',
+'html.obj-n #reto-semana .rs-top .eyebrow::after, html.obj-n #reto-semana .rs-top .eyebrow::before{ display:none !important; }',
+'html.obj-n #reto-semana .rs-xp{ color:var(--hn-ac); background:color-mix(in srgb, var(--hn-ac) 13%, transparent); font-size:12.5px; font-weight:600; padding:5px 10px; }',
+'html.obj-n #reto-semana .rs-editar{ font-size:14px; font-weight:600; color:var(--t2); }',
+'html.obj-n #reto-semana .rs-t{ font-family:var(--f-titulo) !important; font-weight:800 !important; font-size:28px !important; letter-spacing:-.04em !important; line-height:1.1 !important; margin:14px 0 18px; }',
+'html.obj-n #reto-semana .rs-segs{ height:30px; margin:0 0 12px; }',
+'html.obj-n #reto-semana .rs-segs::before{ left:15px; right:15px; border-top:2px solid var(--hairline); }',
+'html.obj-n #reto-semana .rs-segs i{ width:30px !important; height:30px !important; border:1.5px solid var(--t3) !important; background:var(--bg) !important; }',
+'html.obj-n #reto-semana .rs-segs i.on{ background:var(--t1) !important; border-color:var(--t1) !important; }',
+'html.obj-n #reto-semana .rs-pie{ font-size:13px; color:var(--t2); }',
+/* metas del mes */
+'html.obj-n #metas-mes .on-cab{ margin-top:36px; }',
+'html.obj-n #metas-mes .mm-meta{ padding:16px 0; border-bottom:1px solid var(--hairline); box-shadow:none !important; }',
+'html.obj-n #metas-mes .mm-meta:first-of-type{ border-top:1px solid var(--hairline); }',
+'html.obj-n #metas-mes .mm-t{ font-size:16px; font-weight:500; color:var(--t1); }',
+'html.obj-n #metas-mes .mm-sub{ font-size:13px; color:var(--t2); }',
+'html.obj-n .op-tramo-v{ background:var(--hairline) !important; }',
+'html.obj-n .op-tramo-v i{ background:var(--t1) !important; }',
+'html.obj-n .op-tramo b{ font-family:var(--f-titulo); font-size:15px; letter-spacing:-.03em; }',
+'html.obj-n #v-retos #metas-mes .mm-nueva.grande{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:20px; }',
+'html.obj-n #metas-mes .mm-nueva:not(.grande){ display:block; margin-left:auto; margin-top:12px; font-size:13px; font-weight:600; color:var(--t2); background:none !important; }',
+/* días de descanso */
+'html.obj-n #rt-desc{ margin-top:36px; }',
+'html.obj-n #rt-desc h2{ font-family:var(--f-titulo) !important; font-weight:700 !important; font-size:19px !important; letter-spacing:-.03em !important; }',
+'html.obj-n #rt-desc .ds-d{ background:var(--tarjeta) !important; border:0 !important; }',
+'html.obj-n #rt-desc .ds-d.hoy{ box-shadow:inset 0 0 0 1.5px var(--t1) !important; }',
+/* Más */
+'#on-mas{ margin-top:4px; }',
+'.on-fila{ width:100%; display:flex; align-items:center; justify-content:space-between; background:var(--tarjeta); border-radius:20px; padding:16px; margin-top:12px; text-align:left; color:var(--t1); }',
+'.on-fila b{ display:block; font-weight:600; font-size:16px; } .on-fila small{ display:block; color:var(--t2); font-size:13px; margin-top:2px; }',
+'.on-fila i{ font-style:normal; color:var(--t3); font-size:22px; }',
+/* Progreso */
+'#pn{ margin-top:30px; }',
+'.pn-eti{ font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--t3); }',
+'.pn-big{ font-family:var(--f-titulo); font-weight:800; font-size:44px; letter-spacing:-.05em; line-height:1; margin-top:10px; text-transform:uppercase; color:var(--t1); }',
+'.pn-xp{ display:flex; gap:3px; margin-top:18px; }',
+'.pn-xp u{ flex:1; height:8px; border-radius:2px; background:var(--hairline); }',
+'.pn-xp u.on{ background:var(--t1); } .pn-xp u.ac{ background:var(--hn-ac); }',
+'.pn-xpl{ display:flex; justify-content:space-between; font-size:13px; color:var(--t2); margin-top:8px; }',
+'.pn-mont{ position:relative; display:block; width:100%; height:250px; border-radius:24px; overflow:hidden; margin-top:24px; background:#0d0f16; color:#F3EEE3; text-align:left; }',
+'.pn-mont svg{ position:absolute; inset:0; width:100%; height:100%; }',
+'.pn-mt-top{ position:absolute; top:14px; left:16px; right:16px; display:flex; justify-content:space-between; font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:rgba(243,238,227,.7); }',
+'.pn-mt-pie{ position:absolute; left:0; right:0; bottom:0; padding:40px 16px 14px; display:flex; align-items:flex-end; justify-content:space-between; gap:10px;',
+'  background:linear-gradient(to top, rgba(13,15,22,.95), rgba(13,15,22,0)); }',
+'.pn-mt-pie b{ display:block; font-family:var(--f-titulo); font-weight:800; font-size:19px; letter-spacing:-.03em; }',
+'.pn-mt-pie small{ display:block; font-size:13px; color:rgba(243,238,227,.7); margin-top:3px; max-width:200px; }',
+'.pn-btn{ background:#F3EEE3; color:#0d0f16; border-radius:99px; padding:10px 14px; font-size:14px; font-weight:600; white-space:nowrap; }',
+'.pn-f3{ margin-top:24px; } .pn-f3 > div{ padding:14px 0; } .pn-f3 > div+div{ padding-left:14px; border-left:1px solid var(--hairline); }',
+'.pn-am{ width:100%; display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid var(--hairline); text-align:left; color:var(--t1); }',
+'.pn-pos{ font-family:var(--f-titulo); font-weight:700; font-size:13px; color:var(--t3); width:22px; }',
+'.pn-av{ width:36px; height:36px; border-radius:50%; overflow:hidden; flex:none; display:grid; place-items:center; }',
+'.pn-av .hn-yo{ width:36px; height:36px; box-shadow:none; font-size:14px; } .pn-av > *{ max-width:100%; }',
+'.pn-tx b{ display:block; font-weight:500; font-size:16px; } .pn-tx small{ display:block; font-size:13px; color:var(--t2); }',
+'.pn-nv{ margin-left:auto; font-family:var(--f-titulo); font-size:14px; letter-spacing:-.03em; }',
+'.pn-am.me{ background:color-mix(in srgb, var(--hn-ac) 9%, transparent); margin:0 -20px; padding:13px 20px; width:calc(100% + 40px); }',
+'.pn-am.me .pn-pos{ color:var(--hn-ac); }',
+'html.obj-n #camino{ margin-top:36px; }',
+'html.obj-n #camino .cm-cab h2{ font-family:var(--f-titulo) !important; font-weight:700 !important; font-size:19px !important; letter-spacing:-.03em !important; }'
+  ].join("\n");
+  document.head.appendChild(st);
+  try{ onObjetivos(); pnPinta(); }catch(e){}
+})();
+/* ════════ diseño nuevo · Cuerpo (oct 2026) ════════
+   Maqueta: diseno/ui-peak/cuerpo-claro.html. En el móvil el orden pasa a ser
+   Salud del día · Ejercicio · Estirar · Alimentación (con CSS, sin mover nodos:
+   otras piezas recolocan los suyos en cada pintado).
+   Ejercicio: tarjeta de tinta «Entreno de hoy» con el tipo (Gym, Correr, Deporte,
+   Otro), la semana con un check por día y el botón de registrar. */
+
+var CN_TIPOS=[
+  { n:"Gimnasio", t:"Gym", d:'<path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/>' },
+  { n:"Correr", t:"Correr", d:'<circle cx="14" cy="4.5" r="1.8"/><path d="M8 21l3-6 3 2v4M6 12l3-4 4 1 3 3 3 1M11 15l-1.5-4"/>' },
+  { n:"Deporte", t:"Deporte", d:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5v17M3.5 12h17M6 6c3 2 3 10 0 12M18 6c-3 2-3 10 0 12"/>' },
+  { n:"Otro", t:"Otro", d:'<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>' }
+];
+function cnIc(d, tam){ return '<svg viewBox="0 0 24 24" width="'+(tam||20)+'" height="'+(tam||20)+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+d+'</svg>'; }
+function cnTipoDe(d){
+  var l=(S.deporteDia && S.deporteDia[d]) || [];
+  for(var i=0;i<CN_TIPOS.length;i++) if(l.indexOf(CN_TIPOS[i].n)>=0) return CN_TIPOS[i];
+  return l.length ? { n:l[0], t:l[0], otro:true } : null;
+}
+
+function cnPinta(){
+  var v=document.getElementById("v-vital"), btn=document.getElementById("gym-btn"); if(!v || !btn) return;
+  document.documentElement.classList.add("cu-n");
+  var eb=v.querySelector("p.eyebrow"); if(eb && eb.textContent!=="Muévete · come · descansa") eb.textContent="Muévete · come · descansa";
+  var card=btn.closest(".glass"); if(!card) return;
+  card.classList.add("cn-gym");
+  var t=curDay(), hoy=today(), esHoy=t===hoy, hecho=wentGym(t), tipo=hecho ? cnTipoDe(t) : null;
+  /* racha de ejercicio y último entreno */
+  var gs=0, d0=hoy; if(!wentGym(d0)) d0=addDays(d0,-1);
+  while(wentGym(d0) && gs<400){ gs++; d0=addDays(d0,-1); }
+  var ult=null; for(var i=1;i<60;i++){ var dd=addDays(t,-i); if(wentGym(dd)){ ult=dd; break; } }
+  var ultTxt="";
+  if(ult){ var ut=cnTipoDe(ult), dia=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][new Date(ult+"T00:00:00").getDay()];
+    ultTxt="Último: "+(ut?ut.t.toLowerCase():"entreno")+" · "+(ult===addDays(hoy,-1)?"ayer":dia); }
+  else ultTxt="Elige qué haces y suma +20 XP";
+  var big = hecho ? (tipo ? tipo.t : "Hecho")+'<span class="cn-ok">'+cnIc('<path d="M5 12.5l4.2 4.2L19 7"/>', 26)+'</span>'
+          : esHoy ? "¿Qué toca hoy?" : "¿Qué hiciste?";
+  var tipos=CN_TIPOS.map(function(T){
+    var on=hecho && tipo && (tipo.n===T.n || (T.n==="Otro" && tipo.otro));
+    return '<button class="'+(on?"on":"")+'" data-act="x-cn-tipo" data-n="'+T.n+'">'+cnIc(T.d, 22)+'<span>'+T.t+'</span></button>';
+  }).join("");
+  var l=lunesDe(hoy), dias="";
+  for(var k=0;k<7;k++){
+    var d=addDays(l,k), on=wentGym(d), fut=d>hoy;
+    dias+='<button class="'+(on?"ok":"")+(d===t?" hoy":"")+'" data-act="day-go" data-d="'+d+'"'+(fut?" disabled":"")+'><i>'+(on?cnIc('<path d="M5 12.5l4.2 4.2L19 7"/>', 16):"")+'</i>'+"LMXJVSD".charAt(k)+'</button>';
+  }
+  var html=
+    '<div class="hn-sec cn-sec"><h2>Ejercicio</h2><span>'+(gs?"Racha de "+gs:"Sin racha aún")+'</span></div>'+
+    '<div class="cn-entreno"><div class="cn-ar"><div><p class="cn-eti">'+(esHoy?"Entreno de hoy":"Entreno de ese día")+'</p>'+
+      '<p class="cn-big">'+big+'</p><small>'+esc(hecho?"+20 XP sumados. Toca otro tipo para cambiarlo":ultTxt)+'</small></div>'+
+      '<span class="cn-ico">'+cnIc(CN_TIPOS[0].d, 28)+'</span></div>'+
+      '<div class="cn-tipos">'+tipos+'</div></div>'+
+    '<div class="cn-dias">'+dias+'</div>'+
+    '<button class="cn-btn'+(hecho?" si":"")+'" data-act="gym" data-day="'+t+'">'+
+      (hecho ? (esHoy?"Entreno hecho · deshacer":"Entrenaste · deshacer") : 'Registrar entreno <span>+20 XP</span>')+'</button>';
+  var box=document.getElementById("cn-gym");
+  if(!box){ box=document.createElement("div"); box.id="cn-gym"; card.insertBefore(box, card.firstChild); }
+  if(box.dataset.h!==html){ box.innerHTML=html; box.dataset.h=html; }
+  /* salud del día: cuántos datos llevas apuntados */
+  var sf=v.querySelector(".sf-caja");
+  if(sf){
+    var hb=(S.habits && S.habits[t]) || {}, n=((hb.water||0)>0?1:0)+(hb.sleep!=null?1:0)+(hb.screen!=null?1:0);
+    var cab=sf.querySelector(".cn-sfcab");
+    if(!cab){ cab=document.createElement("div"); cab.className="hn-sec cn-sfcab"; sf.insertBefore(cab, sf.firstChild); }
+    var ch='<h2>Salud del día</h2><span>'+n+' de 3 apuntados</span>';
+    if(cab.innerHTML!==ch) cab.innerHTML=ch;
+  }
+  card.classList.toggle("cn-otro", !!(hecho && (!tipo || tipo.otro || tipo.n==="Otro")));
+}
+function cnAccion(a, el){
+  if(a!=="x-cn-tipo") return false;
+  var t=curDay(), n=el.dataset.n, ya=wentGym(t), tipo=ya ? cnTipoDe(t) : null;
+  if(!S.deporteDia) S.deporteDia={};
+  if(ya && tipo && (tipo.n===n || (n==="Otro" && tipo.otro))){   /* tocar el marcado lo quita */
+    delete S.gym[t]; delete S.deporteDia[t]; sonido("des"); save(); render(); return true;
+  }
+  if(!ya){ if(typeof xpPreparar==="function") xpPreparar(); S.gym[t]=true; }
+  S.deporteDia[t] = n==="Otro" ? [] : [n];
+  if(n==="Otro"){ depAnadiendo=!(S.deportes && S.deportes.length); }
+  save(); render();
+  if(!ya && typeof celebraGym==="function") celebraGym({ clientX:el.getBoundingClientRect().left+20, clientY:el.getBoundingClientRect().top+20, target:el });
+  return true;
+}
+
+var _cnVital=rVital;
+rVital=function(){ var r=_cnVital.apply(this, arguments); try{ cnPinta(); }catch(e){ if(window.console) console.warn("cuerpo", e); } return r; };
+
+(function(){
+  var st=document.createElement("style"); st.id="diseno-cuerpo-css"; st.textContent=[
+/* cabecera como Hoy y Objetivos */
+'html.cu-n #v-vital p.eyebrow:has(+ h1.display){ font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:var(--t3); }',
+'html.cu-n #v-vital p.eyebrow:has(+ h1.display)::before{ content:"PEAK."; display:block; font-family:var(--f-titulo); font-weight:800; font-size:17px; letter-spacing:-.03em;',
+'  color:var(--t1); text-transform:none; margin-bottom:30px; line-height:40px; white-space:normal; }',
+'html.cu-n #v-vital h1.display{ font-size:36px !important; font-weight:800 !important; letter-spacing:-.05em !important; line-height:1 !important; margin-top:14px; }',
+'html.cu-n #v-vital > div:first-child{ margin-bottom:20px !important; }',
+/* orden en el móvil: Salud, Ejercicio, Estirar, Alimentación */
+'@media (max-width:1023px){',
+'  html.cu-n #v-vital{ display:flex; flex-direction:column; }',
+'  html.cu-n #v-vital > .grid, html.cu-n #v-vital > .grid > div{ display:contents; }',
+'  html.cu-n #v-vital .sf-caja{ order:1; } html.cu-n #v-vital .cn-gym{ order:2; } html.cu-n #cu-rutinas{ order:3; } html.cu-n #ali-card{ order:4; }',
+'}',
+/* sin tarjetas por fuera */
+'html.cu-n #v-vital .cn-gym, html.cu-n #v-vital #ali-card, html.cu-n #v-vital .sf-caja{ background:none !important; border:0 !important; box-shadow:none !important; padding:0 !important; border-radius:0 !important; }',
+'html.cu-n #v-vital .cn-gym::before, html.cu-n #v-vital #ali-card::before{ display:none !important; }',
+'html.cu-n .cn-gym > :not(#cn-gym):not(#dep-caja){ display:none !important; }',
+'html.cu-n #v-vital .sf-caja > h2, html.cu-n #v-vital .sf-caja > p{ display:none !important; }',
+'html.cu-n #ali-card > .flex.items-start{ align-items:baseline !important; margin-bottom:12px !important; }',
+'html.cu-n #ali-card > .flex.items-start h2{ font-family:var(--f-titulo) !important; font-weight:700 !important; font-size:19px !important; letter-spacing:-.03em !important; }',
+'html.cu-n #ali-card > .flex.items-start p{ display:none; }',
+'html.cu-n #ali-card > .flex.items-start .text-right{ display:flex; align-items:baseline; gap:4px; }',
+'html.cu-n #ali-card > .flex.items-start .text-right > div{ font-family:var(--f-texto) !important; font-size:14px !important; font-weight:500 !important; color:var(--t2); margin:0 !important; letter-spacing:0 !important; }',
+'html.cu-n #ali-card .ali-de{ font-size:14px !important; font-weight:500 !important; color:var(--t2) !important; }',
+'html.cu-n .cn-sfcab{ margin-top:8px; }',
+/* salud del día: tarjetas como la ventana que se abre al tocar */
+'html.cu-n #v-vital .sf-fila{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:22px !important; padding:16px 16px 14px !important; margin-bottom:10px; }',
+'html.cu-n #v-vital .sf-fila b{ font-size:15px; }',
+'html.cu-n #v-vital .sf-num{ font-family:var(--f-titulo) !important; font-weight:800 !important; font-size:34px !important; letter-spacing:-.05em !important; }',
+'html.cu-n #v-vital .sf-msg{ font-size:13px; color:var(--t2); }',
+'html.cu-n #v-vital .sf-sem{ width:140px; height:56px; gap:4px; align-items:flex-end; }',
+'html.cu-n #v-vital .sf-sem i{ flex:1; width:auto !important; min-height:6px; border-radius:4px !important; }',
+/* ejercicio */
+'.cn-sec{ margin-top:36px; }',
+'.cn-entreno{ background:var(--t1); color:var(--bg); border-radius:24px; padding:18px; }',
+'.cn-ar{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }',
+'.cn-eti{ font-size:11px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; color:color-mix(in srgb, var(--bg) 55%, transparent); }',
+'.cn-big{ font-family:var(--f-titulo); font-weight:800; font-size:26px; letter-spacing:-.04em; line-height:1.05; margin-top:8px; display:flex; align-items:center; gap:8px; }',
+'.cn-ok{ color:var(--hn-ac); display:inline-flex; }',
+'.cn-entreno small{ display:block; margin-top:6px; font-size:13.5px; color:color-mix(in srgb, var(--bg) 62%, transparent); }',
+'.cn-ico{ width:54px; height:54px; flex:none; border-radius:16px; background:color-mix(in srgb, var(--bg) 12%, transparent); display:grid; place-items:center; }',
+'.cn-tipos{ display:flex; gap:8px; margin-top:16px; }',
+'.cn-tipos button{ flex:1; border:1px solid color-mix(in srgb, var(--bg) 22%, transparent); border-radius:14px; padding:10px 0 8px; display:flex; flex-direction:column; align-items:center; gap:5px;',
+'  font-size:12px; font-weight:600; color:var(--bg); transition:transform .2s; }',
+'.cn-tipos button:active{ transform:scale(.94); }',
+'.cn-tipos button.on{ background:var(--bg); color:var(--t1); border-color:var(--bg); }',
+'.cn-dias{ display:flex; gap:6px; margin-top:14px; }',
+'.cn-dias button{ flex:1; text-align:center; font-size:11px; font-weight:600; color:var(--t3); }',
+'.cn-dias i{ display:grid; place-items:center; height:40px; border-radius:12px; border:1.5px solid var(--hairline); margin-bottom:6px; color:var(--bg); }',
+'.cn-dias .ok i{ background:var(--t1); border-color:var(--t1); }',
+'.cn-dias .hoy{ color:var(--hn-ac); } .cn-dias .hoy i{ border:2px dashed var(--hn-ac); } .cn-dias .ok.hoy i{ border-style:solid; }',
+'.cn-btn{ width:100%; display:flex; align-items:center; justify-content:center; gap:8px; background:var(--t1); color:var(--bg); border-radius:99px; height:52px; font-weight:600; font-size:16px; margin-top:16px; }',
+'.cn-btn span{ opacity:.6; font-weight:500; }',
+'.cn-btn.si{ background:none; color:var(--t2); border:1.5px solid var(--hairline); font-size:14.5px; }',
+'html.cu-n #dep-caja{ margin-top:14px; } html.cu-n .cn-gym:not(.cn-otro) #dep-caja{ display:none !important; }',
+/* estirar */
+'html.cu-n #cu-rutinas{ margin-top:36px !important; }',
+'html.cu-n #cu-rutinas .tq-cab h2{ font-family:var(--f-titulo) !important; font-weight:700 !important; font-size:19px !important; letter-spacing:-.03em !important; }',
+/* alimentación */
+'html.cu-n #ali-card{ margin-top:36px !important; }',
+'html.cu-n #ali-card .ali-btn{ background:none !important; border:1.5px solid var(--hairline) !important; box-shadow:none !important; border-radius:99px !important; min-height:50px; padding:12px !important; }',
+'html.cu-n #ali-card .ali-btn .display{ font-family:var(--f-texto) !important; font-size:15.5px !important; font-weight:600 !important; letter-spacing:0 !important; }',
+'html.cu-n #ali-card .ali-btn.si{ background:var(--t1) !important; color:var(--bg) !important; border-color:var(--t1) !important; }',
+'html.cu-n #ali-card .ali-sep{ display:none; }',
+'html.cu-n #ali-card .ali-cab{ padding:14px 0; border-top:1px solid var(--hairline); border-bottom:1px solid var(--hairline); margin-top:14px; }',
+'html.cu-n #ali-card .ali-tile{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:16px !important; }'
+  ].join("\n");
+  document.head.appendChild(st);
 })();
 })();
 </script>

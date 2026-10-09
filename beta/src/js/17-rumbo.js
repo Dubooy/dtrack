@@ -725,6 +725,7 @@ setInterval(function(){
 function rumboAccion(a, el){
   if(onbAccion(a, el)) return true;
   if(rumboAccion2(a, el)) return true;
+  if(typeof hoyNuevoAccion==="function" && hoyNuevoAccion(a, el)) return true;
   if(typeof disenoAccion==="function" && disenoAccion(a, el)) return true;
   if(typeof bucleAccion==="function" && bucleAccion(a, el)) return true;
   if(typeof grupoAccion==="function" && grupoAccion(a, el)) return true;

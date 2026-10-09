@@ -178,6 +178,7 @@ function pintaHoy(st){
   /* la checklist de siempre, justo debajo */
   var ci=document.getElementById("card-ideal");
   if(ci && ci.previousElementSibling!==box) box.parentNode.insertBefore(ci, box.nextSibling);
+  if(typeof hoyNuevo==="function") hoyNuevo(st);   /* diseño nuevo (56) */
   hoyAjusta();
 }
 /* lo de arriba (saludo, anillos y tarjetas) llena la pantalla hasta la barra;

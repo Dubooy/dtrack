@@ -77,6 +77,10 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `52-hoy-salud.js` | Hoy con la estética de Salud del día: Retos, Hábitos, Cuerpo, Estudiar y Parte del día como tarjetas (icono y título en su color, número grande, barritas de la semana); títulos con color en Hábitos, Lectura y Tu evolución. Sobrescribe `hoyAnillo`, `anilloDetalle`, `tarjetaEstudio` y `tarjetaParte` |
 | `53-temas-degradado.js` | Modos con degradado (Atardecer, Océano, Uva; claros y «noche»): degradado diagonal de dos colores en el primer 25 % de la pantalla que pasa a blanco o negro. Libres desde el inicio. Sobrescribe `applyTheme` y `muestraTema` |
 | `54-ui-pulido.js` | Pulido de UI: una sola letra (Unbounded en el título de cada pestaña y números grandes; SF, `--f-texto`, en lo demás), cabecera pequeña con degradado al bajar y título grande que se encoge, cada pestaña recuerda su scroll (envuelve `go`), tarjetas con fundido, botones que se hunden, números que suben y hojas que se cierran arrastrando |
+| `55-diseno-base.js` | Diseño nuevo, la base: Instrument Sans (texto) y Unbounded (títulos y números), colores crema/tinta de Claro y Oscuro. Maquetas en `diseno/ui-peak/`. |
+| `56-diseno-hoy.js` | Diseño nuevo de Hoy (`hoyNuevo`, la llama `pintaHoy`): DÍA N., Retos·Hábitos·Cuerpo, listas numeradas, Parte/Estudiar, Tu semana. Tu foto arriba con menú Tu perfil/Ajustes/Modo (`hoyNuevoAccion`, desde `rumboAccion`). |
+| `57-diseno-objetivos.js` | Diseño nuevo de Objetivos (sin tarjetas, «Más» con Mis retos y Experimentos) y Progreso (rango, montaña de noche con Abrir 3D, hoy/racha/mejor, tu grupo). |
+| `58-diseno-cuerpo.js` | Diseño nuevo de Cuerpo: orden Salud del día, Ejercicio, Estirar, Alimentación; tarjeta «Entreno de hoy» con Gym/Correr/Deporte/Otro. |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
