@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700;800&family=Instrument+Sans:wght@500;600&display=swap">
+<style>*{box-sizing:border-box;margin:0;padding:0;font-feature-settings:"tnum"}
+:root{--bg:#F1ECE1;--tx:#141414;--t2:rgba(20,20,20,.58);--t3:rgba(20,20,20,.36);--l:rgba(20,20,20,.12);--sf:#FBF8F1;--ac:#0E8A6E;--up:#3BE08B}
+body{width:390px;background:var(--bg);color:var(--tx);font-family:"Instrument Sans",sans-serif;font-weight:500;letter-spacing:-.005em;padding:54px 20px 120px;position:relative}
+.top{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:Unbounded;font-weight:800;font-size:17px;letter-spacing:-.03em}
+.niv{display:flex;align-items:center;gap:8px;border:1px solid var(--l);border-radius:99px;padding:5px 12px 5px 6px;font-size:13px;font-weight:600}.niv i{width:22px;height:22px;border-radius:50%;background:linear-gradient(150deg,#d4a26a,#7a5228)}.niv span{color:var(--t3);font-weight:500}
+.eti{font-size:11px;font-weight:600;letter-spacing:.18em;color:var(--t3)}
+.hero{margin-top:34px}.hero h1{font-family:Unbounded;font-weight:800;font-size:64px;letter-spacing:-.06em;line-height:.92;margin-top:18px}.hero h1 span{color:var(--t3)}
+.sub{font-size:16px;color:var(--t2);margin-top:12px}.sub b{color:var(--tx);font-weight:600}
+.fila3{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--l);border-bottom:1px solid var(--l);margin-top:28px}.fila3 div{padding:14px 0}.fila3 div+div{padding-left:14px;border-left:1px solid var(--l)}
+.fila3 small{font-size:11px;font-weight:600;letter-spacing:.12em;color:var(--t3)}.fila3 b{display:block;font-family:Unbounded;font-size:24px;margin-top:5px;letter-spacing:-.04em}.fila3 b span{font:500 13px "Instrument Sans";color:var(--t3);margin-left:2px}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:36px 0 12px}.sec h2{font-family:Unbounded;font-weight:700;font-size:19px;letter-spacing:-.03em}.sec span{font-size:14px;color:var(--t2)}
+.tot{display:flex;gap:4px;margin-bottom:6px}.tot u{flex:1;height:4px;border-radius:2px;background:var(--l)}.tot u.on{background:var(--tx)}
+.r{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:15px 0;border-bottom:1px solid var(--l)}
+.r i{font-style:normal;font-family:Unbounded;font-weight:700;font-size:13px;color:var(--t3)}
+.r p{font-size:16px;font-weight:500;line-height:1.3}.r small{display:block;font-size:13px;color:var(--t2);margin-top:2px}
+.r.ok p{color:var(--t3);text-decoration:line-through;text-decoration-thickness:1.5px}.r.ok i{color:var(--ac)}
+.ck{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--t3);position:relative}.ok .ck{background:var(--tx);border-color:var(--tx)}.ok .ck:after{content:"";position:absolute;left:8.5px;top:4.5px;width:5px;height:10px;border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:36px}
+.card{background:var(--sf);border-radius:20px;padding:16px;min-height:118px;display:flex;flex-direction:column;justify-content:space-between}
+.card .ic{width:34px;height:34px;border-radius:10px;border:1px solid var(--l);display:grid;place-items:center}
+.card p{font-weight:600;font-size:16px}.card small{display:block;color:var(--t2);font-size:13px;margin-top:2px}
+.card.neg{background:var(--tx);color:var(--bg)}.card.neg small{color:color-mix(in srgb,var(--bg) 60%,transparent)}.card.neg .ic{border-color:color-mix(in srgb,var(--bg) 20%,transparent)}
+.sem{display:flex;gap:8px;align-items:flex-end;height:90px}.sem div{flex:1;text-align:center;font-size:11px;font-weight:600;color:var(--t3)}.sem i{display:block;width:16px;margin-left:auto;margin-right:auto;border-radius:99px;background:var(--l);margin-bottom:6px}.sem .on i{background:var(--tx)}.sem .hoy{color:var(--tx)}.sem .hoy i{background:var(--ac)}
+.tab{position:absolute;left:14px;right:14px;bottom:22px;height:62px;border-radius:99px;background:rgba(20,20,20,.92);display:flex;justify-content:space-around;align-items:center;backdrop-filter:blur(12px)}
+.tab div{color:color-mix(in srgb,#F1ECE1 45%,transparent);display:grid;place-items:center;width:52px;height:46px;border-radius:99px}.tab div.on{background:#F1ECE1;color:#141414}
+.yo{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#9bb7cf,#3a5a78);box-shadow:0 0 0 2px var(--bg),0 0 0 3.5px var(--tx)}
+.velo{position:absolute;inset:0;background:color-mix(in srgb,var(--bg) 40%,rgba(0,0,0,.25));backdrop-filter:blur(6px);z-index:5}
+.menu{position:absolute;z-index:6;top:104px;right:20px;width:260px;background:var(--sf);border-radius:22px;box-shadow:0 20px 50px -12px rgba(0,0,0,.35);padding:8px;border:1px solid var(--l)}
+.menu .yo2{display:flex;align-items:center;gap:12px;padding:10px 10px 14px;border-bottom:1px solid var(--l);margin-bottom:6px}
+.menu .yo2 i{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#9bb7cf,#3a5a78)}
+.menu .yo2 b{display:block;font-weight:600;font-size:16px}.menu .yo2 small{font-size:13px;color:var(--t2)}
+.menu .op{display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:14px;font-size:15.5px}
+.menu .op svg{color:var(--t2)}.menu .op span{margin-left:auto;color:var(--t3)}
+.modo{margin-left:auto;display:flex;background:var(--bg);border-radius:99px;padding:3px}.modo u{text-decoration:none;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:99px;color:var(--t2)}.modo u.on{background:var(--tx);color:var(--bg)}
+</style></head><body>
+<div class="top"><div class="logo">PEAK.</div><div class="yo" style="position:relative;z-index:7"></div></div>
+<div class="hero"><div class="eti">VIERNES 9 · RACHA</div><h1>DÍA 6<span>.</span></h1><p class="sub">Sin fallar desde el viernes. <b>Mañana superas tu récord.</b></p></div>
+<div class="fila3"><div><small>RETOS</small><b>1<span>/3</span></b></div><div><small>HÁBITOS</small><b>4<span>/6</span></b></div><div><small>CUERPO</small><b>2<span>/4</span></b></div></div>
+<div class="sec"><h2>Retos de hoy</h2><span>1 de 3</span></div><div class="tot"><u class="on"></u><u class=""></u><u class=""></u></div><div class="r "><i>01</i><div><p>Aguantar un minuto colgado de la barra</p><small>+20 XP</small></div><div class="ck"></div></div><div class="r "><i>02</i><div><p>Leer diez páginas de algo que no sea de clase</p><small>+20 XP</small></div><div class="ck"></div></div><div class="r ok"><i>03</i><div><p>Ducha fría los últimos treinta segundos</p><small>+20 XP</small></div><div class="ck"></div></div>
+<div class="sec"><h2>Hábitos</h2><span>Editar</span></div><div class="tot"><u class="on"></u><u class="on"></u><u class="on"></u><u class="on"></u><u class=""></u><u class=""></u></div><div class="r "><i>01</i><div><p>Repaso rápido y mochila lista</p><small>+10 XP</small></div><div class="ck"></div></div><div class="r "><i>02</i><div><p>Móvil fuera, a dormir</p><small>+10 XP</small></div><div class="ck"></div></div><div class="r ok"><i>03</i><div><p>Levantarme a la primera</p><small>+10 XP</small></div><div class="ck"></div></div><div class="r ok"><i>04</i><div><p>Desayunar en condiciones</p><small>+10 XP</small></div><div class="ck"></div></div><div class="r ok"><i>05</i><div><p>Entrenar</p><small>+10 XP</small></div><div class="ck"></div></div><div class="r ok"><i>06</i><div><p>Bloque de estudio · 50 min</p><small>+10 XP</small></div><div class="ck"></div></div>
+<div class="dos"><div class="card neg"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg></div><div><p>Parte del día</p><small>Esta noche · 1 min</small></div></div>
+<div class="card"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></div><div><p>Estudiar</p><small>Pomodoro · 25 min</small></div></div></div>
+<div class="sec"><h2>Tu semana</h2><span>+180 XP</span></div>
+<div class="sem"><div class="on"><i style="height:38px"></i>L</div><div class="on"><i style="height:57px"></i>M</div><div class="on"><i style="height:25px"></i>X</div><div class="on"><i style="height:51px"></i>J</div><div class="hoy"><i style="height:35px"></i>V</div><div class=""><i style="height:6px"></i>S</div><div class=""><i style="height:6px"></i>D</div></div>
+<div class="tab"><div class="on"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20 10 7l4 6 2-3 5 10z"/></svg></div><div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8v5a4 4 0 0 1-8 0zM8 5H5v1.5A3 3 0 0 0 8 10M16 5h3v1.5a3 3 0 0 1-3 3M12 12v5M8 21h8"/></svg></div><div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/></svg></div><div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4c2 3 2 7 0 11-2-4-2-8 0-11zM4 9c4 0 7 3 8 6-4 0-7-2-8-6zM20 9c-4 0-7 3-8 6 4 0 7-2 8-6zM5 19h14"/></svg></div><div><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM3 20c0-3.5 3-5.5 6-5.5s6 2 6 5.5M16 11a3 3 0 1 0 0-6M18 14.5c2 .5 3.5 2.3 3.5 5"/></svg></div></div>
+<div class="velo"></div><div class="menu">
+<div class="yo2"><i></i><div><b>Carlos</b><small>Bronce I · 340 XP</small></div></div>
+<div class="op"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Tu perfil<span>›</span></div>
+<div class="op"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg>Ajustes<span>›</span></div>
+<div class="op"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/></svg>Modo<div class="modo"><u class="on">Claro</u><u class="">Oscuro</u></div></div>
+</div></body></html>
