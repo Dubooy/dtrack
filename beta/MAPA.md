@@ -81,6 +81,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `56-diseno-hoy.js` | Diseño nuevo de Hoy (`hoyNuevo`, la llama `pintaHoy`): DÍA N., Retos·Hábitos·Cuerpo, listas numeradas, Parte/Estudiar, Tu semana. Tu foto arriba con menú Tu perfil/Ajustes/Modo (`hoyNuevoAccion`, desde `rumboAccion`). |
 | `57-diseno-objetivos.js` | Diseño nuevo de Objetivos (sin tarjetas, «Más» con Mis retos y Experimentos) y Progreso (rango, montaña de noche con Abrir 3D, hoy/racha/mejor, tu grupo). |
 | `58-diseno-cuerpo.js` | Diseño nuevo de Cuerpo: orden Salud del día, Ejercicio, Estirar, Alimentación; tarjeta «Entreno de hoy» con Gym/Correr/Deporte/Otro. |
+| `59-diseno-mente-social.js` | Piel nueva de Mente y Social (cabecera, pastillas de tinta, tarjetas lisas; sin mover nada) y la barra de abajo de tinta en Claro y Oscuro. |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
