@@ -23,7 +23,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | Pieza | Qué hay |
 |---|---|
 | `00-errores.js` | Aviso en pantalla si algo falla |
-| `01-idiomas.js` | Traducciones (es, en, fr, it) |
+| `01-idiomas.js` | Idiomas (es, en, fr, it): `tr`, cambiar de idioma. Las tablas de traducción están en `beta/idiomas-datos.js` (a mano; solo se carga si no es español) |
 | `02-textos.js` | TEXTOS de la app (`textos.js` de fuera manda si existe) |
 | `03-estado-y-datos.js` | Estado guardado (`nura-v4`), consultas, retos del día, logo |
 | `04-pintar.js` | Pintado: parte del día, gráficas, vaso/luna/reloj, compartir, año, calendario |
@@ -82,6 +82,9 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `57-diseno-objetivos.js` | Diseño nuevo de Objetivos (sin tarjetas, «Más» con Mis retos y Experimentos) y Progreso (rango, montaña de noche con Abrir 3D, hoy/racha/mejor, tu grupo). |
 | `58-diseno-cuerpo.js` | Diseño nuevo de Cuerpo: orden Salud del día, Ejercicio, Estirar, Alimentación; tarjeta «Entreno de hoy» con Gym/Correr/Deporte/Otro. |
 | `59-diseno-mente-social.js` | Piel nueva de Mente y Social (cabecera, pastillas de tinta, tarjetas lisas; sin mover nada) y la barra de abajo de tinta en Claro y Oscuro. |
+| `60-bienvenida-subida.js` | Bienvenida nueva (logo animado, «¿Cómo te llamas?» y las preguntas de 17 en filas) y subida de rango a pantalla completa de noche con montaña y confeti (envuelve `abrirPreguntas`, `onbPinta`, `onbAccion`, `onbTermina`, `celebraNivel`; `verBienvenida`, `verSubida`) |
+| `61-semana-vacios.js` | Tu semana para stories con la estética nueva (rehace `dibujaSemana` y `CS_COLORES`), tarjeta del domingo en Hoy y Social sin grupo |
+| `62-transiciones-pruebas.js` | Transición al cambiar de pestaña según el lado, botones pequeños con zona de toque de 44 px y Ajustes › Avanzado › «Ver pantallas nuevas» |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),

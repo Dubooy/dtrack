@@ -20,9 +20,9 @@
 '  font-family:var(--f-titulo) !important; font-weight:700 !important; letter-spacing:-.03em !important; }',
 'html #lienzo .view h3, html .sheet-card h3{ font-family:var(--f-texto) !important; font-weight:600 !important; }',
 /* colores */
-P+'{ --bg:#F1ECE1; --tarjeta:#FBF8F1; --t1:#141414; --t2:rgba(20,20,20,.6); --t3:rgba(20,20,20,.4);',
+P+'{ --bg:#F1ECE1; --tarjeta:#FBF8F1; --t1:#141414; --t2:rgba(20,20,20,.72); --t3:rgba(20,20,20,.6);',
 '  --hairline:rgba(20,20,20,.12); --tarjeta-borde:rgba(20,20,20,.07); }',
-D+'{ --bg:#0A0A0A; --tarjeta:#161513; --t1:#F3EEE3; --t2:rgba(243,238,227,.62); --t3:rgba(243,238,227,.4);',
+D+'{ --bg:#0A0A0A; --tarjeta:#161513; --t1:#F3EEE3; --t2:rgba(243,238,227,.7); --t3:rgba(243,238,227,.52);',
 '  --hairline:rgba(243,238,227,.12); --tarjeta-borde:rgba(243,238,227,.08); }',
 P+' body{ background:var(--bg); }',
 P+' .canvas-bg{ display:none; }'
