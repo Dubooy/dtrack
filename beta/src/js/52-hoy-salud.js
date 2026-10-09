@@ -144,7 +144,7 @@ document.addEventListener("click", function(e){
 '.hs-cuerpo{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-top:22px; }',
 '.hs-dato{ min-width:0; display:block; }',
 '.hs-num{ display:block; font-family:Unbounded,sans-serif; font-weight:700; font-size:34px; letter-spacing:-.05em; line-height:1; color:var(--t1); }',
-'.hs-num small{ font-family:Inter,sans-serif; font-size:14px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:6px; }',
+'.hs-num small{ font-family:var(--f-texto); font-size:14px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:6px; }',
 '.hs-msg{ display:block; font-size:12.5px; color:var(--t3); margin-top:8px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
 '.hs-fila.ok .hs-msg, .hs-fila.toca .hs-msg{ color:var(--sf); font-weight:600; }',
 '.hs-sem{ flex:none; display:flex; align-items:flex-end; gap:4px; height:52px; }',

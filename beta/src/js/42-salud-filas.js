@@ -104,7 +104,7 @@ function sfToca(k, cls){
 '.sf-cuerpo{ display:flex; align-items:flex-end; justify-content:space-between; gap:14px; margin-top:22px; }',
 '.sf-dato{ min-width:0; }',
 '.sf-fila .sf-num{ display:block; font-family:Unbounded,sans-serif!important; font-weight:700!important; font-size:34px!important; letter-spacing:-.05em; line-height:1; color:var(--t1)!important; background:none!important; }',
-'.sf-num small{ font-family:Inter,sans-serif; font-size:14px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:6px; }',
+'.sf-num small{ font-family:var(--f-texto); font-size:14px; font-weight:600; letter-spacing:0; color:var(--t3); margin-left:6px; }',
 '.sf-fila .sf-num.vacio{ color:var(--t3)!important; }',
 /* lo de antes pintaba un recuadro de color al llegar a 8 vasos: aquí no */
 '.sf-fila #water-val, .sf-fila #water-val.agua-si, .sf-fila #sleep-val, .sf-fila #screen-val{ background:none!important; box-shadow:none!important; color:var(--t1)!important; padding:0!important; border-radius:0!important; height:auto!important; transform:none; }',

@@ -258,7 +258,7 @@ grupoAccion=function(a, el){
 '.mt-p.pico.on{ filter:drop-shadow(0 0 4px rgba(var(--mt-rgb),.9)); }',
 /* rangos */
 '.mt-rango{ position:absolute; transform:translateY(calc(-100% - 12px)); display:flex; justify-content:flex-end; pointer-events:none; opacity:.4; transition:opacity .6s ease; }',
-'.mt-rango b{ display:flex; align-items:center; gap:6px; font-family:"Plus Jakarta Sans",sans-serif; font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; color:rgba(255,255,255,.75); }',
+'.mt-rango b{ display:flex; align-items:center; gap:6px; font-family:var(--f-texto); font-size:11px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; white-space:nowrap; color:rgba(255,255,255,.75); }',
 '.mt-rango b::before{ content:""; width:6px; height:6px; border-radius:99px; background:var(--rc); }',
 '.mt-rango.on{ opacity:1; } .mt-rango.on b{ color:#fff; text-shadow:0 0 12px var(--rc); } .mt-rango.on b::before{ box-shadow:0 0 8px var(--rc); }',
 /* la cima */

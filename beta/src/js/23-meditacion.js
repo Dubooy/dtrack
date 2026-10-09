@@ -457,7 +457,7 @@ var CALMA_CSS=[
 '@keyframes medLibre{ 0%,100%{ transform:scale(.55); } 45%{ transform:scale(.9); } }',
 '@keyframes medLibreO{ 0%,100%{ transform:scale(.7); } 45%{ transform:scale(1.2); } }',
 '#med-capa .med-fase{ z-index:2; display:flex; flex-direction:column; align-items:center; pointer-events:none; }',
-'#med-capa .med-fase b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:24px; font-weight:600; letter-spacing:.02em; color:var(--t1); transition:opacity .22s ease, transform .3s ease; }',
+'#med-capa .med-fase b{ font-family:var(--f-texto); font-size:24px; font-weight:600; letter-spacing:.02em; color:var(--t1); transition:opacity .22s ease, transform .3s ease; }',
 '#med-capa .med-fase b.cambia{ opacity:0; transform:translateY(4px); }',
 '#med-capa .med-fase span{ font-size:15px; font-weight:600; color:var(--t2); margin-top:4px; min-height:20px; }',
 '#med-capa .med-frase{ min-height:46px; max-width:300px; text-align:center; font-size:15px; font-weight:500; line-height:1.5; color:var(--t2); opacity:0; transition:opacity 1.6s ease; margin:4px 0 12px; }',
@@ -473,7 +473,7 @@ var CALMA_CSS=[
 '#med-capa .med-bt{ width:100%; height:54px; border-radius:99px; background:var(--accent); color:var(--on-accent); font-weight:800; font-size:16px; }',
 /* al acabar */
 '#med-capa .med-hecho{ display:flex; flex-direction:column; align-items:center; text-align:center; animation:medAparece .9s var(--ease) both; }',
-'#med-capa .med-hecho b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:54px; font-weight:700; letter-spacing:-.02em; margin-top:16px; } #med-capa .med-hecho span{ font-size:15px; color:var(--t2); }',
+'#med-capa .med-hecho b{ font-family:var(--f-texto); font-size:54px; font-weight:700; letter-spacing:-.02em; margin-top:16px; } #med-capa .med-hecho span{ font-size:15px; color:var(--t2); }',
 '#med-capa .med-ok{ width:84px; height:84px; } #med-capa .med-ok circle{ fill:var(--md-medio); stroke:none; }',
 '#med-capa .med-ok path{ fill:none; stroke:var(--accent); stroke-width:3.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:40; stroke-dashoffset:40; animation:medTraza .9s .3s cubic-bezier(.6,0,.2,1) forwards; }',
 '@keyframes medTraza{ to{ stroke-dashoffset:0; } }',

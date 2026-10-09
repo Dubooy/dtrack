@@ -122,7 +122,7 @@ var SOC_CSS = [
 '.soc-reto .soc-reto-t{ font-size:19px; font-weight:800; letter-spacing:-.03em; line-height:1.2; margin-top:6px; max-width:22ch; }',
 '.soc-reto .soc-ey{ font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--t3); }',
 '.soc-reto .soc-cifra{ display:flex; align-items:baseline; gap:8px; margin-top:16px; }',
-'.soc-reto .soc-cifra b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:38px; font-weight:800; letter-spacing:-.05em; line-height:.9; }',
+'.soc-reto .soc-cifra b{ font-family:var(--f-texto); font-size:38px; font-weight:800; letter-spacing:-.05em; line-height:.9; }',
 '.soc-reto .soc-cifra span{ color:var(--t3); opacity:1!important; }',
 '.soc-reto .soc-barra{ background:var(--fill-hi); height:6px; margin-top:10px; }',
 '.soc-reto .soc-barra > i{ background:var(--accent); }',
@@ -173,7 +173,7 @@ var SOC_CSS = [
 '  backdrop-filter:blur(18px) saturate(150%); -webkit-backdrop-filter:blur(18px) saturate(150%);',
 '  box-shadow:0 1px 0 var(--hairline); transition:opacity .22s var(--ease), transform .3s var(--ease); }',
 '#soc-mini.ve{ opacity:1; transform:none; }',
-'#soc-mini b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:16px; font-weight:800; letter-spacing:-.02em; }',
+'#soc-mini b{ font-family:var(--f-texto); font-size:16px; font-weight:800; letter-spacing:-.02em; }',
 '@media (min-width:1024px){ #soc-mini{ display:none; } }'
 ].join("\n");
 

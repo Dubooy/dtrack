@@ -428,7 +428,7 @@ var EXTRAS_CSS=[
 '.est-segs{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }',
 '.est-seg{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:70px; border-radius:18px;',
 '  background:var(--fill); color:var(--t2); box-shadow:inset 0 0 0 1px var(--hairline); transition:all .25s var(--ease); }',
-'.est-seg b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:22px; font-weight:800; letter-spacing:-.03em; color:var(--t1); }',
+'.est-seg b{ font-family:var(--f-texto); font-size:22px; font-weight:800; letter-spacing:-.03em; color:var(--t1); }',
 '.est-seg span{ font-size:11px; }',
 '.est-seg.on{ background:var(--accent-soft); box-shadow:inset 0 0 0 2px var(--accent); color:var(--accent); }',
 '.est-seg.on b{ color:var(--accent); }',

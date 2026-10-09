@@ -408,7 +408,7 @@ var HOY_CSS=[
 '.hy-tarjeta{ position:relative; overflow:hidden; isolation:isolate; width:100%; display:flex; flex-direction:column; align-items:flex-start; text-align:left;',
 '  padding:16px 15px 14px; border-radius:24px; min-height:208px; transition:transform .35s var(--spring); }',
 '.hy-tarjeta:active{ transform:scale(.97); }',
-'.hy-t{ font-family:"Plus Jakarta Sans",sans-serif; font-size:18px; font-weight:800; letter-spacing:-.03em; margin-top:12px; line-height:1.15; }',
+'.hy-t{ font-family:var(--f-texto); font-size:18px; font-weight:800; letter-spacing:-.03em; margin-top:12px; line-height:1.15; }',
 '.hy-s{ font-size:12.5px; line-height:1.35; margin-top:3px; opacity:.8; }',
 '.hy-pie{ padding-top:10px; font-size:11.5px; font-weight:600; opacity:.7; }',
 /* estudio: esfera de reloj */
@@ -501,7 +501,7 @@ var HOY_CSS=[
 '.pt-main{ flex:1; height:56px; border-radius:99px; font-size:16.5px; font-weight:700; color:#fff; background:var(--pc);',
 '  box-shadow:0 14px 30px -16px var(--pc); transition:transform .3s var(--spring); }',
 '.pt-main:active, .pt-sec:active{ transform:scale(.97); }',
-'.pt-gym{ width:100%; height:64px; border-radius:20px; font-family:"Plus Jakarta Sans",sans-serif; font-size:17px; font-weight:800; color:var(--t2);',
+'.pt-gym{ width:100%; height:64px; border-radius:20px; font-family:var(--f-texto); font-size:17px; font-weight:800; color:var(--t2);',
 '  background:var(--fill); box-shadow:inset 0 0 0 1px var(--hairline); transition:all .4s var(--spring); }',
 '.pt-gym.si{ color:#fff; background:linear-gradient(145deg,var(--good),color-mix(in srgb,var(--good) 70%,var(--cyan))); box-shadow:0 12px 28px -14px var(--good); }',
 '.pt-ck{ display:flex; flex-direction:column; gap:4px; }',

@@ -467,7 +467,7 @@ var EVOLUCION_CSS=[
 '.ev-cifras{ display:grid; grid-template-columns:repeat(3,1fr); margin-top:14px; }',
 '.ev-cifras div{ display:flex; flex-direction:column; }',
 '.ev-cifras div + div{ padding-left:12px; box-shadow:inset 1px 0 0 var(--hairline); }',
-'.ev-cifras b{ font-family:"Plus Jakarta Sans",sans-serif; font-size:19px; font-weight:800; letter-spacing:-.03em; }',
+'.ev-cifras b{ font-family:var(--f-texto); font-size:19px; font-weight:800; letter-spacing:-.03em; }',
 '.ev-cifras span{ font-size:11.5px; color:var(--t3); }',
 /* tu evolución: la pantalla */
 '#hist-capa{ transform:none!important; clip-path:inset(var(--ev-top,40%) var(--ev-der,16px) var(--ev-bot,40%) var(--ev-izq,16px) round 24px);',

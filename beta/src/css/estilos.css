@@ -93,10 +93,10 @@ input, textarea, select{ -webkit-user-select:auto; user-select:auto; }   /* aqu√
 input[class][class], textarea[class][class], select[class][class],
 input, textarea, select{ font-size:16px !important; }
 .barpill{ touch-action:none; }   /* esta necesita el gesto entero para arrastrar */
-body{ font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; font-size:14px; line-height:1.5;
+body{ font-family:var(--f-texto); font-size:14px; line-height:1.5;
   letter-spacing:-.006em; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   min-height:100vh; overflow-x:hidden; transition:background .5s var(--ease), color .5s var(--ease); }
-h1,h2,h3,.display{ font-family:"Plus Jakarta Sans",-apple-system,sans-serif; letter-spacing:-.032em; }
+h1,h2,h3,.display{ font-family:var(--f-texto); letter-spacing:-.032em; }
 .num{ font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
 .t1{color:var(--t1)} .t2{color:var(--t2)} .t3{color:var(--t3)}
 .eyebrow{ font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--t3); }
