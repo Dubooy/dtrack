@@ -5,8 +5,8 @@
    «Tu progreso de hoy» con cuatro anillos, tu intención de hoy, tus hábitos en
    tarjetas y el siguiente reto. Debajo sigue lo que ya había (Parte del día,
    Estudiar, Tu semana, Tu evolución).
-   La barra de abajo queda General · Cuerpo · Mente · Retos · Social, en una
-   píldora marfil con una rayita bajo la pestaña abierta.
+   La barra de abajo queda General · Cuerpo · Mente · Retos · Social, en la
+   barra de siempre (tinta y burbuja).
    Envuelve hoyNuevo (56), hnAlinea y hnAvatar. Todo sale de S (y de GRUPO). */
 
 var GN_ICO={
@@ -303,14 +303,12 @@ hnAvatar=function(){
 };
 
 /* ── la barra: General · Cuerpo · Mente · Retos · Social ── */
-BARRA_ICO.resumen=GN_ICO.general; BARRA_ICO.vital=GN_ICO.cuerpo; BARRA_ICO.academico=GN_ICO.mente;
-BARRA_ICO.retos=GN_ICO.retos; BARRA_ICO.social=GN_ICO.social;
+/* (17/10) la barra conserva su aspecto y sus iconos de antes: solo cambian el orden y los nombres */
 (function(){
   var bar=document.getElementById("mtabs"); if(!bar) return;
   ["resumen","vital","academico","retos","social"].forEach(function(k){
     var b=bar.querySelector('button[data-view="'+k+'"]') || (k==="academico" && bar.querySelector('button[data-view="tareas"]'));
     if(!b) return;
-    var sv=b.querySelector("svg"); if(sv) sv.outerHTML=barraIco(k);
     bar.appendChild(b);
   });
   var rail=document.getElementById("rail");
@@ -420,22 +418,6 @@ BARRA_ICO.retos=GN_ICO.retos; BARRA_ICO.social=GN_ICO.social;
 '.hn-yo:has(.gn-sinfoto){ background:#E2DCCF; box-shadow:none; color:#141414; }',
 'html.dark .hn-yo:has(.gn-sinfoto){ background:#24221F; color:#F3EEE3; }',
 '.gn-sinfoto svg{ width:22px; height:22px; } .gn-sinfoto svg circle{ fill:currentColor; } .gn-sinfoto svg path{ fill:currentColor; }',
-/* ── la barra de abajo: píldora marfil, rayita bajo la pestaña abierta ── */
-'nav.bottombar{ padding:0 10px calc(6px + env(safe-area-inset-bottom)) !important; }',
-Q+' #mtabs.barpill{ width:100%; max-width:520px; justify-content:space-between; padding:6px 6px 8px !important; border-radius:34px !important;',
-'  background:color-mix(in srgb, var(--gn-tarjeta) 94%, transparent) !important; -webkit-backdrop-filter:blur(18px) saturate(1.3) !important; backdrop-filter:blur(18px) saturate(1.3) !important;',
-'  border:0 !important; box-shadow:0 8px 28px -14px rgba(60,45,25,.28), 0 0 0 1px rgba(40,32,20,.05) !important; }',
-Q+'.dark #mtabs.barpill{ box-shadow:0 10px 30px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(243,238,227,.07) !important; }',
-Q+' #mtabs .mtab{ flex:1; width:auto !important; height:58px; gap:5px; color:var(--t3) !important; }',
-Q+' #mtabs .mtab[aria-current="true"], '+Q+' #mtabs .mtab.cerca{ color:var(--t1) !important; }',
-Q+' #mtabs .mtab svg{ width:25px !important; height:25px !important; stroke-width:1.6 !important; }',
-Q+' #mtabs .mtab span{ font-size:12px !important; font-weight:500 !important; }',
-Q+' #mtabs .mtab[aria-current="true"] span{ font-weight:600 !important; }',
-Q+' #mtabs .mtab svg .r{ fill:none; } '+Q+' #mtabs .mtab[aria-current="true"] svg .r{ fill:currentColor; }',
-Q+' #mind::before{ inset:auto !important; top:auto !important; left:50% !important; bottom:3px !important; width:24px; height:2.5px; border-radius:2px; transform:translateX(-50%) !important;',
-'  background:var(--t1) !important; box-shadow:none !important; }',
-Q+' #mtabs.grabbing #mind::before, '+Q+' #mtabs.apretada #mind::before{ transform:translateX(-50%) scaleX(1.4) !important; }',
-Q+' #mind{ top:6px !important; height:58px !important; }',
 '@media (max-width:1023px){ #lienzo{ padding-bottom:calc(112px + env(safe-area-inset-bottom)) !important; } }',
 /* pantallas grandes: la cabecera y el progreso a la izquierda, los hábitos a la derecha */
 '@media (min-width:1024px){',

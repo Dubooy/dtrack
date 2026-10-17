@@ -51,14 +51,14 @@
     var gr=g.getBoundingClientRect(), s=r.width/lado;
     var dx=(r.left+r.width/2)-(gr.left+gr.width/2), dy=(r.top+r.height/2)-(gr.top+gr.height/2);
     g.style.transform="translate3d("+dx+"px,"+dy+"px,0) scale("+s+")";
-    g.style.borderRadius="999px";
+    g.style.borderRadius="50%";
     a.style.visibility="hidden";
     void g.offsetWidth;
     requestAnimationFrame(function(){
       capa.classList.add("ve");
       g.style.transition="transform .55s cubic-bezier(.2,1.12,.3,1), border-radius .45s ease";
       g.style.transform="translate3d(0,0,0) scale(1)";
-      g.style.borderRadius="32px";
+      g.style.borderRadius="50%";
     });
     function cerrar(){
       capa.removeEventListener("click", cerrar); document.removeEventListener("keydown", tecla);
@@ -67,7 +67,7 @@
       capa.classList.remove("ve");
       g.style.transition="transform .42s cubic-bezier(.3,.9,.3,1), border-radius .35s ease";
       g.style.transform="translate3d("+dx2+"px,"+dy2+"px,0) scale("+s2+")";
-      g.style.borderRadius="999px";
+      g.style.borderRadius="50%";
       setTimeout(function(){ a.style.visibility=""; if(capa.parentNode) capa.parentNode.removeChild(capa); }, 430);
     }
     function tecla(e){ if(e.key==="Escape") cerrar(); }
