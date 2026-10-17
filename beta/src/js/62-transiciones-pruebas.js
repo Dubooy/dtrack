@@ -73,6 +73,9 @@ hoyNuevoAccion=function(a, el){
 '@keyframes vDer{ from{ opacity:0; transform:translateX(28px); } to{ opacity:1; transform:none; } }',
 '@keyframes vIzq{ from{ opacity:0; transform:translateX(-28px); } to{ opacity:1; transform:none; } }',
 'html.tour-on .view{ animation:none!important; }',
+/* la vista que entra de lado no puede ensanchar la página: si no, el iPhone la aleja (se ve más pequeña) y da un tirón al volver */
+'html, body{ overflow-x:clip; }',
+'html{ touch-action:manipulation; }',
 '@media (prefers-reduced-motion:reduce){ html.va-der .view, html.va-izq .view{ animation:vIn .2s linear both; } }',
 /* botones pequeños: misma pinta, pero se pueden tocar en un círculo de al menos 44 px */
 '.hn-g-cab button, [data-act="edit-ideal"], .rs-editar, .sf-mas, .ali-obj, [data-act="day-prev"], [data-act="day-next"], [data-act="day-pick"], .cs-hoy-x{ position:relative; }',
@@ -80,3 +83,7 @@ hoyNuevoAccion=function(a, el){
 '  content:""; position:absolute; left:50%; top:50%; width:max(100%, 44px); height:max(100%, 44px); transform:translate(-50%,-50%); }'
   ].join("\n"); document.head.appendChild(st);
 })();
+
+/* sin zoom: Safari no hace caso a user-scalable=no, así que se cortan el pellizco y el doble toque */
+document.addEventListener("gesturestart", function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener("touchmove", function(e){ if(e.scale!==undefined && e.scale!==1) e.preventDefault(); }, {passive:false});

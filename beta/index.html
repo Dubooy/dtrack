@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>window.DTRACK_BETA=1;(function(){var P="beta:",S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};S.removeItem=function(k){return r.call(this,P+k)};})();</script>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Peak.</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%201000%201000%22%3E%3Crect%20width%3D%221000%22%20height%3D%221000%22%20fill%3D%22%231c1b19%22/%3E%3Cg%20transform%3D%22translate%28176%20194%29%20scale%28.72%29%22%3E%3Cpath%20d%3D%22M450%200%200%20900%20600%20900%20525%20648%20538%20607%20634%20900%20680%20900%20561%20534%20577%20481%20714%20900%20760%20900%20497%2094%20594%20288ZM594%20288%20794%20900%20840%20900%20727%20554ZM900%20900%20824%20748%20874%20900Z%22%20fill%3D%22%23f5f0e6%22/%3E%3C/g%3E%3C/svg%3E">
 <meta name="theme-color" content="#f5f0e6">
@@ -25788,6 +25788,9 @@ hoyNuevoAccion=function(a, el){
 '@keyframes vDer{ from{ opacity:0; transform:translateX(28px); } to{ opacity:1; transform:none; } }',
 '@keyframes vIzq{ from{ opacity:0; transform:translateX(-28px); } to{ opacity:1; transform:none; } }',
 'html.tour-on .view{ animation:none!important; }',
+/* la vista que entra de lado no puede ensanchar la página: si no, el iPhone la aleja (se ve más pequeña) y da un tirón al volver */
+'html, body{ overflow-x:clip; }',
+'html{ touch-action:manipulation; }',
 '@media (prefers-reduced-motion:reduce){ html.va-der .view, html.va-izq .view{ animation:vIn .2s linear both; } }',
 /* botones pequeños: misma pinta, pero se pueden tocar en un círculo de al menos 44 px */
 '.hn-g-cab button, [data-act="edit-ideal"], .rs-editar, .sf-mas, .ali-obj, [data-act="day-prev"], [data-act="day-next"], [data-act="day-pick"], .cs-hoy-x{ position:relative; }',
@@ -25795,6 +25798,10 @@ hoyNuevoAccion=function(a, el){
 '  content:""; position:absolute; left:50%; top:50%; width:max(100%, 44px); height:max(100%, 44px); transform:translate(-50%,-50%); }'
   ].join("\n"); document.head.appendChild(st);
 })();
+
+/* sin zoom: Safari no hace caso a user-scalable=no, así que se cortan el pellizco y el doble toque */
+document.addEventListener("gesturestart", function(e){ e.preventDefault(); }, {passive:false});
+document.addEventListener("touchmove", function(e){ if(e.scale!==undefined && e.scale!==1) e.preventDefault(); }, {passive:false});
 /* ════════ General (oct 2026) ════════
    La pestaña de inicio pasa a ser «General»: un panel que resume Cuerpo, Mente,
    Retos y Social. Sigue la referencia que mandó Carlos el 17/10: PEAK. y tu foto
