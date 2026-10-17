@@ -85,6 +85,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `60-bienvenida-subida.js` | Bienvenida nueva (logo animado, «¿Cómo te llamas?» y las preguntas de 17 en filas) y subida de rango a pantalla completa de noche con montaña y confeti (envuelve `abrirPreguntas`, `onbPinta`, `onbAccion`, `onbTermina`, `celebraNivel`; `verBienvenida`, `verSubida`) |
 | `61-semana-vacios.js` | Tu semana para stories con la estética nueva (rehace `dibujaSemana` y `CS_COLORES`), tarjeta del domingo en Hoy y Social sin grupo |
 | `62-transiciones-pruebas.js` | Transición al cambiar de pestaña según el lado, botones pequeños con zona de toque de 44 px y Ajustes › Avanzado › «Ver pantallas nuevas» |
+| `63-general.js` | **General** (la pestaña de inicio, antes Hoy) como la referencia del 17/10: PEAK. y foto, fecha, «Buenos días, tu mejor versión» con montaña, «Tu progreso de hoy» con 4 anillos (Cuerpo, Mente, Retos, Social; `gnDatos`), intención, hábitos en tarjetas, siguiente reto y hojas «Ver detalle»/«Retos de hoy». Barra General · Cuerpo · Mente · Retos · Social en píldora marfil con rayita. Envuelve `hoyNuevo`, `hnAlinea`, `hnAvatar`, `extrasAccion` |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
