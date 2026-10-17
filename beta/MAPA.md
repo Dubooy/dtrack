@@ -86,7 +86,9 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `61-semana-vacios.js` | Tu semana para stories con la estética nueva (rehace `dibujaSemana` y `CS_COLORES`), tarjeta del domingo en Hoy y Social sin grupo |
 | `62-transiciones-pruebas.js` | Transición al cambiar de pestaña según el lado, botones pequeños con zona de toque de 44 px y Ajustes › Avanzado › «Ver pantallas nuevas» |
 | `63-general.js` | **General** (la pestaña de inicio, antes Hoy) como la referencia del 17/10: PEAK. y foto, fecha, «Buenos días, tu mejor versión» con montaña, «Tu progreso de hoy» con 4 anillos (Cuerpo, Mente, Retos, Social; `gnDatos`), intención, hábitos en tarjetas, siguiente reto y hojas «Ver detalle»/«Retos de hoy». Barra General · Cuerpo · Mente · Retos · Social en píldora marfil con rayita. Envuelve `hoyNuevo`, `hnAlinea`, `hnAvatar`, `extrasAccion` |
+| `64-cuerpo-nuevo.js` | Cuerpo (17/10): Estirar como tarjetas con texto y flecha bajo la foto y «Ver todos» (lista entera); Alimentación con «¿Has comido bien?» (check redondo y semana) e ideas de hoy en filas con dibujo del plato (`beta/comida/*.svg`, propios). Rehace `rtPinta` y `aliTarjetaHTML` |
+| `65-barra-iconos.js` | Barra de abajo: iconos nuevos de contorno y macizos en la pestaña abierta (`BI`), pastilla suave detrás del icono abierto en vez de la rayita |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
-`vendor/` (jszip, epub.js), `salud/` (imágenes de los artículos de salud, JPG a 1200×660 sacados de los SVG de /mnt/project-files/salud-articulos/svg), `libros/` (EPUB y catálogo), `sw.js`, `manifest.webmanifest`, `privacidad.html`.
+`vendor/` (jszip, epub.js), `salud/` (imágenes de los artículos de salud, JPG a 1200×660 sacados de los SVG de /mnt/project-files/salud-articulos/svg), `libros/` (EPUB y catálogo), `comida/` (dibujos de platos de Alimentación), `sw.js`, `manifest.webmanifest`, `privacidad.html`.
