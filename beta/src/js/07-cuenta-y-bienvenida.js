@@ -186,10 +186,11 @@ var CAR_CSS =
    que se anima sola cuando la lámina está delante. */
 var CARRUSEL=[
   { marca:true },   /* la lámina de la marca («Palabras»): la primera (Carlos, 18/10) */
-  { t:"Cuida <br>el cuerpo.",          s:"Ejercicio, sueño, pantallas y meditación. Un toque y apuntado.",   e:escenaGym },
-  { t:"Una racha <br>que engancha.",   s:"Tres retos al día, XP y niveles. Si haces los tres, ×1,5.",   e:escenaRacha },
-  { t:"Con <br>los tuyos.",            s:"Tu grupo, un objetivo en común y quién tira más del carro.",       e:escenaGrupo },
-  { t:"Cada noche, <br>tu Parte del día.", s:"Un minuto: repasas el día, cómo te has sentido y lo que no quieres olvidar mañana.", e:escenaParte }
+  /* las láminas enseñan la app como es ahora (18/10): General, Cuerpo, Retos y Social */
+  { t:"Tu día, <br>de un vistazo.",    s:"Cuatro anillos que se cierran con lo que haces: Cuerpo, Mente, Retos y Social.", e:escenaDia },
+  { t:"Cuida <br>el cuerpo.",          s:"Agua, sueño, pantalla y entreno. Un toque y apuntado.",               e:escenaCuerpoN },
+  { t:"Retos que <br>enganchan.",      s:"Tres al día y uno grande cada semana. Cada uno te sube por tu montaña.", e:escenaRetosN },
+  { t:"Con <br>los tuyos.",            s:"Un grupo de amigos, sin desconocidos. Veis quién tira más del carro.", e:escenaGrupoN }
 ];
 var LLAMA_BV='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.4c3.8 4.2 6 7.2 6 10.6a6 6 0 0 1-12 0c0-2.1.9-3.8 2.3-5.3-.1 1.5.4 2.5 1.2 3C9.8 7.5 10.6 5 12 2.4z"/></svg>';
 var CHECK_BV='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
@@ -269,6 +270,57 @@ function escenaGrupo(){
     '<div class="bv-comun"><div class="bv-comun-t"><span>Objetivo del grupo</span><b class="num"><span class="bv-cuenta"><span class="a">18</span><span class="b">24</span></span> / 24</b></div>'+
       '<div class="bv-barra grande"><i></i></div></div>'+
   '</div>';
+}
+
+/* ── láminas nuevas (18/10): con las piezas y colores de la app de ahora ── */
+var BVN_ICO={
+  cuerpo:'<circle cx="15.2" cy="4.6" r="1.9"/><path d="M8 10.2l2.6-2.3 3.4.3 2 3.3 3 .8M14 8.2l-1.6 5.1 3.1 2.6-.9 4.6M12.4 13.3l-2 3.3-4.2 1.2"/>',
+  mente:'<path d="M12 5.4c-.7-.8-1.6-1.2-2.6-1.2A2.6 2.6 0 0 0 6.8 6.6 2.9 2.9 0 0 0 4.8 9.4c0 .6.2 1.2.5 1.7a3.1 3.1 0 0 0 .9 4.9 2.8 2.8 0 0 0 3 3c1 0 1.9-.4 2.8-1.1zM12 5.4c.7-.8 1.6-1.2 2.6-1.2a2.6 2.6 0 0 1 2.6 2.4 2.9 2.9 0 0 1 2 2.8c0 .6-.2 1.2-.5 1.7a3.1 3.1 0 0 1-.9 4.9 2.8 2.8 0 0 1-3 3c-1 0-1.9-.4-2.8-1.1zM12 5.4v12.5M8.6 9.2c.9 0 1.7.6 2 1.4M15.4 9.2c-.9 0-1.7.6-2 1.4M8.2 13.6c1 .2 1.8.9 2 1.8M15.8 13.6c-1 .2-1.8.9-2 1.8"/>',
+  retos:'<circle cx="11" cy="13" r="7.5"/><circle cx="11" cy="13" r="4"/><circle cx="11" cy="13" r=".6" fill="currentColor"/><path d="M11 13l8-8M15.6 5.2v3.2h3.2M19 5l1.5-1.5"/>',
+  social:'<circle cx="9" cy="8" r="3.1"/><path d="M3.3 19.3c0-3.2 2.6-5.4 5.7-5.4s5.7 2.2 5.7 5.4"/><circle cx="16.6" cy="8.6" r="2.5"/><path d="M15.9 13.9c2.9-.2 5 1.7 5 4.6"/>',
+  gota:'<path d="M12 3.8c3 3.8 5.4 6.9 5.4 9.9a5.4 5.4 0 0 1-10.8 0c0-3 2.4-6.1 5.4-9.9z"/>',
+  luna:'<path d="M19.5 14.6A7.6 7.6 0 0 1 9.4 4.5a7.6 7.6 0 1 0 10.1 10.1z"/>',
+  movil:'<rect x="7" y="3" width="10" height="18" rx="2.4"/><path d="M11 18h2"/>',
+  zapa:'<path d="M3 16.5V10.8c1.4.4 2.5.4 3.5-.1l1.4 2.4c1.6.5 3.4.6 5 .3l4.4.9c1.8.4 3.2 1.4 3.7 3.2v1H3z"/><path d="M3 17.5h17.9M9.6 11.6l1.3-1.1M11.6 12.6l1.3-1.1"/>',
+  pesa:'<path d="M6.5 7.5v9M17.5 7.5v9M4 10v4M20 10v4M6.5 12h11"/>',
+  libro:'<path d="M12 6.6C10 5.1 7 4.7 3.5 5.1v12.8c3.5-.4 6.5 0 8.5 1.5 2-1.5 5-1.9 8.5-1.5V5.1C17 4.7 14 5.1 12 6.6zM12 6.6v12.8"/>',
+  bici:'<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="M6 16l4-7h5l3 7M10 9l2 7"/>'
+};
+function bvnI(k){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+BVN_ICO[k]+'</svg>'; }
+function escenaDia(){
+  var C=2*Math.PI*30, an=[["cuerpo","Cuerpo",5,7],["mente","Mente",3,5],["retos","Retos",2,3],["social","Social",3,4]];
+  var hab=[["01","Entrenar o andar 30 minutos","Cuerpo · Movimiento","zapa","t-salvia",1],["02","Leer 20 páginas","Mente · Lectura","libro","t-lavanda",1],["03","Móvil fuera antes de dormir","Mente · Desconexión","movil","t-arena",0]];
+  return '<div class="bvn-dia"><div class="gn-anillos">'+an.map(function(a,i){
+      return '<div class="gn-an gn-'+a[0]+'"><span class="gn-ani"><svg viewBox="0 0 68 68"><circle class="gn-pista" cx="34" cy="34" r="30"/>'+
+        '<circle class="gn-arco bvn-arco" cx="34" cy="34" r="30" stroke-dasharray="'+C.toFixed(1)+'" style="--c0:'+C.toFixed(1)+';--to:'+(C*(1-a[2]/a[3])).toFixed(1)+';--d:'+i+'"/></svg>'+
+        '<span class="gn-aico">'+bvnI(a[0])+'</span></span><b class="num">'+a[2]+'/'+a[3]+'</b><small>'+a[1]+'</small></div>'; }).join("")+'</div>'+
+    '<div class="bvn-lista">'+hab.map(function(h,i){
+      return '<div class="gn-h bvn-sube'+(h[5]?" ok":"")+'" style="--d:'+(i+3)+'"><i class="num">'+h[0]+'</i><span class="gn-hic '+h[4]+'">'+bvnI(h[3])+'</span>'+
+        '<span class="gn-htx"><b>'+h[1]+'</b><small>'+h[2]+'</small></span><span class="gn-ck"></span></div>'; }).join("")+'</div></div>';
+}
+function escenaCuerpoN(){
+  var f=[["gota","Agua","6 de 8 vasos",.75,"t-verde"],["luna","Sueño","7 h 40",.86,"t-lavanda"],["movil","Pantalla","1 h 50",.55,"t-arena"]];
+  return '<div class="bvn-cuerpo"><p class="bvn-ey">Salud del día</p>'+f.map(function(x,i){
+      return '<div class="bvn-sal bvn-sube '+x[4]+'" style="--d:'+i+'"><span class="gn-hic '+x[4]+'">'+bvnI(x[0])+'</span>'+
+        '<span class="bvn-st"><b>'+x[1]+'</b><small>'+x[2]+'</small></span><i class="bvn-barra"><em style="--p:'+x[3]+'"></em></i></div>'; }).join("")+
+    '<div class="bvn-entreno bvn-sube" style="--d:3"><p class="bvn-ey">Entreno de hoy</p><b>¿Qué toca hoy?</b>'+
+      '<div class="bvn-ops">'+["pesa","zapa","bici"].map(function(k,i){ return '<span class="'+(i===0?"si":"")+'">'+bvnI(k)+'</span>'; }).join("")+'<span class="bvn-xp num">+20 XP</span></div></div></div>';
+}
+function escenaRetosN(){
+  var r=[["Leer diez páginas",1],["Un minuto de plancha",1],["Hacer la cama",0]];
+  return '<div class="bvn-retos"><div class="bvn-sube" style="--d:0"><p class="bvn-ey">Reto de la semana <span class="bvn-chip num">+150 XP</span></p>'+
+      '<b class="bvn-gran">Todo hecho 4 días</b>'+
+      '<div class="bvn-senda">'+[0,1,2,3].map(function(i){ return '<i class="'+(i<3?"si":"")+'" style="--d:'+i+'"></i>'; }).join("")+'</div></div>'+
+    '<p class="bvn-ey bvn-sube" style="--d:2;margin-top:26px">Los tres de hoy</p>'+
+    r.map(function(x,i){ return '<div class="bvn-reto bvn-sube'+(x[1]?" ok":"")+'" style="--d:'+(i+3)+'"><span class="gn-ck"></span><b>'+x[0]+'</b><span class="bvn-chip num">+15</span></div>'; }).join("")+'</div>';
+}
+function escenaGrupoN(){
+  var g=[["L","lucia",37,40],["T","tú",58,30],["M","marcos",72,52],["N","nerea",22,60]];
+  var monte=(typeof mlSvg==="function") ? mlSvg("bvn-ml", "0 -6 120 70",
+    "M0 64 L34 32 L45 38 L74 6 L88 21 L96 16 L120 42 L120 64Z", "M74 6 L88 21 L96 16 L120 42 L120 64 L82 64 Z", "M74 7 V-4 L81 -1.5 L74 1Z", [30, 63, 0]) : "";
+  return '<div class="bvn-grupo"><div class="bvn-monte">'+monte+g.map(function(x,i){
+      return '<span class="bvn-cara'+(x[1]==="tú"?" yo":"")+'" style="left:'+x[2]+'%;top:'+x[3]+'%;--d:'+i+'">'+x[0]+'</span>'; }).join("")+'</div>'+
+    '<div class="bvn-objetivo bvn-sube" style="--d:4"><span>Objetivo del grupo</span><b class="num">18 / 24</b><i class="bvn-barra"><em style="--p:.75"></em></i></div></div>';
 }
 
 function laminaHTML(L, copia){
@@ -544,6 +596,52 @@ function carVa(i){
   }
   carIdx=i; carPinta(true);
 }
+BV_CSS+="\n"+[
+'#puerta .bvn-dia, #puerta .bvn-cuerpo, #puerta .bvn-retos, #puerta .bvn-grupo{ width:100%; max-width:380px; }',
+'#puerta .bvn-sube{ opacity:0; }',
+'#puerta .bv.on .bvn-sube{ animation:bvSube .5s var(--ease) calc(.15s + var(--d,0)*.12s) both; }',
+'#puerta .bvn-ey{ font-size:11px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--t3); margin:0 0 10px; display:flex; align-items:center; gap:8px; }',
+'#puerta .bvn-chip{ font-size:11px; letter-spacing:0; padding:3px 8px; border-radius:99px; background:var(--fill-hi); color:var(--t1); font-weight:600; text-transform:none; }',
+'#puerta .bvn-arco{ stroke-dashoffset:var(--c0); transition:none; }',
+'#puerta .bv.on .bvn-arco{ stroke-dashoffset:var(--to); transition:stroke-dashoffset 1.1s cubic-bezier(.3,.8,.3,1) calc(.2s + var(--d)*.1s); }',
+'#puerta .bvn-dia .gn-anillos{ margin:0 0 18px; }',
+'#puerta .bvn-dia .gn-aico svg, #puerta .bvn-dia .gn-hic svg{ display:block; width:100%; height:100%; }',
+'#puerta .bvn-lista{ display:flex; flex-direction:column; gap:8px; }',
+'#puerta .bvn-lista .gn-htx{ flex:1; min-width:0; display:flex; flex-direction:column; } #puerta .bvn-lista .gn-htx b{ font-size:14.5px; font-weight:600; } #puerta .bvn-lista .gn-htx small{ font-size:12px; color:var(--t3); }',
+'#puerta .bvn-sal{ display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; background:var(--gn-tarjeta); margin-bottom:8px; background-clip:padding-box; }',
+'#puerta .bvn-sal.t-verde, #puerta .bvn-sal.t-lavanda, #puerta .bvn-sal.t-arena{ background:var(--gn-tarjeta); }',
+'#puerta .bvn-st{ display:flex; flex-direction:column; width:96px; } #puerta .bvn-st b{ font-size:15px; font-weight:600; color:var(--t1); } #puerta .bvn-st small{ font-size:12.5px; color:var(--t2); }',
+'#puerta .bvn-barra{ flex:1; height:6px; border-radius:6px; background:var(--fill-hi); overflow:hidden; display:block; }',
+'#puerta .bvn-barra em{ display:block; height:100%; width:0; border-radius:6px; background:currentColor; }',
+'#puerta .bvn-sal .bvn-barra{ color:inherit; } #puerta .bvn-sal.t-verde .bvn-barra em{ background:var(--gn-verde); } #puerta .bvn-sal.t-lavanda .bvn-barra em{ background:var(--gn-lavanda); } #puerta .bvn-sal.t-arena .bvn-barra em{ background:var(--gn-arena); }',
+'#puerta .bv.on .bvn-barra em{ width:calc(var(--p)*100%); transition:width 1s cubic-bezier(.3,.8,.3,1) .5s; }',
+'#puerta .bvn-entreno{ margin-top:6px; padding:16px; border-radius:20px; background:#1C1B19; color:#F3EEE3; }',
+'#puerta .bvn-entreno .bvn-ey{ color:rgba(243,238,227,.5); margin-bottom:4px; }',
+'#puerta .bvn-entreno > b{ font-family:var(--f-titulo); font-weight:800; font-size:22px; letter-spacing:-.04em; }',
+'#puerta .bvn-ops{ display:flex; align-items:center; gap:8px; margin-top:12px; }',
+'#puerta .bvn-ops span{ width:46px; height:40px; border-radius:12px; display:grid; place-items:center; background:rgba(243,238,227,.08); }',
+'#puerta .bvn-ops span svg{ width:22px; height:22px; }',
+'#puerta .bv.on .bvn-ops span.si{ animation:bvnSi .4s ease 1.3s both; }',
+'@keyframes bvnSi{ to{ background:#F3EEE3; color:#1C1B19; } }',
+'#puerta .bvn-ops .bvn-xp{ width:auto; background:none; margin-left:auto; font-size:13px; font-weight:600; color:#3BE08B; opacity:0; }',
+'#puerta .bv.on .bvn-ops .bvn-xp{ animation:bvPop .45s ease 1.55s both; }',
+'#puerta .bvn-gran{ display:block; font-family:var(--f-titulo); font-weight:800; font-size:26px; letter-spacing:-.045em; line-height:1.08; color:var(--t1); }',
+'#puerta .bvn-senda{ position:relative; display:flex; justify-content:space-between; margin-top:16px; }',
+'#puerta .bvn-senda::before{ content:""; position:absolute; left:10px; right:10px; top:50%; height:1.5px; background:var(--hairline); }',
+'#puerta .bvn-senda i{ position:relative; width:22px; height:22px; border-radius:50%; border:1.5px solid var(--t2); background:var(--bg); }',
+'#puerta .bv.on .bvn-senda i.si{ animation:bvnPunto .35s ease calc(.6s + var(--d)*.18s) both; }',
+'@keyframes bvnPunto{ to{ background:var(--t1); border-color:var(--t1); } }',
+'#puerta .bvn-reto{ display:flex; align-items:center; gap:12px; padding:11px 2px; border-bottom:1px solid var(--hairline); }',
+'#puerta .bvn-reto b{ flex:1; font-size:15px; font-weight:500; color:var(--t1); } #puerta .bvn-reto.ok b{ color:var(--t3); }',
+'#puerta .bvn-monte{ position:relative; width:100%; aspect-ratio:120/70; color:var(--t1); }',
+'#puerta .bvn-monte svg{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; }',
+'#puerta .bvn-cara{ position:absolute; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:700;',
+'  background:var(--bg); color:var(--t1); box-shadow:0 0 0 2px var(--t1); opacity:0; }',
+'#puerta .bvn-cara.yo{ background:#3BE08B; color:#141414; box-shadow:0 0 0 2px var(--bg); }',
+'#puerta .bv.on .bvn-cara{ animation:bvPop .45s ease calc(.4s + var(--d)*.15s) both; }',
+'#puerta .bvn-objetivo{ margin-top:22px; padding:16px; border-radius:18px; background:#1C1B19; color:#F3EEE3; display:grid; grid-template-columns:1fr auto; row-gap:12px; font-size:14px; font-weight:600; }',
+'#puerta .bvn-objetivo .bvn-barra{ grid-column:1/-1; background:rgba(243,238,227,.15); } #puerta .bvn-objetivo .bvn-barra em{ background:#F3EEE3; }'
+].join("\n");
 BV_CSS+="\n#puerta .car-pista{ transition:transform .55s var(--spring), opacity .26s var(--ease); }"+
   "\n#puerta .car-pista.fundido{ opacity:1; }"+
   "\n@media (max-height:720px){ #puerta .bv-marca{ display:none; } #puerta .bv-t{ font-size:28px; margin-top:0; } #puerta .bv-t br{ display:none; } #puerta .bv-s{ font-size:13.5px; margin-top:6px; } #puerta .car-lam.bv{ padding:calc(env(safe-area-inset-top) + 14px) 22px 30px; } #puerta .bv-escena{ padding-top:8px; } #puerta .car-puntos{ bottom:10px!important; } }\n@media (max-height:640px){ #puerta .bv-s{ display:none; } #puerta .bv-retos{ margin-top:8px; } #puerta .bv-reto{ padding:6px 2px; } #puerta .bv-bonus{ margin-top:8px; padding:10px 14px; } #puerta .bv-fila{ padding:8px 12px; } #puerta .bv-examen{ margin-top:10px; padding:11px 14px; } #puerta .bv-comun{ margin-top:6px; } #puerta .car-pie .pu-nota{ display:none; } #puerta .car-pie .pu-enlace{ padding-top:8px; } #puerta .bv-semana{ margin-top:18px; } }";
