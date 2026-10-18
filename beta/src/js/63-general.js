@@ -191,15 +191,16 @@ function gnMasDeHoy(t){
     var x=sem.porDia[i];
     return '<div class="'+(d===t?"hoy":x>0?"on":"")+'"><em class="num">'+(x>0?x:"")+'</em><i style="height:'+(x>0?Math.max(8, Math.round(x/tope*72)):3)+'px"></i><span>'+"LMXJVSD".charAt(i)+'</span></div>';
   }).join("");
+  var estudia=prefValor("academico"), vacia=!sem.xp && !sem.porDia.some(function(x){ return x>0; });
   return '<div class="gn-sec gn-sec2"><h2>Más de hoy</h2></div>'+
-    '<div class="hn-dos gn-dos">'+
+    '<div class="hn-dos gn-dos'+(estudia?"":" gn-solo")+'">'+
       '<button class="hn-card neg'+(parteHecho?" ok":"")+'" data-act="parte"><span class="hn-ic">'+gnSvg("luna")+'</span>'+
         '<span><b>Parte del día</b><small>'+(parteHecho?"Hecho. Buenas noches":(hh>=19||hh<4)?"Ahora · 1 min":"Esta noche · 1 min")+'</small></span></button>'+
-      '<button class="hn-card" data-act="'+estAct+'"><span class="hn-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>'+
-        '<span><b>'+(est?"Estudiando":"Estudiar")+'</b><small>'+estSub+'</small></span></button>'+
+      (estudia ? '<button class="hn-card" data-act="'+estAct+'"><span class="hn-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>'+
+        '<span><b>'+(est?"Estudiando":"Estudiar")+'</b><small>'+estSub+'</small></span></button>' : '')+
     '</div>'+
     '<div class="gn-sec gn-sec2"><h2>Tu semana</h2><span class="num">+'+sem.xp+' XP</span></div>'+
-    '<div class="hn-sem">'+barras+'</div>';
+    (vacia ? '<p class="gn-semvacia">Marca tu primer hábito y aquí empieza tu semana 📈</p>' : '<div class="hn-sem">'+barras+'</div>');
 }
 
 /* la montaña de la cabecera: roca en grises con relieve, un sol de arena detrás y la base fundida con el fondo */

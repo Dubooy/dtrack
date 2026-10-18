@@ -10238,7 +10238,7 @@ function pintaInstalar(){
   var hoyBox=document.getElementById("hoy"); if(!hoyBox) return;
   var el=document.getElementById("hy-instalar");
   var luego=0; try{ luego=Number(localStorage.getItem(INSTKEY)||0); }catch(e){}
-  var toca = !instalada() && !enVisor() && Date.now()>luego && S.tour;
+  var toca = !instalada() && !enVisor() && Date.now()>luego && S.tour && (typeof ppDia!=="function" || ppDia()>=2);   /* el primer día, no */
   if(!toca){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement("div"); el.id="hy-instalar"; hoyBox.parentNode.insertBefore(el, hoyBox); }
   el.innerHTML='<span class="hi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></span>'+
@@ -26019,15 +26019,16 @@ function gnMasDeHoy(t){
     var x=sem.porDia[i];
     return '<div class="'+(d===t?"hoy":x>0?"on":"")+'"><em class="num">'+(x>0?x:"")+'</em><i style="height:'+(x>0?Math.max(8, Math.round(x/tope*72)):3)+'px"></i><span>'+"LMXJVSD".charAt(i)+'</span></div>';
   }).join("");
+  var estudia=prefValor("academico"), vacia=!sem.xp && !sem.porDia.some(function(x){ return x>0; });
   return '<div class="gn-sec gn-sec2"><h2>Más de hoy</h2></div>'+
-    '<div class="hn-dos gn-dos">'+
+    '<div class="hn-dos gn-dos'+(estudia?"":" gn-solo")+'">'+
       '<button class="hn-card neg'+(parteHecho?" ok":"")+'" data-act="parte"><span class="hn-ic">'+gnSvg("luna")+'</span>'+
         '<span><b>Parte del día</b><small>'+(parteHecho?"Hecho. Buenas noches":(hh>=19||hh<4)?"Ahora · 1 min":"Esta noche · 1 min")+'</small></span></button>'+
-      '<button class="hn-card" data-act="'+estAct+'"><span class="hn-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>'+
-        '<span><b>'+(est?"Estudiando":"Estudiar")+'</b><small>'+estSub+'</small></span></button>'+
+      (estudia ? '<button class="hn-card" data-act="'+estAct+'"><span class="hn-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg></span>'+
+        '<span><b>'+(est?"Estudiando":"Estudiar")+'</b><small>'+estSub+'</small></span></button>' : '')+
     '</div>'+
     '<div class="gn-sec gn-sec2"><h2>Tu semana</h2><span class="num">+'+sem.xp+' XP</span></div>'+
-    '<div class="hn-sem">'+barras+'</div>';
+    (vacia ? '<p class="gn-semvacia">Marca tu primer hábito y aquí empieza tu semana 📈</p>' : '<div class="hn-sem">'+barras+'</div>');
 }
 
 /* la montaña de la cabecera: roca en grises con relieve, un sol de arena detrás y la base fundida con el fondo */
@@ -26441,6 +26442,7 @@ O.split(", ").map(function(x){ return x+".dark"; }).join(", ")+'{ --tarjeta:colo
 var PP_PASOS=[
   { d:2, k:"cuerpo",  sel:["#cu-rutinas","#ali-card"], t:"🧘 Estirar y 🥗 Alimentación", en:"Cuerpo" },
   { d:3, k:"leer",    sel:["#mt-leer"],                t:"📚 Leer",                       en:"Mente" },
+  { d:3, k:"nivel",   sel:[".soc-nv","#v-retos .rt-tabs"], t:"🏔️ Tu nivel y tu rango",   en:"Retos" },
   { d:4, k:"metas",   sel:["#metas-mes","#rt-desc"],   t:"🎯 Metas del mes y días de descanso", en:"Retos" },
   { d:6, k:"mas",     sel:["#on-mas"],                 t:"🧪 Mis retos y Experimentos",   en:"Retos" }
 ];
@@ -26464,12 +26466,28 @@ function ppAplica(){
 function ppManana(){
   var box=document.getElementById("hoy"); if(!box) return;
   var v=box.querySelector(".pp-manana"); if(v) v.remove();
-  var dia=ppDia(), sig=PP_PASOS.filter(function(p){ return p.d===dia+1; })[0];
-  if(!sig) return;
+  var w=box.querySelector(".pp-amigos"); if(w) w.remove();
   var ref=box.querySelector(".gn-habs") || box.querySelector(".gn-vacio"); if(!ref) return;
   var masHab=ref.nextElementSibling && ref.nextElementSibling.classList.contains("gn-pie") ? ref.nextElementSibling : ref;
-  masHab.insertAdjacentHTML("afterend", '<p class="pp-manana">🔓 Mañana se abre '+sig.t+' en '+sig.en+'.</p>');
+  /* el grupo es lo que más engancha: mientras no tengas, se ofrece aquí */
+  var conGrupo=(typeof GRUPO!=="undefined" && GRUPO && GRUPO.miembros && GRUPO.miembros.length>1);
+  if(!conGrupo && !S.ppAmigosNo){
+    masHab.insertAdjacentHTML("afterend", '<div class="pp-amigos"><button class="pp-am-x" data-pp="no" aria-label="Ahora no">×</button>'+
+      '<span class="pp-am-e" aria-hidden="true">👋</span><b>Peak. va mejor con amigos</b>'+
+      '<small>Haz un grupo con 2 o 3 y veréis cada día quién tira más del carro.</small>'+
+      '<button class="pp-am-b" data-pp="crear">Invitar amigos</button></div>');
+  }
+  var dia=ppDia(), sig=PP_PASOS.filter(function(p){ return p.d===dia+1; });
+  if(!sig.length) return;
+  var t=sig.map(function(p){ return p.t+" en "+p.en; }).join(" y ");
+  masHab.insertAdjacentHTML("afterend", '<p class="pp-manana">🔓 Mañana se abre '+t+'.</p>');
 }
+document.addEventListener("click", function(ev){
+  var b=ev.target.closest && ev.target.closest(".pp-amigos [data-pp]"); if(!b) return;
+  ev.preventDefault(); ev.stopPropagation();
+  if(b.dataset.pp==="no"){ S.ppAmigosNo=1; save(); var c=b.closest(".pp-amigos"); if(c) c.remove(); return; }
+  go("social"); setTimeout(function(){ grupoAccion("x-g-crear"); }, 350);
+}, true);
 var _hoyNuevoPp=hoyNuevo;
 hoyNuevo=function(){ var r=_hoyNuevoPp.apply(this, arguments); try{ ppManana(); }catch(e){} return r; };
 var _renderPp=render;
@@ -26483,7 +26501,16 @@ document.addEventListener("visibilitychange", function(){ if(!document.hidden) t
 
 (function(){
   var css=PP_PASOS.map(function(p){ return p.sel.map(function(s){ return 'html.pp-no-'+p.k+' '+s; }).join(", ")+'{ display:none !important; }'; });
-  css.push('.pp-manana{ margin:14px 2px 0; font-size:14px; font-weight:500; color:var(--t3); }');
+  css.push('.pp-manana{ margin:14px 2px 0; font-size:14px; font-weight:500; color:var(--t3); }',
+    '.pp-amigos{ position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:4px; margin-top:22px; padding:18px; border-radius:22px; background:var(--fill); }',
+    '.pp-am-e{ font-size:28px; line-height:1; margin-bottom:6px; }',
+    '.pp-amigos b{ font-family:var(--f-texto); font-size:16.5px; font-weight:600; color:var(--t1); }',
+    '.pp-amigos small{ font-size:14px; font-weight:500; color:var(--t2); line-height:1.4; }',
+    '.pp-am-b{ margin-top:12px; height:42px; padding:0 18px; border-radius:99px; background:var(--t1); color:var(--bg); font-size:14.5px; font-weight:600; }',
+    '.pp-am-x{ position:absolute; top:8px; right:8px; width:44px; height:44px; font-size:22px; color:var(--t3); }',
+    '.gn-dos.gn-solo{ grid-template-columns:1fr !important; }',
+    '.gn-semvacia{ margin:10px 2px 0; font-size:14.5px; font-weight:500; color:var(--t2); }',
+    'html.pp-no-nivel #hy-evo .ev-mapa{ display:none !important; }');
   var st=document.createElement("style"); st.id="poco-a-poco-css"; st.textContent=css.join("\n");
   document.head.appendChild(st);
 })();

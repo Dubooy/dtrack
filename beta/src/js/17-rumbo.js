@@ -693,7 +693,7 @@ function pintaInstalar(){
   var hoyBox=document.getElementById("hoy"); if(!hoyBox) return;
   var el=document.getElementById("hy-instalar");
   var luego=0; try{ luego=Number(localStorage.getItem(INSTKEY)||0); }catch(e){}
-  var toca = !instalada() && !enVisor() && Date.now()>luego && S.tour;
+  var toca = !instalada() && !enVisor() && Date.now()>luego && S.tour && (typeof ppDia!=="function" || ppDia()>=2);   /* el primer día, no */
   if(!toca){ if(el) el.remove(); return; }
   if(!el){ el=document.createElement("div"); el.id="hy-instalar"; hoyBox.parentNode.insertBefore(el, hoyBox); }
   el.innerHTML='<span class="hi-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M12 8v6M9 11l3 3 3-3"/></svg></span>'+
