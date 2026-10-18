@@ -629,6 +629,10 @@ var RANGO_CSS=[
 '.tab-anillo.ve{ opacity:1; transform:none; }',
 '.tab-anillo svg{ width:52px!important; height:52px!important; display:block; transform:none!important; animation:none!important; }',
 '.mtab.tab-sube{ color:var(--good)!important; }',
+'#mtabs .mtab > svg{ transition:transform .35s cubic-bezier(.3,1.4,.5,1), translate .5s cubic-bezier(.3,1.3,.5,1); }',
+'#mtabs .mtab > span{ transition:opacity .25s ease; }',
+'#mtabs .mtab:has(.tab-anillo.ve) > svg{ translate:0 6.5px; }',
+'#mtabs .mtab:has(.tab-anillo.ve) > span{ opacity:0!important; }',
 '.mtab.tab-sube > svg{ animation:xpToque .5s cubic-bezier(.3,.9,.3,1) 2; }',
 /* el camino */
 '#camino{ margin:6px 0 30px; }',

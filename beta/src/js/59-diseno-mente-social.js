@@ -68,7 +68,7 @@ en('.soc-nota')+'{ color:var(--t2); font-size:14.5px; }',
 P+' #mtabs.barpill{ background:rgba(20,20,20,.92) !important; -webkit-backdrop-filter:blur(14px) saturate(1.2); backdrop-filter:blur(14px) saturate(1.2);',
 '  box-shadow:0 12px 30px -12px rgba(0,0,0,.45) !important; border:0 !important; }',
 P+'.dark #mtabs.barpill{ background:rgba(30,29,27,.92) !important; box-shadow:inset 0 0 0 1px rgba(243,238,227,.1), 0 12px 30px -12px rgba(0,0,0,.6) !important; }',
-P+' #mtabs .mtab{ color:rgba(241,236,225,.5); }',
+P+' #mtabs .mtab{ color:#8c887f; }',
 P+' #mtabs .mtab[aria-current="true"], '+P+' #mtabs .mtab.cerca{ color:#141414; }',
 P+' #mind::before{ background:#F1ECE1 !important; box-shadow:none !important; }',
 P+' #mtabs .mtab[aria-current="true"] svg .d, '+P+' #mtabs .mtab[aria-current="true"] svg .h{ stroke:#F1ECE1; }'

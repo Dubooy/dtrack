@@ -1,12 +1,12 @@
 /* ════════ temas que quedan (17/10/2026) ════════
    Solo Claro, Oscuro, Sistema (el del dispositivo), Jardín, Cielo y los que se
-   desbloquean por nivel. Fuera Clásico, Melocotón, Lavanda, Menta y los de degradado.
+   desbloquean por nivel (y Clásico, devuelto el 18/10). Fuera Melocotón, Lavanda, Menta y los de degradado.
    Quien tuviera uno de esos pasa a Claro u Oscuro.
    Y ventanas que se distingan del fondo: Jardín y los temas de nivel no tenían
    --tarjeta (menús y tarjetas salían transparentes), y en oscuro la hoja era
    del mismo negro que lo de detrás. */
 (function(){
-  var quedan={ light:1, dark:1, system:1, sage:1, cielo:1 }, fuera=[];
+  var quedan={ light:1, dark:1, system:1, sage:1, cielo:1, neo:1 }, fuera=[];
   for(var i=TEMAS.length-1;i>=0;i--) if(!TEMAS[i].nv && !quedan[TEMAS[i].k]){ fuera.push(TEMAS[i].k); TEMAS.splice(i,1); }
   var cur=curTheme();
   if(fuera.indexOf(cur)>=0){

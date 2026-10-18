@@ -4,7 +4,8 @@ var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){ret
 function uid(){ return Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-3); }
 function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]}); }
 function iso(d){ var t=new Date(d); return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0"); }
-function today(){ return iso(new Date()); }
+/* el día de Peak. acaba a las 5:00: lo de madrugada cuenta para el día anterior */
+function today(){ return iso(Date.now()-5*3600e3); }
 function addDays(s,n){ var d=new Date(s+"T00:00:00"); d.setDate(d.getDate()+n); return iso(d); }
 function diff(a,b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/864e5); }
 function fmt(s,o){ try{ return new Date(s+"T00:00:00").toLocaleDateString(LOCALE,o||{day:"numeric",month:"short"}); }catch(e){ return s; } }

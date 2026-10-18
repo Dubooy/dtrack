@@ -11,13 +11,13 @@ var BARRA_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke
    toma el color de la burbuja (la línea del libro) · f: solo relleno, solo
    debajo de la burbuja · h: contorno que separa figuras rellenas */
 var BARRA_ICO={
-  /* Hoy: la montaña del logo de Peak., maciza como la del corredor; al abrirla da un saltito */
-  resumen:'<g class="mk"><path fill="currentColor" stroke="none" transform="translate(2.55 2.4) scale(.0211)" d="'+PEAK_MK_D+'"/></g>',
+  /* General: la montaña del logo en línea, como los demás (maciza al abrirla, con sus rayas); da un saltito */
+  resumen:'<g class="mk"><path class="r" d="M11 3.8 3.4 19.6h17.2z"/><path class="d" d="M12.6 11.2l3.5 8.4M14.7 9.9l4.1 9.7"/></g>',
   retos:'<path class="r" d="M7 3.5h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 5.25H5.4a1.15 1.15 0 0 0-1.15 1.2c.08 2 1.4 3.6 3.25 4M17 5.25h1.6a1.15 1.15 0 0 1 1.15 1.2c-.08 2-1.4 3.6-3.25 4"/><path class="r" d="M10.9 14h2.2v3.6h-2.2z"/><path class="r" d="M8 20.5h8v-.6a2.3 2.3 0 0 0-2.3-2.3h-3.4A2.3 2.3 0 0 0 8 19.9z"/>',
   /* el corredor de la app de iPhone: macizo, igual abierto o cerrado */
   vital:'<g fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.9" cy="4" r="2" stroke="none"/>'+
-    '<path fill="none" stroke-width="1.85" d="M7.2 11l.5-3.6 4.8-.2M12.8 7.4l2.5 3.4 3.3-1.1M10.8 12.9l4.7 2.4-3.2 3.2M9.8 14l-1.1 3.4-3.5 3.7"/>'+
-    '<path fill="none" stroke-width="3.3" d="M11.9 8.2l-1.1 4.1"/></g>',
+    '<path fill="none" stroke-width="1.7" d="M7.2 11l.5-3.6 4.8-.2M12.8 7.4l2.5 3.4 3.3-1.1M10.8 12.9l4.7 2.4-3.2 3.2M9.8 14l-1.1 3.4-3.5 3.7"/>'+
+    '<path fill="none" stroke-width="2.9" d="M11.9 8.2l-1.1 4.1"/></g>',
   academico:'<path class="r" d="M12 19.5c-2.8-1.7-4.3-4.3-4.3-7.2 0-2.6 1.5-5.1 4.3-7.8 2.8 2.7 4.3 5.2 4.3 7.8 0 2.9-1.5 5.5-4.3 7.2z"/><path d="M7.9 10.6C5.8 10 3.9 10 2.5 10.6c.3 4.9 4.3 8.9 9.5 8.9"/><path d="M16.1 10.6c2.1-.6 4-.6 5.4 0-.3 4.9-4.3 8.9-9.5 8.9"/>',
   social:'<circle class="r" cx="16.6" cy="7.4" r="2.6"/><path d="M17.2 13.4c2.4.3 4.05 2.2 4.05 4.6v.35a.6.6 0 0 1-.6.6h-2.6"/><path class="f" d="M12 13.75c1.3-.45 2.9-.6 4.8-.4 2.6.3 4.45 2.25 4.45 4.65v.35a.65.65 0 0 1-.65.65H12z"/><g class="h"><circle cx="9" cy="7.75" r="3.25"/><path d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/></g><circle class="r" cx="9" cy="7.75" r="3.25"/><path class="r" d="M2.75 19.1c0-3.3 2.8-5.6 6.25-5.6s6.25 2.3 6.25 5.6v.15a.75.75 0 0 1-.75.75H3.5a.75.75 0 0 1-.75-.75z"/>',
   tareas:'<path d="M3.5 6.25l1.6 1.6 3-3.1M3.5 12.75l1.6 1.6 3-3.1M3.5 19.25l1.6 1.6 3-3.1M11 6.5h9.5M11 13h9.5M11 19.5h9.5"/>'
@@ -38,7 +38,7 @@ ICO_TAREAS=barraIco("tareas");
 'html.dark #mtabs{ background:color-mix(in srgb, var(--bg) 55%, transparent)!important; border-color:rgba(255,255,255,.1);',
 '  box-shadow:0 10px 30px -12px rgba(0,0,0,.6)!important; }',
 '#mtabs .mtab{ width:66px; height:54px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--t2); }',
-'#mtabs .mtab svg, #mtabs button[data-view="resumen"] svg{ width:24px; height:24px; flex:none; stroke-width:1.5; transition:transform .35s cubic-bezier(.3,1.4,.5,1); }',
+'#mtabs .mtab svg, #mtabs button[data-view="resumen"] svg{ width:24px; height:24px; flex:none; stroke-width:1.7; shape-rendering:geometricPrecision; transition:transform .35s cubic-bezier(.3,1.4,.5,1); }',
 '#mtabs .mtab span{ position:static; opacity:1; transform:none; font-size:10px; font-weight:500; letter-spacing:.01em; line-height:1; color:inherit; }',
 '#mtabs .mtab[aria-current="true"], #mtabs .mtab.cerca{ color:var(--accent); }',
 '#mtabs .mtab[aria-current="true"] span{ opacity:1; font-weight:600; }',
