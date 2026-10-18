@@ -122,10 +122,10 @@ var GN_INTENCIONES=[
 ];
 /* el saludo: tu nombre y una frase que cambia con la hora y el día */
 var GN_SALUDOS={
-  m:["a por el {d}","tu mejor versión","hoy se sube","empieza fuerte","un paso más arriba","hoy suma"],
-  t:["sigue subiendo","aún queda {d}","tu mejor versión","remata el {d}","no aflojes","a mitad de cumbre"],
-  n:["cierra el {d}","buen trabajo hoy","mañana, más","tu mejor versión","repasa y a descansar","casi en la cima"],
-  z:["hora de dormir","mañana se sube","descansa, que toca","el sueño también suma"]
+  m:["a por el {d}","tu mejor versión","hoy se sube","empieza fuerte","un paso más","hoy suma"],
+  t:["sigue subiendo","tu mejor versión","remata el día","no aflojes","media cumbre"],
+  n:["cierra el día","buen trabajo hoy","mañana, más","tu mejor versión","a descansar","casi en la cima"],
+  z:["hora de dormir","mañana se sube","descansa ya","dormir suma"]
 };
 function gnSaludo(t, hh){
   var nom=(((S.profile||{}).name)||"").trim().split(/\s+/)[0];
@@ -134,6 +134,27 @@ function gnSaludo(t, hh){
   var dia=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][new Date(t+"T00:00:00").getDay()];
   var L=GN_SALUDOS[fr], h=0, k=t+fr; for(var i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0;
   return esc(hola+(nom?", "+nom:"")+",")+"<br>"+esc(L[Math.abs(h)%L.length].replace("{d}", dia));
+}
+/* la frase de debajo: según lo que llevas, la hora y el día (cambia cada día y en cada franja) */
+var GN_FRASES={
+  nada:{
+    m:["Hoy es un buen día para cuidar lo que te hace bien.","Empieza por algo pequeño y el resto viene solo.","El día está en blanco. Tú decides qué pones.","Un hábito antes de mirar el móvil y ya vas ganando.","Nadie sube la montaña de golpe: primer paso."],
+    t:["Aún hay tarde de sobra para sumar algo.","Elige una cosa de la lista y hazla ahora.","No hace falta hacerlo todo, solo empezar.","La tarde también cuenta. Marca tu primer hábito.","Diez minutos bien usados cambian el día."],
+    n:["Todavía puedes cerrar el día con algo hecho.","Un último hábito antes de dormir y a la cama tranquilo.","Mañana empieza esta noche: deja algo hecho.","Algo pequeño ahora vale más que nada."]
+  },
+  va:{
+    m:["Buen arranque. Sigue con lo que te hace bien.","Ya has empezado, que es lo más difícil.","Vas por delante del día. Mantén el ritmo.","Mañana bien aprovechada. A por lo siguiente."],
+    t:["Vas bien. Sigue con lo que te hace bien.","Medio camino hecho. Remata la tarde.","Lo que has hecho ya cuenta. Suma uno más.","Buen ritmo. Que no se te enfríe."],
+    n:["Buen día. Remata lo que te queda y a descansar.","Ya has sumado hoy. Cierra con calma.","Lo de hoy ya está en la montaña. Un último empujón.","Día aprovechado. Mañana, más arriba."]
+  },
+  dia:{ 1:"Lunes: la semana es tuya si la empiezas bien.", 5:"Viernes: cierra la semana por todo lo alto.", 6:"Sábado: sin prisa, pero sin parar.", 0:"Domingo: descansa y prepara la semana." }
+};
+function gnFrase(t, hh, k){
+  var fr=hh<14&&hh>=5?"m":hh<21&&hh>=5?"t":"n", d=new Date(t+"T00:00:00"), L=GN_FRASES[k][fr].slice(), h=0, s=t+k+fr;
+  if(k==="nada" && fr==="m" && GN_FRASES.dia[d.getDay()]) L.push(GN_FRASES.dia[d.getDay()], GN_FRASES.dia[d.getDay()]);
+  if(d.getDate()===1) L.push("Mes nuevo, montaña nueva. A por ella.");
+  for(var i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0;
+  return L[Math.abs(h)%L.length];
 }
 var GN_EXTRA_XP=10, GN_EXTRA_ICO={ vital:"cuerpo", academico:"mente", retos:"retos", social:"social" };
 function gnExtraHecho(d){ return !!(S.extra && S.extra[d]); }
@@ -168,8 +189,7 @@ function gnPinta(st){
   var pendRetos=A.retos.filter(function(x){ return !x.ok; });
   var frase = ((hh>=21||hh<5) && !(S.parte&&S.parte[t])) ? "Te queda el Parte del día: un minuto y a dormir."
     : (habs.length && nHab>=habs.length && !pendRetos.length) ? "Todo hecho hoy. Esa es tu mejor versión."
-    : (nHab || A.retos.length-pendRetos.length) ? "Vas bien. Sigue con lo que te hace bien."
-    : "Hoy es un buen día para cuidar lo que te hace bien.";
+    : gnFrase(t, hh, (nHab || A.retos.length-pendRetos.length) ? "va" : "nada");
   var intn=gnIntencion(t);
 
   var anillos=GN_AREAS.map(function(a){
@@ -391,16 +411,16 @@ hnAvatar=function(){
 'html.gen #v-resumen > div:first-child, html.gen .hn-fila3, html.gen .hn-guia{ display:none !important; }',
 'html.gen #hoy{ position:relative; }',
 /* cabecera */
-'.gn-cab{ position:relative; padding-bottom:26px; }',
+'.gn-cab{ position:relative; padding-bottom:52px; }',
 '.gn-logo{ font-family:"Unbounded",var(--f-titulo); font-weight:800; font-size:26px; letter-spacing:-.045em; line-height:40px; color:var(--t1); position:relative; }',
 '.gn-fecha{ position:relative; margin-top:30px; font-size:12px; font-weight:500; letter-spacing:.24em; color:var(--t2); }',
 '.gn-tit{ position:relative; margin-top:12px; font-family:var(--f-texto); font-weight:700; font-size:31px; line-height:1.08; letter-spacing:-.035em; color:var(--t1); }',
 '.gn-raya{ position:relative; display:block; width:22px; height:2.5px; border-radius:2px; background:var(--t1); margin-top:16px; }',
-'.gn-frase{ position:relative; margin-top:16px; max-width:56%; font-size:15px; line-height:1.4; color:var(--t2); }',
+'.gn-frase{ position:relative; margin-top:16px; max-width:64%; font-size:15px; line-height:1.4; color:var(--t2); }',
 /* el saludo ocupa la izquierda y la montaña la derecha: no se pisan */
-'.gn-monte{ position:absolute; right:-44px; top:34px; width:min(78%,320px); pointer-events:none; }',
-'.gn-tit{ max-width:68%; }',
-'.gn-frase{ z-index:1; paint-order:stroke fill; -webkit-text-stroke:5px var(--bg); }',
+'.gn-monte{ position:absolute; right:-44px; top:72px; width:min(78%,320px); pointer-events:none; }',
+'.gn-tit{ max-width:100%; }',
+
 '.gn-monte svg{ display:block; width:100%; height:auto; }',
 '.gn-sol{ fill:var(--gn-sol); }',
 '.gn-sombra{ fill:#1D1B19; opacity:.38; mix-blend-mode:multiply; }',
