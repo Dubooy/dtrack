@@ -91,6 +91,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `67-cabecera-marca.js` | Cabecera de marca: en Cuerpo, Mente, Retos y Social, sin antetítulo ni título grande, solo «PEAK.» y tu foto (General conserva su saludo) |
 | `68-poco-a-poco.js` | Poco a poco: a quien empieza (`S.ppDesde`) el primer día solo se le enseña lo básico; Estirar y Alimentación (día 2), Leer (3), Metas del mes y días de descanso (4), Mis retos y Experimentos (6), nivel y rango (3) aparecen después con aviso y un «Mañana se abre…» en General (`PP_PASOS`). También la tarjeta «Invita amigos» de General mientras no tienes grupo |
 | `69-montana-logo.js` | Un solo dibujo: la montaña del logo (maciza en tinta, cara a rayas, bandera, base fundida con el fondo) en la cabecera de General (`gnMontana`) y en las pantallas vacías (`vcDibujo`), con `mlSvg` |
+| `70-colores-seccion.js` | Un color por sección (`--c-cuerpo`, `--c-mente`, `--c-retos`, `--c-social`, los de los anillos de General): Salud del día con el de Cuerpo, «Siguiente reto» con el de Retos; tarjetas destacadas (Parte del día, Entreno de hoy, Biblioteca) en gris en oscuro |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
