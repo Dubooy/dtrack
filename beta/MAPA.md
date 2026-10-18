@@ -93,7 +93,8 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `69-montana-logo.js` | Un solo dibujo: la montaña del logo (maciza en tinta, cara a rayas, bandera, base fundida con el fondo) en la cabecera de General (`gnMontana`) y en las pantallas vacías (`vcDibujo`), con `mlSvg` |
 | `70-colores-seccion.js` | Un color por sección (`--c-cuerpo`, `--c-mente`, `--c-retos`, `--c-social`, los de los anillos de General): Salud del día con el de Cuerpo, «Siguiente reto» con el de Retos; tarjetas destacadas (Parte del día, Entreno de hoy, Biblioteca) en gris en oscuro |
 | `71-retos-una-pagina.js` | **Retos** en una sola página (sin selector Objetivos/Progreso): rango, «Retos de hoy» en tarjeta arena con 1/3 y anillo (`rpHoy`), reto de la semana, metas del mes, Tu cima, tu grupo, camino de rangos y «Más» con Días de descanso plegado. Envuelve `retosOrganiza` y `rumboAccion` |
-| `72-cabeceras-cuerpo-mente.js` | Cabecera de Mente: tu ánimo de la semana (del parte, `S.animo`) con frase que cambia cada día (`MN_FRASES`) y barras; Meditación y Leer en ventanas como Agua y Sueño. Cabecera de Cuerpo: tu energía (`cuEnergia`: sueño, agua y ejercicio) con frase (`CU_FRASES`) y barras. Envuelve `render` |
+| `72-cabeceras-cuerpo-mente.js` | Cabecera de Mente: tu ánimo de la semana (del parte, `S.animo`) con frase que cambia cada día (`MN_FRASES`) y barras; Meditación y Leer en ventanas como Agua y Sueño. Cabecera de Cuerpo: tu energía (`cuEnergia`: sueño, agua y ejercicio) con frase (`CU_FRASES`) y barras; tocar una barra cambia de día (sin la fila de día de arriba). Envuelve `render` |
+| `73-deslizar-pestanas.js` | Deslizar en horizontal sobre una pestaña pasa a la de al lado (orden de la barra); no salta en filas que ya se deslizan, campos ni lienzos |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),

@@ -64,22 +64,29 @@ function cuEnergia(d){
 }
 function cuNivel(e){ return e<0.35?1 : e<0.55?2 : e<0.7?3 : e<0.85?4 : 5; }
 function cuCabHTML(){
-  var dia=curDay(), barras="";
+  /* la semana acaba hoy; tocar una barra lleva a ese día */
+  var dia=curDay(), hoy=today(), barras="";
   for(var i=6;i>=0;i--){
-    var d=addDays(dia,-i), e=cuEnergia(d);
-    barras+='<div class="'+(i===0?"hoy":"")+'"><i class="'+(e!=null?"si":"")+'" style="height:'+(e!=null?Math.round(12+e*48):6)+'px"></i>'+INI[new Date(d+"T00:00:00").getDay()]+'</div>';
+    var d=addDays(hoy,-i), e=cuEnergia(d);
+    barras+='<div data-cu-dia="'+d+'" class="'+(d===dia?"hoy":"")+'"><i class="'+(e!=null?"si":"")+'" style="height:'+(e!=null?Math.round(12+e*48):6)+'px"></i>'+INI[new Date(d+"T00:00:00").getDay()]+'</div>';
   }
   var e=cuEnergia(dia), h=habit(dia), esHoy=dia===today(), t, sub;
   if(e==null){ t=esHoy?"¿Cómo amaneces?":"Sin datos"; sub=esHoy?"Apunta cómo dormiste y aquí verás tu energía":"Ese día no apuntaste sueño ni agua"; }
   else {
     var n=cuNivel(e); t=mnFrase(CU_FRASES[n],"cu"+dia);
-    sub=(esHoy?"Tu energía hoy":"Tu energía ese día")+(n>=5?"":
+    sub=(esHoy?"Tu energía hoy":"Tu energía ese día")+(n>=5 || !esHoy?"":
       h.sleep>0 && h.sleep<7 ? " · dormir más te la subiría" :
       h.water+1<cuAguaToca(dia) ? " · un par de vasos más te vendrán bien" :
       !wentGym(dia) ? " · moverte un rato le da un empujón" : "");
   }
-  return '<div class="cab-t">'+esc(t)+'</div><div class="cab-s">'+esc(sub)+'</div><div class="cab-sem">'+barras+'</div>';
+  var otro=esHoy?"":'<div class="cu-otro"><span>'+esc(cap(fmt(dia,{weekday:"long",day:"numeric"})))+'</span><button data-cu-dia="'+today()+'">Volver a hoy</button></div>';
+  return otro+'<div class="cab-t">'+esc(t)+'</div><div class="cab-s">'+esc(sub)+'</div><div class="cab-sem">'+barras+'</div>';
 }
+document.addEventListener("click", function(ev){
+  var b=ev.target.closest && ev.target.closest("#cu-cab [data-cu-dia]"); if(!b) return;
+  var d=b.getAttribute("data-cu-dia"); if(d>today()) return;
+  selDay=(d===today()?null:d); try{ sonido("tick"); }catch(e){} render();
+});
 function cuCabPinta(){
   var ancla=document.getElementById("vital-daybar"); if(!ancla) return;
   var c=document.getElementById("cu-cab");
@@ -106,6 +113,9 @@ render=function(){ var r=_renderCabCM.apply(this, arguments); try{ mnCabPinta();
 'html.dz-n .view #med-card#med-card, html.dz-n .view #mt-leer#mt-leer{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:22px !important; padding:18px !important; }',
 'html.dz-n .view #med-card{ margin-bottom:12px; } html .view #mt-leer{ margin-top:0; }',
 /* Cuerpo sin la fila para cambiar de día arriba */
+'#cu-cab .cab-sem div{ cursor:pointer; } #cu-cab .cab-sem div:active i{ transform:scale(.94); }',
+'.cu-otro{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; font-size:14px; font-weight:600; color:var(--c-cuerpo); }',
+'.cu-otro button{ height:32px; padding:0 14px; border-radius:99px; font-size:13px; font-weight:600; background:var(--t1); color:var(--bg); }',
 '#vital-daybar{ display:none !important; } #cu-cab{ margin-top:4px !important; }'
   ].join("\n"); document.head.appendChild(st);
 })();
