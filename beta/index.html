@@ -26879,10 +26879,11 @@ function mnCabHTML(){
   return '<div class="cab-t">'+esc(t)+'</div><div class="cab-s">'+esc(sub)+'</div><div class="cab-sem">'+barras+'</div>';
 }
 function mnCabPinta(){
-  var v=document.getElementById("v-academico"), ancla=document.getElementById("mente-academico");
-  if(!v || !ancla) return;
+  /* sin Estudio, Mente es la vista de Tareas (#mente-tareas): la cabecera va donde esté la meditación */
+  var ancla=menteHueco(); if(!ancla) return;
   var c=document.getElementById("mn-cab");
-  if(!c){ c=document.createElement("div"); c.id="mn-cab"; c.className="cab-cm"; ancla.parentNode.insertBefore(c, ancla); }
+  if(!c){ c=document.createElement("div"); c.id="mn-cab"; c.className="cab-cm"; }
+  if(c.nextSibling!==ancla) ancla.parentNode.insertBefore(c, ancla);
   c.innerHTML=mnCabHTML();
 }
 var CU_FRASES=[
@@ -26952,8 +26953,10 @@ render=function(){ var r=_renderCabCM.apply(this, arguments); try{ mnCabPinta();
 '.cab-cm .cab-sem div.hoy{ color:var(--t1); font-weight:600; } .cab-cm .cab-sem div.hoy i.si{ background:var(--c, var(--t1)); }',
 '#mn-cab{ --c:var(--c-mente); } #cu-cab{ --c:var(--c-cuerpo); margin-top:18px; }',
 /* Meditación y Leer, cada una en su ventana */
-'html.dz-n #v-academico #med-card, html #v-academico #mt-leer{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:22px !important; padding:18px !important; }',
-'html.dz-n #v-academico #med-card{ margin-bottom:12px; } html #v-academico #mt-leer{ margin-top:0; }'
+'html.dz-n .view #med-card#med-card, html.dz-n .view #mt-leer#mt-leer{ background:var(--tarjeta) !important; border:0 !important; box-shadow:none !important; border-radius:22px !important; padding:18px !important; }',
+'html.dz-n .view #med-card{ margin-bottom:12px; } html .view #mt-leer{ margin-top:0; }',
+/* Cuerpo sin la fila para cambiar de día arriba */
+'#vital-daybar{ display:none !important; } #cu-cab{ margin-top:4px !important; }'
   ].join("\n"); document.head.appendChild(st);
 })();
 })();
