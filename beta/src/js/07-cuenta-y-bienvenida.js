@@ -185,7 +185,7 @@ var CAR_CSS =
    Sin fotos. Cada lámina es un titular grande y una pieza real de la app
    que se anima sola cuando la lámina está delante. */
 var CARRUSEL=[
-  /* { marca:true },  la lámina de la marca («Palabras»): fuera de momento, falta decidir dónde va */
+  { marca:true },   /* la lámina de la marca («Palabras»): la primera (Carlos, 18/10) */
   { t:"Cuida <br>el cuerpo.",          s:"Ejercicio, sueño, pantallas y meditación. Un toque y apuntado.",   e:escenaGym },
   { t:"Una racha <br>que engancha.",   s:"Tres retos al día, XP y niveles. Si haces los tres, ×1,5.",   e:escenaRacha },
   { t:"Con <br>los tuyos.",            s:"Tu grupo, un objetivo en común y quién tira más del carro.",       e:escenaGrupo },

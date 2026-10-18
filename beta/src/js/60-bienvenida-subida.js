@@ -8,7 +8,8 @@ var onbPre=null, onbPrueba=false, onbAnim=null;
 var _abrirPreguntasBase=abrirPreguntas;
 abrirPreguntas=function(fin){
   _abrirPreguntasBase(fin);
-  onbPre="intro"; onbPinta(true);
+  /* el logo ya sale primero en el carrusel: tras entrar se va directo a «¿Cómo te llamas?» */
+  onbPre="nombre"; onbPinta(true);
 };
 var _onbPintaBase=onbPinta;
 onbPinta=function(primera){
