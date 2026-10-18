@@ -26017,18 +26017,63 @@ function gnDatos(t){
   return A;
 }
 
+/* «Extra de hoy»: una cosa pequeña al día, de cualquier sección; marcarla da +10 XP */
 var GN_INTENCIONES=[
   ["Sal a caminar diez minutos sin el móvil.", "vital"],
-  ["Escribe a alguien a quien echas de menos.", "social"],
+  ["Bebe un vaso de agua antes de cada comida.", "vital"],
+  ["Esta noche, a la cama sin pantallas.", "vital"],
+  ["Sube por las escaleras siempre que puedas.", "vital"],
+  ["Estira cinco minutos al levantarte.", "vital"],
+  ["Come algo de fruta antes de la cena.", "vital"],
+  ["Haz 20 sentadillas en algún descanso.", "vital"],
+  ["Acuéstate media hora antes que ayer.", "vital"],
+  ["Desayuna sentado, sin prisas ni móvil.", "vital"],
+  ["Sal a que te dé el sol diez minutos.", "vital"],
   ["Respira hondo un minuto antes de empezar.", "academico"],
   ["Dedica 10 minutos a algo que te haga bien.", "academico"],
-  ["Bebe un vaso de agua antes de cada comida.", "vital"],
+  ["Lee diez páginas de un libro.", "academico"],
+  ["Escribe tres cosas buenas de hoy.", "academico"],
+  ["Una hora sin redes por la tarde.", "academico"],
+  ["Medita cinco minutos con los ojos cerrados.", "academico"],
+  ["Ordena tu cuarto o tu mesa.", "academico"],
+  ["Escucha un disco entero sin hacer nada más.", "academico"],
+  ["Apunta una idea que no quieras olvidar.", "academico"],
+  ["Silencia las notificaciones una hora.", "academico"],
   ["Termina hoy algo que llevas días aplazando.", "retos"],
-  ["Esta noche, a la cama sin pantallas.", "vital"]
+  ["Empieza por lo más difícil del día.", "retos"],
+  ["Haz algo que te dé un poco de miedo.", "retos"],
+  ["Aprende algo nuevo en 15 minutos.", "retos"],
+  ["Pon el móvil en otra habitación mientras trabajas.", "retos"],
+  ["Prueba algo que nunca hayas hecho.", "retos"],
+  ["Escribe a alguien a quien echas de menos.", "social"],
+  ["Dale las gracias a alguien de verdad.", "social"],
+  ["Llama a alguien de tu familia.", "social"],
+  ["Haz un cumplido sincero a alguien.", "social"],
+  ["Propón un plan a un amigo.", "social"],
+  ["Escucha a alguien sin mirar el móvil.", "social"]
 ];
+/* el saludo: tu nombre y una frase que cambia con la hora y el día */
+var GN_SALUDOS={
+  m:["a por el {d}","tu mejor versión","hoy se sube","empieza fuerte","un paso más arriba","hoy suma"],
+  t:["sigue subiendo","aún queda {d}","tu mejor versión","remata el {d}","no aflojes","a mitad de cumbre"],
+  n:["cierra el {d}","buen trabajo hoy","mañana, más","tu mejor versión","repasa y a descansar","casi en la cima"],
+  z:["hora de dormir","mañana se sube","descansa, que toca","el sueño también suma"]
+};
+function gnSaludo(t, hh){
+  var nom=(((S.profile||{}).name)||"").trim().split(/\s+/)[0];
+  var fr=hh<6?"z":hh<14?"m":hh<21?"t":"n";
+  var hola=fr==="m"?"Buenos días":fr==="t"?"Buenas tardes":"Buenas noches";
+  var dia=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][new Date(t+"T00:00:00").getDay()];
+  var L=GN_SALUDOS[fr], h=0, k=t+fr; for(var i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0;
+  return esc(hola+(nom?", "+nom:"")+",")+"<br>"+esc(L[Math.abs(h)%L.length].replace("{d}", dia));
+}
+var GN_EXTRA_XP=10, GN_EXTRA_ICO={ vital:"cuerpo", academico:"mente", retos:"retos", social:"social" };
+function gnExtraHecho(d){ return !!(S.extra && S.extra[d]); }
+var _gnExtraXP=dayXP;
+dayXP=function(d, tmap){ return _gnExtraXP(d, tmap)+(gnExtraHecho(d) ? GN_EXTRA_XP : 0); };
 function gnIntencion(t){
   var d=new Date(t+"T00:00:00"), ini=new Date(d.getFullYear(),0,0), n=Math.round((d-ini)/864e5);
-  return GN_INTENCIONES[n%GN_INTENCIONES.length];
+  return GN_INTENCIONES[(n*7)%GN_INTENCIONES.length];
 }
 
 /* los anillos se animan desde donde estaban */
@@ -26049,7 +26094,7 @@ function gnPinta(st){
   gnEtiquetas();
   var t=today(), d=new Date(t+"T00:00:00"), hh=new Date().getHours(), A=gnDatos(t);
   var fecha=["DOM","LUN","MAR","MIÉ","JUE","VIE","SÁB"][d.getDay()]+" "+d.getDate()+" "+["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][d.getMonth()];
-  var saludo=(hh>=6&&hh<14)?"Buenos días,":(hh>=14&&hh<21)?"Buenas tardes,":"Buenas noches,";
+  var saludo=gnSaludo(t, hh);
   var habs=ordenIdeal(idealActivos()), cks=checksOf(t);
   var nHab=cks.filter(function(id){ return habs.some(function(x){ return x.id===id; }); }).length;
   var pendRetos=A.retos.filter(function(x){ return !x.ok; });
@@ -26087,14 +26132,14 @@ function gnPinta(st){
       '<div class="gn-monte" aria-hidden="true">'+gnMontana()+'</div>'+
       '<p class="gn-logo" id="gn-logo">PEAK.</p>'+
       '<p class="gn-fecha">'+fecha+'</p>'+
-      '<h1 class="gn-tit">'+saludo+'<br>tu mejor versión</h1><i class="gn-raya"></i>'+
+      '<h1 class="gn-tit">'+saludo+'</h1><i class="gn-raya"></i>'+
       '<p class="gn-frase">'+esc(frase)+'</p>'+
     '</header>'+
     '<section class="gn-prog">'+
       '<div class="gn-sec"><h2>Tu progreso de hoy</h2><button data-act="x-gn-detalle">Ver detalle'+gnSvg("flecha")+'</button></div>'+
       '<div class="gn-anillos">'+anillos+'</div>'+
-      '<button class="gn-int" data-jump="'+intn[1]+'"><span class="gn-hoja">'+gnSvg("hoja")+'</span>'+
-        '<span class="gn-itx"><small>Tu intención de hoy</small><b>'+esc(intn[0])+'</b></span>'+gnSvg("flecha","gn-fl")+'</button>'+
+      '<button class="gn-int'+(gnExtraHecho(t)?" ok":"")+'" data-act="x-gn-extra"><span class="gn-hoja gn-ex-'+intn[1]+'">'+gnSvg(GN_EXTRA_ICO[intn[1]])+'</span>'+
+        '<span class="gn-itx"><small>Extra de hoy · +'+GN_EXTRA_XP+' XP</small><b>'+esc(intn[0])+'</b></span><span class="gn-ex-ck" aria-label="Hecho"></span></button>'+
     '</section>'+
     '<div class="gn-sec gn-sec2" id="hn-habitos"><h2>Tus hábitos de hoy</h2><button data-act="x-gn-vertodos">Ver todos'+gnSvg("flecha")+'</button></div>'+
     (habs.length ? '<div class="gn-habs">'+filas+'</div>'+masHab
@@ -26180,6 +26225,16 @@ function gnAbreHoja(que){
 
 function gnAccion(a, el){
   if(a==="x-gn-area"){ var ar=GN_AREAS.filter(function(x){ return x.k===el.dataset.k; })[0]; if(ar) go(ar.tab); return true; }
+  if(a==="x-gn-extra"){
+    var td=today(), on=!gnExtraHecho(td); if(!S.extra) S.extra={};
+    if(on && typeof xpPreparar==="function") xpPreparar();
+    if(on) S.extra[td]=true; else delete S.extra[td];
+    save(); render();
+    if(!on){ sonido("des"); return true; }
+    sonido("pop"); try{ if(navigator.vibrate) navigator.vibrate(16); }catch(e){}
+    var r=el.getBoundingClientRect(); if(typeof xpVuela==="function") xpVuela(r.right-30, r.top+r.height/2, GN_EXTRA_XP);
+    return true;
+  }
   if(a==="x-gn-detalle"){ gnAbreHoja("todo"); return true; }
   if(a==="x-gn-retos"){ gnAbreHoja("retos"); return true; }
   if(a==="x-gn-cierra"){ gnHoja=null; closeSheet(); return true; }
@@ -26310,6 +26365,12 @@ hnAvatar=function(){
 '.gn-itx small, .gn-rtx small{ display:block; font-size:10.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--t2); }',
 '.gn-itx b, .gn-rtx b{ display:block; margin-top:3px; font-size:14.5px; font-weight:500; line-height:1.3; color:var(--t1); }',
 '.gn-fl{ width:17px; height:17px; flex:none; color:var(--t2); }',
+'.gn-ex-ck{ width:24px; height:24px; flex:none; border-radius:50%; box-shadow:inset 0 0 0 1.6px color-mix(in srgb,var(--t1) 30%,transparent); display:grid; place-items:center; transition:background .25s, box-shadow .25s; }',
+'.gn-int.ok .gn-ex-ck{ background:var(--gn-salvia); box-shadow:none; }',
+'.gn-int.ok .gn-ex-ck::after{ content:""; width:10px; height:6px; margin-top:-2px; border:solid var(--gn-tarjeta); border-width:0 0 2px 2px; transform:rotate(-45deg); }',
+'.gn-int.ok .gn-itx b{ color:var(--t2); }',
+'.gn-hoja svg path:first-child{ fill:none !important; }',
+'.gn-ex-vital{ color:var(--c-cuerpo); } .gn-ex-academico{ color:var(--c-mente); } .gn-ex-retos{ color:var(--c-retos); } .gn-ex-social{ color:var(--c-social); }',
 /* hábitos */
 '.gn-habs{ display:flex; flex-direction:column; gap:8px; }',
 '.gn-h{ width:100%; display:flex; align-items:center; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:var(--gn-tarjeta); box-shadow:var(--gn-sombra); text-align:left; transition:transform .2s; }',
@@ -27003,6 +27064,138 @@ render=function(){ var r=_renderCabCM.apply(this, arguments); try{ mnCabPinta();
     if(j>=0 && j<bs.length) bs[j].click();
   }, { passive:true });
 })();
+/* ════════ marca, iconos de la barra y modo oscuro (18/10/2026) ════════
+   · «PEAK.» arriba igual en todas las pestañas (General incluida, mismo tamaño),
+     con la A hecha con la montaña del logo (`pkLogo`).
+   · Barra: General con la montaña calcada del logo; Retos con una diana.
+   · Modo oscuro con más vida: grafito cálido en vez de casi negro, tarjetas que
+     se distinguen y colores de sección más vivos. */
+function pkLogo(){ return 'PE<svg class="pk-a" viewBox="0 0 900 900" aria-hidden="true"><path d="'+PEAK_MK_D+'"/></svg>K.'; }
+function pkLogoPon(){
+  var g=document.getElementById("gn-logo");
+  if(g && !g.querySelector(".pk-a")){ g.innerHTML=pkLogo(); g.setAttribute("aria-label","PEAK."); }
+  $$('.view:not(#v-resumen) p.eyebrow').forEach(function(p){
+    var h=p.nextElementSibling; if(!h || !h.matches("h1.display")) return;
+    if(!p.querySelector(".pk-logo")) p.insertAdjacentHTML("afterbegin", '<span class="pk-logo" aria-label="PEAK.">'+pkLogo()+'</span>');
+  });
+}
+BARRA_ICO.resumen='<g class="mk"><path fill="currentColor" stroke="none" transform="translate(2.2 2.6) scale(.0218)" d="'+PEAK_MK_D+'"/></g>';
+BARRA_ICO.retos='<circle class="r" cx="11" cy="13" r="8.25"/><circle class="d" cx="11" cy="13" r="4.4"/><circle class="dp" cx="11" cy="13" r="1.25" fill="currentColor" stroke="none"/>'+
+  '<path d="M11 13l8-8"/><path d="M16.4 3.2l.3 3.1 3.1.3"/>';
+(function(){
+  $$('#mtabs button[data-view="resumen"], #mtabs button[data-view="retos"]').forEach(function(b){
+    var sv=b.querySelector("svg"); if(sv) sv.outerHTML=barraIco(b.dataset.view);
+  });
+})();
+var _renderMarca=render;
+render=function(){ var r=_renderMarca.apply(this, arguments); try{ pkLogoPon(); }catch(e){} return r; };
+/* General se repinta por su cuenta: vigilar que su PEAK. lleve la montaña */
+try{ pkLogoPon(); }catch(e){} setTimeout(function(){ try{ pkLogoPon(); }catch(e){} }, 0);
+(function(){ var v=document.getElementById("v-resumen"); if(v && window.MutationObserver) new MutationObserver(function(){ var g=document.getElementById("gn-logo"); if(g && !g.querySelector(".pk-a")) pkLogoPon(); }).observe(v, { childList:true, subtree:true }); })();
+(function(){
+  var P="html:not(.sage):not(.neo):not(.arena):not(.porcelana):not(.medianoche):not(.oro):not(.gr)", D=P+".dark";
+  var st=document.createElement("style"); st.id="marca-oscuro-css"; st.textContent=[
+/* PEAK. con la A de montaña, a 17 px en todas */
+'.pk-a{ display:inline-block; width:.8em; height:.8em; margin:0 .02em; vertical-align:-.02em; fill:currentColor; }',
+'.view:not(#v-resumen) p.eyebrow:has(+ h1.display)::before{ content:none !important; }',
+'.view:not(#v-resumen) p.eyebrow:has(+ h1.display){ font-size:0 !important; letter-spacing:0 !important; margin-bottom:0 !important; line-height:40px; }',
+'.pk-logo{ font-family:"Unbounded",var(--f-titulo); font-weight:800; font-size:17px; letter-spacing:-.03em; line-height:40px; color:var(--t1); text-transform:none; }',
+'html .gn-logo{ font-size:17px !important; letter-spacing:-.03em !important; }',
+/* la diana: el punto del centro, del color del fondo cuando está abierta */
+'#mtabs .mtab[aria-current="true"] svg .dp{ fill:var(--bg); }',
+P+' #mtabs .mtab[aria-current="true"] svg .dp{ fill:#F1ECE1; }',
+/* modo oscuro con vida */
+D+'{ --bg:#1A1916; --tarjeta:#26241F; --t2:rgba(243,238,227,.74); --t3:rgba(243,238,227,.56); --hairline:rgba(243,238,227,.14); --tarjeta-borde:rgba(243,238,227,.1); }',
+'html.dark{ --gn-tarjeta:#26241F; --tarjeta-dest-oscuro:#33302A;',
+'  --gn-salvia:#B7D2A2; --gn-salvia-2:#323B2C; --gn-lavanda:#C6B3F0; --gn-lavanda-2:#363047;',
+'  --gn-arena:#E8BF84; --gn-arena-2:#433623; --gn-verde:#93D0CC; --gn-verde-2:#263938;',
+'  --gn-int:#2A2C24; --gn-reto:#2C2833; --gn-reto-ic:#3A3445; --gn-sol:#332E27; }',
+P+'.dark #mtabs.barpill{ background:rgba(40,38,34,.94) !important; }'
+  ].join("\n"); document.head.appendChild(st);
+})();
+/* ════════ pulido, segunda tanda (18/10/2026) ════════
+   · Iconos de «Tu progreso de hoy» y de los hábitos de General: los mismos que la
+     barra (corredor, loto, diana, gente); el zapato pasa a ser el corredor.
+   · Una sola animación al marcar algo (como el objetivo del grupo): el círculo se
+     rellena y el check da un pequeño sello. Fuera botes de tarjetas, ondas, chispas
+     y destellos de hábitos, ejercicio, retos de hoy y metas del mes.
+   · Meditación: el sonido de fondo elegido se ve marcado y se dice bajo «Empezar»;
+     la campana de cada cambio suena siempre, con su propio interruptor.
+   · Dentro del grupo no se cambia tu foto (se cambia desde tu perfil). */
+(function(){
+  function sinCapas(svg){ return svg.replace(/<path class="f"[^>]*\/>/g, "").replace(/<g class="h">[\s\S]*?<\/g>/, ""); }
+  GN_ICO.cuerpo=BARRA_ICO.vital;
+  GN_ICO.zapa=BARRA_ICO.vital;
+  GN_ICO.mente=BARRA_ICO.academico;
+  GN_ICO.social=sinCapas(BARRA_ICO.social);
+})();
+
+/* ── meditación ── */
+function medBongOn(){ return medPref().bong!==false; }
+var _medAvanzaBong=medAvanza;
+medAvanza=function(){
+  var antes=medA && medA.fase, r=_medAvanzaBong.apply(this, arguments);
+  /* con el sonido quitado, la campana de cada fase sigue sonando si no la apagas aparte */
+  if(!medA || medA.fin || medA.pausadoEn || medA.tipo.guia!=="resp" || medA.fase===antes || !medA.fase || medSuena() || !medBongOn()) return r;
+  var f=medFaseDe(medTranscurrido()); if(f.k==="prep") return r;
+  medCuenco(293.7, .075, Math.min(5, Math.max(2.5, f.dur+.8)));
+  return r;
+};
+function medExtrasPinta(){
+  var c=document.getElementById("med-card"), go=c && c.querySelector(".med-go"); if(!go) return;
+  var con=c.querySelector(".med-con");
+  if(!con){ go.insertAdjacentHTML("afterend", '<p class="med-con"></p>'); con=c.querySelector(".med-con"); }
+  var k=medFondoTipo();
+  con.innerHTML=k==="nada" ? "Sin sonido de fondo" : "Con "+esc(medFondoNombre(k).toLowerCase());
+  if(!c.querySelector(".med-bong")){
+    con.insertAdjacentHTML("afterend", '<button class="med-bong" data-act="x-med-bong"><span><b>Campana en cada cambio</b><small>Suena al pasar de inspira a mantén y espira</small></span><i></i></button>');
+  }
+  c.querySelector(".med-bong").classList.toggle("on", medBongOn());
+}
+var _medPintaExtras=medPintaTarjeta;
+medPintaTarjeta=function(){ var r=_medPintaExtras.apply(this, arguments); try{ medExtrasPinta(); }catch(e){} return r; };
+document.addEventListener("click", function(e){
+  var b=e.target.closest && e.target.closest('[data-act="x-med-bong"]');
+  if(b){ e.stopPropagation(); medPref().bong=!medBongOn(); save(); medExtrasPinta(); sonido("tick"); if(medBongOn()) medCuenco(293.7, .06, 3); return; }
+  if(e.target.closest && e.target.closest('[data-act="x-med-fondo-elige"]')) setTimeout(function(){ try{ medExtrasPinta(); }catch(err){} }, 0);
+}, true);
+
+(function(){
+  var st=document.createElement("style"); st.id="pulido-segunda-css"; st.textContent=[
+/* iconos de la barra dentro de General: sin las capas que solo usa la barra */
+'.gn-aico .f, .gn-aico .h, .gn-hic .f, .gn-hic .h, .gn-ha-i .f, .gn-ha-i .h{ display:none; }',
+/* ── una sola animación al marcar ── */
+'@keyframes peakSello{ 0%{ transform:scale(.9); } 50%{ transform:scale(1.06); } 100%{ transform:none; } }',
+'@keyframes hnPop{ 0%{ transform:scale(.9); } 50%{ transform:scale(1.06); } 100%{ transform:none; } }',
+'@keyframes tickSalto{ 0%{ transform:scale(.9); } 50%{ transform:scale(1.06); } 100%{ transform:none; } }',
+'@keyframes clPop{ 0%{ transform:scale(.9); } 50%{ transform:scale(1.06); } 100%{ transform:none; } }',
+'@keyframes medPop{ 0%{ transform:scale(.9); } 50%{ transform:scale(1.06); } 100%{ transform:none; } }',
+'@keyframes mmTick{ 0%{ opacity:0; } 100%{ opacity:1; } }',
+/* lo que movía filas, tarjetas o la pantalla */
+'@keyframes tickFila{ from{} to{} } @keyframes tickOnda{ from{ opacity:0; } to{ opacity:0; } } @keyframes tickGlow{ from{ opacity:0; } to{ opacity:0; } }',
+'@keyframes saludOk{ from{} to{} } @keyframes clBrillo{ from{} to{} } @keyframes mmFondo{ from{} to{} } @keyframes mmTexto{ from{} to{} }',
+'@keyframes opSube{ from{} to{} } @keyframes bxPop{ from{} to{} } @keyframes bxBrillo{ from{ opacity:0; } to{ opacity:0; } }',
+'@keyframes cbChispa{ from{ opacity:0; } to{ opacity:0; } } @keyframes gymChispa{ from{ opacity:0; } to{ opacity:0; } } @keyframes gymOla{ from{ opacity:0; } to{ opacity:0; } }',
+'#gym-btn.gym-sello, .ali-btn.ali-sello{ animation:none !important; }',
+'.cb-ck.ali-sello, .rp-chk{ animation-name:peakSello; }',
+/* el círculo se rellena suave */
+'.gn-ck, .tick, .rp-chk, .cb-ck, .mm-anillo{ transition:background-color .25s ease, border-color .25s ease, box-shadow .25s ease; }',
+/* ── meditación: sonido elegido bien marcado ── */
+'#med-card .med-fondos button.on{ background:var(--c-mente) !important; color:var(--bg) !important; box-shadow:none !important; padding-left:30px; position:relative; }',
+'#med-card .med-fondos button.on::before{ content:""; position:absolute; left:12px; top:50%; width:12px; height:12px; margin-top:-6px; background:currentColor;',
+'  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27black%27 stroke-width=%273%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M5 12l5 5 9-10%27/%3E%3C/svg%3E") center/contain no-repeat;',
+'  mask:url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27black%27 stroke-width=%273%27 stroke-linecap=%27round%27%3E%3Cpath d=%27M5 12l5 5 9-10%27/%3E%3C/svg%3E") center/contain no-repeat; }',
+'#med-card .med-con{ text-align:center; font-size:13px; font-weight:500; color:var(--t2); margin-top:8px; }',
+'#med-card .med-bong{ width:100%; display:flex; align-items:center; gap:12px; margin-top:14px; padding:12px 14px; border-radius:16px; background:var(--fill); text-align:left; }',
+'#med-card .med-bong span{ flex:1; min-width:0; } #med-card .med-bong b{ display:block; font-size:14px; font-weight:600; } #med-card .med-bong small{ display:block; font-size:12px; color:var(--t3); }',
+'#med-card .med-bong i{ width:44px; height:26px; flex:none; border-radius:99px; background:var(--hairline); position:relative; transition:background .2s; }',
+'#med-card .med-bong i::after{ content:""; position:absolute; left:3px; top:3px; width:20px; height:20px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .25s cubic-bezier(.3,1.4,.5,1); }',
+'#med-card .med-bong.on i{ background:var(--c-mente); } #med-card .med-bong.on i::after{ transform:translateX(18px); }',
+/* ── tu foto dentro del grupo: solo se ve, no se cambia ── */
+'#v-social .av-lapiz[data-act="nube-foto"]{ display:none !important; }'
+  ].join("\n"); document.head.appendChild(st);
+})();
+setTimeout(function(){ try{ render(); }catch(e){} }, 0);
 })();
 </script>
 <script>

@@ -85,18 +85,63 @@ function gnDatos(t){
   return A;
 }
 
+/* «Extra de hoy»: una cosa pequeña al día, de cualquier sección; marcarla da +10 XP */
 var GN_INTENCIONES=[
   ["Sal a caminar diez minutos sin el móvil.", "vital"],
-  ["Escribe a alguien a quien echas de menos.", "social"],
+  ["Bebe un vaso de agua antes de cada comida.", "vital"],
+  ["Esta noche, a la cama sin pantallas.", "vital"],
+  ["Sube por las escaleras siempre que puedas.", "vital"],
+  ["Estira cinco minutos al levantarte.", "vital"],
+  ["Come algo de fruta antes de la cena.", "vital"],
+  ["Haz 20 sentadillas en algún descanso.", "vital"],
+  ["Acuéstate media hora antes que ayer.", "vital"],
+  ["Desayuna sentado, sin prisas ni móvil.", "vital"],
+  ["Sal a que te dé el sol diez minutos.", "vital"],
   ["Respira hondo un minuto antes de empezar.", "academico"],
   ["Dedica 10 minutos a algo que te haga bien.", "academico"],
-  ["Bebe un vaso de agua antes de cada comida.", "vital"],
+  ["Lee diez páginas de un libro.", "academico"],
+  ["Escribe tres cosas buenas de hoy.", "academico"],
+  ["Una hora sin redes por la tarde.", "academico"],
+  ["Medita cinco minutos con los ojos cerrados.", "academico"],
+  ["Ordena tu cuarto o tu mesa.", "academico"],
+  ["Escucha un disco entero sin hacer nada más.", "academico"],
+  ["Apunta una idea que no quieras olvidar.", "academico"],
+  ["Silencia las notificaciones una hora.", "academico"],
   ["Termina hoy algo que llevas días aplazando.", "retos"],
-  ["Esta noche, a la cama sin pantallas.", "vital"]
+  ["Empieza por lo más difícil del día.", "retos"],
+  ["Haz algo que te dé un poco de miedo.", "retos"],
+  ["Aprende algo nuevo en 15 minutos.", "retos"],
+  ["Pon el móvil en otra habitación mientras trabajas.", "retos"],
+  ["Prueba algo que nunca hayas hecho.", "retos"],
+  ["Escribe a alguien a quien echas de menos.", "social"],
+  ["Dale las gracias a alguien de verdad.", "social"],
+  ["Llama a alguien de tu familia.", "social"],
+  ["Haz un cumplido sincero a alguien.", "social"],
+  ["Propón un plan a un amigo.", "social"],
+  ["Escucha a alguien sin mirar el móvil.", "social"]
 ];
+/* el saludo: tu nombre y una frase que cambia con la hora y el día */
+var GN_SALUDOS={
+  m:["a por el {d}","tu mejor versión","hoy se sube","empieza fuerte","un paso más arriba","hoy suma"],
+  t:["sigue subiendo","aún queda {d}","tu mejor versión","remata el {d}","no aflojes","a mitad de cumbre"],
+  n:["cierra el {d}","buen trabajo hoy","mañana, más","tu mejor versión","repasa y a descansar","casi en la cima"],
+  z:["hora de dormir","mañana se sube","descansa, que toca","el sueño también suma"]
+};
+function gnSaludo(t, hh){
+  var nom=(((S.profile||{}).name)||"").trim().split(/\s+/)[0];
+  var fr=hh<6?"z":hh<14?"m":hh<21?"t":"n";
+  var hola=fr==="m"?"Buenos días":fr==="t"?"Buenas tardes":"Buenas noches";
+  var dia=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][new Date(t+"T00:00:00").getDay()];
+  var L=GN_SALUDOS[fr], h=0, k=t+fr; for(var i=0;i<k.length;i++) h=(h*31+k.charCodeAt(i))|0;
+  return esc(hola+(nom?", "+nom:"")+",")+"<br>"+esc(L[Math.abs(h)%L.length].replace("{d}", dia));
+}
+var GN_EXTRA_XP=10, GN_EXTRA_ICO={ vital:"cuerpo", academico:"mente", retos:"retos", social:"social" };
+function gnExtraHecho(d){ return !!(S.extra && S.extra[d]); }
+var _gnExtraXP=dayXP;
+dayXP=function(d, tmap){ return _gnExtraXP(d, tmap)+(gnExtraHecho(d) ? GN_EXTRA_XP : 0); };
 function gnIntencion(t){
   var d=new Date(t+"T00:00:00"), ini=new Date(d.getFullYear(),0,0), n=Math.round((d-ini)/864e5);
-  return GN_INTENCIONES[n%GN_INTENCIONES.length];
+  return GN_INTENCIONES[(n*7)%GN_INTENCIONES.length];
 }
 
 /* los anillos se animan desde donde estaban */
@@ -117,7 +162,7 @@ function gnPinta(st){
   gnEtiquetas();
   var t=today(), d=new Date(t+"T00:00:00"), hh=new Date().getHours(), A=gnDatos(t);
   var fecha=["DOM","LUN","MAR","MIÉ","JUE","VIE","SÁB"][d.getDay()]+" "+d.getDate()+" "+["ENE","FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC"][d.getMonth()];
-  var saludo=(hh>=6&&hh<14)?"Buenos días,":(hh>=14&&hh<21)?"Buenas tardes,":"Buenas noches,";
+  var saludo=gnSaludo(t, hh);
   var habs=ordenIdeal(idealActivos()), cks=checksOf(t);
   var nHab=cks.filter(function(id){ return habs.some(function(x){ return x.id===id; }); }).length;
   var pendRetos=A.retos.filter(function(x){ return !x.ok; });
@@ -155,14 +200,14 @@ function gnPinta(st){
       '<div class="gn-monte" aria-hidden="true">'+gnMontana()+'</div>'+
       '<p class="gn-logo" id="gn-logo">PEAK.</p>'+
       '<p class="gn-fecha">'+fecha+'</p>'+
-      '<h1 class="gn-tit">'+saludo+'<br>tu mejor versión</h1><i class="gn-raya"></i>'+
+      '<h1 class="gn-tit">'+saludo+'</h1><i class="gn-raya"></i>'+
       '<p class="gn-frase">'+esc(frase)+'</p>'+
     '</header>'+
     '<section class="gn-prog">'+
       '<div class="gn-sec"><h2>Tu progreso de hoy</h2><button data-act="x-gn-detalle">Ver detalle'+gnSvg("flecha")+'</button></div>'+
       '<div class="gn-anillos">'+anillos+'</div>'+
-      '<button class="gn-int" data-jump="'+intn[1]+'"><span class="gn-hoja">'+gnSvg("hoja")+'</span>'+
-        '<span class="gn-itx"><small>Tu intención de hoy</small><b>'+esc(intn[0])+'</b></span>'+gnSvg("flecha","gn-fl")+'</button>'+
+      '<button class="gn-int'+(gnExtraHecho(t)?" ok":"")+'" data-act="x-gn-extra"><span class="gn-hoja gn-ex-'+intn[1]+'">'+gnSvg(GN_EXTRA_ICO[intn[1]])+'</span>'+
+        '<span class="gn-itx"><small>Extra de hoy · +'+GN_EXTRA_XP+' XP</small><b>'+esc(intn[0])+'</b></span><span class="gn-ex-ck" aria-label="Hecho"></span></button>'+
     '</section>'+
     '<div class="gn-sec gn-sec2" id="hn-habitos"><h2>Tus hábitos de hoy</h2><button data-act="x-gn-vertodos">Ver todos'+gnSvg("flecha")+'</button></div>'+
     (habs.length ? '<div class="gn-habs">'+filas+'</div>'+masHab
@@ -248,6 +293,16 @@ function gnAbreHoja(que){
 
 function gnAccion(a, el){
   if(a==="x-gn-area"){ var ar=GN_AREAS.filter(function(x){ return x.k===el.dataset.k; })[0]; if(ar) go(ar.tab); return true; }
+  if(a==="x-gn-extra"){
+    var td=today(), on=!gnExtraHecho(td); if(!S.extra) S.extra={};
+    if(on && typeof xpPreparar==="function") xpPreparar();
+    if(on) S.extra[td]=true; else delete S.extra[td];
+    save(); render();
+    if(!on){ sonido("des"); return true; }
+    sonido("pop"); try{ if(navigator.vibrate) navigator.vibrate(16); }catch(e){}
+    var r=el.getBoundingClientRect(); if(typeof xpVuela==="function") xpVuela(r.right-30, r.top+r.height/2, GN_EXTRA_XP);
+    return true;
+  }
   if(a==="x-gn-detalle"){ gnAbreHoja("todo"); return true; }
   if(a==="x-gn-retos"){ gnAbreHoja("retos"); return true; }
   if(a==="x-gn-cierra"){ gnHoja=null; closeSheet(); return true; }
@@ -378,6 +433,12 @@ hnAvatar=function(){
 '.gn-itx small, .gn-rtx small{ display:block; font-size:10.5px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--t2); }',
 '.gn-itx b, .gn-rtx b{ display:block; margin-top:3px; font-size:14.5px; font-weight:500; line-height:1.3; color:var(--t1); }',
 '.gn-fl{ width:17px; height:17px; flex:none; color:var(--t2); }',
+'.gn-ex-ck{ width:24px; height:24px; flex:none; border-radius:50%; box-shadow:inset 0 0 0 1.6px color-mix(in srgb,var(--t1) 30%,transparent); display:grid; place-items:center; transition:background .25s, box-shadow .25s; }',
+'.gn-int.ok .gn-ex-ck{ background:var(--gn-salvia); box-shadow:none; }',
+'.gn-int.ok .gn-ex-ck::after{ content:""; width:10px; height:6px; margin-top:-2px; border:solid var(--gn-tarjeta); border-width:0 0 2px 2px; transform:rotate(-45deg); }',
+'.gn-int.ok .gn-itx b{ color:var(--t2); }',
+'.gn-hoja svg path:first-child{ fill:none !important; }',
+'.gn-ex-vital{ color:var(--c-cuerpo); } .gn-ex-academico{ color:var(--c-mente); } .gn-ex-retos{ color:var(--c-retos); } .gn-ex-social{ color:var(--c-social); }',
 /* hábitos */
 '.gn-habs{ display:flex; flex-direction:column; gap:8px; }',
 '.gn-h{ width:100%; display:flex; align-items:center; gap:10px; padding:11px 12px 11px 14px; border-radius:16px; background:var(--gn-tarjeta); box-shadow:var(--gn-sombra); text-align:left; transition:transform .2s; }',
