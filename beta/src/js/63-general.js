@@ -197,10 +197,10 @@ function gnPinta(st){
 
   box.innerHTML=
     '<header class="gn-cab">'+
+      '<div class="gn-monte" aria-hidden="true">'+gnMontana()+'</div>'+
       '<p class="gn-logo" id="gn-logo">PEAK.</p>'+
       '<p class="gn-fecha">'+fecha+'</p>'+
-      '<h1 class="gn-tit">'+saludo+'</h1>'+
-      '<div class="gn-ancla"><div class="gn-monte" aria-hidden="true">'+gnMontana()+'</div></div><i class="gn-raya"></i>'+
+      '<h1 class="gn-tit">'+saludo+'</h1><i class="gn-raya"></i>'+
       '<p class="gn-frase">'+esc(frase)+'</p>'+
     '</header>'+
     '<section class="gn-prog">'+
@@ -391,15 +391,15 @@ hnAvatar=function(){
 'html.gen #v-resumen > div:first-child, html.gen .hn-fila3, html.gen .hn-guia{ display:none !important; }',
 'html.gen #hoy{ position:relative; }',
 /* cabecera */
-'.gn-cab{ position:relative; padding-bottom:40px; }',
+'.gn-cab{ position:relative; padding-bottom:26px; }',
 '.gn-logo{ font-family:"Unbounded",var(--f-titulo); font-weight:800; font-size:26px; letter-spacing:-.045em; line-height:40px; color:var(--t1); position:relative; }',
 '.gn-fecha{ position:relative; margin-top:30px; font-size:12px; font-weight:500; letter-spacing:.24em; color:var(--t2); }',
 '.gn-tit{ position:relative; margin-top:12px; font-family:var(--f-texto); font-weight:700; font-size:31px; line-height:1.08; letter-spacing:-.035em; color:var(--t1); }',
 '.gn-raya{ position:relative; display:block; width:22px; height:2.5px; border-radius:2px; background:var(--t1); margin-top:16px; }',
 '.gn-frase{ position:relative; margin-top:16px; max-width:56%; font-size:15px; line-height:1.4; color:var(--t2); }',
-/* la montaña cuelga justo debajo del saludo: nunca lo tapa, tenga las líneas que tenga */
-'.gn-ancla{ position:relative; height:0; }',
-'.gn-monte{ position:absolute; right:-20px; top:-64px; width:min(80%,330px); pointer-events:none; }',
+/* el saludo ocupa la izquierda y la montaña la derecha: no se pisan */
+'.gn-monte{ position:absolute; right:-44px; top:34px; width:min(78%,320px); pointer-events:none; }',
+'.gn-tit{ max-width:68%; }',
 '.gn-frase{ z-index:1; paint-order:stroke fill; -webkit-text-stroke:5px var(--bg); }',
 '.gn-monte svg{ display:block; width:100%; height:auto; }',
 '.gn-sol{ fill:var(--gn-sol); }',

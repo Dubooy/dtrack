@@ -19,7 +19,7 @@ gnMontana=function(){
   return mlSvg("gn-ml", "0 0 240 230",
     "M0 230 L72 166 L94 178 L150 72 L176 100 L190 92 L240 146 L240 230Z",
     "M150 72 L176 100 L190 92 L240 146 L240 230 L168 230 Z",
-    "M150 73 V54 L163 58.5 L150 63Z", [150, 228, 90]);
+    "", [150, 228, 90]);
 };
 vcDibujo=function(){
   return '<span class="vc-svg">'+mlSvg("vc-ml", "0 -6 120 70",
