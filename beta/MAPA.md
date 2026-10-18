@@ -89,6 +89,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `64-cuerpo-nuevo.js` | Cuerpo (17/10): Estirar como tarjetas con texto y flecha bajo la foto y «Ver todos» (lista entera); Alimentación con «¿Has comido bien?» (check redondo y semana) e ideas de hoy en filas con dibujo del plato (`beta/comida/*.svg`, propios). Rehace `rtPinta` y `aliTarjetaHTML` |
 | `66-temas-justos.js` | Temas que quedan: Claro, Oscuro, Sistema, Jardín, Cielo y los de nivel (quita los demás de `TEMAS` y pasa a Claro u Oscuro a quien tuviera uno quitado) |
 | `67-cabecera-marca.js` | Cabecera de marca: en Cuerpo, Mente, Retos y Social, sin antetítulo ni título grande, solo «PEAK.» y tu foto (General conserva su saludo) |
+| `68-poco-a-poco.js` | Poco a poco: a quien empieza (`S.ppDesde`) el primer día solo se le enseña lo básico; Estirar y Alimentación (día 2), Leer (3), Metas del mes y días de descanso (4), Mis retos y Experimentos (6) aparecen después con aviso y un «Mañana se abre…» en General (`PP_PASOS`) |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
