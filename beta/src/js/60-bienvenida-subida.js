@@ -36,11 +36,11 @@ onbPinta=function(primera){
     return;
   }
   _onbPintaBase(primera);
-  /* las metas, sin emoji y numeradas como las listas de Hoy */
-  c.querySelectorAll(".onb-grid .onb-op").forEach(function(b, i){
-    var e=b.querySelector(".onb-e"); if(e) e.outerHTML='<span class="onb-nn num">'+(i<9?"0":"")+(i+1)+'</span>';
+  /* las metas, en tarjetas con su emoji (como antes); en «¿Estudias?» y «¿Cuánto te quieres exigir?», un emoji delante */
+  var EMO={ insti:"🏫", uni:"🎓", examen:"📝", no:"🙅", "3":"🌱", "5":"💪", "7":"🔥" };
+  c.querySelectorAll('.onb-op.fila[data-c="estudia"], .onb-op.fila[data-c="nivel"]').forEach(function(b){
+    var e=EMO[b.dataset.v]; if(e) b.insertAdjacentHTML("afterbegin", '<span class="onb-em" aria-hidden="true">'+e+'</span>');
   });
-  var g=c.querySelector(".onb-grid"); if(g) g.className="onb-lista onb-metas";
 };
 var _onbAccionBase=onbAccion;
 onbAccion=function(a, el){
@@ -48,7 +48,8 @@ onbAccion=function(a, el){
     if(onbPre==="intro"){ onbPre="nombre"; onbPinta(); setTimeout(function(){ var i=document.getElementById("onb-nombre"); if(i) i.focus(); }, 350); return true; }
     if(onbPre==="nombre"){
       var i=document.getElementById("onb-nombre"), v=i ? i.value.trim().slice(0,20) : "";
-      if(v && !el.dataset.saltar && !onbPrueba){ if(!S.profile) S.profile={}; S.profile.name=v; save(); }
+      if(v && !el.dataset.saltar && !onbPrueba){ if(!S.profile) S.profile={}; S.profile.name=v; save();
+        if(typeof esPrueba==="function" && esPrueba() && perfil) perfil.usuario=v; }
       onbPre=null; onbPinta(); return true;
     }
   }
@@ -155,6 +156,14 @@ function verSubida(){
 'html.onb-n .onb-op.on i{ background:var(--t1); color:var(--bg); transform:none; }',
 'html.onb-n .onb-op.on .onb-nn{ color:var(--t1); }',
 'html.onb-n .onb-op:active{ transform:none; opacity:.6; }',
+/* las metas: tarjetas de dos en dos con el emoji grande */
+'html.onb-n .onb-grid .onb-op{ flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:12px; min-height:0; padding:16px; border-radius:20px;',
+'  background:var(--fill); border:0; box-shadow:inset 0 0 0 1.5px transparent; font-weight:600; font-size:15.5px; }',
+'html.onb-n .onb-grid .onb-op i{ position:absolute; top:14px; right:14px; width:24px; height:24px; }',
+'html.onb-n .onb-grid .onb-op.on{ background:var(--fill-hi); box-shadow:inset 0 0 0 2px var(--t1); }',
+'html.onb-n .onb-grid .onb-op:active{ transform:scale(.97); opacity:1; }',
+'html.onb-n .onb-e{ font-size:30px; line-height:1; }',
+'html.onb-n .onb-op.fila span.onb-em{ flex:none; display:block; font-size:22px; line-height:1; width:28px; text-align:center; }',
 /* botones */
 'html.onb-n .onb-main{ flex:1; height:56px; border-radius:99px; background:var(--t1); color:var(--bg); font-family:var(--f-texto); font-size:16px; font-weight:600; box-shadow:none; }',
 'html.onb-n .onb-main:disabled{ opacity:.3; }',

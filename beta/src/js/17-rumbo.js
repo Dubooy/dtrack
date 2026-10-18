@@ -459,6 +459,8 @@ function onbTermina(aplicar){
     if(S.chPick) S.chPick={};
     var estudia=(onb.estudia && onb.estudia!=="no");
     try{ prefPon("academico", estudia); }catch(e){}
+    /* solo el instituto tiene modalidades: al resto no se le vuelve a preguntar «¿Qué estudias?» en Mente */
+    if(onb.estudia && onb.estudia!=="insti" && !S.modalidad) aplicarModalidad("otro");
     var h=parseInt(onb.hora,10); if(h>=20 && h<=23){ S.avisos.hn=h; }
     S.onbMetas=onb.metas.slice();
   }

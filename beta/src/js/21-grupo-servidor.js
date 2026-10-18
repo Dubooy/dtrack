@@ -276,8 +276,8 @@ reaccionar=function(id, e, boton){
 };
 
 function grupoAccion(a, el){
-  if(a==="x-g-crear"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para crear uno."); return true; } gSheetCrear(); return true; }
-  if(a==="x-g-unirse"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para unirte a uno."); return true; } gSheetUnirse(); return true; }
+  if(a==="x-g-crear"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ if(sinCuenta()) cuentaDesdePrueba("Para crear un grupo hace falta cuenta. Lo que llevas se guarda en ella."); else avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para crear uno."); return true; } gSheetCrear(); return true; }
+  if(a==="x-g-unirse"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ if(sinCuenta()) cuentaDesdePrueba("Para unirte a un grupo hace falta cuenta. Lo que llevas se guarda en ella."); else avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para unirte a uno."); return true; } gSheetUnirse(); return true; }
   if(a==="x-g-crear-ok"){ var n=(($("#g-nombre")||{}).value||"").trim(); el.disabled=true;
     gRpc("g_crear", { p_nombre:n }).then(function(){ return gTrasEntrar("Grupo creado. Invita a tus amigos con el código."); }).catch(function(e){ el.disabled=false; gFallo(e); }); return true; }
   if(a==="x-g-unirse-ok"){ var c=(($("#g-codigo")||{}).value||"").trim().toUpperCase(); if(c.length<6){ gFallo({message:"codigo_mal"}); return true; } el.disabled=true;

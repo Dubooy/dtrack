@@ -360,12 +360,12 @@ function socCuenta(){
   var foto = perfil&&perfil.avatar;
   return '<div class="soc-sec"><h2 class="display">Cuenta</h2></div>'+
     '<div class="soc-ajustes">'+
-      '<div><span>'+(esPrueba()?"Modo prueba":esc(ses.email||""))+'</span><span id="nube-estado" class="t3" style="font-size:13px">al día</span></div>'+
+      '<div><span>'+(sinCuenta()?"Sin cuenta: se guarda en este móvil":esPrueba()?"Modo prueba":esc(ses.email||""))+'</span><span id="nube-estado" class="t3" style="font-size:13px">al día</span></div>'+
       '<button data-act="nube-subir"><span>Guardar ahora</span><span class="t3">›</span></button>'+
       (foto?'<button data-act="nube-quitafoto"><span>Quitar la foto</span><span class="t3">›</span></button>':'')+
-      '<button data-act="nube-salir"><span class="rojo">'+(esPrueba()?"Salir del modo prueba":"Cerrar sesión")+'</span></button>'+
+      '<button data-act="nube-salir"><span class="'+(sinCuenta()?"":"rojo")+'">'+(sinCuenta()?"Crear cuenta y guardar lo tuyo":esPrueba()?"Salir del modo prueba":"Cerrar sesión")+'</span></button>'+
     '</div>'+
-    (esPrueba()
+    (esPrueba() && !sinCuenta()
       ? '<div class="soc-sec"><h2 class="display">Pruebas</h2><span class="t3" style="font-size:12.5px">solo en modo prueba</span></div>'+
         '<div class="soc-ajustes">'+
           '<button data-act="x-dev-nivel"><span>Subir un nivel</span><span class="t3 num">NV '+stats().lvl+'</span></button>'+

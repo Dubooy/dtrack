@@ -1275,7 +1275,7 @@ var TEXTOS = {
   ],
 
   tutorial: [
-    {t:"Tu día en tres anillos", d:"Retos, hábitos y Cuerpo. Cuando se cierran los tres, el día ha salido redondo. Toca uno para ver qué cuenta."},
+    {t:"Tu día en cuatro anillos", d:"Cuerpo, Mente, Retos y Social. Cada uno suma tus hábitos de esa parte y lo básico del día (agua, sueño, entreno…). Toca uno para ver qué cuenta."},
     {t:"Tus hábitos",            d:"Lo que quieres hacer cada día. Tócalo para marcarlo; mantén pulsado uno para cambiarlo."},
     {t:"Para moverte",           d:"Aquí cambias de sección. En Ajustes puedes volver a ver esta guía cuando quieras."}
   ]
@@ -3537,8 +3537,8 @@ function aplicarModalidad(k){
   save();
 }
 var TOUR_OBJ=[
-  {v:"resumen",   sel:"#hoy-anillos"},
-  {v:"resumen",   sel:"#card-ideal"},
+  {v:"resumen",   sel:".gn-prog"},
+  {v:"resumen",   sel:".gn-habs"},
   {v:null,        sel:["#mtabs","#rail"]}
 ];
 var TOUR=TOUR_OBJ.map(function(o,i){
@@ -4821,16 +4821,28 @@ function enVisor(){
   return document.documentElement.classList.contains("embebido");
 }
 function esPrueba(){ return !!(ses && ses.demo); }
+/* fuera del visor, el modo prueba es «probar sin cuenta»: todo se guarda en este móvil
+   y, al crear la cuenta, se sube (es la primera subida de la cuenta nueva) */
+function sinCuenta(){ return esPrueba() && !enVisor(); }
+function nombrePrueba(){ return (S.profile && S.profile.name) || (enVisor() ? "carlos" : "tú"); }
+function cuentaDesdePrueba(aviso){
+  sesGuardar(null);
+  try{ localStorage.removeItem(SYNCKEY); }catch(e){}
+  puertaAviso=aviso||"";
+  abrirPuerta("correo");
+}
 
 function entrarDePrueba(){
-  sesGuardar({ demo:true, uid:"prueba", email:"modo de prueba",
+  var vis=enVisor();
+  sesGuardar({ demo:true, uid:"prueba", email:vis?"modo de prueba":"sin cuenta",
                access_token:"", refresh_token:"", caduca:0 });
-  perfil = { usuario:"carlos", nacimiento:"", avatar:FOTOS_PRUEBA.carlos };
+  perfil = { usuario:nombrePrueba(), nacimiento:"", avatar:vis?FOTOS_PRUEBA.carlos:"" };
   GRUPO=null;   /* sin grupo por defecto: se crea o se une con cuenta */
   cerrarPuerta();
   render();
   tourSiToca();
-  if(typeof avisoTrasTour==="function") avisoTrasTour("Modo prueba: nada se guarda en la nube."); else avisoNube("Modo prueba: nada se guarda en la nube.");
+  var t=vis ? "Modo prueba: nada se guarda en la nube." : "Sin cuenta: lo tuyo se guarda en este móvil. Crea la cuenta cuando quieras y se sube.";
+  if(typeof avisoTrasTour==="function") avisoTrasTour(t); else avisoNube(t);
 }
 
 /* fotos provisionales de los usuarios de prueba (dibujadas, no son personas) */
@@ -5198,12 +5210,12 @@ function socCuenta(){
   var foto = perfil&&perfil.avatar;
   return '<div class="soc-sec"><h2 class="display">Cuenta</h2></div>'+
     '<div class="soc-ajustes">'+
-      '<div><span>'+(esPrueba()?"Modo prueba":esc(ses.email||""))+'</span><span id="nube-estado" class="t3" style="font-size:13px">al día</span></div>'+
+      '<div><span>'+(sinCuenta()?"Sin cuenta: se guarda en este móvil":esPrueba()?"Modo prueba":esc(ses.email||""))+'</span><span id="nube-estado" class="t3" style="font-size:13px">al día</span></div>'+
       '<button data-act="nube-subir"><span>Guardar ahora</span><span class="t3">›</span></button>'+
       (foto?'<button data-act="nube-quitafoto"><span>Quitar la foto</span><span class="t3">›</span></button>':'')+
-      '<button data-act="nube-salir"><span class="rojo">'+(esPrueba()?"Salir del modo prueba":"Cerrar sesión")+'</span></button>'+
+      '<button data-act="nube-salir"><span class="'+(sinCuenta()?"":"rojo")+'">'+(sinCuenta()?"Crear cuenta y guardar lo tuyo":esPrueba()?"Salir del modo prueba":"Cerrar sesión")+'</span></button>'+
     '</div>'+
-    (esPrueba()
+    (esPrueba() && !sinCuenta()
       ? '<div class="soc-sec"><h2 class="display">Pruebas</h2><span class="t3" style="font-size:12.5px">solo en modo prueba</span></div>'+
         '<div class="soc-ajustes">'+
           '<button data-act="x-dev-nivel"><span>Subir un nivel</span><span class="t3 num">NV '+stats().lvl+'</span></button>'+
@@ -9992,6 +10004,8 @@ function onbTermina(aplicar){
     if(S.chPick) S.chPick={};
     var estudia=(onb.estudia && onb.estudia!=="no");
     try{ prefPon("academico", estudia); }catch(e){}
+    /* solo el instituto tiene modalidades: al resto no se le vuelve a preguntar «¿Qué estudias?» en Mente */
+    if(onb.estudia && onb.estudia!=="insti" && !S.modalidad) aplicarModalidad("otro");
     var h=parseInt(onb.hora,10); if(h>=20 && h<=23){ S.avisos.hn=h; }
     S.onbMetas=onb.metas.slice();
   }
@@ -13156,8 +13170,8 @@ reaccionar=function(id, e, boton){
 };
 
 function grupoAccion(a, el){
-  if(a==="x-g-crear"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para crear uno."); return true; } gSheetCrear(); return true; }
-  if(a==="x-g-unirse"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para unirte a uno."); return true; } gSheetUnirse(); return true; }
+  if(a==="x-g-crear"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ if(sinCuenta()) cuentaDesdePrueba("Para crear un grupo hace falta cuenta. Lo que llevas se guarda en ella."); else avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para crear uno."); return true; } gSheetCrear(); return true; }
+  if(a==="x-g-unirse"){ if(typeof esPrueba==="function" && esPrueba() && !gReal()){ if(sinCuenta()) cuentaDesdePrueba("Para unirte a un grupo hace falta cuenta. Lo que llevas se guarda en ella."); else avisoNube("Sin cuenta no hay grupos: entra con tu cuenta para unirte a uno."); return true; } gSheetUnirse(); return true; }
   if(a==="x-g-crear-ok"){ var n=(($("#g-nombre")||{}).value||"").trim(); el.disabled=true;
     gRpc("g_crear", { p_nombre:n }).then(function(){ return gTrasEntrar("Grupo creado. Invita a tus amigos con el código."); }).catch(function(e){ el.disabled=false; gFallo(e); }); return true; }
   if(a==="x-g-unirse-ok"){ var c=(($("#g-codigo")||{}).value||"").trim().toUpperCase(); if(c.length<6){ gFallo({message:"codigo_mal"}); return true; } el.disabled=true;
@@ -13694,8 +13708,8 @@ function pieHTML(){
     /* en la beta (publicar.py pone window.DTRACK_BETA) también se ofrece, para probar sin código */
     (enVisor()
       ? '<button class="pu-enlace" data-p="prueba">Entrar sin cuenta · modo prueba</button>'+
-        (enVisor() ? '<p class="pu-nota">Aquí dentro no hay conexión con el servidor, así que la cuenta no funciona. El modo prueba usa datos de mentira.</p>' : '')
-      : '')+
+        '<p class="pu-nota">Aquí dentro no hay conexión con el servidor, así que la cuenta no funciona. El modo prueba usa datos de mentira.</p>'
+      : (ult ? '' : '<button class="pu-enlace" data-p="prueba">Probar sin cuenta</button>'))+
   '</div>';
 }
 
@@ -14020,6 +14034,7 @@ function salirCuenta(){
     try{ localStorage.removeItem(SYNCKEY); localStorage.removeItem("dtrack-grupo-cache"); }catch(e){}
     location.reload();
   }
+  if(sinCuenta()){ cuentaDesdePrueba(); return; }
   if(!ses || ses.demo){ fin(); return; }
   /* dos toques, para no salir sin querer */
   if(Date.now()-salirArmado>4000){ salirArmado=Date.now(); avisoNube("Toca otra vez «Cerrar sesión» para salir. Tus datos se quedan guardados."); return; }
@@ -14035,7 +14050,7 @@ function arrancarCuenta(){
   if(volverDeGoogle()) return;   /* se vuelve de Google con un código: se termina de entrar */
   ses=sesLeer();
   if(ses && ses.demo){
-    perfil = { usuario:"carlos", nacimiento:"", avatar:"" };
+    perfil = { usuario:nombrePrueba(), nacimiento:"", avatar:"" };
     GRUPO=null; render(); tourSiToca(); return;
   }
   if(!ses){ abrirPuerta("bienvenida"); return; }
@@ -14322,7 +14337,7 @@ function tarjetaCuenta(){
     '</div>'+
     '<div class="soft" style="margin-top:16px;padding:12px 14px;border-radius:14px;display:flex;'+
       'align-items:center;justify-content:space-between;gap:10px">'+
-      '<span class="t2" style="font-size:12.5px">'+(esPrueba()?"Modo prueba":"Tus datos")+'</span>'+
+      '<span class="t2" style="font-size:12.5px">'+(sinCuenta()?"Sin cuenta: en este móvil":esPrueba()?"Modo prueba":"Tus datos")+'</span>'+
       '<span id="nube-estado" class="t3" style="font-size:12px">al día</span>'+
     '</div>'+
     '<p class="t3" style="margin-top:10px;font-size:11.5px;line-height:1.5">'+
@@ -14330,7 +14345,7 @@ function tarjetaCuenta(){
             : 'Toca el cuadro para ponerte una foto.')+'</p>'+
     '<div style="display:flex;gap:10px;margin-top:12px">'+
       '<button class="btn btn-quiet" data-act="nube-subir" style="flex:1">Guardar ahora</button>'+
-      '<button class="btn btn-danger" data-act="nube-salir" style="flex:1">'+(esPrueba()?"Salir":"Cerrar sesión")+'</button>'+
+      '<button class="btn btn-danger" data-act="nube-salir" style="flex:1">'+(sinCuenta()?"Crear cuenta":esPrueba()?"Salir":"Cerrar sesión")+'</button>'+
     '</div>'+
   '</div>';
 }
@@ -25460,11 +25475,11 @@ onbPinta=function(primera){
     return;
   }
   _onbPintaBase(primera);
-  /* las metas, sin emoji y numeradas como las listas de Hoy */
-  c.querySelectorAll(".onb-grid .onb-op").forEach(function(b, i){
-    var e=b.querySelector(".onb-e"); if(e) e.outerHTML='<span class="onb-nn num">'+(i<9?"0":"")+(i+1)+'</span>';
+  /* las metas, en tarjetas con su emoji (como antes); en «¿Estudias?» y «¿Cuánto te quieres exigir?», un emoji delante */
+  var EMO={ insti:"🏫", uni:"🎓", examen:"📝", no:"🙅", "3":"🌱", "5":"💪", "7":"🔥" };
+  c.querySelectorAll('.onb-op.fila[data-c="estudia"], .onb-op.fila[data-c="nivel"]').forEach(function(b){
+    var e=EMO[b.dataset.v]; if(e) b.insertAdjacentHTML("afterbegin", '<span class="onb-em" aria-hidden="true">'+e+'</span>');
   });
-  var g=c.querySelector(".onb-grid"); if(g) g.className="onb-lista onb-metas";
 };
 var _onbAccionBase=onbAccion;
 onbAccion=function(a, el){
@@ -25472,7 +25487,8 @@ onbAccion=function(a, el){
     if(onbPre==="intro"){ onbPre="nombre"; onbPinta(); setTimeout(function(){ var i=document.getElementById("onb-nombre"); if(i) i.focus(); }, 350); return true; }
     if(onbPre==="nombre"){
       var i=document.getElementById("onb-nombre"), v=i ? i.value.trim().slice(0,20) : "";
-      if(v && !el.dataset.saltar && !onbPrueba){ if(!S.profile) S.profile={}; S.profile.name=v; save(); }
+      if(v && !el.dataset.saltar && !onbPrueba){ if(!S.profile) S.profile={}; S.profile.name=v; save();
+        if(typeof esPrueba==="function" && esPrueba() && perfil) perfil.usuario=v; }
       onbPre=null; onbPinta(); return true;
     }
   }
@@ -25579,6 +25595,14 @@ function verSubida(){
 'html.onb-n .onb-op.on i{ background:var(--t1); color:var(--bg); transform:none; }',
 'html.onb-n .onb-op.on .onb-nn{ color:var(--t1); }',
 'html.onb-n .onb-op:active{ transform:none; opacity:.6; }',
+/* las metas: tarjetas de dos en dos con el emoji grande */
+'html.onb-n .onb-grid .onb-op{ flex-direction:column; align-items:flex-start; justify-content:flex-start; gap:12px; min-height:0; padding:16px; border-radius:20px;',
+'  background:var(--fill); border:0; box-shadow:inset 0 0 0 1.5px transparent; font-weight:600; font-size:15.5px; }',
+'html.onb-n .onb-grid .onb-op i{ position:absolute; top:14px; right:14px; width:24px; height:24px; }',
+'html.onb-n .onb-grid .onb-op.on{ background:var(--fill-hi); box-shadow:inset 0 0 0 2px var(--t1); }',
+'html.onb-n .onb-grid .onb-op:active{ transform:scale(.97); opacity:1; }',
+'html.onb-n .onb-e{ font-size:30px; line-height:1; }',
+'html.onb-n .onb-op.fila span.onb-em{ flex:none; display:block; font-size:22px; line-height:1; width:28px; text-align:center; }',
 /* botones */
 'html.onb-n .onb-main{ flex:1; height:56px; border-radius:99px; background:var(--t1); color:var(--bg); font-family:var(--f-texto); font-size:16px; font-weight:600; box-shadow:none; }',
 'html.onb-n .onb-main:disabled{ opacity:.3; }',

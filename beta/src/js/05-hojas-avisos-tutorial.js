@@ -551,8 +551,8 @@ function aplicarModalidad(k){
   save();
 }
 var TOUR_OBJ=[
-  {v:"resumen",   sel:"#hoy-anillos"},
-  {v:"resumen",   sel:"#card-ideal"},
+  {v:"resumen",   sel:".gn-prog"},
+  {v:"resumen",   sel:".gn-habs"},
   {v:null,        sel:["#mtabs","#rail"]}
 ];
 var TOUR=TOUR_OBJ.map(function(o,i){

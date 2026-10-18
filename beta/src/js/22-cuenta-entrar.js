@@ -65,8 +65,8 @@ function pieHTML(){
     /* en la beta (publicar.py pone window.DTRACK_BETA) también se ofrece, para probar sin código */
     (enVisor()
       ? '<button class="pu-enlace" data-p="prueba">Entrar sin cuenta · modo prueba</button>'+
-        (enVisor() ? '<p class="pu-nota">Aquí dentro no hay conexión con el servidor, así que la cuenta no funciona. El modo prueba usa datos de mentira.</p>' : '')
-      : '')+
+        '<p class="pu-nota">Aquí dentro no hay conexión con el servidor, así que la cuenta no funciona. El modo prueba usa datos de mentira.</p>'
+      : (ult ? '' : '<button class="pu-enlace" data-p="prueba">Probar sin cuenta</button>'))+
   '</div>';
 }
 
@@ -391,6 +391,7 @@ function salirCuenta(){
     try{ localStorage.removeItem(SYNCKEY); localStorage.removeItem("dtrack-grupo-cache"); }catch(e){}
     location.reload();
   }
+  if(sinCuenta()){ cuentaDesdePrueba(); return; }
   if(!ses || ses.demo){ fin(); return; }
   /* dos toques, para no salir sin querer */
   if(Date.now()-salirArmado>4000){ salirArmado=Date.now(); avisoNube("Toca otra vez «Cerrar sesión» para salir. Tus datos se quedan guardados."); return; }
@@ -406,7 +407,7 @@ function arrancarCuenta(){
   if(volverDeGoogle()) return;   /* se vuelve de Google con un código: se termina de entrar */
   ses=sesLeer();
   if(ses && ses.demo){
-    perfil = { usuario:"carlos", nacimiento:"", avatar:"" };
+    perfil = { usuario:nombrePrueba(), nacimiento:"", avatar:"" };
     GRUPO=null; render(); tourSiToca(); return;
   }
   if(!ses){ abrirPuerta("bienvenida"); return; }
@@ -693,7 +694,7 @@ function tarjetaCuenta(){
     '</div>'+
     '<div class="soft" style="margin-top:16px;padding:12px 14px;border-radius:14px;display:flex;'+
       'align-items:center;justify-content:space-between;gap:10px">'+
-      '<span class="t2" style="font-size:12.5px">'+(esPrueba()?"Modo prueba":"Tus datos")+'</span>'+
+      '<span class="t2" style="font-size:12.5px">'+(sinCuenta()?"Sin cuenta: en este móvil":esPrueba()?"Modo prueba":"Tus datos")+'</span>'+
       '<span id="nube-estado" class="t3" style="font-size:12px">al día</span>'+
     '</div>'+
     '<p class="t3" style="margin-top:10px;font-size:11.5px;line-height:1.5">'+
@@ -701,7 +702,7 @@ function tarjetaCuenta(){
             : 'Toca el cuadro para ponerte una foto.')+'</p>'+
     '<div style="display:flex;gap:10px;margin-top:12px">'+
       '<button class="btn btn-quiet" data-act="nube-subir" style="flex:1">Guardar ahora</button>'+
-      '<button class="btn btn-danger" data-act="nube-salir" style="flex:1">'+(esPrueba()?"Salir":"Cerrar sesión")+'</button>'+
+      '<button class="btn btn-danger" data-act="nube-salir" style="flex:1">'+(sinCuenta()?"Crear cuenta":esPrueba()?"Salir":"Cerrar sesión")+'</button>'+
     '</div>'+
   '</div>';
 }
