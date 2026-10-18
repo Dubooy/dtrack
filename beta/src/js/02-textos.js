@@ -30,7 +30,7 @@ var TEXTOS = {
      La clave pública es la que va emparejada con la privada que guardaste allí. */
   avisos: {
     servidor: "https://avisos-dutrack.cgduboycastosa.workers.dev",
-    clave:    "BNLE0hErIZzlVHmqAt_MW0KHFwACLBZNp8yxbCIR2S3BEsMK6qZCjCAaBpedrve6EtOrcVWrOPHaPqK6ZkHemVM",
+    clave:    "BPiBGNNZBVrfNYzA9Xc6R2ENFo5OHcdL8gyDmYx3hrlJTFt2n53j7rli1Xx1jDqvNU78Ie5w6qLx0k95YxD6njo",
     /* lo que dicen los avisos. Lo que va entre llaves lo rellena tu móvil */
     textos: {
       manana:     { t:"Buenos días",       b:"{clases}. {tareas}" },

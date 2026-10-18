@@ -7,11 +7,7 @@
 function chatAvisosAlta(){
   if(!hayAvisos() || !claveAvisos() || typeof Notification==="undefined" || Notification.permission!=="granted") return;
   if(!ses || !ses.uid) return;
-  navigator.serviceWorker.ready.then(function(reg){
-    return reg.pushManager.getSubscription().then(function(sub){
-      return sub || reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:aBytes(claveAvisos()) });
-    });
-  }).then(function(sub){
+  navigator.serviceWorker.ready.then(suscripcionAvisos).then(function(sub){
     if(!sub) return;
     var j=sub.toJSON(); if(S.chatPush===j.endpoint) return;
     return pedirAuth("/rest/v1/g_push?on_conflict=endpoint", { method:"POST", prefer:"resolution=merge-duplicates,return=minimal",

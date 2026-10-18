@@ -344,6 +344,16 @@ function aBytes(b64){
   for(var i=0;i<bin.length;i++) out[i]=bin.charCodeAt(i);
   return out;
 }
+/* la suscripción de avisos de este móvil, con la clave de ahora: si se hizo con otra
+   clave (porque se cambió el par de claves), se rehace, que si no no llega nada */
+async function suscripcionAvisos(reg){
+  var sub=await reg.pushManager.getSubscription(), k=aBytes(claveAvisos());
+  if(sub){
+    var vieja=sub.options && sub.options.applicationServerKey ? new Uint8Array(sub.options.applicationServerKey) : null;
+    if(vieja && (vieja.length!==k.length || vieja.some(function(b,i){ return b!==k[i]; }))){ await sub.unsubscribe().catch(function(){}); sub=null; }
+  }
+  return sub || reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey:k });
+}
 function desfaseHoras(){ return -Math.round(new Date().getTimezoneOffset()/60); }
 
 function avisoEstado(txt, mal){
@@ -360,8 +370,7 @@ async function activarAvisos(){
     var permiso = await Notification.requestPermission();
     if(permiso!=="granted"){ avisoEstado("No has dado permiso para los avisos.", true); return false; }
     var reg = await navigator.serviceWorker.ready;
-    var sub = await reg.pushManager.getSubscription();
-    if(!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly:true, applicationServerKey: aBytes(claveAvisos()) });
+    var sub = await suscripcionAvisos(reg);
     var r = await fetch(url+"/alta", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
     if(!r.ok){ avisoEstado("El servidor ha contestado con un error ("+r.status+").", true); return false; }
@@ -397,9 +406,10 @@ async function probarAviso(){
 function refrescarAvisos(){
   if(!S.avisos || !S.avisos.activo || !servidorAvisos() || !hayAvisos()) return;
   navigator.serviceWorker.ready.then(function(reg){
-    return reg.pushManager.getSubscription();
+    return Notification.permission==="granted" ? suscripcionAvisos(reg) : reg.pushManager.getSubscription();
   }).then(function(sub){
     if(!sub) return;
+    S.avisos.endpoint=sub.endpoint;
     return fetch(servidorAvisos()+"/alta",{ method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
   }).catch(function(){});
