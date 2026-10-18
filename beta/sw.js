@@ -1,7 +1,7 @@
 /* Peak · service worker
    La app entera va dentro de index.html, así que basta con guardarla
    y servirla desde la caché cuando no hay internet. */
-const CACHE = "dtrack-beta-v293";
+const CACHE = "dtrack-beta-v294";
 const FILES = [
   "./", "./index.html", "./manifest.webmanifest", "./textos.js", "./idiomas-datos.js", "./peak-anim.js",
   "./vendor/jszip.min.js", "./vendor/epub.min.js",
@@ -101,7 +101,7 @@ self.addEventListener("push", e => {
          iOS ya escribe el nombre de la app debajo y si no, sale dos veces */
       return self.registration.showNotification(d.tipo === "prueba" ? "Los avisos funcionan" : (d.t || "Aviso"), {
         body: d.b || "", icon:"./icon-192.png", badge:"./icon-192.png",
-        tag:"dtrack-"+(d.tipo || "prueba"), data:{ url:"./index.html" }
+        tag:"dtrack-"+(d.tipo || "prueba"), renotify: d.tipo === "chat", data:{ url:"./index.html" }
       });
     }
 

@@ -96,6 +96,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `72-cabeceras-cuerpo-mente.js` | Cabecera de Mente: tu ánimo de la semana (del parte, `S.animo`) con frase que cambia cada día (`MN_FRASES`) y barras; Meditación y Leer en ventanas como Agua y Sueño. Cabecera de Cuerpo: tu energía (`cuEnergia`: sueño, agua y ejercicio) con frase (`CU_FRASES`) y barras; tocar una barra cambia de día (sin la fila de día de arriba). Envuelve `render` |
 | `73-deslizar-pestanas.js` | Deslizar en horizontal sobre una pestaña pasa a la de al lado (orden de la barra); no salta en filas que ya se deslizan, campos ni lienzos |
 | `75-pulido-segunda.js` | Iconos de la barra en «Tu progreso de hoy» y hábitos (`GN_ICO`); una sola animación al marcar (anula botes, ondas y chispas redefiniendo sus `@keyframes`); meditación: sonido de fondo marcado, «Con …» bajo Empezar y «Campana en cada cambio» (`medPref().bong`); sin lápiz de tu foto dentro del grupo. «Extra de hoy» (+10 XP, `S.extra`) y el saludo con tu nombre (`gnSaludo`) están en 63 |
+| `76-avisos-chat.js` | Avisos del chat: guarda tu suscripción de avisos en `g_push` (pide permiso al enviar tu primer mensaje). Lo manda la función de Supabase `servidor/aviso-chat/` con un webhook de `g_chat` (ver `servidor/avisos-chat.sql`) |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),
