@@ -1,5 +1,11 @@
 /* ════════════════════════════════════════════════════════════════
-   CHAT DEL GRUPO (sep 2026)
+   NOVEDADES DEL GRUPO (antes el chat; oct 2026)
+   · Desde el 19/10 ya no se escribe: es un panel con las subidas de
+     nivel y las fotos del grupo (las del gym y las fotos que se
+     mandaron al chat antes del cambio), lo más nuevo arriba. Lo único
+     que se hace aquí es reaccionar. Sin caja de texto, sin cámara y sin
+     comentarios; los mensajes de texto antiguos no salen.
+   Lo de abajo es como era el chat (se conserva el mecanismo):
    · Cada grupo tiene su chat, dentro de Social (donde estaba
      «Actividad»): un recuadro con scroll y la caja para escribir debajo.
      Los logros que se publican solos salen dentro, como líneas en gris.
@@ -321,12 +327,30 @@ function chDiaTxt(d){
 }
 function chNombre(uid){ if(uid===chYo()) return tr("Tú"); var q=chQuien(uid); return q ? q.usuario : "alguien"; }
 /* mensajes y actividad automática, por orden de hora */
+function pnEsNivel(e){ return /^ha subido al nivel \d+/.test(e.texto||""); }
 function chItems(){
-  var G=chG(), princ=G.msgs.filter(chPrincipal), l=princ.map(function(m){ return { k:"m", ts:m.ts, m:m }; });
+  var G=chG(), princ=G.msgs.filter(chPrincipal), l=princ.filter(function(m){ return !!m.foto; }).map(function(m){ return { k:"m", ts:m.ts, m:m }; });
   var desde=(G.hayMas && princ.length) ? princ[0].ts : 0;
-  ((GRUPO && GRUPO.muro) || []).forEach(function(e){ if(e.ts && e.ts>=desde) l.push({ k:"e", ts:e.ts, e:e }); });
-  l.sort(function(a,b){ return a.ts-b.ts; });
+  ((GRUPO && GRUPO.muro) || []).forEach(function(e){ if(e.ts && e.ts>=desde && (e.foto || pnEsNivel(e))) l.push({ k:"e", ts:e.ts, e:e }); });
+  l.sort(function(a,b){ return b.ts-a.ts; });
   return l;
+}
+/* una tarjeta del panel: cara, quién y qué, la foto si la hay y las reacciones */
+function pnMiembro(nom){ var l=(GRUPO && GRUPO.miembros) || []; for(var i=0;i<l.length;i++) if(l[i].usuario===nom) return l[i]; return null; }
+function pnTarjeta(key, nom, texto, ts, foto, reac, mias, mio, nivel){
+  var q=pnMiembro(nom), ab=CH.abiertoReac===key;
+  return '<div class="pn-item'+(nivel?" nivel":"")+'">'+
+    '<div class="pn-cab"><span class="pn-cara"'+(q?' data-act="x-perfil" data-u="'+esc(nom)+'"':'')+'>'+caraDe(q||{ usuario:nom }, 34)+'</span>'+
+      '<p class="pn-txt"><b>'+esc(mio?tr("Tú"):nom)+'</b> '+esc(texto)+'<span class="pn-hora num">'+esc(chHora(ts))+'</span></p>'+
+      (nivel ? '<span class="pn-nivel num">'+esc((texto.match(/nivel (\d+)/)||[])[1]||"")+'</span>' : '')+
+    '</div>'+
+    (foto ? '<button class="pn-foto" data-act="x-fg-ver" data-u="'+esc(foto)+'" data-t="'+esc(nom+" · "+chHora(ts))+'"><img src="'+esc(foto)+'" alt="" loading="lazy"></button>' : '')+
+    '<div class="pn-pie">'+chReacHTML(reac, mias, key).replace('class="ch-reac"','class="ch-reac pn-reac"')+
+      '<button class="pn-reacciona'+(ab?" on":"")+'" data-act="x-chat-toca" data-id="'+esc(key)+'" aria-label="Reaccionar">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></button>'+
+    '</div>'+
+    (ab ? chEligeHTML(key, mias, mio) : '')+
+  '</div>';
 }
 function chComentarios(key){
   var id=+String(key).slice(2), ev=key.indexOf("e:")===0;
@@ -363,6 +387,7 @@ function chComHTML(key){
   return h+'</div>';
 }
 function chMensajeHTML(m, sigue, mio){
+  if(m.foto && m.id) return pnTarjeta("m:"+m.id, chNombre(m.uid), m.texto ? "· "+m.texto : "ha subido una foto", m.ts, m.foto, m.reac, m.mias, mio, false);
   var key=m.id ? "m:"+m.id : "", nom=chNombre(m.uid), q=mio ? null : chQuien(m.uid), foto=m.foto||m.local;
   var cara="";
   if(!mio) cara = sigue ? '<span class="ch-hueco"></span>'
@@ -383,6 +408,7 @@ function chMensajeHTML(m, sigue, mio){
 }
 function chEventoHTML(e){
   var key="e:"+e.id;
+  return pnTarjeta(key, e.usuario, e.texto, e.ts, e.foto, e.reac, e.mias, e.usuario===(GRUPO&&GRUPO.yo), pnEsNivel(e));
   return '<div class="ch-ev">'+
     '<button class="ch-ev-t" data-act="x-chat-toca" data-id="'+esc(key)+'"><b>'+esc(e.usuario)+'</b> '+esc(e.texto)+'<span class="num"> · '+chHora(e.ts)+'</span></button>'+
     (e.foto ? '<button class="ch-foto" data-act="x-fg-ver" data-u="'+esc(e.foto)+'" data-t="'+esc(e.usuario+" · "+e.cuando)+'"><img src="'+esc(e.foto)+'" alt="" loading="lazy"></button>' : '')+
@@ -408,26 +434,22 @@ function chPintaLista(abajo, forzar){
   CH.firma=firma; CH.listaPend=false;
   var G=chG(), yo=chYo(), h="", dia="", prev=null;
   var cerca=abajo || (sc.scrollHeight-sc.scrollTop-sc.clientHeight<140);
-  if(G.hayMas) h+='<button class="ch-antes" data-act="x-chat-antes">Ver mensajes anteriores</button>';
   if(!items.length){
     h+='<p class="ch-vacio">'+(CH.sinServidor ? "El chat aún no está activado en el servidor. Vuelve a probar en un rato."
       : !G.cargado ? "Cargando…"
       : G.error ? "No se han podido cargar los mensajes. Prueba en un rato."+(window.DTRACK_BETA && G.errorTxt ? " ("+esc(G.errorTxt.slice(0,160))+")" : "")
-      : "Aquí empieza el chat de «"+esc(GRUPO.nombre)+"». Lo que escribas solo lo ve el grupo.")+'</p>';
+      : "Aquí saldrán las subidas de nivel y las fotos de «"+esc(GRUPO.nombre)+"». Toca la carita para reaccionar.")+'</p>';
   }
   items.forEach(function(it){
     var d=iso(it.ts);
     if(d!==dia){ dia=d; prev=null; h+='<p class="ch-dia">'+esc(chDiaTxt(d))+'</p>'; }
-    if(it.k==="e"){ h+=chEventoHTML(it.e); prev=null; return; }
-    var m=it.m, sigue=!!(prev && prev.uid===m.uid && m.ts-prev.ts<5*60000 && !prev.foto && !m.foto);
-    h+=chMensajeHTML(m, sigue, m.uid===yo);
-    prev=m;
+    if(it.k==="e"){ h+=chEventoHTML(it.e); return; }
+    h+=chMensajeHTML(it.m, false, it.m.uid===yo);
   });
+  if(G.hayMas) h+='<button class="ch-antes" data-act="x-chat-antes">Ver anteriores</button>';
   var alto=sc.scrollHeight, arriba=sc.scrollTop;
   lista.innerHTML=h;
-  if(CH.mantenArriba){ CH.mantenArriba=false; sc.scrollTop=arriba+(sc.scrollHeight-alto); }
-  else if(cerca) sc.scrollTop=sc.scrollHeight;
-  else sc.scrollTop=arriba;
+  CH.mantenArriba=false;
   /* si estabas comentando, el foco vuelve a tu caja */
   if(comentando){ var inp=lista.querySelector('.ch-com-in[data-id="'+ae.dataset.id+'"]'); if(inp){ try{ inp.focus({ preventScroll:true }); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){ inp.focus(); } } }
   chMarcaVisto();
@@ -439,30 +461,8 @@ var ICO_CAMARA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 function chCaja(){
   if(CH.caja) return CH.caja;
   var c=document.createElement("div"); c.className="ch-caja"; c.id="ch-caja";
-  c.innerHTML='<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>'+
-    '<div class="ch-escribe">'+
-      '<button class="ch-foto-bt" data-act="x-chat-foto" aria-label="Mandar una foto">'+ICO_CAMARA+'</button>'+
-      '<textarea id="ch-texto" rows="1" maxlength="1000" placeholder="Escribe al grupo…" enterkeyhint="send" autocomplete="off"></textarea>'+
-      '<button class="ch-enviar" data-act="x-chat-enviar" aria-label="Enviar">'+
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>'+
-    '</div>';
-  var ta=c.querySelector("#ch-texto"), sc=c.querySelector("#ch-scroll");
-  ta.addEventListener("input", function(){ chAlto(ta); });
-  ta.addEventListener("keydown", function(ev){ if(ev.key==="Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); chEnviaCaja(); } });
-  /* que al tocar «enviar» no se cierre el teclado */
-  c.addEventListener("pointerdown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
-  c.addEventListener("mousedown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
-  /* comentarios: lo escrito se guarda y Enter lo manda */
-  c.addEventListener("input", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in")) CH.comBorr[t.dataset.id]=t.value; });
-  c.addEventListener("keydown", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in") && ev.key==="Enter" && !ev.isComposing){ ev.preventDefault(); chComEnvia(t.dataset.id); } });
-  /* al soltar la caja, lo que se dejó para luego */
-  c.addEventListener("focusout", function(){
-    setTimeout(function(){
-      if(chEscribiendo()) return;
-      if(CH.listaPend) chPintaLista();
-      if(CH.repintar){ CH.repintar=false; if(view==="social") rSocial(); }
-    }, 60);
-  });
+  c.innerHTML='<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>';
+  var sc=c.querySelector("#ch-scroll");
   /* tocar fuera de una burbuja cierra las reacciones */
   sc.addEventListener("click", function(ev){ if(!ev.target.closest("[data-act]") && CH.abiertoReac){ CH.abiertoReac=null; CH.borrar=null; chPintaLista(); } });
   CH.caja=c; return c;
@@ -486,7 +486,7 @@ function chComEnvia(key){
 var _chSocMuro=socMuro;
 socMuro=function(){
   if(!chActivo()) return _chSocMuro.apply(this, arguments);
-  return '<div class="soc-sec"><h2 class="display">Chat</h2></div><div id="ch-sitio"></div>';
+  return '<div class="soc-sec"><h2 class="display">Novedades</h2></div><div id="ch-sitio"></div>';
 };
 var _chRSocial=rSocial;
 rSocial=function(){
@@ -565,19 +565,13 @@ function chCambiaA(id){
 }
 
 function chatAccion(a, el){
-  if(a==="x-chat-enviar"){ chEnviaCaja(); return true; }
-  if(a==="x-chat-foto"){ chFotoElige(); return true; }
+  if(a==="x-chat-enviar" || a==="x-chat-foto" || a==="x-chat-com" || a==="x-chat-com-envia") return true;
   if(a==="x-chat-toca"){ var k=el.dataset.id; CH.abiertoReac=(CH.abiertoReac===k)?null:k; CH.borrar=null; sonido("tick"); chPintaLista();
-    var e=document.querySelector("#ch-lista .ch-elige"); if(e && e.scrollIntoView) try{ e.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){}
     return true; }
   if(a==="x-chat-reac"){ chReacciona(el.dataset.id, el.dataset.e); return true; }
   if(a==="x-chat-borra"){ chBorra(el.dataset.id); return true; }
   if(a==="x-chat-antes"){ var G=chG(), pr=G.msgs.filter(function(m){ return m.id && chPrincipal(m); }); if(pr[0]){ el.disabled=true; el.textContent="Cargando…"; chCargar(pr[0].id); } return true; }
   if(a==="x-chat-reintenta"){ var G2=chG(); G2.msgs.forEach(function(m){ if(m.tmp===el.dataset.tmp && m.estado==="fallo"){ chSube(G2, m); } }); chPintaLista(false, true); return true; }
-  if(a==="x-chat-com"){ var ck=el.dataset.id; if(CH.coms[ck]) delete CH.coms[ck]; else CH.coms[ck]=1; sonido("tick"); chPintaLista(false, true);
-    if(CH.coms[ck]){ var inp=document.querySelector('#ch-lista .ch-com-in[data-id="'+ck+'"]'); if(inp && inp.scrollIntoView) try{ inp.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){} }
-    return true; }
-  if(a==="x-chat-com-envia"){ chComEnvia(el.dataset.id); return true; }
   if(a==="x-g-lista"){ chLista(); return true; }
   if(a==="x-g-elige"){ chCambiaA(el.dataset.id); return true; }
   return false;
@@ -617,11 +611,28 @@ var CHAT_CSS=[
 /* punto en la pestaña Social si hay mensajes sin leer */
 '#mtabs button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:8px; left:calc(50% + 9px); width:8px; height:8px; border-radius:99px; background:var(--accent); box-shadow:0 0 0 2px var(--bg); }',
 '#rail button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:50%; right:12px; margin-top:-4px; width:8px; height:8px; border-radius:99px; background:var(--accent); }',
-/* el recuadro del chat */
-'.ch-caja{ margin-top:10px; height:min(64vh, 500px); display:flex; flex-direction:column; border-radius:20px; overflow:hidden;',
-'  background:var(--glass-bg); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
-'.ch-scroll{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }',
-'.ch-lista{ padding:4px 12px 12px; }',
+/* el panel de novedades: va con la página, sin recuadro con scroll propio */
+'.ch-caja{ margin-top:10px; }',
+'.ch-scroll{ overflow:visible; }',
+'.ch-lista{ display:flex; flex-direction:column; gap:10px; }',
+'.ch-lista .ch-dia{ margin:8px 0 0; text-align:left; padding-left:4px; }',
+'.pn-item{ padding:14px; border-radius:20px; background:var(--card, var(--glass-bg)); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'.pn-cab{ display:flex; align-items:center; gap:10px; }',
+'.pn-cara{ flex:0 0 auto; cursor:pointer; }',
+'.pn-txt{ flex:1; min-width:0; font-size:14.5px; line-height:1.38; color:var(--t2); overflow-wrap:anywhere; }',
+'.pn-txt b{ color:var(--t1); font-weight:650; }',
+'.pn-hora{ margin-left:6px; font-size:12px; color:var(--t3); white-space:nowrap; }',
+'.pn-nivel{ flex:0 0 auto; min-width:40px; height:40px; padding:0 8px; border-radius:99px; display:grid; place-items:center; font-size:17px; font-weight:800;',
+'  background:color-mix(in srgb,var(--c-retos, var(--accent)) 18%,transparent); color:var(--c-retos, var(--accent)); }',
+'.pn-foto{ display:block; width:100%; margin-top:12px; border-radius:16px; overflow:hidden; background:var(--fill); aspect-ratio:4/5; }',
+'.pn-foto img{ width:100%; height:100%; object-fit:cover; display:block; }',
+'.pn-pie{ display:flex; align-items:center; gap:6px; margin-top:10px; }',
+'.pn-reac{ margin-top:0; flex:0 1 auto; }',
+'.pn-reacciona{ width:32px; height:32px; flex:0 0 auto; border-radius:99px; display:grid; place-items:center; color:var(--t3); background:var(--fill); transition:transform .25s var(--spring); }',
+'.pn-reacciona.on{ color:var(--accent); background:var(--accent-soft); }',
+'.pn-reacciona:active{ transform:scale(.9); }',
+'.pn-reacciona svg{ width:19px; height:19px; }',
+'.pn-item .ch-elige{ margin-top:8px; }',
 '.ch-antes{ display:block; margin:10px auto 4px; padding:7px 14px; border-radius:99px; font-size:13px; font-weight:600; color:var(--accent); background:var(--fill); }',
 '.ch-vacio{ margin:40px auto 0; max-width:30ch; text-align:center; font-size:13.5px; line-height:1.5; color:var(--t3); }',
 '.ch-dia{ margin:16px 0 6px; text-align:center; font-size:11.5px; font-weight:700; color:var(--t3); }',

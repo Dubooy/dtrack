@@ -103,6 +103,21 @@ function pmMini(box){
   PM_MINI={ box:box, cv:cv, para:function(){ vivo=false; cancelAnimationFrame(raf); if(io) io.disconnect(); document.removeEventListener("visibilitychange", alVolver); } };
 }
 
+/* la montaña pequeña se hace cuando la tarjeta se ve (19/10/2026): al abrir la app
+   General está delante y hacerla antes costaba ~0,5 s en un móvil medio */
+var pmMiniIO=null;
+function pmMiniCuando(card){
+  if(PM_MINI && PM_MINI.box===card && card.contains(PM_MINI.cv)) return;
+  if(!window.IntersectionObserver){ pmMini(card); return; }
+  if(pmMiniIO){ if(pmMiniIO.card===card) return; pmMiniIO.disconnect(); }
+  pmMiniIO=new IntersectionObserver(function(es){
+    if(!es[0].isIntersecting) return;
+    var c=pmMiniIO.card; pmMiniIO.disconnect(); pmMiniIO=null;
+    if(c.isConnected) pmMini(c);
+  });
+  pmMiniIO.card=card; pmMiniIO.observe(card);
+}
+
 /* ── 2 · el rango como insignia, con la barra de luz ── */
 function pmInsignia(st){
   var card=document.getElementById("card-nivel"); if(!card) return;
@@ -238,7 +253,7 @@ pintaRangoRetos=function(st){
   var r=_pmPintaRango.apply(this, arguments);
   try{
     var card=document.getElementById("card-nivel"); if(card) card.classList.add("pm-noche");
-    if(card) pmMini(card);
+    if(card) pmMiniCuando(card);
     var s=stats();
     pmInsignia(s); pmLlama(s); pmSendero(); pmExtra(s);
   }catch(e){ if(window.console) console.warn("progreso", e); }

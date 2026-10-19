@@ -159,3 +159,22 @@ No se ha implementado porque toca tablas que no están en el repo (`perfiles`, `
 4. Avisos push activados por defecto en la primera semana (el bucle D1 depende de que Peak te
    recuerde volver) y sacar el endpoint del estado que se sincroniza.
 5. Limpieza sin riesgo: borrar las ~35 declaraciones de función muertas (ver P2).
+
+---
+
+# Segunda pasada — 19 de octubre de 2026
+
+Auditoría rápida tras el rediseño del 17–18/10 y arreglos (caché `v300`).
+
+| Qué | Cambio | Comprobación |
+|---|---|---|
+| **Chat → Novedades** | Social ya no tiene chat: es un panel con las subidas de nivel y las fotos del grupo (gym y fotos antiguas del chat), lo nuevo arriba. Solo se reacciona (y se puede denunciar/bloquear). En el servidor ya no se pueden insertar mensajes (`gc_enviar` → `chat_cerrado`). | Servidor de mentira: sin caja de texto, 3 tarjetas (nivel, 2 fotos), la racha y el texto «hola» no salen, la reacción llama a `gc_reaccion`, nunca a `gc_enviar`. |
+| **Avisos del chat** | Retirada la función `aviso-chat`: se fiaba del cuerpo de la petición y cualquiera con sesión podía mandar avisos falsos a cualquier grupo. Sin mensajes ya no hace falta. | — |
+| **Borrar mi cuenta** (P0 de la primera auditoría) | Ajustes › Tus datos › «Borrar mi cuenta» (pieza 77) + `borrar_mi_cuenta()` en `servidor/panel-y-cuenta.sql`. Se borran también sus fotos y reacciones en los grupos. | PostgreSQL 16 con un esquema simulado: no queda nada de la usuaria en 10 tablas, su grupo vacío se borra y el compartido sigue intacto. En la app: orden comprobación → fotos → servidor → local; solo se tocan las claves `beta:`. |
+| **RLS de `datos` y `perfiles`** | Se quitan las reglas que hubiera y cada uno solo ve y cambia lo suyo (perfiles visibles a la gente de tus grupos solo si alguna función de grupos lo necesita). | Otro usuario ve 1 fila (la suya); `anon` no puede leer; una regla vieja «todo el mundo» desaparece. |
+| **Reacciones** | Sin `update` directo en `g_chat`; `gc_reaccion` comprueba grupo, mensajes escondidos y bloqueos. | Reaccionar en tu grupo funciona; en otro, `no_eres_miembro`; `update` a mano, denegado. |
+| **Avisos por dispositivo** | Si los avisos están activos y su suscripción van fuera del estado que se sincroniza (`peak-avisos-dispositivo`). | Migración: un estado con avisos activos los pasa al dispositivo y desaparecen del sincronizado. |
+| **Hábitos iniciales** | Sin el «Bloque de estudio» repetido; quien salta las preguntas tiene hábitos para cualquiera. «¿Qué estudias?» solo se abre solo a quien dijo que estudia en el instituto. | Usuario nuevo: hábitos neutros, Mente sin hoja. |
+| **Arranque** | La montaña pequeña de Retos se dibuja cuando se ve, no al abrir la app. | Perfil con CPU 4×: `render` 854 → 452 ms; carga 2,6 → 2,3 s. Minimizar el código solo ahorraba un 10 % más y añadía herramientas: no se ha hecho. |
+
+**Para activar en Supabase:** ejecutar `servidor/panel-y-cuenta.sql` y borrar la Edge Function `aviso-chat` y su webhook.

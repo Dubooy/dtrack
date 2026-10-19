@@ -27,7 +27,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `02-textos.js` | TEXTOS de la app (`textos.js` de fuera manda si existe) |
 | `03-estado-y-datos.js` | Estado guardado (`nura-v4`), consultas, retos del día, logo |
 | `04-pintar.js` | Pintado: parte del día, gráficas, vaso/luna/reloj, compartir, año, calendario |
-| `05-hojas-avisos-tutorial.js` | Hojas (sheets), avisos diarios, tutorial |
+| `05-hojas-avisos-tutorial.js` | Hojas (sheets), avisos diarios, tutorial. Si los avisos están activos en ESTE dispositivo va aparte de S (`avDisp`, `avActivos`; clave `peak-avisos-dispositivo`), para que no se sincronice |
 | `06-navegacion-y-eventos.js` | Barra de abajo (base, arrastrar la pastilla) y eventos de toque |
 | `07-cuenta-y-bienvenida.js` | Carrusel y animación de bienvenida, entrar con Google |
 | `08-modo-prueba.js` | Modo prueba (`enVisor`, usuarios de mentira) |
@@ -48,7 +48,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `23-meditacion.js` | Meditación: sonido, voz y sesión a pantalla completa |
 | `24-pegatinas-fotos-gym.js` | Pegatinas para compartir, fotos del gym, resumen del mes |
 | `25-claridad-solidez.js` | Retoques de septiembre (agua, objetivos del mes, XP justo) y el easter egg «DUBOY» |
-| `26-chat.js` | Chat del grupo en tiempo real |
+| `26-chat.js` | **Novedades** del grupo (antes el chat): panel sin escribir con las subidas de nivel y las fotos, lo nuevo arriba; solo se reacciona (`pnTarjeta`, `pnEsNivel`). El mecanismo de carga y tiempo real es el del chat |
 | `27-meditacion-ojos-sonidos.js` | Meditación con ojos cerrados, sonidos de fondo |
 | `28-fotos-perfil.js` | Barra de hábitos, recorte y galería de fotos de perfil, foto en grande |
 | `29-libros-habitos.js` | Lectura: biblioteca, encuesta, fichas de libros |
@@ -97,7 +97,7 @@ por capas, así que una zona de la app puede tener retoques en varias piezas: bu
 | `73-deslizar-pestanas.js` | Deslizar en horizontal sobre una pestaña pasa a la de al lado (orden de la barra); no salta en filas que ya se deslizan, campos ni lienzos |
 | `74-marca-oscuro.js` | «PEAK.» arriba igual en todas las pestañas (17 px, `pkLogo`/`pkLogoPon`); iconos de la barra: General = montaña del logo (`PEAK_MK_D`), Retos = diana nueva; modo oscuro con más vida (grafito cálido, tarjetas que se distinguen, colores de sección más vivos). Envuelve `render` |
 | `75-pulido-segunda.js` | Iconos de la barra en «Tu progreso de hoy» y hábitos (`GN_ICO`); una sola animación al marcar (anula botes, ondas y chispas redefiniendo sus `@keyframes`); meditación: sonido de fondo marcado, «Con …» bajo Empezar y «Campana en cada cambio» (`medPref().bong`); sin lápiz de tu foto dentro del grupo. «Extra de hoy» (+10 XP, `S.extra`) y el saludo con tu nombre (`gnSaludo`) están en 63 |
-| `76-avisos-chat.js` | Avisos del chat: guarda tu suscripción de avisos en `g_push` (pide permiso al enviar tu primer mensaje). Lo manda la función de Supabase `servidor/aviso-chat/` con un webhook de `g_chat` (ver `servidor/avisos-chat.sql`) |
+| `77-borrar-cuenta.js` | Ajustes › Tus datos › «Borrar mi cuenta»: doble confirmación (escribir BORRAR), borra tus fotos de Storage (cubos `gym` y `avatares`), apaga los avisos, llama a `borrar_mi_cuenta()` (`servidor/borrar-cuenta.sql`) y vacía lo de este dispositivo (solo claves `beta:` e IndexedDB `dutrack`) |
 
 ## Fuera de src/ (archivos que la app carga tal cual)
 `textos.js`, `peak-anim.js` (animación del logo), `tres.js` (three.js), `cuerpo.glb` (modelo 3D),

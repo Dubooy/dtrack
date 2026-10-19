@@ -123,7 +123,8 @@ function go(v){
   $$("#mtabs button").forEach(function(b){ b.setAttribute("aria-current",b.dataset.view===tab?"true":"false"); });
   moveMarker(); moveMTab(); fitBottomBar(); window.scrollTo({top:0,behavior:"auto"}); render();
   /* la primera vez que entras al horario, se te pregunta qué estudias */
-  if(v==="academico" && !S.modalidad && !tourLive) setTimeout(function(){ if(view==="academico" && !S.modalidad && !tourLive) sheetModalidad(); },320);
+  /* «¿Qué estudias?» solo sale solo a quien dijo que estudia en el instituto (los demás lo ponen desde el horario) */
+  if(v==="academico" && !S.modalidad && S.onbEstudia==="insti" && !tourLive) setTimeout(function(){ if(view==="academico" && !S.modalidad && !tourLive) sheetModalidad(); },320);
 }
 
 /* ════════ eventos ════════ */
@@ -148,10 +149,10 @@ document.addEventListener("click",function(ev){
   if(a==="tour-prev"){ tourStep=Math.max(0,tourStep-1); renderTour(); return; }
   if(a==="tour-skip"){ tourStep=TOUR.length; renderTour(); go("resumen"); return; }
   if(a==="tour-open"){ tourStep=0; tourLive=false; closeSheet(); go("resumen"); renderTour(); return; }
-  if(a==="av-hora"){ S.avisos[el.dataset.k]=+el.dataset.h; save(); if(S.avisos.activo) activarAvisos(); sheetSettings(); return; }
+  if(a==="av-hora"){ S.avisos[el.dataset.k]=+el.dataset.h; save(); if(avActivos()) activarAvisos(); sheetSettings(); return; }
   if(a==="av-toggle"){
     var campo=$("#av-servidor"); if(campo){ S.avisos.servidor=(campo.value||"").trim(); save(); }
-    if(S.avisos.activo) desactivarAvisos().then(function(){ sheetSettings(); });
+    if(avActivos()) desactivarAvisos().then(function(){ sheetSettings(); });
     else activarAvisos().then(function(ok){ if(ok) sheetSettings(); });
     return;
   }

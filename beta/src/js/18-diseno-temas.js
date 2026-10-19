@@ -179,7 +179,7 @@ function sheetIdeal(editId){
     '<select id="hb-aviso" class="field mb-1.5">'+horas.map(function(h){
         var sel = ed && ed.aviso!=null ? ed.aviso===h : h==="";
         return '<option value="'+h+'"'+(sel?" selected":"")+'>'+(h===""?"Sin recordatorio":"A las "+h+":00")+'</option>'; }).join("")+'</select>'+
-    '<p class="text-[11.5px] t3 mb-4">'+(S.avisos&&S.avisos.activo?"Te llegará como aviso al móvil.":"Con la app abierta te sale un aviso. Para que llegue con ella cerrada, activa los avisos en Ajustes.")+'</p>'+
+    '<p class="text-[11.5px] t3 mb-4">'+(avActivos()?"Te llegará como aviso al móvil.":"Con la app abierta te sale un aviso. Para que llegue con ella cerrada, activa los avisos en Ajustes.")+'</p>'+
     '<p class="hb-lab">Tipo</p>'+
     '<div class="seg w-full mb-5" id="id-tag" style="display:grid;grid-template-columns:1fr 1fr 1fr">'+
     ["vital","estudio","personal"].map(function(k){ var sel=habEd.tag===k;
@@ -294,7 +294,7 @@ function recordatoriosMira(){
     if((S.checks[t]||[]).indexOf(x.id)>=0) return;
     var k="dtrack-rec-"+t+"-"+x.id;
     try{ if(localStorage.getItem(k)) return; localStorage.setItem(k,"1"); }catch(e){ return; }
-    if(S.avisos && S.avisos.activo) return;     /* ya llega por el servidor */
+    if(avActivos()) return;     /* ya llega por el servidor */
     avisoNube("⏰ "+tr("Recordatorio")+": "+x.text);
   });
 }

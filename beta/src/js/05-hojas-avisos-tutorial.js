@@ -318,6 +318,21 @@ function espejo(){ clearTimeout(espejoPend); espejoPend=setTimeout(guardarEspejo
 
 
 /* ═══════════ AVISOS DIARIOS ═══════════ */
+/* Si los avisos están activos y con qué suscripción es cosa de CADA dispositivo: se
+   guarda aparte (no en S, que se sincroniza), para que el móvil y el PC no se pisen.
+   La primera vez se pasa aquí lo que hubiera en S. */
+var AV_DISP="peak-avisos-dispositivo";
+function avDisp(){ try{ var o=JSON.parse(localStorage.getItem(AV_DISP)||"null"); return (o && typeof o==="object") ? o : null; }catch(e){ return null; } }
+function avDispPon(o){ try{ localStorage.setItem(AV_DISP, JSON.stringify(Object.assign(avDisp()||{}, o))); }catch(e){} }
+function avActivos(){ var d=avDisp(); return !!(d && d.activo); }
+/* se llama justo después de cargar el estado (35-notion.js, tras load()) */
+function avMigra(){
+  if(avDisp()===null) avDispPon({ activo:!!(S.avisos && S.avisos.activo), endpoint:(S.avisos && S.avisos.endpoint)||"", chatPush:S.chatPush||"", chatPushPedido:!!S.chatPushPedido });
+  var cambia=false;
+  if(S.avisos){ ["activo","endpoint"].forEach(function(k){ if(k in S.avisos){ delete S.avisos[k]; cambia=true; } }); }
+  ["chatPush","chatPushPedido"].forEach(function(k){ if(k in S){ delete S[k]; cambia=true; } });
+  if(cambia) try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+}
 function servidorAvisos(){
   var puesto = ((S.avisos&&S.avisos.servidor) || (TEXTOS.avisos&&TEXTOS.avisos.servidor) || "").trim();
   if(puesto) return puesto.replace(/\/+$/,"");
@@ -374,7 +389,7 @@ async function activarAvisos(){
     var r = await fetch(url+"/alta", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
     if(!r.ok){ avisoEstado("El servidor ha contestado con un error ("+r.status+").", true); return false; }
-    S.avisos.activo=true; S.avisos.endpoint=sub.endpoint; save();
+    avDispPon({ activo:true, endpoint:sub.endpoint });
     avisoEstado("Listo. Te aviso a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00.");
     return true;
   }catch(e){ avisoEstado("No se ha podido activar: "+(e.message||e), true); return false; }
@@ -386,12 +401,12 @@ async function desactivarAvisos(){
     var sub = await reg.pushManager.getSubscription();
     if(sub){ if(url) await fetch(url+"/baja",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({endpoint:sub.endpoint})}).catch(function(){}); await sub.unsubscribe().catch(function(){}); }
   }catch(e){}
-  S.avisos.activo=false; S.avisos.endpoint=""; save();
+  avDispPon({ activo:false, endpoint:"" });
   avisoEstado("Avisos apagados.");
 }
 async function probarAviso(){
   var url=servidorAvisos();
-  if(!url || !S.avisos.activo){ avisoEstado("Primero activa los avisos.", true); return; }
+  if(!url || !avActivos()){ avisoEstado("Primero activa los avisos.", true); return; }
   try{
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
@@ -404,12 +419,12 @@ async function probarAviso(){
 }
 /* al abrir la app se refresca la suscripción, por si cambió la hora oficial */
 function refrescarAvisos(){
-  if(!S.avisos || !S.avisos.activo || !servidorAvisos() || !hayAvisos()) return;
+  if(!avActivos() || !servidorAvisos() || !hayAvisos()) return;
   navigator.serviceWorker.ready.then(function(reg){
     return Notification.permission==="granted" ? suscripcionAvisos(reg) : reg.pushManager.getSubscription();
   }).then(function(sub){
     if(!sub) return;
-    S.avisos.endpoint=sub.endpoint;
+    avDispPon({ endpoint:sub.endpoint });
     return fetch(servidorAvisos()+"/alta",{ method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
   }).catch(function(){});
@@ -460,11 +475,11 @@ function sheetSettings(){
           ';transition:all .3s var(--spring)">'+h+':00</button>'; }).join("")+
     '</div>'+
     '<div class="flex gap-2 mb-2">'+
-      '<button class="btn '+(S.avisos.activo?"btn-quiet":"btn-primary")+' flex-1" data-act="av-toggle">'+
-        (S.avisos.activo?"Apagar avisos":"Activar avisos")+'</button>'+
-      (S.avisos.activo?'<button class="btn btn-quiet" data-act="av-probar">Probar</button>':'')+
+      '<button class="btn '+(avActivos()?"btn-quiet":"btn-primary")+' flex-1" data-act="av-toggle">'+
+        (avActivos()?"Apagar avisos":"Activar avisos")+'</button>'+
+      (avActivos()?'<button class="btn btn-quiet" data-act="av-probar">Probar</button>':'')+
     '</div>'+
-    '<p id="av-estado" class="text-[11.5px] t3 mb-3 leading-relaxed">'+(S.avisos.activo?("Activos a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00."):"")+'</p>'+
+    '<p id="av-estado" class="text-[11.5px] t3 mb-3 leading-relaxed">'+(avActivos()?("Activos a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00."):"")+'</p>'+
     '<div class="flex items-center justify-between mb-6">'+
       '<span class="text-[11.5px] t3">'+(avisosPropios()?"Servidor: el mismo sitio donde está la app":"Servidor de avisos configurado")+'</span>'+
       '<button class="text-[11.5px] t3 underline" data-act="av-srv-ver">cambiar</button></div>'+
@@ -501,7 +516,8 @@ function sheetSettings(){
     (typeof ajustesCuenta==="function"?ajustesCuenta():"")+
     '<button class="btn btn-quiet w-full mb-3" data-act="tour-open">Ver el tutorial otra vez</button>'+
     '<button class="btn btn-primary w-full !py-3.5 mb-3" data-act="save-settings">Guardar cambios</button>'+
-    '<button class="btn btn-danger w-full" data-act="reset">Borrar todos los datos</button>');
+    '<button class="btn btn-danger w-full" data-act="reset">Borrar todos los datos</button>'+
+    ((typeof ses!=="undefined" && ses && !ses.demo && ses.uid) ? '<button class="btn btn-quiet w-full mt-3" data-act="x-borrar-cuenta" style="color:var(--alert)">Borrar mi cuenta</button>' : ''));
   var th=curTheme();
   function marcar(){
     $$("#st-theme button").forEach(function(b){

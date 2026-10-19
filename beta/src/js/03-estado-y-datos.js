@@ -112,16 +112,16 @@ function seed(){
     mealNames:["Desayuno","Media mañana","Comida","Merienda","Cena"],
     gym:{}, habits:{}, meals:{},
     ideal:[
+      /* hábitos para cualquiera (quien estudia los cambia en las preguntas iniciales) */
       {id:"i1",time:"",text:"Levantarme a la primera",tag:"personal"},
       {id:"i2",time:"",text:"Desayunar en condiciones",tag:"vital"},
-      {id:"i3",time:"",text:"Bloque de estudio · 50 min",tag:"estudio"},
-      {id:"i4",time:"",text:"Bloque de estudio · 50 min",tag:"estudio"},
-      {id:"i5",time:"",text:"Entrenar",tag:"vital"},
-      {id:"i6",time:"",text:"Repaso rápido y mochila lista",tag:"estudio"},
-      {id:"i7",time:"",text:"Móvil fuera, a dormir",tag:"personal"}
+      {id:"i3",time:"",text:"Beber 8 vasos de agua",tag:"vital"},
+      {id:"i4",time:"",text:"Entrenar",tag:"vital"},
+      {id:"i5",time:"",text:"Leer 10 páginas",tag:"personal"},
+      {id:"i6",time:"",text:"Móvil fuera, a dormir",tag:"personal"}
     ],
     checks:{}, challenges:defaultChallenges(), chDone:{}, chPick:{}, plan:{}, parte:{}, modalidad:"", ejemplos:0,
-    avisos:{activo:false, hm:7, hn:20, servidor:"", endpoint:""}, descanso:{}, imported:"limpio", tour:false
+    avisos:{hm:7, hn:20, servidor:""}, descanso:{}, imported:"limpio", tour:false
   };
 }
 var S=seed(), view="resumen", taskFilter="pend", newCat="c1", cellKey=null, selDay=null;
@@ -196,7 +196,7 @@ function load(){
     if(!base.parte) base.parte={};
     if(base.modalidad===undefined) base.modalidad="";
     if(base.ejemplos===undefined) base.ejemplos=0;
-    if(!base.avisos) base.avisos={activo:false, hm:7, hn:20, servidor:"", endpoint:""};
+    if(!base.avisos) base.avisos={hm:7, hn:20, servidor:""};
     if(base.avisos.hm===undefined){ base.avisos.hm=7; base.avisos.hn=base.avisos.hora||20; }
     S=base; return true;
   }catch(e){ return false; }

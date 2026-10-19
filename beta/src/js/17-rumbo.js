@@ -297,7 +297,7 @@ sheetSettings=function(){
     if(n.classList.contains("aj-cuenta")){ grupos.cuenta.push(n); return; }
     if(n.getAttribute("data-act")==="save-settings"){ n.remove(); return; }
     if(n.getAttribute("data-act")==="tour-open"){ grupos.pref.push(n); return; }
-    if(n.getAttribute("data-act")==="reset"){ grupos.datos.push(n); return; }
+    if(n.getAttribute("data-act")==="reset" || n.getAttribute("data-act")==="x-borrar-cuenta"){ grupos.datos.push(n); return; }
     if(n.id==="av-servidor" || (n.querySelector && n.querySelector('[data-act="av-srv-ver"]'))){ grupos.av.unshift(n); return; }
     (grupos[actual||"tu"]).push(n);
   });
@@ -463,6 +463,7 @@ function onbTermina(aplicar){
     if(onb.estudia && onb.estudia!=="insti" && !S.modalidad) aplicarModalidad("otro");
     var h=parseInt(onb.hora,10); if(h>=20 && h<=23){ S.avisos.hn=h; }
     S.onbMetas=onb.metas.slice();
+    S.onbEstudia=onb.estudia||"";
   }
   S.onb=1; save();
   var c=document.getElementById("onb");

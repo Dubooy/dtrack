@@ -1,6 +1,11 @@
 -- ════════════════════════════════════════════════════════════════
 -- Peak · avisos del chat
 --
+-- RETIRADO (19/10/2026): el chat pasó a ser un panel sin mensajes, así que la
+-- función «aviso-chat» se quitó (bórrala también en Supabase con su webhook).
+-- La tabla g_push se queda por si vuelven los avisos del grupo; borrar_mi_cuenta()
+-- (panel-y-cuenta.sql) borra tus filas.
+--
 -- Guarda la suscripción de avisos de cada móvil para poder avisar cuando
 -- alguien escribe en el chat de tu grupo. La usa la función «aviso-chat»
 -- (servidor/aviso-chat/index.ts), que salta con cada mensaje nuevo.

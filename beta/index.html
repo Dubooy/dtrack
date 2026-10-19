@@ -1405,16 +1405,16 @@ function seed(){
     mealNames:["Desayuno","Media mañana","Comida","Merienda","Cena"],
     gym:{}, habits:{}, meals:{},
     ideal:[
+      /* hábitos para cualquiera (quien estudia los cambia en las preguntas iniciales) */
       {id:"i1",time:"",text:"Levantarme a la primera",tag:"personal"},
       {id:"i2",time:"",text:"Desayunar en condiciones",tag:"vital"},
-      {id:"i3",time:"",text:"Bloque de estudio · 50 min",tag:"estudio"},
-      {id:"i4",time:"",text:"Bloque de estudio · 50 min",tag:"estudio"},
-      {id:"i5",time:"",text:"Entrenar",tag:"vital"},
-      {id:"i6",time:"",text:"Repaso rápido y mochila lista",tag:"estudio"},
-      {id:"i7",time:"",text:"Móvil fuera, a dormir",tag:"personal"}
+      {id:"i3",time:"",text:"Beber 8 vasos de agua",tag:"vital"},
+      {id:"i4",time:"",text:"Entrenar",tag:"vital"},
+      {id:"i5",time:"",text:"Leer 10 páginas",tag:"personal"},
+      {id:"i6",time:"",text:"Móvil fuera, a dormir",tag:"personal"}
     ],
     checks:{}, challenges:defaultChallenges(), chDone:{}, chPick:{}, plan:{}, parte:{}, modalidad:"", ejemplos:0,
-    avisos:{activo:false, hm:7, hn:20, servidor:"", endpoint:""}, descanso:{}, imported:"limpio", tour:false
+    avisos:{hm:7, hn:20, servidor:""}, descanso:{}, imported:"limpio", tour:false
   };
 }
 var S=seed(), view="resumen", taskFilter="pend", newCat="c1", cellKey=null, selDay=null;
@@ -1489,7 +1489,7 @@ function load(){
     if(!base.parte) base.parte={};
     if(base.modalidad===undefined) base.modalidad="";
     if(base.ejemplos===undefined) base.ejemplos=0;
-    if(!base.avisos) base.avisos={activo:false, hm:7, hn:20, servidor:"", endpoint:""};
+    if(!base.avisos) base.avisos={hm:7, hn:20, servidor:""};
     if(base.avisos.hm===undefined){ base.avisos.hm=7; base.avisos.hn=base.avisos.hora||20; }
     S=base; return true;
   }catch(e){ return false; }
@@ -3305,6 +3305,21 @@ function espejo(){ clearTimeout(espejoPend); espejoPend=setTimeout(guardarEspejo
 
 
 /* ═══════════ AVISOS DIARIOS ═══════════ */
+/* Si los avisos están activos y con qué suscripción es cosa de CADA dispositivo: se
+   guarda aparte (no en S, que se sincroniza), para que el móvil y el PC no se pisen.
+   La primera vez se pasa aquí lo que hubiera en S. */
+var AV_DISP="peak-avisos-dispositivo";
+function avDisp(){ try{ var o=JSON.parse(localStorage.getItem(AV_DISP)||"null"); return (o && typeof o==="object") ? o : null; }catch(e){ return null; } }
+function avDispPon(o){ try{ localStorage.setItem(AV_DISP, JSON.stringify(Object.assign(avDisp()||{}, o))); }catch(e){} }
+function avActivos(){ var d=avDisp(); return !!(d && d.activo); }
+/* se llama justo después de cargar el estado (35-notion.js, tras load()) */
+function avMigra(){
+  if(avDisp()===null) avDispPon({ activo:!!(S.avisos && S.avisos.activo), endpoint:(S.avisos && S.avisos.endpoint)||"", chatPush:S.chatPush||"", chatPushPedido:!!S.chatPushPedido });
+  var cambia=false;
+  if(S.avisos){ ["activo","endpoint"].forEach(function(k){ if(k in S.avisos){ delete S.avisos[k]; cambia=true; } }); }
+  ["chatPush","chatPushPedido"].forEach(function(k){ if(k in S){ delete S[k]; cambia=true; } });
+  if(cambia) try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+}
 function servidorAvisos(){
   var puesto = ((S.avisos&&S.avisos.servidor) || (TEXTOS.avisos&&TEXTOS.avisos.servidor) || "").trim();
   if(puesto) return puesto.replace(/\/+$/,"");
@@ -3361,7 +3376,7 @@ async function activarAvisos(){
     var r = await fetch(url+"/alta", { method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
     if(!r.ok){ avisoEstado("El servidor ha contestado con un error ("+r.status+").", true); return false; }
-    S.avisos.activo=true; S.avisos.endpoint=sub.endpoint; save();
+    avDispPon({ activo:true, endpoint:sub.endpoint });
     avisoEstado("Listo. Te aviso a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00.");
     return true;
   }catch(e){ avisoEstado("No se ha podido activar: "+(e.message||e), true); return false; }
@@ -3373,12 +3388,12 @@ async function desactivarAvisos(){
     var sub = await reg.pushManager.getSubscription();
     if(sub){ if(url) await fetch(url+"/baja",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({endpoint:sub.endpoint})}).catch(function(){}); await sub.unsubscribe().catch(function(){}); }
   }catch(e){}
-  S.avisos.activo=false; S.avisos.endpoint=""; save();
+  avDispPon({ activo:false, endpoint:"" });
   avisoEstado("Avisos apagados.");
 }
 async function probarAviso(){
   var url=servidorAvisos();
-  if(!url || !S.avisos.activo){ avisoEstado("Primero activa los avisos.", true); return; }
+  if(!url || !avActivos()){ avisoEstado("Primero activa los avisos.", true); return; }
   try{
     var reg = await navigator.serviceWorker.ready;
     var sub = await reg.pushManager.getSubscription();
@@ -3391,12 +3406,12 @@ async function probarAviso(){
 }
 /* al abrir la app se refresca la suscripción, por si cambió la hora oficial */
 function refrescarAvisos(){
-  if(!S.avisos || !S.avisos.activo || !servidorAvisos() || !hayAvisos()) return;
+  if(!avActivos() || !servidorAvisos() || !hayAvisos()) return;
   navigator.serviceWorker.ready.then(function(reg){
     return Notification.permission==="granted" ? suscripcionAvisos(reg) : reg.pushManager.getSubscription();
   }).then(function(sub){
     if(!sub) return;
-    S.avisos.endpoint=sub.endpoint;
+    avDispPon({ endpoint:sub.endpoint });
     return fetch(servidorAvisos()+"/alta",{ method:"POST", headers:{"Content-Type":"application/json"},
       body: JSON.stringify({ sub: sub.toJSON(), hm: S.avisos.hm, hn: S.avisos.hn, desfase: desfaseHoras(), hab: (typeof avisosHabitos==="function"?avisosHabitos():[]) }) });
   }).catch(function(){});
@@ -3447,11 +3462,11 @@ function sheetSettings(){
           ';transition:all .3s var(--spring)">'+h+':00</button>'; }).join("")+
     '</div>'+
     '<div class="flex gap-2 mb-2">'+
-      '<button class="btn '+(S.avisos.activo?"btn-quiet":"btn-primary")+' flex-1" data-act="av-toggle">'+
-        (S.avisos.activo?"Apagar avisos":"Activar avisos")+'</button>'+
-      (S.avisos.activo?'<button class="btn btn-quiet" data-act="av-probar">Probar</button>':'')+
+      '<button class="btn '+(avActivos()?"btn-quiet":"btn-primary")+' flex-1" data-act="av-toggle">'+
+        (avActivos()?"Apagar avisos":"Activar avisos")+'</button>'+
+      (avActivos()?'<button class="btn btn-quiet" data-act="av-probar">Probar</button>':'')+
     '</div>'+
-    '<p id="av-estado" class="text-[11.5px] t3 mb-3 leading-relaxed">'+(S.avisos.activo?("Activos a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00."):"")+'</p>'+
+    '<p id="av-estado" class="text-[11.5px] t3 mb-3 leading-relaxed">'+(avActivos()?("Activos a las "+S.avisos.hm+":00 y a las "+S.avisos.hn+":00."):"")+'</p>'+
     '<div class="flex items-center justify-between mb-6">'+
       '<span class="text-[11.5px] t3">'+(avisosPropios()?"Servidor: el mismo sitio donde está la app":"Servidor de avisos configurado")+'</span>'+
       '<button class="text-[11.5px] t3 underline" data-act="av-srv-ver">cambiar</button></div>'+
@@ -3488,7 +3503,8 @@ function sheetSettings(){
     (typeof ajustesCuenta==="function"?ajustesCuenta():"")+
     '<button class="btn btn-quiet w-full mb-3" data-act="tour-open">Ver el tutorial otra vez</button>'+
     '<button class="btn btn-primary w-full !py-3.5 mb-3" data-act="save-settings">Guardar cambios</button>'+
-    '<button class="btn btn-danger w-full" data-act="reset">Borrar todos los datos</button>');
+    '<button class="btn btn-danger w-full" data-act="reset">Borrar todos los datos</button>'+
+    ((typeof ses!=="undefined" && ses && !ses.demo && ses.uid) ? '<button class="btn btn-quiet w-full mt-3" data-act="x-borrar-cuenta" style="color:var(--alert)">Borrar mi cuenta</button>' : ''));
   var th=curTheme();
   function marcar(){
     $$("#st-theme button").forEach(function(b){
@@ -3817,7 +3833,8 @@ function go(v){
   $$("#mtabs button").forEach(function(b){ b.setAttribute("aria-current",b.dataset.view===tab?"true":"false"); });
   moveMarker(); moveMTab(); fitBottomBar(); window.scrollTo({top:0,behavior:"auto"}); render();
   /* la primera vez que entras al horario, se te pregunta qué estudias */
-  if(v==="academico" && !S.modalidad && !tourLive) setTimeout(function(){ if(view==="academico" && !S.modalidad && !tourLive) sheetModalidad(); },320);
+  /* «¿Qué estudias?» solo sale solo a quien dijo que estudia en el instituto (los demás lo ponen desde el horario) */
+  if(v==="academico" && !S.modalidad && S.onbEstudia==="insti" && !tourLive) setTimeout(function(){ if(view==="academico" && !S.modalidad && !tourLive) sheetModalidad(); },320);
 }
 
 /* ════════ eventos ════════ */
@@ -3842,10 +3859,10 @@ document.addEventListener("click",function(ev){
   if(a==="tour-prev"){ tourStep=Math.max(0,tourStep-1); renderTour(); return; }
   if(a==="tour-skip"){ tourStep=TOUR.length; renderTour(); go("resumen"); return; }
   if(a==="tour-open"){ tourStep=0; tourLive=false; closeSheet(); go("resumen"); renderTour(); return; }
-  if(a==="av-hora"){ S.avisos[el.dataset.k]=+el.dataset.h; save(); if(S.avisos.activo) activarAvisos(); sheetSettings(); return; }
+  if(a==="av-hora"){ S.avisos[el.dataset.k]=+el.dataset.h; save(); if(avActivos()) activarAvisos(); sheetSettings(); return; }
   if(a==="av-toggle"){
     var campo=$("#av-servidor"); if(campo){ S.avisos.servidor=(campo.value||"").trim(); save(); }
-    if(S.avisos.activo) desactivarAvisos().then(function(){ sheetSettings(); });
+    if(avActivos()) desactivarAvisos().then(function(){ sheetSettings(); });
     else activarAvisos().then(function(ok){ if(ok) sheetSettings(); });
     return;
   }
@@ -9955,7 +9972,7 @@ sheetSettings=function(){
     if(n.classList.contains("aj-cuenta")){ grupos.cuenta.push(n); return; }
     if(n.getAttribute("data-act")==="save-settings"){ n.remove(); return; }
     if(n.getAttribute("data-act")==="tour-open"){ grupos.pref.push(n); return; }
-    if(n.getAttribute("data-act")==="reset"){ grupos.datos.push(n); return; }
+    if(n.getAttribute("data-act")==="reset" || n.getAttribute("data-act")==="x-borrar-cuenta"){ grupos.datos.push(n); return; }
     if(n.id==="av-servidor" || (n.querySelector && n.querySelector('[data-act="av-srv-ver"]'))){ grupos.av.unshift(n); return; }
     (grupos[actual||"tu"]).push(n);
   });
@@ -10121,6 +10138,7 @@ function onbTermina(aplicar){
     if(onb.estudia && onb.estudia!=="insti" && !S.modalidad) aplicarModalidad("otro");
     var h=parseInt(onb.hora,10); if(h>=20 && h<=23){ S.avisos.hn=h; }
     S.onbMetas=onb.metas.slice();
+    S.onbEstudia=onb.estudia||"";
   }
   S.onb=1; save();
   var c=document.getElementById("onb");
@@ -11126,7 +11144,7 @@ function sheetIdeal(editId){
     '<select id="hb-aviso" class="field mb-1.5">'+horas.map(function(h){
         var sel = ed && ed.aviso!=null ? ed.aviso===h : h==="";
         return '<option value="'+h+'"'+(sel?" selected":"")+'>'+(h===""?"Sin recordatorio":"A las "+h+":00")+'</option>'; }).join("")+'</select>'+
-    '<p class="text-[11.5px] t3 mb-4">'+(S.avisos&&S.avisos.activo?"Te llegará como aviso al móvil.":"Con la app abierta te sale un aviso. Para que llegue con ella cerrada, activa los avisos en Ajustes.")+'</p>'+
+    '<p class="text-[11.5px] t3 mb-4">'+(avActivos()?"Te llegará como aviso al móvil.":"Con la app abierta te sale un aviso. Para que llegue con ella cerrada, activa los avisos en Ajustes.")+'</p>'+
     '<p class="hb-lab">Tipo</p>'+
     '<div class="seg w-full mb-5" id="id-tag" style="display:grid;grid-template-columns:1fr 1fr 1fr">'+
     ["vital","estudio","personal"].map(function(k){ var sel=habEd.tag===k;
@@ -11241,7 +11259,7 @@ function recordatoriosMira(){
     if((S.checks[t]||[]).indexOf(x.id)>=0) return;
     var k="dtrack-rec-"+t+"-"+x.id;
     try{ if(localStorage.getItem(k)) return; localStorage.setItem(k,"1"); }catch(e){ return; }
-    if(S.avisos && S.avisos.activo) return;     /* ya llega por el servidor */
+    if(avActivos()) return;     /* ya llega por el servidor */
     avisoNube("⏰ "+tr("Recordatorio")+": "+x.text);
   });
 }
@@ -15906,7 +15924,13 @@ cambiarUsuario=function(v){
 };
 
 /* ════════════════════════════════════════════════════════════════
-   CHAT DEL GRUPO (sep 2026)
+   NOVEDADES DEL GRUPO (antes el chat; oct 2026)
+   · Desde el 19/10 ya no se escribe: es un panel con las subidas de
+     nivel y las fotos del grupo (las del gym y las fotos que se
+     mandaron al chat antes del cambio), lo más nuevo arriba. Lo único
+     que se hace aquí es reaccionar. Sin caja de texto, sin cámara y sin
+     comentarios; los mensajes de texto antiguos no salen.
+   Lo de abajo es como era el chat (se conserva el mecanismo):
    · Cada grupo tiene su chat, dentro de Social (donde estaba
      «Actividad»): un recuadro con scroll y la caja para escribir debajo.
      Los logros que se publican solos salen dentro, como líneas en gris.
@@ -16228,12 +16252,30 @@ function chDiaTxt(d){
 }
 function chNombre(uid){ if(uid===chYo()) return tr("Tú"); var q=chQuien(uid); return q ? q.usuario : "alguien"; }
 /* mensajes y actividad automática, por orden de hora */
+function pnEsNivel(e){ return /^ha subido al nivel \d+/.test(e.texto||""); }
 function chItems(){
-  var G=chG(), princ=G.msgs.filter(chPrincipal), l=princ.map(function(m){ return { k:"m", ts:m.ts, m:m }; });
+  var G=chG(), princ=G.msgs.filter(chPrincipal), l=princ.filter(function(m){ return !!m.foto; }).map(function(m){ return { k:"m", ts:m.ts, m:m }; });
   var desde=(G.hayMas && princ.length) ? princ[0].ts : 0;
-  ((GRUPO && GRUPO.muro) || []).forEach(function(e){ if(e.ts && e.ts>=desde) l.push({ k:"e", ts:e.ts, e:e }); });
-  l.sort(function(a,b){ return a.ts-b.ts; });
+  ((GRUPO && GRUPO.muro) || []).forEach(function(e){ if(e.ts && e.ts>=desde && (e.foto || pnEsNivel(e))) l.push({ k:"e", ts:e.ts, e:e }); });
+  l.sort(function(a,b){ return b.ts-a.ts; });
   return l;
+}
+/* una tarjeta del panel: cara, quién y qué, la foto si la hay y las reacciones */
+function pnMiembro(nom){ var l=(GRUPO && GRUPO.miembros) || []; for(var i=0;i<l.length;i++) if(l[i].usuario===nom) return l[i]; return null; }
+function pnTarjeta(key, nom, texto, ts, foto, reac, mias, mio, nivel){
+  var q=pnMiembro(nom), ab=CH.abiertoReac===key;
+  return '<div class="pn-item'+(nivel?" nivel":"")+'">'+
+    '<div class="pn-cab"><span class="pn-cara"'+(q?' data-act="x-perfil" data-u="'+esc(nom)+'"':'')+'>'+caraDe(q||{ usuario:nom }, 34)+'</span>'+
+      '<p class="pn-txt"><b>'+esc(mio?tr("Tú"):nom)+'</b> '+esc(texto)+'<span class="pn-hora num">'+esc(chHora(ts))+'</span></p>'+
+      (nivel ? '<span class="pn-nivel num">'+esc((texto.match(/nivel (\d+)/)||[])[1]||"")+'</span>' : '')+
+    '</div>'+
+    (foto ? '<button class="pn-foto" data-act="x-fg-ver" data-u="'+esc(foto)+'" data-t="'+esc(nom+" · "+chHora(ts))+'"><img src="'+esc(foto)+'" alt="" loading="lazy"></button>' : '')+
+    '<div class="pn-pie">'+chReacHTML(reac, mias, key).replace('class="ch-reac"','class="ch-reac pn-reac"')+
+      '<button class="pn-reacciona'+(ab?" on":"")+'" data-act="x-chat-toca" data-id="'+esc(key)+'" aria-label="Reaccionar">'+
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2.1 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.5h.01M15 9.5h.01"/></svg></button>'+
+    '</div>'+
+    (ab ? chEligeHTML(key, mias, mio) : '')+
+  '</div>';
 }
 function chComentarios(key){
   var id=+String(key).slice(2), ev=key.indexOf("e:")===0;
@@ -16270,6 +16312,7 @@ function chComHTML(key){
   return h+'</div>';
 }
 function chMensajeHTML(m, sigue, mio){
+  if(m.foto && m.id) return pnTarjeta("m:"+m.id, chNombre(m.uid), m.texto ? "· "+m.texto : "ha subido una foto", m.ts, m.foto, m.reac, m.mias, mio, false);
   var key=m.id ? "m:"+m.id : "", nom=chNombre(m.uid), q=mio ? null : chQuien(m.uid), foto=m.foto||m.local;
   var cara="";
   if(!mio) cara = sigue ? '<span class="ch-hueco"></span>'
@@ -16290,6 +16333,7 @@ function chMensajeHTML(m, sigue, mio){
 }
 function chEventoHTML(e){
   var key="e:"+e.id;
+  return pnTarjeta(key, e.usuario, e.texto, e.ts, e.foto, e.reac, e.mias, e.usuario===(GRUPO&&GRUPO.yo), pnEsNivel(e));
   return '<div class="ch-ev">'+
     '<button class="ch-ev-t" data-act="x-chat-toca" data-id="'+esc(key)+'"><b>'+esc(e.usuario)+'</b> '+esc(e.texto)+'<span class="num"> · '+chHora(e.ts)+'</span></button>'+
     (e.foto ? '<button class="ch-foto" data-act="x-fg-ver" data-u="'+esc(e.foto)+'" data-t="'+esc(e.usuario+" · "+e.cuando)+'"><img src="'+esc(e.foto)+'" alt="" loading="lazy"></button>' : '')+
@@ -16315,26 +16359,22 @@ function chPintaLista(abajo, forzar){
   CH.firma=firma; CH.listaPend=false;
   var G=chG(), yo=chYo(), h="", dia="", prev=null;
   var cerca=abajo || (sc.scrollHeight-sc.scrollTop-sc.clientHeight<140);
-  if(G.hayMas) h+='<button class="ch-antes" data-act="x-chat-antes">Ver mensajes anteriores</button>';
   if(!items.length){
     h+='<p class="ch-vacio">'+(CH.sinServidor ? "El chat aún no está activado en el servidor. Vuelve a probar en un rato."
       : !G.cargado ? "Cargando…"
       : G.error ? "No se han podido cargar los mensajes. Prueba en un rato."+(window.DTRACK_BETA && G.errorTxt ? " ("+esc(G.errorTxt.slice(0,160))+")" : "")
-      : "Aquí empieza el chat de «"+esc(GRUPO.nombre)+"». Lo que escribas solo lo ve el grupo.")+'</p>';
+      : "Aquí saldrán las subidas de nivel y las fotos de «"+esc(GRUPO.nombre)+"». Toca la carita para reaccionar.")+'</p>';
   }
   items.forEach(function(it){
     var d=iso(it.ts);
     if(d!==dia){ dia=d; prev=null; h+='<p class="ch-dia">'+esc(chDiaTxt(d))+'</p>'; }
-    if(it.k==="e"){ h+=chEventoHTML(it.e); prev=null; return; }
-    var m=it.m, sigue=!!(prev && prev.uid===m.uid && m.ts-prev.ts<5*60000 && !prev.foto && !m.foto);
-    h+=chMensajeHTML(m, sigue, m.uid===yo);
-    prev=m;
+    if(it.k==="e"){ h+=chEventoHTML(it.e); return; }
+    h+=chMensajeHTML(it.m, false, it.m.uid===yo);
   });
+  if(G.hayMas) h+='<button class="ch-antes" data-act="x-chat-antes">Ver anteriores</button>';
   var alto=sc.scrollHeight, arriba=sc.scrollTop;
   lista.innerHTML=h;
-  if(CH.mantenArriba){ CH.mantenArriba=false; sc.scrollTop=arriba+(sc.scrollHeight-alto); }
-  else if(cerca) sc.scrollTop=sc.scrollHeight;
-  else sc.scrollTop=arriba;
+  CH.mantenArriba=false;
   /* si estabas comentando, el foco vuelve a tu caja */
   if(comentando){ var inp=lista.querySelector('.ch-com-in[data-id="'+ae.dataset.id+'"]'); if(inp){ try{ inp.focus({ preventScroll:true }); inp.setSelectionRange(inp.value.length, inp.value.length); }catch(e){ inp.focus(); } } }
   chMarcaVisto();
@@ -16346,30 +16386,8 @@ var ICO_CAMARA='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 function chCaja(){
   if(CH.caja) return CH.caja;
   var c=document.createElement("div"); c.className="ch-caja"; c.id="ch-caja";
-  c.innerHTML='<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>'+
-    '<div class="ch-escribe">'+
-      '<button class="ch-foto-bt" data-act="x-chat-foto" aria-label="Mandar una foto">'+ICO_CAMARA+'</button>'+
-      '<textarea id="ch-texto" rows="1" maxlength="1000" placeholder="Escribe al grupo…" enterkeyhint="send" autocomplete="off"></textarea>'+
-      '<button class="ch-enviar" data-act="x-chat-enviar" aria-label="Enviar">'+
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button>'+
-    '</div>';
-  var ta=c.querySelector("#ch-texto"), sc=c.querySelector("#ch-scroll");
-  ta.addEventListener("input", function(){ chAlto(ta); });
-  ta.addEventListener("keydown", function(ev){ if(ev.key==="Enter" && !ev.shiftKey && !ev.isComposing){ ev.preventDefault(); chEnviaCaja(); } });
-  /* que al tocar «enviar» no se cierre el teclado */
-  c.addEventListener("pointerdown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
-  c.addEventListener("mousedown", function(ev){ if(ev.target.closest(".ch-enviar, .ch-com-env")) ev.preventDefault(); });
-  /* comentarios: lo escrito se guarda y Enter lo manda */
-  c.addEventListener("input", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in")) CH.comBorr[t.dataset.id]=t.value; });
-  c.addEventListener("keydown", function(ev){ var t=ev.target; if(t.classList && t.classList.contains("ch-com-in") && ev.key==="Enter" && !ev.isComposing){ ev.preventDefault(); chComEnvia(t.dataset.id); } });
-  /* al soltar la caja, lo que se dejó para luego */
-  c.addEventListener("focusout", function(){
-    setTimeout(function(){
-      if(chEscribiendo()) return;
-      if(CH.listaPend) chPintaLista();
-      if(CH.repintar){ CH.repintar=false; if(view==="social") rSocial(); }
-    }, 60);
-  });
+  c.innerHTML='<div class="ch-scroll" id="ch-scroll"><div class="ch-lista" id="ch-lista"></div></div>';
+  var sc=c.querySelector("#ch-scroll");
   /* tocar fuera de una burbuja cierra las reacciones */
   sc.addEventListener("click", function(ev){ if(!ev.target.closest("[data-act]") && CH.abiertoReac){ CH.abiertoReac=null; CH.borrar=null; chPintaLista(); } });
   CH.caja=c; return c;
@@ -16393,7 +16411,7 @@ function chComEnvia(key){
 var _chSocMuro=socMuro;
 socMuro=function(){
   if(!chActivo()) return _chSocMuro.apply(this, arguments);
-  return '<div class="soc-sec"><h2 class="display">Chat</h2></div><div id="ch-sitio"></div>';
+  return '<div class="soc-sec"><h2 class="display">Novedades</h2></div><div id="ch-sitio"></div>';
 };
 var _chRSocial=rSocial;
 rSocial=function(){
@@ -16472,19 +16490,13 @@ function chCambiaA(id){
 }
 
 function chatAccion(a, el){
-  if(a==="x-chat-enviar"){ chEnviaCaja(); return true; }
-  if(a==="x-chat-foto"){ chFotoElige(); return true; }
+  if(a==="x-chat-enviar" || a==="x-chat-foto" || a==="x-chat-com" || a==="x-chat-com-envia") return true;
   if(a==="x-chat-toca"){ var k=el.dataset.id; CH.abiertoReac=(CH.abiertoReac===k)?null:k; CH.borrar=null; sonido("tick"); chPintaLista();
-    var e=document.querySelector("#ch-lista .ch-elige"); if(e && e.scrollIntoView) try{ e.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){}
     return true; }
   if(a==="x-chat-reac"){ chReacciona(el.dataset.id, el.dataset.e); return true; }
   if(a==="x-chat-borra"){ chBorra(el.dataset.id); return true; }
   if(a==="x-chat-antes"){ var G=chG(), pr=G.msgs.filter(function(m){ return m.id && chPrincipal(m); }); if(pr[0]){ el.disabled=true; el.textContent="Cargando…"; chCargar(pr[0].id); } return true; }
   if(a==="x-chat-reintenta"){ var G2=chG(); G2.msgs.forEach(function(m){ if(m.tmp===el.dataset.tmp && m.estado==="fallo"){ chSube(G2, m); } }); chPintaLista(false, true); return true; }
-  if(a==="x-chat-com"){ var ck=el.dataset.id; if(CH.coms[ck]) delete CH.coms[ck]; else CH.coms[ck]=1; sonido("tick"); chPintaLista(false, true);
-    if(CH.coms[ck]){ var inp=document.querySelector('#ch-lista .ch-com-in[data-id="'+ck+'"]'); if(inp && inp.scrollIntoView) try{ inp.scrollIntoView({ block:"nearest", behavior:"smooth" }); }catch(err){} }
-    return true; }
-  if(a==="x-chat-com-envia"){ chComEnvia(el.dataset.id); return true; }
   if(a==="x-g-lista"){ chLista(); return true; }
   if(a==="x-g-elige"){ chCambiaA(el.dataset.id); return true; }
   return false;
@@ -16524,11 +16536,28 @@ var CHAT_CSS=[
 /* punto en la pestaña Social si hay mensajes sin leer */
 '#mtabs button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:8px; left:calc(50% + 9px); width:8px; height:8px; border-radius:99px; background:var(--accent); box-shadow:0 0 0 2px var(--bg); }',
 '#rail button[data-view="social"].ch-punto::after{ content:""; position:absolute; top:50%; right:12px; margin-top:-4px; width:8px; height:8px; border-radius:99px; background:var(--accent); }',
-/* el recuadro del chat */
-'.ch-caja{ margin-top:10px; height:min(64vh, 500px); display:flex; flex-direction:column; border-radius:20px; overflow:hidden;',
-'  background:var(--glass-bg); box-shadow:inset 0 0 0 1px var(--hairline-2); }',
-'.ch-scroll{ flex:1; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }',
-'.ch-lista{ padding:4px 12px 12px; }',
+/* el panel de novedades: va con la página, sin recuadro con scroll propio */
+'.ch-caja{ margin-top:10px; }',
+'.ch-scroll{ overflow:visible; }',
+'.ch-lista{ display:flex; flex-direction:column; gap:10px; }',
+'.ch-lista .ch-dia{ margin:8px 0 0; text-align:left; padding-left:4px; }',
+'.pn-item{ padding:14px; border-radius:20px; background:var(--card, var(--glass-bg)); box-shadow:inset 0 0 0 1px var(--hairline); }',
+'.pn-cab{ display:flex; align-items:center; gap:10px; }',
+'.pn-cara{ flex:0 0 auto; cursor:pointer; }',
+'.pn-txt{ flex:1; min-width:0; font-size:14.5px; line-height:1.38; color:var(--t2); overflow-wrap:anywhere; }',
+'.pn-txt b{ color:var(--t1); font-weight:650; }',
+'.pn-hora{ margin-left:6px; font-size:12px; color:var(--t3); white-space:nowrap; }',
+'.pn-nivel{ flex:0 0 auto; min-width:40px; height:40px; padding:0 8px; border-radius:99px; display:grid; place-items:center; font-size:17px; font-weight:800;',
+'  background:color-mix(in srgb,var(--c-retos, var(--accent)) 18%,transparent); color:var(--c-retos, var(--accent)); }',
+'.pn-foto{ display:block; width:100%; margin-top:12px; border-radius:16px; overflow:hidden; background:var(--fill); aspect-ratio:4/5; }',
+'.pn-foto img{ width:100%; height:100%; object-fit:cover; display:block; }',
+'.pn-pie{ display:flex; align-items:center; gap:6px; margin-top:10px; }',
+'.pn-reac{ margin-top:0; flex:0 1 auto; }',
+'.pn-reacciona{ width:32px; height:32px; flex:0 0 auto; border-radius:99px; display:grid; place-items:center; color:var(--t3); background:var(--fill); transition:transform .25s var(--spring); }',
+'.pn-reacciona.on{ color:var(--accent); background:var(--accent-soft); }',
+'.pn-reacciona:active{ transform:scale(.9); }',
+'.pn-reacciona svg{ width:19px; height:19px; }',
+'.pn-item .ch-elige{ margin-top:8px; }',
 '.ch-antes{ display:block; margin:10px auto 4px; padding:7px 14px; border-radius:99px; font-size:13px; font-weight:600; color:var(--accent); background:var(--fill); }',
 '.ch-vacio{ margin:40px auto 0; max-width:30ch; text-align:center; font-size:13.5px; line-height:1.5; color:var(--t3); }',
 '.ch-dia{ margin:16px 0 6px; text-align:center; font-size:11.5px; font-weight:700; color:var(--t3); }',
@@ -20543,6 +20572,7 @@ document.addEventListener("visibilitychange", function(){ if(!document.hidden) n
 ].join("\n"); document.head.appendChild(st); })();
 
 if(!load()) save();
+avMigra();
 if(S.cats.length) newCat=S.cats[0].id;
 trArranca();
 extrasArranca();
@@ -24022,6 +24052,21 @@ function pmMini(box){
   PM_MINI={ box:box, cv:cv, para:function(){ vivo=false; cancelAnimationFrame(raf); if(io) io.disconnect(); document.removeEventListener("visibilitychange", alVolver); } };
 }
 
+/* la montaña pequeña se hace cuando la tarjeta se ve (19/10/2026): al abrir la app
+   General está delante y hacerla antes costaba ~0,5 s en un móvil medio */
+var pmMiniIO=null;
+function pmMiniCuando(card){
+  if(PM_MINI && PM_MINI.box===card && card.contains(PM_MINI.cv)) return;
+  if(!window.IntersectionObserver){ pmMini(card); return; }
+  if(pmMiniIO){ if(pmMiniIO.card===card) return; pmMiniIO.disconnect(); }
+  pmMiniIO=new IntersectionObserver(function(es){
+    if(!es[0].isIntersecting) return;
+    var c=pmMiniIO.card; pmMiniIO.disconnect(); pmMiniIO=null;
+    if(c.isConnected) pmMini(c);
+  });
+  pmMiniIO.card=card; pmMiniIO.observe(card);
+}
+
 /* ── 2 · el rango como insignia, con la barra de luz ── */
 function pmInsignia(st){
   var card=document.getElementById("card-nivel"); if(!card) return;
@@ -24157,7 +24202,7 @@ pintaRangoRetos=function(st){
   var r=_pmPintaRango.apply(this, arguments);
   try{
     var card=document.getElementById("card-nivel"); if(card) card.classList.add("pm-noche");
-    if(card) pmMini(card);
+    if(card) pmMiniCuando(card);
     var s=stats();
     pmInsignia(s); pmLlama(s); pmSendero(); pmExtra(s);
   }catch(e){ if(window.console) console.warn("progreso", e); }
@@ -27224,31 +27269,106 @@ document.addEventListener("click", function(e){
   ].join("\n"); document.head.appendChild(st);
 })();
 setTimeout(function(){ try{ render(); }catch(e){} }, 0);
-/* ════════ avisos del chat (18/10/2026) ════════
-   Cuando alguien escribe en el chat de tu grupo, te llega un aviso al móvil.
-   La app guarda tu suscripción de avisos en g_push (servidor/avisos-chat.sql) y la
-   función de Supabase «aviso-chat» la usa cuando entra un mensaje nuevo en g_chat.
-   El permiso se pide la primera vez que envías un mensaje (hace falta un toque) o
-   ya lo tienes si activaste los avisos diarios. En iPhone solo con Peak. instalada. */
-function chatAvisosAlta(){
-  if(!hayAvisos() || !claveAvisos() || typeof Notification==="undefined" || Notification.permission!=="granted") return;
-  if(!ses || !ses.uid) return;
-  navigator.serviceWorker.ready.then(suscripcionAvisos).then(function(sub){
-    if(!sub) return;
-    var j=sub.toJSON(); if(S.chatPush===j.endpoint) return;
-    return pedirAuth("/rest/v1/g_push?on_conflict=endpoint", { method:"POST", prefer:"resolution=merge-duplicates,return=minimal",
-      body:{ endpoint:j.endpoint, sub:j } }).then(function(r){ if(r && r.ok){ S.chatPush=j.endpoint; save(); } });
-  }).catch(function(){});
+/* ════════ BORRAR MI CUENTA (19/10/2026) ════════
+   Ajustes › Tus datos › «Borrar mi cuenta». Con doble confirmación (hay que escribir
+   BORRAR). Borra, por este orden:
+   1. Tus fotos de la nube (cubos «gym» y «avatares», tu carpeta), con la API de Storage.
+   2. Los avisos de este dispositivo.
+   3. Todo lo tuyo del servidor y la propia cuenta: función borrar_mi_cuenta()
+      (servidor/borrar-cuenta.sql): datos, perfil, grupos (y el grupo si te quedas
+      sin nadie), reacciones, fotos publicadas, bloqueos, denuncias, Notion y avisos.
+   4. Lo guardado en este dispositivo, y vuelve a la bienvenida.
+   Si la función aún no está en el servidor, no se borra nada en local y se avisa. */
+var bcFase="";
+function bcPuede(){ return !!(typeof ses!=="undefined" && ses && !ses.demo && ses.uid && ses.access_token); }
+function bcHoja(){
+  openSheet('<div class="flex items-start justify-between mb-3"><h3 class="display text-[20px] font-bold">Borrar mi cuenta</h3>'+closeBtn()+'</div>'+
+    '<p class="text-[14px] t2 leading-relaxed mb-3">Se borra para siempre, del servidor y de este dispositivo:</p>'+
+    '<ul class="bc-lista">'+
+      '<li>Tus hábitos, retos, diario, ánimo y todo lo que apuntas</li>'+
+      '<li>Tu perfil, tu foto y tus fotos del gym</li>'+
+      '<li>Lo que has publicado en tus grupos y tus reacciones. Sales de todos tus grupos</li>'+
+    '</ul>'+
+    '<p class="text-[13px] t3 leading-relaxed mb-4">No se puede deshacer. Si quieres guardar una copia, descárgala antes en Tus datos.</p>'+
+    '<label class="bc-label">Escribe <b>BORRAR</b> para confirmar'+
+      '<input id="bc-confirma" class="field !py-2.5 mt-2" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>'+
+    '<p id="bc-estado" class="text-[12.5px] mt-3" style="min-height:18px;color:var(--t3)"></p>'+
+    '<button class="btn btn-danger w-full !py-3.5 mt-2" data-act="x-borrar-cuenta-si" disabled>Borrar mi cuenta para siempre</button>');
+  var inp=document.getElementById("bc-confirma"), bt=document.querySelector('[data-act="x-borrar-cuenta-si"]');
+  if(inp && bt) inp.addEventListener("input", function(){ bt.disabled=inp.value.trim().toUpperCase()!=="BORRAR" || !!bcFase; });
 }
-/* la primera vez que escribes, se pide el permiso (iPhone exige que sea tras un toque) */
-document.addEventListener("click", function(e){
-  if(!(e.target.closest && e.target.closest('[data-act="x-chat-enviar"]'))) return;
-  if(!hayAvisos() || typeof Notification==="undefined" || Notification.permission!=="default" || S.chatPushPedido) return;
-  if(esIOS() && !instalada()) return;
-  S.chatPushPedido=true; save();
-  try{ Notification.requestPermission().then(function(p){ if(p==="granted") chatAvisosAlta(); }); }catch(err){}
+function bcEstado(t, mal){ var e=document.getElementById("bc-estado"); if(e){ e.textContent=t; e.style.color=mal?"var(--alert)":"var(--t3)"; } }
+
+/* las fotos de tu carpeta en un cubo: se listan y se borran (Storage no deja borrar carpetas enteras) */
+function bcFotos(cubo){
+  var h={ "apikey":NUBE_KEY, "Authorization":"Bearer "+ses.access_token, "Content-Type":"application/json" };
+  function lista(){
+    return fetch(NUBE_URL+"/storage/v1/object/list/"+cubo, { method:"POST", headers:h,
+      body:JSON.stringify({ prefix:ses.uid, limit:1000, offset:0 }) }).then(function(r){ return r.ok ? r.json() : []; });
+  }
+  return lista().then(function(l){
+    var rutas=(Array.isArray(l)?l:[]).filter(function(x){ return x && x.name && x.id; }).map(function(x){ return ses.uid+"/"+x.name; });
+    if(!rutas.length) return 0;
+    return fetch(NUBE_URL+"/storage/v1/object/"+cubo, { method:"DELETE", headers:h, body:JSON.stringify({ prefixes:rutas }) })
+      .then(function(r){ return r.ok ? rutas.length : 0; });
+  }).catch(function(){ return 0; });
+}
+/* lo de este dispositivo: solo lo de Peak (las claves «beta:»), no lo de otras webs del mismo sitio */
+function bcLocal(){
+  /* desde aquí no se guarda nada más (si no, lo que esté pintándose lo volvería a escribir) */
+  save=function(){}; clearTimeout(espejoPend); espejo=function(){};
+  try{
+    var ks=[]; for(var i=0;i<window.localStorage.length;i++){ var k=window.localStorage.key(i); if(k && k.indexOf("beta:")===0) ks.push(k.slice(5)); }
+    ks.forEach(function(k){ try{ localStorage.removeItem(k); }catch(e){} });
+  }catch(e){}
+  /* la base de la sincronización y los textos de los avisos; se espera a que acabe */
+  return new Promise(function(ok){
+    var t=setTimeout(ok, 1500);
+    try{ var r=indexedDB.deleteDatabase("dutrack"); r.onsuccess=r.onerror=r.onblocked=function(){ clearTimeout(t); ok(); }; }
+    catch(e){ clearTimeout(t); ok(); }
+  });
+}
+function bcBorra(){
+  if(bcFase || !bcPuede()) return;
+  var bt=document.querySelector('[data-act="x-borrar-cuenta-si"]'); if(bt) bt.disabled=true;
+  bcFase="fotos"; bcEstado("Borrando tus fotos…");
+  /* que nada vuelva a subir lo de este dispositivo mientras se borra */
+  aplicando=true;
+  /* antes de tocar nada, que el servidor sepa borrar cuentas */
+  gRpc("borrar_mi_cuenta_lista", {}).then(function(){ return Promise.all([bcFotos("gym"), bcFotos("avatares")]); })
+  .then(function(){
+    bcFase="avisos"; bcEstado("Apagando los avisos…");
+    return Promise.race([ (typeof desactivarAvisos==="function" && avActivos()) ? desactivarAvisos() : Promise.resolve(), new Promise(function(ok){ setTimeout(ok, 4000); }) ]);
+  }).then(function(){
+    bcFase="servidor"; bcEstado("Borrando tu cuenta del servidor…");
+    return gRpc("borrar_mi_cuenta", {});
+  }).then(function(){
+    bcFase="local"; bcEstado("Hecho. Borrando lo de este dispositivo…");
+    ses=null; perfil=null; GRUPO=null;
+    return bcLocal().then(function(){ location.reload(); });
+  }).catch(function(e){
+    bcFase=""; aplicando=false;
+    var m=(e && e.message)||"";
+    bcEstado(m==="sin_servidor"
+      ? "El borrado de cuentas aún no está activado en el servidor. No se ha borrado nada de tus datos."
+      : (navigator.onLine===false ? "Sin conexión. No se ha borrado tu cuenta; prueba con red." : "No se ha podido borrar la cuenta. Prueba en un rato."), true);
+    var b=document.querySelector('[data-act="x-borrar-cuenta-si"]'), inp=document.getElementById("bc-confirma");
+    if(b) b.disabled=!(inp && inp.value.trim().toUpperCase()==="BORRAR");
+  });
+}
+document.addEventListener("click", function(ev){
+  var el=ev.target.closest && ev.target.closest('[data-act="x-borrar-cuenta"], [data-act="x-borrar-cuenta-si"]'); if(!el) return;
+  ev.preventDefault(); ev.stopPropagation();
+  if(el.dataset.act==="x-borrar-cuenta"){ if(bcPuede()) bcHoja(); else avisoNube("Sin cuenta no hay nada en el servidor: «Borrar todos los datos» borra lo de este dispositivo."); }
+  else bcBorra();
 }, true);
-setTimeout(chatAvisosAlta, 5000);
+(function(){ var st=document.createElement("style"); st.id="bc-css"; st.textContent=[
+'.bc-lista{ margin:0 0 12px; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }',
+'.bc-lista li{ position:relative; padding-left:16px; font-size:14px; line-height:1.4; color:var(--t1); }',
+'.bc-lista li::before{ content:""; position:absolute; left:2px; top:.55em; width:6px; height:6px; border-radius:99px; background:var(--alert); }',
+'.bc-label{ display:block; font-size:13px; color:var(--t2); }',
+'.bc-label b{ color:var(--t1); letter-spacing:.04em; }'
+].join("\n"); document.head.appendChild(st); })();
 })();
 </script>
 <script>

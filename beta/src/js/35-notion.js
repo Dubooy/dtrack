@@ -222,6 +222,7 @@ document.addEventListener("visibilitychange", function(){ if(!document.hidden) n
 ].join("\n"); document.head.appendChild(st); })();
 
 if(!load()) save();
+avMigra();
 if(S.cats.length) newCat=S.cats[0].id;
 trArranca();
 extrasArranca();

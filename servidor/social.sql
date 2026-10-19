@@ -6,6 +6,9 @@
 --   Supabase → tu proyecto → SQL Editor → New query → pega TODO este
 --   archivo → Run. Tiene que salir «Success. No rows returned».
 --   Se puede volver a ejecutar sin miedo: no borra nada.
+--   OJO (19/10/2026): el chat se cerró y ahora es un panel. Si vuelves a
+--   ejecutar este archivo, ejecuta después panel-y-cuenta.sql, que lo
+--   vuelve a cerrar y deja las reacciones solo por la función.
 --
 -- Qué añade:
 --   · g_chat: los mensajes de cada grupo (texto y/o foto), con sus
