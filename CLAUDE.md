@@ -10,3 +10,4 @@
   función `(function(){ "use strict"; … })();` que está en `beta/src/index.plantilla.html`.
   Una función de una pieza se ve desde las demás. Si añades una pieza nueva, apúntala en la plantilla y en el mapa.
 - Si cambias algo que la app guarda en caché, sube el número de `CACHE` en `beta/sw.js`.
+- `echovoid/` es otro proyecto: el videojuego ECHO//VOID (Three.js + Vite). Tiene sus propias reglas en `echovoid/CLAUDE.md`; lo de `beta/` no le aplica.
